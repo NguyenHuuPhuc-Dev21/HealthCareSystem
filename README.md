@@ -1,4 +1,4 @@
-# Home-Care Nursing Platform — [repo name]
+# Home-Care Nursing Platform — HealthCareSystem
 
 > A multi-tenant SaaS platform for hospitals: patients book hospital nurses for home care — scheduling, nurse matching, in-home care sessions, payment and reconciliation — with symptom screening and an emergency SOS flow built in.
 
@@ -114,6 +114,4 @@ cd <repo-name>
 
 ## 11. Contact & license
 
-- Product owner: _[name / email]_
-- Development team: _[name / channel]_
-- License: _[not published — internal repository]_
+- Development team: Group 3
