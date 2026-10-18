@@ -43,6 +43,10 @@ Out of pilot scope: cash at the patient's home, instant booking, automatic recon
 | `luong_hoat_dong_v8.14.drawio` | 17 activity flows + traceability matrix (page 00c) | `docs/design/` |
 | `erd-vat-ly-nhap-theo-ban-8.11.md` | Physical ERD draft — pending official state-enum sign-off before the schema is frozen | `docs/design/` |
 | Decision register Q-01–Q-51 | Lives on page 00b of the flow file; a feature whose decision has no value yet must not be built | inside the flow file |
+| `User Stories Catalog` | 27 Must User Stories modularized with ACs & Acceptance Test Cases | `docs/user_Stories/` |
+| `Business Rules Catalog` | 23 Business Rules (BR-01–BR-23) + Table F modularized by domain groups | `docs/business_rule/` |
+| `Requirements Specifications` | Functional (FR-01–FR-11) & Non-Functional (NFR-01–NFR-09) Specifications | `docs/requirement/` |
+| `Security & Privacy Architecture` | 11 Policy Groups (SEC-00–SEC-10) & 8 Non-Negotiable Invariants | `docs/security/` |
 
 Rule: when code and documents disagree, **the documents win** until they are revised and versioned. Business changes are made in the design files first, code second.
 
