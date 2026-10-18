@@ -43,7 +43,7 @@ Thumbs.db
 *.njsproj
 *.sln
 *.swp
-.claude
+.claude/
 
 # Docker volumes
 docker-data/
