@@ -1,0 +1,73 @@
+name: CI Quality Gate
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint-and-typecheck:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install Dependencies
+        run: npm ci || npm install
+      - name: Build Shared Types
+        run: npm run build --workspace=packages/shared --if-present
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+  database-constraints:
+    name: PostgreSQL 16 Schema & Constraint Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: healthcare_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgrespassword
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Apply Migrations
+        run: |
+          PGPASSWORD=postgrespassword psql -h localhost -U postgres -d healthcare_test -f db/migrations/0001_initial_schema.sql
+          PGPASSWORD=postgrespassword psql -h localhost -U postgres -d healthcare_test -f db/seeds/001_reference_and_demo.sql
+      - name: Run Schema Constraint Test Suite (Tier 1)
+        run: |
+          npm run test:db --if-present
+        env:
+          DATABASE_URL: postgresql://postgres:postgrespassword@localhost:5432/healthcare_test
+
+  secret-scanning:
+    name: Automated Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified

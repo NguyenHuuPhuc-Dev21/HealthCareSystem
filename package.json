@@ -1,0 +1,31 @@
+{
+  "name": "healthcare-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hospital Home-Care Nursing SaaS Platform",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*",
+    "db/tests"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:unit": "npm run test:unit --workspace=services/api --if-present",
+    "test:db": "npm run test --workspace=db/tests --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "dev:api": "npm run dev --workspace=services/api",
+    "dev:admin": "npm run dev --workspace=apps/admin-web",
+    "dev:patient": "npm run dev --workspace=apps/patient-web",
+    "docker:up": "docker compose -f infra/docker/docker-compose.yml up -d",
+    "docker:down": "docker compose -f infra/docker/docker-compose.yml down"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

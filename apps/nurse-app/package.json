@@ -1,0 +1,21 @@
+{
+  "name": "@healthcare-system/nurse-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nurse Mobile Application for Home Care Field Visits",
+  "main": "index.js",
+  "scripts": {
+    "start": "react-native start",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios"
+  },
+  "dependencies": {
+    "@healthcare-system/shared": "*",
+    "react": "18.3.1",
+    "react-native": "0.74.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "typescript": "^5.4.5"
+  }
+}
