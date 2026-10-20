@@ -1,6 +1,6 @@
 <mxfile host="Electron" pages="16">
   <diagram id="p0" name="00. Tổng quan">
-    <mxGraphModel dx="1806" dy="1429" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2400" pageHeight="2000" math="0" shadow="0">
+    <mxGraphModel dx="5024" dy="3440" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2400" pageHeight="2000" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -14,7 +14,7 @@
         </mxCell>
         <UserObject label="facility" tooltip="Cơ sở của bệnh viện; BN chọn cơ sở khi đặt lịch, vùng phục vụ tính theo cơ sở (BR-06)" id="c4">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="74" width="330" x="1940" y="1860" as="geometry" />
+            <mxGeometry height="74" width="330" x="970" y="2536" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c5" parent="c4" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -50,7 +50,7 @@
         </mxCell>
         <UserObject label="staff_profile" tooltip="Hồ sơ nhân sự ĐD / BS gắn BV; trạng thái xác minh 2 bước (UC5–UC12, UC139, BR-21)" id="c14">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#ffe6cc;strokeColor=#d79b00;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="140" width="330" x="1080" y="1690" as="geometry" />
+            <mxGeometry height="140" width="330" x="-160" y="2435" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c15" parent="c14" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -70,7 +70,7 @@
         </mxCell>
         <UserObject label="nurse_availability" tooltip="Lịch trống điều dưỡng khai báo cho 14 ngày tới (UC114)" id="c20">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#ffe6cc;strokeColor=#d79b00;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="74" width="330" x="2070" y="1056" as="geometry" />
+            <mxGeometry height="74" width="330" x="-800" y="2954" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c21" parent="c20" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -80,19 +80,19 @@
           <mxGeometry height="22" width="330" y="52" as="geometry" />
         </mxCell>
         <UserObject label="patient_profile" tooltip="Hồ sơ người được chăm sóc; một tài khoản quản lý nhiều hồ sơ người thân (UC3, UC4)" id="c23">
-          <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#e1d5e7;strokeColor=#9673a6;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="74" width="330" x="920" y="880" as="geometry" />
+          <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=34;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#e1d5e7;strokeColor=#9673a6;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
+            <mxGeometry height="78" width="330" x="800" y="3540" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c24" parent="c23" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
-          <mxGeometry height="22" width="330" y="30" as="geometry" />
+          <mxGeometry height="22" width="330" y="34" as="geometry" />
         </mxCell>
         <mxCell id="c25" parent="c23" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;FK&lt;/td&gt;&lt;td&gt;owner_account_id&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
-          <mxGeometry height="22" width="330" y="52" as="geometry" />
+          <mxGeometry height="22" width="330" y="56" as="geometry" />
         </mxCell>
         <UserObject label="patient_consent" tooltip="Consent xử lý dữ liệu sức khỏe theo từng hồ sơ (UC2, UC106, BR-17)" id="c26">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#e1d5e7;strokeColor=#9673a6;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="96" width="330" x="200" y="754" as="geometry" />
+            <mxGeometry height="96" width="330" x="840" y="3750" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c27" parent="c26" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -106,7 +106,7 @@
         </mxCell>
         <UserObject label="medical_order" tooltip="Chỉ định / y lệnh BN tải lên cho dịch vụ cần y lệnh, bác sĩ trực kiểm tra (UC136, UC137)" id="c30">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#e1d5e7;strokeColor=#9673a6;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="118" width="330" x="370" y="1401" as="geometry" />
+            <mxGeometry height="118" width="330" x="40" y="2803" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c31" parent="c30" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -122,8 +122,8 @@
           <mxGeometry height="22" width="330" y="96" as="geometry" />
         </mxCell>
         <UserObject label="service" tooltip="Danh mục dịch vụ / vật tư của BV với cờ được phép tại nhà và cần y lệnh (UC84, BR-15)" id="c35">
-          <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#fff2cc;strokeColor=#d6b656;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="96" width="330" x="2530" y="1930" as="geometry" />
+          <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
+            <mxGeometry height="96" width="330" x="2600" y="3010" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c36" parent="c35" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -135,8 +135,8 @@
         <mxCell id="c38" parent="c35" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;FK&lt;/td&gt;&lt;td&gt;report_template_id&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
           <mxGeometry height="22" width="330" y="74" as="geometry" />
         </mxCell>
-        <mxCell id="c39" parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#fff2cc;strokeColor=#d6b656;rounded=1;arcSize=6;fontSize=13;html=1;" value="service_price" vertex="1">
-          <mxGeometry height="96" width="330" x="2580" y="1290" as="geometry" />
+        <mxCell id="c39" parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" value="service_price" vertex="1">
+          <mxGeometry height="96" width="330" x="1760" y="2660" as="geometry" />
         </mxCell>
         <mxCell id="c40" parent="c39" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
           <mxGeometry height="22" width="330" y="30" as="geometry" />
@@ -149,7 +149,7 @@
         </mxCell>
         <UserObject label="care_order" tooltip="Đơn chăm sóc (hẹn trước / đặt ngay / đơn con); vòng đời ca và trạng thái tiền tách riêng (luồng 04–09, 15)" id="c43">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="316" width="330" x="1080" y="1976" as="geometry" />
+            <mxGeometry height="316" width="330" x="1010" y="1790" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c44" parent="c43" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -193,7 +193,7 @@
         </mxCell>
         <UserObject label="order_assignment" tooltip="Mỗi lượt mời / gán ĐD cho đơn: BN chọn, tự gán, mời thay, điều thủ công (UC25, UC31–32, UC37, UC78, UC113–115)" id="c57">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f8cecc;strokeColor=#b85450;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="96" width="330" x="330" y="1620" as="geometry" />
+            <mxGeometry height="96" width="330" x="-210" y="2070" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c58" parent="c57" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -207,7 +207,7 @@
         </mxCell>
         <UserObject label="replacement_case" tooltip="Báo nghỉ / đổi người / bom ca: tìm người thay và xét vi phạm một lần (luồng 06)" id="c61">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f8cecc;strokeColor=#b85450;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="140" width="330" x="-240" y="1638" as="geometry" />
+            <mxGeometry height="140" width="330" x="-570" y="1811" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c62" parent="c61" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -227,7 +227,7 @@
         </mxCell>
         <UserObject label="care_visit" tooltip="Diễn biến ca tại nhà: xuất phát, check-in, bắt đầu, kết thúc (luồng 07B)" id="c67">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="96" width="330" x="1960" y="1600" as="geometry" />
+            <mxGeometry height="96" width="330" x="980" y="3010" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c68" parent="c67" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK,FK&lt;/td&gt;&lt;td&gt;&lt;u&gt;order_id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -241,7 +241,7 @@
         </mxCell>
         <UserObject label="care_report" tooltip="Báo cáo chăm sóc bắt buộc; đủ trường → ca Hoàn tất, lưu vào hồ sơ BN tại BV (UC43, UC44, BR-22)" id="c71">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="118" width="330" x="310" y="1012" as="geometry" />
+            <mxGeometry height="118" width="330" x="-60" y="1630" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c73" parent="c71" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;FK,UQ&lt;/td&gt;&lt;td&gt;order_id&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -258,7 +258,7 @@
         </mxCell>
         <UserObject label="addon_request" tooltip="Dịch vụ phát sinh trong ca nhánh A / B / C (UC91, luồng 07C)" id="c77">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="140" width="330" x="2040" y="1390" as="geometry" />
+            <mxGeometry height="140" width="330" x="1570" y="2930" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c78" parent="c77" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -278,7 +278,7 @@
         </mxCell>
         <UserObject label="care_stop" tooltip="Dừng ca giữa chừng: lý do, phí tạm tính / chốt, đơn con (UC127, UC128, BR-16)" id="c83">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="118" width="330" x="1300" y="3340" as="geometry" />
+            <mxGeometry height="118" width="330" x="2110" y="2059" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c84" parent="c83" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -295,7 +295,7 @@
         </mxCell>
         <UserObject label="order_line" tooltip="Dòng bảng kê ca: dịch vụ gốc, phát sinh, vật tư, phí đến nhà (UC93)" id="c88">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="118" width="330" x="2400" y="2220" as="geometry" />
+            <mxGeometry height="118" width="330" x="2630" y="1894" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c89" parent="c88" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -312,7 +312,7 @@
         </mxCell>
         <UserObject label="payment_transaction" tooltip="Giao dịch cọc / phần còn lại qua cổng hoặc tiền mặt; tiền về TK bệnh viện (UC45, UC46, UC121)" id="c93">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="118" width="330" x="1000" y="2608" as="geometry" />
+            <mxGeometry height="118" width="330" x="1330" y="1530" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c94" parent="c93" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -329,7 +329,7 @@
         </mxCell>
         <UserObject label="refund" tooltip="Lệnh hoàn tiền: tự động theo BR-04, ngoại lệ, thủ công sau thanh toán (UC90)" id="c98">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="140" width="330" x="440" y="2880" as="geometry" />
+            <mxGeometry height="140" width="330" x="1240" y="1280" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c99" parent="c98" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -347,9 +347,29 @@
         <mxCell id="c103" parent="c98" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;FK&lt;/td&gt;&lt;td&gt;created_by&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
           <mxGeometry height="22" width="330" y="118" as="geometry" />
         </mxCell>
+        <UserObject label="cash_collection" tooltip="Thu tiền mặt tại nhà, hai bên cùng xác nhận số tiền (UC122, UC123)" id="c104">
+          <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
+            <mxGeometry height="140" width="330" x="1730" y="2390" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="c105" parent="c104" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
+          <mxGeometry height="22" width="330" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="c106" parent="c104" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;FK,UQ&lt;/td&gt;&lt;td&gt;order_id&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
+          <mxGeometry height="22" width="330" y="52" as="geometry" />
+        </mxCell>
+        <mxCell id="c107" parent="c104" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;FK&lt;/td&gt;&lt;td&gt;nurse_id&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
+          <mxGeometry height="22" width="330" y="74" as="geometry" />
+        </mxCell>
+        <mxCell id="c108" parent="c104" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;FK&lt;/td&gt;&lt;td&gt;resolved_by&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
+          <mxGeometry height="22" width="330" y="96" as="geometry" />
+        </mxCell>
+        <mxCell id="c109" parent="c104" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;FK&lt;/td&gt;&lt;td&gt;payment_txn_id&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
+          <mxGeometry height="22" width="330" y="118" as="geometry" />
+        </mxCell>
         <UserObject label="complaint" tooltip="Khiếu nại về ĐD / nền tảng, báo cáo hành vi BN, phúc tra (UC51–53, UC98–101, BR-11)" id="c110">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#ffe6cc;strokeColor=#d79b00;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="206" width="330" x="1890" y="720" as="geometry" />
+            <mxGeometry height="206" width="330" x="10" y="1340" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c111" parent="c110" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -378,7 +398,7 @@
         </mxCell>
         <UserObject label="staff_violation" tooltip="Nhật ký vi phạm ĐD; đếm cửa sổ 30 ngày cuộn theo nhóm BR-01 / BR-02 (UC33, UC72, UC79, UC88)" id="c119">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#ffe6cc;strokeColor=#d79b00;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="162" width="330" x="210" y="1950" as="geometry" />
+            <mxGeometry height="162" width="330" x="-80" y="1850" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c120" parent="c119" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -401,7 +421,7 @@
         </mxCell>
         <UserObject label="sos_incident" tooltip="SOS &amp; ứng phó khẩn cấp; hệ thống không tự gọi 115 (UC92, UC140, BR-23)" id="c126">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#ffe6cc;strokeColor=#d79b00;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="184" width="330" x="1820" y="2390" as="geometry" />
+            <mxGeometry height="184" width="330" x="720" y="1300" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c127" parent="c126" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -427,7 +447,7 @@
         </mxCell>
         <UserObject label="risk_assessment" tooltip="AI phân tích rủi ro từ báo cáo chăm sóc (UC54)" id="c134">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#e1d5e7;strokeColor=#9673a6;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="96" width="330" x="-210" y="1023" as="geometry" />
+            <mxGeometry height="96" width="330" x="-590" y="1610" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c135" parent="c134" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -441,7 +461,7 @@
         </mxCell>
         <UserObject label="risk_alert" tooltip="Cảnh báo rủi ro cao gửi bác sĩ phụ trách / trực (UC55, UC68, UC103)" id="c138">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#e1d5e7;strokeColor=#9673a6;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="118" width="330" x="350" y="1210" as="geometry" />
+            <mxGeometry height="118" width="330" x="-740" y="2560" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c139" parent="c138" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -458,7 +478,7 @@
         </mxCell>
         <UserObject label="followup_case" tooltip="Đề xuất → xác nhận → phân công → kế hoạch tái khám (UC56, UC57, UC13, UC60)" id="c143">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#e1d5e7;strokeColor=#9673a6;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="162" width="330" x="960" y="1070" as="geometry" />
+            <mxGeometry height="162" width="330" x="-300" y="3050" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c144" parent="c143" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -481,7 +501,7 @@
         </mxCell>
         <UserObject label="doctor_access_grant" tooltip="Quyền có thời hạn cho bác sĩ xem lịch sử chăm sóc tại BV mình; BN thu hồi được (UC58, UC59, UC102)" id="c150">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#e1d5e7;strokeColor=#9673a6;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="162" width="330" x="1400" y="850" as="geometry" />
+            <mxGeometry height="162" width="330" x="150" y="3500" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c151" parent="c150" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -504,7 +524,7 @@
         </mxCell>
         <UserObject label="data_deletion_request" tooltip="Yêu cầu xóa dữ liệu, xử lý trong 72h (UC61–UC65, UC105, BR-12)" id="c157">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#fff2cc;strokeColor=#d6b656;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="118" width="330" x="860" y="500" as="geometry" />
+            <mxGeometry height="140" width="330" x="1460" y="3570" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c158" parent="c157" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -519,6 +539,9 @@
         <mxCell id="c161" parent="c157" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;FK&lt;/td&gt;&lt;td&gt;reviewed_by&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
           <mxGeometry height="22" width="330" y="96" as="geometry" />
         </mxCell>
+        <mxCell id="pPHsZ7ELDe4VjLbJbNKT-9" parent="c157" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;FK&lt;/td&gt;&lt;td&gt;reviewed_by&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
+          <mxGeometry height="22" width="330" y="118" as="geometry" />
+        </mxCell>
         <UserObject label="reconciliation_period" tooltip="Kỳ đối chiếu tháng theo BV (UC48, luồng 11 phần B)" id="c162">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d5e8d4;strokeColor=#82b366;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
             <mxGeometry height="74" width="330" x="1170" y="-510" as="geometry" />
@@ -530,33 +553,34 @@
         <mxCell id="c164" parent="c162" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;FK&lt;/td&gt;&lt;td&gt;hospital_id&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
           <mxGeometry height="22" width="330" y="52" as="geometry" />
         </mxCell>
-        <mxCell id="c165" edge="1" parent="1" source="c19" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c4" value="">
+        <mxCell id="c165" edge="1" parent="1" source="c18" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=1.006;exitY=0.03;exitDx=0;exitDy=0;exitPerimeter=0;" target="c4" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c166" edge="1" parent="1" source="c22" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" target="c14" value="">
+        <mxCell id="c166" edge="1" parent="1" source="c22" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="c19" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="2050" y="-50" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c167" edge="1" parent="1" source="c28" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" target="c23" value="">
+        <mxCell id="c167" edge="1" parent="1" source="c26" style="fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.615;entryY=1.032;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryPerimeter=0;" target="c25" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c168" edge="1" parent="1" source="c30" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1.008;exitY=0.17;exitDx=0;exitDy=0;exitPerimeter=0;" target="c24" value="">
+        <mxCell id="c168" edge="1" parent="1" source="c34" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c24" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="980" y="-90" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c169" edge="1" parent="1" source="c32" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0.995;exitY=0.982;exitDx=0;exitDy=0;exitPerimeter=0;" target="c16" value="">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="c169" edge="1" parent="1" source="c30" style="fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.746;entryY=1.028;entryDx=0;entryDy=0;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryPerimeter=0;" target="c19" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="277.69" y="2948.23" as="sourcePoint" />
+            <mxPoint x="189.99999999999994" y="2678.002" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
-        <mxCell id="c170" edge="1" parent="1" source="c42" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" target="c35" value="">
+        <mxCell id="c170" edge="1" parent="1" source="c41" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c35" value="">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="3240" y="1375" />
-              <mxPoint x="3240" y="1955" />
-              <mxPoint x="2860" y="1955" />
+              <mxPoint x="2460" y="2723" />
+              <mxPoint x="2460" y="3034" />
             </Array>
-            <mxPoint x="2860" y="2015" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="c171" edge="1" parent="1" source="c42" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" target="c4" value="">
@@ -565,210 +589,208 @@
         <mxCell id="c172" edge="1" parent="1" source="c47" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c23" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c173" edge="1" parent="1" source="c45" style="fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;edgeStyle=entityRelationEdgeStyle;" target="c6" value="">
+        <mxCell id="c173" edge="1" parent="1" source="c56" style="fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.372;entryY=-0.009;entryDx=0;entryDy=0;exitX=0.246;exitY=1.03;exitDx=0;exitDy=0;exitPerimeter=0;entryPerimeter=0;" target="c4" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="2050" y="170" as="sourcePoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c174" edge="1" parent="1" source="c46" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c37" value="">
+        <mxCell id="c174" edge="1" parent="1" source="c53" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.25;entryY=0;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c35" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c175" edge="1" parent="1" source="c44" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="c33" value="">
+        <mxCell id="c175" edge="1" parent="1" source="c56" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="c31" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="c176" edge="1" parent="1" source="c52" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c43" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c177" edge="1" parent="1" source="c54" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0.994;exitY=0.146;exitDx=0;exitDy=0;exitPerimeter=0;" target="c14" value="">
+        <mxCell id="c177" edge="1" parent="1" source="c55" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.994;entryY=-0.131;entryDx=0;entryDy=0;entryPerimeter=0;" target="c16" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c178" edge="1" parent="1" source="c43" style="fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.384;entryY=1.061;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="c19" value="">
+        <mxCell id="c178" edge="1" parent="1" source="c52" style="fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1.01;entryY=0.138;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="c14" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c179" edge="1" parent="1" source="c78" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c36" value="">
+        <mxCell id="c179" edge="1" parent="1" source="c82" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c36" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c180" edge="1" parent="1" source="c77" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0;exitY=0.13;exitDx=0;exitDy=0;exitPerimeter=0;" target="c14" value="">
+        <mxCell id="c180" edge="1" parent="1" source="c79" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c16" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c181" edge="1" parent="1" source="c59" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="c45" value="">
+        <mxCell id="c181" edge="1" parent="1" source="c59" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="c49" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c182" edge="1" parent="1" source="c58" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="c17" value="">
+        <mxCell id="c182" edge="1" parent="1" source="c60" style="fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0.202;exitY=1.045;exitDx=0;exitDy=0;entryX=0.077;entryY=0.007;entryDx=0;entryDy=0;exitPerimeter=0;entryPerimeter=0;" target="c14" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c183" edge="1" parent="1" source="c66" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="c46" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="c184" edge="1" parent="1" source="c64" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c18" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="c185" edge="1" parent="1" source="c62" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c57" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="c186" edge="1" parent="1" source="c78" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1.012;entryY=0.915;entryDx=0;entryDy=0;entryPerimeter=0;" target="c17" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="c187" edge="1" parent="1" source="c68" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c44" value="">
+        <mxCell id="c183" edge="1" parent="1" source="c61" style="fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="c44" value="">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1480" y="2019" as="targetPoint" />
+            <mxPoint x="-120" y="2157.7980000000002" as="sourcePoint" />
+            <mxPoint x="1089.9999999999995" y="2059.9800000000005" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c188" edge="1" parent="1" source="c67" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0;exitY=0.25;exitDx=0;exitDy=0;" target="c14" value="">
+        <mxCell id="c184" edge="1" parent="1" source="c66" style="fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.008;entryY=0.129;entryDx=0;entryDy=0;exitX=0.283;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryPerimeter=0;" target="c14" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c189" edge="1" parent="1" source="c73" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.004;entryY=0.046;entryDx=0;entryDy=0;entryPerimeter=0;" target="c43" value="">
+        <mxCell id="c185" edge="1" parent="1" source="c65" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c57" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c190" edge="1" parent="1" source="c71" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1.006;exitY=0.107;exitDx=0;exitDy=0;exitPerimeter=0;" target="c25" value="">
+        <mxCell id="c186" edge="1" parent="1" source="c80" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1.003;entryY=1.017;entryDx=0;entryDy=0;entryPerimeter=0;" target="c18" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c191" edge="1" parent="1" source="c79" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c48" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="c192" edge="1" parent="1" source="c83" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c56" value="">
+        <mxCell id="c187" edge="1" parent="1" source="c68" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c45" value="">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="1548" y="2281" />
+              <mxPoint x="1510" y="3051" />
+              <mxPoint x="1510" y="1853" />
             </Array>
+            <mxPoint x="1450" y="3050" as="sourcePoint" />
+            <mxPoint x="1480" y="1830" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c193" edge="1" parent="1" source="c83" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.83;entryY=1.061;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryPerimeter=0;" target="c56" value="">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="1465" y="2540" />
-              <mxPoint x="1354" y="2540" />
-            </Array>
-          </mxGeometry>
+        <mxCell id="c188" edge="1" parent="1" source="c69" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c19" value="">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c194" edge="1" parent="1" source="c90" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.993;entryY=0.903;entryDx=0;entryDy=0;entryPerimeter=0;" target="c54" value="">
+        <mxCell id="c189" edge="1" parent="1" source="c75" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.002;entryY=-0.032;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryPerimeter=0;" target="c44" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c190" edge="1" parent="1" source="c76" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.002;entryY=0.376;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryPerimeter=0;" target="c23" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c191" edge="1" parent="1" source="c77" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=-0.011;exitY=0.131;exitDx=0;exitDy=0;exitPerimeter=0;" target="c48" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c192" edge="1" parent="1" source="c83" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=-0.001;exitY=0.1;exitDx=0;exitDy=0;exitPerimeter=0;" target="c54" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c193" edge="1" parent="1" source="c84" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="c55" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c194" edge="1" parent="1" source="c90" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1.012;entryY=0.749;entryDx=0;entryDy=0;entryPerimeter=0;" target="c50" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="c195" edge="1" parent="1" source="c91" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c35" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c196" edge="1" parent="1" source="c88" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0;exitY=0.25;exitDx=0;exitDy=0;entryX=1.016;entryY=1.327;entryDx=0;entryDy=0;entryPerimeter=0;" target="c81" value="">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="c196" edge="1" parent="1" source="c92" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c78" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2820" y="2070" />
+              <mxPoint x="2810" y="2070" />
+              <mxPoint x="2810" y="2971" />
+            </Array>
+            <mxPoint x="2820.1400000000003" y="1980.004" as="sourcePoint" />
+            <mxPoint x="1969.86" y="2961.3100000000004" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
-        <mxCell id="c197" edge="1" parent="1" source="c93" style="fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.062;entryY=0.975;entryDx=0;entryDy=0;entryPerimeter=0;" target="c56" value="">
+        <mxCell id="c197" edge="1" parent="1" source="c97" style="fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0.179;exitY=0.985;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;exitPerimeter=0;" target="c43" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1350" y="2099" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c198" edge="1" parent="1" source="c100" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="c56" value="">
+        <mxCell id="c198" edge="1" parent="1" source="c102" style="fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;edgeStyle=orthogonalEdgeStyle;" target="c43" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c199" edge="1" parent="1" source="c101" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c93" value="">
+        <mxCell id="c199" edge="1" parent="1" source="c103" style="fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0.662;exitY=1.167;exitDx=0;exitDy=0;entryX=0.405;entryY=-0.012;entryDx=0;entryDy=0;exitPerimeter=0;entryPerimeter=0;" target="c93" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1260" y="2670" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c200" edge="1" parent="1" source="c106" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c56" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c200" edge="1" parent="1" source="c106" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c51" value="">
+        <mxCell id="c201" edge="1" parent="1" source="c107" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0;exitY=0.773;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c17" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c201" edge="1" parent="1" source="c105" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=-0.004;exitY=0.073;exitDx=0;exitDy=0;exitPerimeter=0;" target="c14" value="">
+        <mxCell id="c202" edge="1" parent="1" source="c104" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0.005;exitY=0.116;exitDx=0;exitDy=0;exitPerimeter=0;" target="c93" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c202" edge="1" parent="1" source="c109" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c93" value="">
+        <mxCell id="c203" edge="1" parent="1" source="c125" style="fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.891;entryY=-0.023;entryDx=0;entryDy=0;exitX=0.703;exitY=0.988;exitDx=0;exitDy=0;exitPerimeter=0;entryPerimeter=0;" target="c14" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="190" y="1939.9999999999995" as="sourcePoint" />
+            <mxPoint x="307.5" y="2580" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c204" edge="1" parent="1" source="c120" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c48" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c203" edge="1" parent="1" source="c121" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="c19" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="c204" edge="1" parent="1" source="c123" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="c48" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="c205" edge="1" parent="1" source="c120" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c65" value="">
+        <mxCell id="c205" edge="1" parent="1" source="c120" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c62" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="100" y="221" as="sourcePoint" />
             <mxPoint x="100" y="323" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c206" edge="1" parent="1" source="c118" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.999;entryY=0.05;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryPerimeter=0;" target="c49" value="">
+        <mxCell id="c206" edge="1" parent="1" source="c117" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.058;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryPerimeter=0;" target="c43" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c207" edge="1" parent="1" source="c115" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c18" value="">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="c207" edge="1" parent="1" source="c112" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1.006;entryY=0.255;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryPerimeter=0;" target="c15" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="640" y="1403" />
+              <mxPoint x="640" y="2470" />
+              <mxPoint x="172" y="2470" />
+            </Array>
+            <mxPoint x="1500" y="1150" as="sourcePoint" />
+            <mxPoint x="190" y="2668" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
-        <mxCell id="c208" edge="1" parent="1" source="c114" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.25;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="c23" value="">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="c208" edge="1" parent="1" source="c114" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=1.008;exitY=-0.092;exitDx=0;exitDy=0;entryX=-0.004;entryY=0.135;entryDx=0;entryDy=0;entryPerimeter=0;exitPerimeter=0;" target="c23" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="801" y="3567" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="c209" edge="1" parent="1" source="c118" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c110" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c210" edge="1" parent="1" source="c129" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c55" value="">
+        <mxCell id="c210" edge="1" parent="1" source="c133" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=0.09;exitY=0.998;exitDx=0;exitDy=0;exitPerimeter=0;" target="c46" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c211" edge="1" parent="1" source="c104" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c23" value="">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="c211" edge="1" parent="1" source="c133" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.25;entryY=0;entryDx=0;entryDy=0;exitX=0.498;exitY=0.998;exitDx=0;exitDy=0;exitPerimeter=0;" target="c23" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="884" y="1520" />
+              <mxPoint x="880" y="1520" />
+              <mxPoint x="880" y="2367" />
+              <mxPoint x="883" y="2367" />
+            </Array>
+          </mxGeometry>
         </mxCell>
         <mxCell id="c212" edge="1" parent="1" source="c136" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c71" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c213" edge="1" parent="1" source="c140" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c137" value="">
+        <mxCell id="c213" edge="1" parent="1" source="c138" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="c136" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c214" edge="1" parent="1" source="c140" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c15" value="">
+        <mxCell id="c214" edge="1" parent="1" source="c140" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c16" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c215" edge="1" parent="1" source="c139" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.004;entryY=0.179;entryDx=0;entryDy=0;exitX=1;exitY=0.909;exitDx=0;exitDy=0;exitPerimeter=0;entryPerimeter=0;" target="c14" value="">
+        <mxCell id="c215" edge="1" parent="1" source="c139" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c15" value="">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="570" y="1199" as="sourcePoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c216" edge="1" parent="1" source="c145" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" target="c138" value="">
+        <mxCell id="c216" edge="1" parent="1" source="c145" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1.002;entryY=1.11;entryDx=0;entryDy=0;entryPerimeter=0;" target="c141" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c217" edge="1" parent="1" source="c146" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.997;entryY=0.939;entryDx=0;entryDy=0;entryPerimeter=0;" target="c24" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="c218" edge="1" parent="1" source="c148" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1.002;entryY=0.173;entryDx=0;entryDy=0;entryPerimeter=0;" target="c14" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="c219" edge="1" parent="1" source="c152" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" value="">
+        <mxCell id="c217" edge="1" parent="1" source="c146" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" value="">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1520" y="1390" as="targetPoint" />
+            <mxPoint x="800" y="3595" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c220" edge="1" parent="1" source="c153" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c25" value="">
+        <mxCell id="c218" edge="1" parent="1" source="c143" style="fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.448;entryY=1.015;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.75;exitY=0;exitDx=0;exitDy=0;" target="c19" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c221" edge="1" parent="1" source="c155" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c143" value="">
+        <mxCell id="c220" edge="1" parent="1" source="c156" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c25" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="770" y="3680" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c221" edge="1" parent="1" source="c155" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c149" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c222" edge="1" parent="1" source="c161" style="fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.75;entryY=0;entryDx=0;entryDy=0;exitX=0.696;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" target="c23" value="">
+        <mxCell id="c222" edge="1" parent="1" source="c158" style="fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;edgeStyle=entityRelationEdgeStyle;" target="c25" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="c72" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
           <mxGeometry height="22" width="330" x="-740" y="940" as="geometry" />
-        </mxCell>
-        <mxCell id="pPHsZ7ELDe4VjLbJbNKT-6" edge="1" parent="1" source="c128" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c109" value="">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="2260" y="2453" />
-              <mxPoint x="2260" y="2223" />
-            </Array>
-            <mxPoint x="2150" y="2453" as="sourcePoint" />
-            <mxPoint x="1250" y="880" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <UserObject label="cash_collection" tooltip="Thu tiền mặt tại nhà, hai bên cùng xác nhận số tiền (UC122, UC123)" id="c104">
-          <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="140" width="330" x="1740" y="2094" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <mxCell id="c105" parent="c104" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
-          <mxGeometry height="22" width="330" y="30" as="geometry" />
-        </mxCell>
-        <mxCell id="c106" parent="c104" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;FK,UQ&lt;/td&gt;&lt;td&gt;order_id&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
-          <mxGeometry height="22" width="330" y="52" as="geometry" />
-        </mxCell>
-        <mxCell id="c107" parent="c104" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;FK&lt;/td&gt;&lt;td&gt;nurse_id&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
-          <mxGeometry height="22" width="330" y="74" as="geometry" />
-        </mxCell>
-        <mxCell id="c108" parent="c104" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;FK&lt;/td&gt;&lt;td&gt;resolved_by&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
-          <mxGeometry height="22" width="330" y="96" as="geometry" />
-        </mxCell>
-        <mxCell id="c109" parent="c104" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;FK&lt;/td&gt;&lt;td&gt;payment_txn_id&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
-          <mxGeometry height="22" width="330" y="118" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
@@ -1839,7 +1861,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="p7" name="06. Đặt lịch &amp; điều phối">
-    <mxGraphModel dx="2912" dy="2120" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2400" pageHeight="2000" math="0" shadow="0">
+    <mxGraphModel dx="3147" dy="2267" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2400" pageHeight="2000" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1978,7 +2000,7 @@
           <mxGeometry height="22" width="330" y="954" as="geometry" />
         </mxCell>
         <mxCell id="c595" parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f8cecc;strokeColor=#b85450;rounded=1;arcSize=6;fontSize=13;html=1;" value="order_status_history" vertex="1">
-          <mxGeometry height="228" width="330" x="1300" y="-44" as="geometry" />
+          <mxGeometry height="228" width="330" x="-320" y="-240" as="geometry" />
         </mxCell>
         <mxCell id="c596" parent="c595" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;bigint NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
           <mxGeometry height="22" width="330" y="30" as="geometry" />
@@ -2115,7 +2137,7 @@
         </mxCell>
         <UserObject label="replacement_case" tooltip="Báo nghỉ / đổi người / bom ca: tìm người thay và xét vi phạm một lần (luồng 06)" id="c639">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f8cecc;strokeColor=#b85450;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="382" width="330" x="580" y="130" as="geometry" />
+            <mxGeometry height="382" width="330" x="580" y="170" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c640" parent="c639" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -2258,49 +2280,49 @@
         <mxCell id="c681" edge="1" parent="1" source="c577" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c672" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c682" edge="1" parent="1" source="c578" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c672" value="">
+        <mxCell id="c682" edge="1" parent="1" source="c578" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=1;entryDx=0;entryDy=0;" target="c672" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c683" edge="1" parent="1" source="c597" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c552" value="">
+        <mxCell id="c683" edge="1" parent="1" source="c597" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="c551" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c684" edge="1" parent="1" source="c607" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c552" value="">
+        <mxCell id="c684" edge="1" parent="1" source="c607" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0;entryDx=0;entryDy=0;" target="c551" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c685" edge="1" parent="1" source="c608" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c669" value="">
+        <mxCell id="c685" edge="1" parent="1" source="c608" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0;entryDx=0;entryDy=0;" target="c669" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="c686" edge="1" parent="1" source="c617" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c606" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c687" edge="1" parent="1" source="c618" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c552" value="">
+        <mxCell id="c687" edge="1" parent="1" source="c618" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c564" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c688" edge="1" parent="1" source="c621" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c672" value="">
+        <mxCell id="c688" edge="1" parent="1" source="c621" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" target="c672" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c689" edge="1" parent="1" source="c627" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c552" value="">
+        <mxCell id="c689" edge="1" parent="1" source="c627" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c566" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c690" edge="1" parent="1" source="c628" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c672" value="">
+        <mxCell id="c690" edge="1" parent="1" source="c628" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" target="c672" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c691" edge="1" parent="1" source="c641" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c552" value="">
+        <mxCell id="c691" edge="1" parent="1" source="c641" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c555" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c692" edge="1" parent="1" source="c642" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c672" value="">
+        <mxCell id="c692" edge="1" parent="1" source="c642" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="c672" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="c693" edge="1" parent="1" source="c647" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c626" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c694" edge="1" parent="1" source="c658" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c552" value="">
+        <mxCell id="c694" edge="1" parent="1" source="c658" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="c568" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c695" edge="1" parent="1" source="c661" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c672" value="">
+        <mxCell id="c695" edge="1" parent="1" source="c661" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="c672" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c696" edge="1" parent="1" source="c662" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c672" value="">
+        <mxCell id="c696" edge="1" parent="1" source="c662" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" target="c672" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="c697" edge="1" parent="1" source="c619" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c671" value="">
@@ -2310,13 +2332,13 @@
     </mxGraphModel>
   </diagram>
   <diagram id="p8" name="07. Thực hiện ca chăm sóc">
-    <mxGraphModel dx="1920" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2400" pageHeight="2000" math="0" shadow="0">
+    <mxGraphModel dx="2025" dy="1415" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2400" pageHeight="2000" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <UserObject label="care_visit" tooltip="Diễn biến ca tại nhà: xuất phát, check-in, bắt đầu, kết thúc (luồng 07B)" id="c699">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="322" width="330" x="40" y="110" as="geometry" />
+            <mxGeometry height="316" width="330" x="-10" y="378" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c700" parent="c699" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK,FK&lt;/td&gt;&lt;td&gt;&lt;u&gt;order_id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -2360,7 +2382,7 @@
         </mxCell>
         <UserObject label="visit_location_point" tooltip="Vị trí ĐD từ lúc xuất phát đến check-in; phát hiện tắt định vị &gt; 10 phút (UC38, UC77)" id="c713">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="168" width="330" x="480" y="110" as="geometry" />
+            <mxGeometry height="162" width="330" x="560" y="680" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c714" parent="c713" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;bigint NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -2383,7 +2405,7 @@
         </mxCell>
         <UserObject label="visit_code" tooltip="Mã hiển thị trên app BN để xác nhận trong ca: check-in, bảng kê, phát sinh, dừng ca (BR-20)" id="c720">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="190" width="330" x="920" y="110" as="geometry" />
+            <mxGeometry height="184" width="330" x="1070" y="370" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c721" parent="c720" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -2409,7 +2431,7 @@
         </mxCell>
         <UserObject label="care_report" tooltip="Báo cáo chăm sóc bắt buộc; đủ trường → ca Hoàn tất, lưu vào hồ sơ BN tại BV (UC43, UC44, BR-22)" id="c728">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="278" width="330" x="480" y="338" as="geometry" />
+            <mxGeometry height="272" width="330" x="1450" y="270" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c729" parent="c728" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -2446,7 +2468,7 @@
           <mxGeometry height="22" width="330" y="250" as="geometry" />
         </mxCell>
         <mxCell id="c740" parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;arcSize=6;fontSize=13;html=1;" value="care_report_revision" vertex="1">
-          <mxGeometry height="190" width="330" x="920" y="360" as="geometry" />
+          <mxGeometry height="184" width="330" x="1430" y="-40" as="geometry" />
         </mxCell>
         <mxCell id="c741" parent="c740" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
           <mxGeometry height="22" width="330" y="30" as="geometry" />
@@ -2471,7 +2493,7 @@
         </mxCell>
         <UserObject label="handover" tooltip="Bàn giao khi thay người hoặc dừng ca: người giao, người nhận, nội dung (BR-22)" id="c748">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="190" width="330" x="40" y="492" as="geometry" />
+            <mxGeometry height="184" width="330" y="730" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c749" parent="c748" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -2497,7 +2519,7 @@
         </mxCell>
         <UserObject label="addon_request" tooltip="Dịch vụ phát sinh trong ca nhánh A / B / C (UC91, luồng 07C)" id="c756">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="454" width="330" x="920" y="610" as="geometry" />
+            <mxGeometry height="448" width="330" x="910" y="1150" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c757" parent="c756" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -2559,7 +2581,7 @@
         </mxCell>
         <UserObject label="care_stop" tooltip="Dừng ca giữa chừng: lý do, phí tạm tính / chốt, đơn con (UC127, UC128, BR-16)" id="c776">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="322" width="330" x="480" y="676" as="geometry" />
+            <mxGeometry height="316" width="330" x="910" y="-60" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c777" parent="c776" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -2603,7 +2625,7 @@
         </mxCell>
         <UserObject label="chat_message" tooltip="Chat / gọi BN – ĐD trong app theo đơn, không dùng SĐT (UC133)" id="c790">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="190" width="330" x="40" y="742" as="geometry" />
+            <mxGeometry height="184" width="330" x="1400" y="980" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c791" parent="c790" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;bigint NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -2629,7 +2651,7 @@
         </mxCell>
         <UserObject label="nurse_rating" tooltip="Đánh giá ĐD, không bắt buộc (UC50)" id="c798">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d0cee2;strokeColor=#56517e;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="168" width="330" x="40" y="992" as="geometry" />
+            <mxGeometry height="162" width="330" x="-50" y="1030" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c799" parent="c798" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK,FK&lt;/td&gt;&lt;td&gt;&lt;u&gt;order_id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -2652,22 +2674,22 @@
         </mxCell>
         <UserObject label="care_order" tooltip="Đơn chăm sóc (hẹn trước / đặt ngay / đơn con); vòng đời ca và trạng thái tiền tách riêng (luồng 04–09, 15)" id="c805">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f5f5f5;strokeColor=#999999;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="30" width="330" x="1520" y="360" as="geometry" />
+            <mxGeometry height="30" width="330" x="540" y="540" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="care_report_template" tooltip="Biểu mẫu báo cáo chăm sóc theo loại dịch vụ, có trường bắt buộc (BR-22)" id="c806">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f5f5f5;strokeColor=#999999;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="30" width="330" x="1400" y="165" as="geometry" />
+            <mxGeometry height="30" width="330" x="1920" y="378" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="patient_profile" tooltip="Hồ sơ người được chăm sóc; một tài khoản quản lý nhiều hồ sơ người thân (UC3, UC4)" id="c807">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f5f5f5;strokeColor=#999999;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="30" width="330" x="1400" y="220" as="geometry" />
+            <mxGeometry height="30" width="330" x="1910" y="480" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="service" tooltip="Danh mục dịch vụ / vật tư của BV với cờ được phép tại nhà và cần y lệnh (UC84, BR-15)" id="c808">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f5f5f5;strokeColor=#999999;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="30" width="330" x="1400" y="275" as="geometry" />
+            <mxGeometry height="30" width="330" x="1320" y="1359" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="staff_profile" tooltip="Hồ sơ nhân sự ĐD / BS gắn BV; trạng thái xác minh 2 bước (UC5–UC12, UC139, BR-21)" id="c809">
@@ -2678,34 +2700,44 @@
         <mxCell id="c810" edge="1" parent="1" source="c759" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c808" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c811" edge="1" parent="1" source="c766" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c809" value="">
+        <mxCell id="c811" edge="1" parent="1" source="c766" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" target="c809" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c812" edge="1" parent="1" source="c772" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c809" value="">
+        <mxCell id="c812" edge="1" parent="1" source="c772" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="c809" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c813" edge="1" parent="1" source="c700" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c805" value="">
+        <mxCell id="c813" edge="1" parent="1" source="c700" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0;entryDx=0;entryDy=0;" target="c805" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c814" edge="1" parent="1" source="c701" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c809" value="">
+        <mxCell id="c814" edge="1" parent="1" source="c711" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.12;entryY=-0.1;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryPerimeter=0;" target="c809" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="350" y="661" />
+              <mxPoint x="520" y="660" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c815" edge="1" parent="1" source="c713" style="fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="c805" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c815" edge="1" parent="1" source="c715" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c805" value="">
+        <mxCell id="c816" edge="1" parent="1" source="c716" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" target="c809" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="880" y="1080" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c817" edge="1" parent="1" source="c721" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=0;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="c805" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1060" y="449" as="sourcePoint" />
+            <mxPoint x="859.9999999999995" y="555" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c818" edge="1" parent="1" source="c730" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.903;entryY=-0.016;entryDx=0;entryDy=0;entryPerimeter=0;" target="c805" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c816" edge="1" parent="1" source="c716" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c809" value="">
+        <mxCell id="c819" edge="1" parent="1" source="c738" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c806" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c817" edge="1" parent="1" source="c722" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c805" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="c818" edge="1" parent="1" source="c730" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c805" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="c819" edge="1" parent="1" source="c731" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c806" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="c820" edge="1" parent="1" source="c733" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c807" value="">
+        <mxCell id="c820" edge="1" parent="1" source="c739" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c807" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="c821" edge="1" parent="1" source="c742" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c729" value="">
@@ -2714,25 +2746,29 @@
         <mxCell id="c822" edge="1" parent="1" source="c750" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c805" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c823" edge="1" parent="1" source="c751" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c809" value="">
+        <mxCell id="c823" edge="1" parent="1" source="c753" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" target="c809" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c824" edge="1" parent="1" source="c753" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c809" value="">
+        <mxCell id="c824" edge="1" parent="1" source="c755" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="c809" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c825" edge="1" parent="1" source="c758" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c805" value="">
+        <mxCell id="c825" edge="1" parent="1" source="c756" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="c805" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1075" y="570" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c826" edge="1" parent="1" source="c778" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="c805" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c826" edge="1" parent="1" source="c778" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c805" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="c827" edge="1" parent="1" source="c784" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c805" value="">
+        <mxCell id="c827" edge="1" parent="1" source="c784" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" target="c805" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="c828" edge="1" parent="1" source="c792" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c805" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c829" edge="1" parent="1" source="c799" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c805" value="">
+        <mxCell id="c829" edge="1" parent="1" source="c799" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=1;entryDx=0;entryDy=0;" target="c805" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="c830" edge="1" parent="1" source="c800" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c809" value="">
@@ -2742,13 +2778,13 @@
     </mxGraphModel>
   </diagram>
   <diagram id="p9" name="08. Bảng kê, thanh toán &amp; hoàn tiền">
-    <mxGraphModel dx="2112" dy="1320" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2400" pageHeight="2000" math="0" shadow="0">
+    <mxGraphModel dx="3840" dy="2050" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2400" pageHeight="2000" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <UserObject label="order_line" tooltip="Dòng bảng kê ca: dịch vụ gốc, phát sinh, vật tư, phí đến nhà (UC93)" id="c832">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="322" width="330" x="40" y="110" as="geometry" />
+            <mxGeometry height="316" width="330" x="-430" y="130" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c833" parent="c832" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -2792,7 +2828,7 @@
         </mxCell>
         <UserObject label="line_dispute" tooltip="Khiếu nại dòng bảng kê trước (F1a) / sau thanh toán trong 24h (F1b)" id="c846">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="300" width="330" x="480" y="110" as="geometry" />
+            <mxGeometry height="294" width="330" x="420" y="-100" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c847" parent="c846" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -2833,7 +2869,7 @@
         </mxCell>
         <UserObject label="payment_transaction" tooltip="Giao dịch cọc / phần còn lại qua cổng hoặc tiền mặt; tiền về TK bệnh viện (UC45, UC46, UC121)" id="c859">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="322" width="330" x="920" y="110" as="geometry" />
+            <mxGeometry height="316" width="330" x="620" y="544" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c860" parent="c859" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -2877,7 +2913,7 @@
         </mxCell>
         <UserObject label="gateway_webhook_event" tooltip="Kết quả giao dịch / hoàn tiền do cổng gửi về (UC47, luồng 11 phần A)" id="c873">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="212" width="330" x="480" y="470" as="geometry" />
+            <mxGeometry height="206" width="330" x="-70" y="1090" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c874" parent="c873" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -2906,7 +2942,7 @@
         </mxCell>
         <UserObject label="refund" tooltip="Lệnh hoàn tiền: tự động theo BR-04, ngoại lệ, thủ công sau thanh toán (UC90)" id="c882">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="388" width="330" x="40" y="492" as="geometry" />
+            <mxGeometry height="382" width="330" x="-30" y="478" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c883" parent="c882" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -2959,7 +2995,7 @@
         </mxCell>
         <UserObject label="deposit_exception_request" tooltip="BN xin ngoại lệ hoàn cọc, QT BV duyệt (UC36, F2)" id="c899">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="300" width="330" x="920" y="492" as="geometry" />
+            <mxGeometry height="294" width="330" x="-810" y="250" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c900" parent="c899" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -3000,7 +3036,7 @@
         </mxCell>
         <UserObject label="cash_collection" tooltip="Thu tiền mặt tại nhà, hai bên cùng xác nhận số tiền (UC122, UC123)" id="c912">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="278" width="330" x="480" y="742" as="geometry" />
+            <mxGeometry height="272" width="330" x="430" y="910" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c913" parent="c912" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -3038,7 +3074,7 @@
         </mxCell>
         <UserObject label="cash_remittance" tooltip="ĐD nộp tiền mặt về thủ quỹ BV, hạn 48h (luồng 10)" id="c924">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="256" width="330" x="920" y="852" as="geometry" />
+            <mxGeometry height="250" width="330" x="1160" y="840" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c925" parent="c924" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -3073,7 +3109,7 @@
         </mxCell>
         <UserObject label="financial_entry" tooltip="Sổ bút toán chỉ ghi thêm: cọc 4 nhóm, thu, hoàn, tiền mặt ĐD giữ / nộp, bù công (BR-04, BR-18)" id="c935">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="278" width="330" x="40" y="940" as="geometry" />
+            <mxGeometry height="272" width="330" x="-550" y="1130" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c936" parent="c935" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;bigint NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -3111,7 +3147,7 @@
         </mxCell>
         <UserObject label="patient_invoice" tooltip="Hóa đơn điện tử BV xuất cho BN, gồm hóa đơn điều chỉnh (UC126)" id="c947">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="256" width="330" x="480" y="1080" as="geometry" />
+            <mxGeometry height="250" width="330" x="-1140" y="890" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c948" parent="c947" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="&lt;table style=&quot;width:100%;font-size:11px&quot;&gt;&lt;tr&gt;&lt;td style=&quot;width:44px;color:#555&quot;&gt;PK&lt;/td&gt;&lt;td&gt;&lt;u&gt;id&lt;/u&gt;&lt;/td&gt;&lt;td style=&quot;text-align:right;color:#666&quot;&gt;uuid NN&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
@@ -3146,34 +3182,36 @@
         </mxCell>
         <UserObject label="addon_request" tooltip="Dịch vụ phát sinh trong ca nhánh A / B / C (UC91, luồng 07C)" id="c958">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f5f5f5;strokeColor=#999999;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="30" width="330" x="1400" y="110" as="geometry" />
+            <mxGeometry height="30" width="330" x="70" y="310" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="care_order" tooltip="Đơn chăm sóc (hẹn trước / đặt ngay / đơn con); vòng đời ca và trạng thái tiền tách riêng (luồng 04–09, 15)" id="c959">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f5f5f5;strokeColor=#999999;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="30" width="330" x="1400" y="165" as="geometry" />
+            <mxGeometry height="30" width="330" x="-620" y="930" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="hospital_payment_account" tooltip="Tài khoản nhận tiền của BV liên kết cổng thanh toán (UC110)" id="c960">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f5f5f5;strokeColor=#999999;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="30" width="330" x="1400" y="220" as="geometry" />
+            <mxGeometry height="30" width="330" x="1130" y="576" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="service" tooltip="Danh mục dịch vụ / vật tư của BV với cờ được phép tại nhà và cần y lệnh (UC84, BR-15)" id="c961">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f5f5f5;strokeColor=#999999;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="30" width="330" x="1400" y="275" as="geometry" />
+            <mxGeometry height="30" width="330" x="40" y="218" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="staff_profile" tooltip="Hồ sơ nhân sự ĐD / BS gắn BV; trạng thái xác minh 2 bước (UC5–UC12, UC139, BR-21)" id="c962">
           <mxCell parent="1" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f5f5f5;strokeColor=#999999;rounded=1;arcSize=6;fontSize=13;html=1;" vertex="1">
-            <mxGeometry height="30" width="330" x="1400" y="330" as="geometry" />
+            <mxGeometry height="30" width="330" x="840" y="1360" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="c963" edge="1" parent="1" source="c927" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c962" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c964" edge="1" parent="1" source="c834" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c959" value="">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="c964" edge="1" parent="1" source="c845" style="fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.75;entryY=0;entryDx=0;entryDy=0;exitX=0.413;exitY=1.188;exitDx=0;exitDy=0;exitPerimeter=0;" target="c959" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-360" y="920" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="c965" edge="1" parent="1" source="c836" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c961" value="">
           <mxGeometry relative="1" as="geometry" />
@@ -3184,19 +3222,25 @@
         <mxCell id="c967" edge="1" parent="1" source="c848" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c833" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c968" edge="1" parent="1" source="c861" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c959" value="">
+        <mxCell id="c968" edge="1" parent="1" source="c871" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" target="c959" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="c969" edge="1" parent="1" source="c863" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c960" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c970" edge="1" parent="1" source="c884" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c959" value="">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="c970" edge="1" parent="1" source="c896" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.908;entryY=-0.12;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="c959" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-190" y="785" />
+              <mxPoint x="-190" y="830" />
+              <mxPoint x="-320" y="830" />
+            </Array>
+          </mxGeometry>
         </mxCell>
         <mxCell id="c971" edge="1" parent="1" source="c886" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c860" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c972" edge="1" parent="1" source="c901" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c959" value="">
+        <mxCell id="c972" edge="1" parent="1" source="c911" style="fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0.496;exitY=1.045;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="c959" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="c973" edge="1" parent="1" source="c911" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c883" value="">
@@ -3205,19 +3249,22 @@
         <mxCell id="c974" edge="1" parent="1" source="c914" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERmandOne;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c959" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c975" edge="1" parent="1" source="c915" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c962" value="">
+        <mxCell id="c975" edge="1" parent="1" source="c913" style="edgeStyle=orthogonalEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c962" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="810" y="839.9999999999998" as="sourcePoint" />
+            <mxPoint x="940" y="1508" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c976" edge="1" parent="1" source="c912" style="fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.179;entryY=0.981;entryDx=0;entryDy=0;entryPerimeter=0;" target="c872" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c976" edge="1" parent="1" source="c922" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c860" value="">
+        <mxCell id="c977" edge="1" parent="1" source="c938" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=1;entryY=1;entryDx=0;entryDy=0;" target="c959" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c977" edge="1" parent="1" source="c938" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c959" value="">
+        <mxCell id="c978" edge="1" parent="1" source="c945" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="c962" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="c978" edge="1" parent="1" source="c939" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c962" value="">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="c979" edge="1" parent="1" source="c949" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c959" value="">
+        <mxCell id="c979" edge="1" parent="1" source="c949" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;startArrow=ERoneToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="c959" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="c980" edge="1" parent="1" source="c952" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERzeroToOne;startArrow=ERzeroToMany;endFill=0;startFill=0;strokeColor=#666666;rounded=1;" target="c948" value="">
@@ -4205,13 +4252,10 @@
     </mxGraphModel>
   </diagram>
   <diagram id="p15" name="14. Từ điển enum">
-    <mxGraphModel dx="1760" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2400" pageHeight="2000" math="0" shadow="0">
+    <mxGraphModel dx="3520" dy="2200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2400" pageHeight="2000" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="c1280" parent="1" style="text;html=1;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=12;" value="&lt;b style=font-size:20px&gt;Từ điển giá trị enum&lt;/b&gt;&lt;br&gt;Xanh lá = giá trị theo đặc tả (BR ghi trong ngoặc). Cam = đề xuất ở nhóm 4.4–4.6 của danh sách góp ý, chờ PO duyệt. Xám = các enum còn lại (mục 4.7), suy ra từ trang 00c, chờ PO duyệt cùng đợt." vertex="1">
-          <mxGeometry height="70" width="1500" x="40" y="20" as="geometry" />
-        </mxCell>
         <mxCell id="c1281" parent="1" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;arcSize=4;" value="&lt;b&gt;account_status&lt;/b&gt; &lt;span style=&quot;color:#666&quot;&gt;· chờ PO (4.7)&lt;/span&gt;&lt;br&gt;UNVERIFIED&lt;br&gt;INACTIVE&lt;br&gt;ACTIVE&lt;br&gt;TEMP_LOCKED&lt;br&gt;DISABLED&lt;br&gt;&lt;span style=&quot;color:#888;font-size:10px&quot;&gt;dùng ở: user_account.status&lt;/span&gt;" vertex="1">
           <mxGeometry height="130" width="310" x="40" y="110" as="geometry" />
         </mxCell>
