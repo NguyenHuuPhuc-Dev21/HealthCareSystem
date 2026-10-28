@@ -1,21 +1,20 @@
-# Home-Care Nursing Platform — User Stories Specification (Must Group)
+# HealthCareSystem — User Stories Specification
 
-> **Specification Baseline:** `use_case_v8.1.drawio` (140 UCs, BR-01–BR-23) + `luong_hoat_dong_v8.14.drawio` (17 Activity Flows)  
-> **Pilot Scope (Decision Q-23):** Single hospital, advance booking only, online gateway payments only, rule-based symptom screening with clinical review, SOS escalation within 5 minutes (no auto-115 dialing).  
-> **Status:** Baseline Frozen (Release 1 — Pilot Q-23)  
-> **Original Vietnamese Baseline:** Preserved in [`archive/user-stories-day-du-nhom-must-theo-baseline-v8.1-8.14.vi.md`](archive/user-stories-day-du-nhom-must-theo-baseline-v8.1-8.14.vi.md)
+> **Governing Baseline:** SRS HealthCareSystem On-Demand Nursing — **Version 2.0 (Updated, 28/10/2026)**  
+> **Model:** A marketplace connecting Patients/Families with retired doctors & nurses and fresh medical/nursing graduates. There are no hospital tenants; nurses are independent participants, and the platform is the connector and escrow/settlement operator.  
+> **Status:** Revised per SRS v2.0 — supersedes the hospital-baseline version (use_case_v8.1 / luong_hoat_dong_v8.14, BR-01–BR-23), which is retained for history in `archive/` only and must not be used for development.  
+> **Key model anchors:** Phone + OTP sign-in for all users (Admin Portal adds mandatory 2FA) · Customer eKYC (CCCD) required for private-home care · Nurse tiers TIER_1_BASIC / TIER_2_SPECIALIST gated by a valid GPHN · Two matching mechanisms (Radar dispatch / Job Board) + direct nurse selection · Payment per booking: 100% prepaid bank transfer into escrow, or cash at shift end with the nurse self-paying the 15% commission within 24h · Nurse deposit wallet 300,000 VND upfront, used only for SLA penalties · Cancellation/refunds per the SRS §5.2 SLA matrix · 3-axis booking state machine (execution / payment / dispute).
 
 ---
 
 ## 1. Directory Structure
 
-All 27 "Must" User Stories have been modularized into domain-specific Epic folders with standardized identifiers, problem context, user story statements, acceptance criteria (Given/When/Then), and test case traceability matrices:
+User Stories are modularized into domain-specific Epic folders with standardized identifiers, problem context, user story statements, acceptance criteria (Given/When/Then), and test case traceability to the SRS §10 RTM:
 
 ```
-docs/User_Stories/
-├── README.md                                                 # Master Catalog & Traceability Matrix (this file)
-├── archive/
-│   └── user-stories-day-du-nhom-must-theo-baseline-v8.1-8.14.vi.md   # Archived original Vietnamese specification
+docs/user_stories/
+├── README.md                                  # Master Catalog & Traceability Matrix (this file)
+├── archive/                                   # Superseded hospital-baseline specifications (historical only)
 ├── epic-a-account-and-access/
 │   ├── US-HP-01-patient-email-registration-signin.md
 │   ├── US-HP-02-relative-email-consent.md
@@ -54,39 +53,43 @@ docs/User_Stories/
     └── US-HP-36-event-driven-notifications.md
 ```
 
+> File names and US-HP codes are kept unchanged from the previous baseline for repository continuity; story **titles and content** follow SRS v2.0.
+
 ---
 
-## 2. Master Traceability Matrix (27 Must Stories)
+## 2. Master Traceability Matrix
 
-| Story ID | Story Title & Link | Bounded Context | Primary Persona | Traceability (UC / BR / Flow) | Decision / Notes |
+Traceability references SRS v2.0 functional requirements (FR) and, where applicable, the SRS §10 RTM test-case IDs — replacing the previous UC/BR traceability.
+
+| Story ID | Story Title & Link | Bounded Context | Primary Persona | Traceability (SRS v2.0) | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **US-HP-01** | [Email-Only Registration & Sign-In for Patients](epic-a-account-and-access/US-HP-01-patient-email-registration-signin.md) | `Identity & Consent` | Patient, Family Member | UC1, UC14, UC61, UC82, UC83 · BR-20 · Flow 01 | Q-51 (Email only, no phone/CCCD) |
-| **US-HP-02** | [Relative Consent via Email Link](epic-a-account-and-access/US-HP-02-relative-email-consent.md) | `Identity & Consent` | Family Member / Legal Rep | UC2, UC4 · BR-17 · Flows 02, 04 | No proxy consent by dispatcher |
-| **US-HP-03** | [Consent Withdrawal & New-Terms Consent](epic-a-account-and-access/US-HP-03-consent-withdrawal-terms.md) | `Identity & Consent` | Account Owner | UC106, UC138 · Q-47 · Flows 02, 03 | Mandatory re-consent on terms update |
-| **US-HP-04** | [Two-Step Staff Activation & Professional Confirmation](epic-a-account-and-access/US-HP-04-staff-activation-professional-confirmation.md) | `Identity & Consent`, `Hospital Operations` | Nurse, Doctor | UC139 · BR-21 · Q-50 · Flow 01 | Unconfirmed staff excluded from dispatch |
-| **US-HP-05** | [Mandatory Two-Factor Sign-In for Staff](epic-a-account-and-access/US-HP-05-staff-mandatory-2fa-signin.md) | `Identity & Consent` | Staff (Nurse, Doctor, Admin) | BR-20, BR-21 · Flow 01 | 2FA mandatory for staff; patients exempt |
-| **US-HP-06** | [Patient Profile Creation](epic-b-patient-profile-and-screening/US-HP-06-patient-profile-creation.md) | `Patient Profile & Screening` | Patient, Account Owner | UC6, UC11 · BR-17 · Flow 02 | No CCCD; reusable across bookings |
-| **US-HP-07** | [Symptom Entry & Four-Group Classification](epic-b-patient-profile-and-screening/US-HP-07-symptom-screening-classification.md) | `Patient Profile & Screening` | Patient | UC21, UC22 · BR-15 · Flow 04 | Emergency group blocks routine booking |
-| **US-HP-09** | [Advance Booking](epic-c-booking-and-nurse-matching/US-HP-09-advance-booking.md) | `Booking & Matching` | Patient | BR-03, BR-04 · Flow 04 | 17:00–21:30 operating hours only |
-| **US-HP-10** | [Automatic Nurse Matching](epic-c-booking-and-nurse-matching/US-HP-10-automated-nurse-matching.md) | `Booking & Matching` | Patient, Nurse | BR-05, BR-21 · Flow 05 | Filters by qualification & availability |
-| **US-HP-11** | [New Matching Round After Nurse Cancellation During Deposit Wait](epic-c-booking-and-nurse-matching/US-HP-11-rematching-on-nurse-cancellation.md) | `Booking & Matching` | Patient, Dispatcher | BR-06 · Flow 05 | Automatic secondary round & timer reset |
-| **US-HP-12** | [Pre-Session Reminder & Optional Symptom Update](epic-c-booking-and-nurse-matching/US-HP-12-pre-session-reminder-symptom-update.md) | `Booking & Matching`, `Patient Profile & Screening` | Patient | UC119 · BR-15 · Flow 06 | Optional; never blocks care session |
-| **US-HP-13** | [Patient-Initiated Cancellation with Transparent Refund Rule](epic-c-booking-and-nurse-matching/US-HP-13-patient-initiated-cancellation.md) | `Booking & Matching`, `Payment & Deposit` | Patient | UC14 · BR-07, BR-18 F2 · Flow 06 | Time-tiered refund calculation |
-| **US-HP-14** | [30% Deposit via Hospital Payment Gateway](epic-d-deposit-payment-and-refund/US-HP-14-deposit-payment-gateway.md) | `Payment & Deposit` | Patient | UC15, UC16 · BR-04 · Flow 04 | Min 50,000 VND floor; no cash |
-| **US-HP-15** | [Outstanding Balance & 24h "Chờ thanh toán" State](epic-d-deposit-payment-and-refund/US-HP-15-outstanding-balance-pending-payment.md) | `Payment & Deposit` | Patient, Hospital Admin | UC17 · BR-10, BR-18 · Flow 10 | 24h settlement window before debt follow-up |
-| **US-HP-18** | [Nurse Pre-Session Briefing](epic-e-home-care-visit-execution/US-HP-18-nurse-pre-session-briefing.md) | `Care Session` | Nurse | UC31, UC32 · BR-08 · Flow 07 | Accessible only to assigned nurse |
-| **US-HP-19** | [In-App Code Check-In at Patient's Home](epic-e-home-care-visit-execution/US-HP-19-in-app-code-check-in.md) | `Care Session` | Nurse, Patient | UC33 · BR-09, BR-20 · Flow 07A | Dynamic in-app code (not email OTP) |
-| **US-HP-20** | [Mandatory Initial Assessment by Service-Type Form](epic-e-home-care-visit-execution/US-HP-20-initial-patient-assessment.md) | `Care Session` | Nurse | UC34 · BR-09 · Flow 07A | Prerequisite before clinical execution |
-| **US-HP-22** | [Mandatory Post-Session Care Report](epic-e-home-care-visit-execution/US-HP-22-mandatory-care-report.md) | `Care Session` | Nurse | UC36 · BR-22 · Flow 07A | Mandatory even if no initial symptoms |
-| **US-HP-23** | [In-Session Add-On Lines with Patient Confirmation](epic-e-home-care-visit-execution/US-HP-23-in-session-add-on-items.md) | `Care Session`, `Payment & Deposit` | Nurse, Patient | UC35 · BR-10 · Flow 07A | Items require patient confirmation |
-| **US-HP-24** | [Unsafe-Environment Session Stop Declaration](epic-e-home-care-visit-execution/US-HP-24-unsafe-environment-session-stop.md) | `Care Session`, `Hospital Operations` | Nurse | UC37 · BR-11 · Flow 07A | Immediate stop & fee freeze |
-| **US-HP-25** | [Minimum Home-Visit Fee When Service Cannot Be Performed Due to Patient](epic-e-home-care-visit-execution/US-HP-25-minimum-visit-fee-patient-impediment.md) | `Care Session`, `Payment & Deposit` | Nurse, Hospital Admin | UC38 · BR-12, BR-18 F3 · Flow 07A | Pending Decision Q-03 (rate/structure) |
-| **US-HP-26** | [Patient/Relative SOS Signal](epic-f-emergency-sos-and-safety/US-HP-26-patient-sos-signal.md) | `Safety & SOS` | Patient, Family Member | UC140 · BR-23 · Q-48 · Flow 17 | 5-min escalation; no auto-115 in MVP |
-| **US-HP-27** | [On-Duty Hospital Contact Acknowledges & Closes SOS Incident](epic-f-emergency-sos-and-safety/US-HP-27-hospital-sos-reception-and-closure.md) | `Safety & SOS`, `Hospital Operations` | On-Duty Physician, Admin | UC140 · BR-23, Q-48 · Flow 17 | Acknowledge in 5 min; resolution mandatory |
-| **US-HP-28** | [Fee-Line Complaint Handling — F1a/F1b Branches](epic-g-hospital-administration/US-HP-28-fee-dispute-handling-f1a-f1b.md) | `Hospital Operations`, `Payment & Deposit` | Hospital Admin | BR-18 F1a/F1b · Q-44 · Flows 08, 12 | F1a 5-day auto-waiver; F1b UC90 voucher |
-| **US-HP-29** | [Violation Recording, Adjudication & Staff Lock/Unlock](epic-g-hospital-administration/US-HP-29-violation-recording-staff-suspension.md) | `Hospital Operations` | Hospital Admin | BR-01, BR-02 · Q-43 · BR-18 F6 · Flow 12 | 24h auto-unlock if unconfirmed; sliding window |
-| **US-HP-34** | [Platform Admin Decision on Escalated F1b Complaints](epic-h-saas-platform-administration/US-HP-34-platform-admin-dispute-escalation.md) | `Platform Administration`, `Payment & Deposit` | SaaS Platform Admin | BR-18 F1b · Q-44 | 3-business-day arbitration SLA |
-| **US-HP-36** | [Event-Driven Notifications via Email & In-App](epic-i-notifications-and-lookup/US-HP-36-event-driven-notifications.md) | `Notification` | All System Roles | UC119 · BR-20 · Flows 04–15, 17 | Zero SMS policy; real-time in-app for SOS |
+| **US-HP-01** | [Customer Registration & Sign-In with Phone Number + OTP](epic-a-account-and-access/US-HP-01-patient-email-registration-signin.md) | `Identity & Consent` | Customer | FR-AUTH-03 · APIs request-otp / verify-otp | Phone + OTP for all users; no email channel |
+| **US-HP-02** | [A Relative Books Care for a Patient](epic-a-account-and-access/US-HP-02-relative-email-consent.md) | `Identity & Consent` | Family Member | FR-AUTH-03 · FR-PRIV-01 · TC-PRIV-01 | Care-recipient profile + recorded consent to share records with the assigned nurse |
+| **US-HP-03** | [Customer Withdraws Consent / Requests Data Handling per Nghị định 13/2023](epic-a-account-and-access/US-HP-03-consent-withdrawal-terms.md) | `Identity & Consent` | Customer | FR-PRIV-01 · RISK-03 | Record access closes 12h after check-out; deletion/anonymization supported |
+| **US-HP-04** | [Nurse Account Activation After eKYC + Tier Assignment by Admin](epic-a-account-and-access/US-HP-04-staff-activation-professional-confirmation.md) | `Identity & Consent` | Nurse; Medical Admin | FR-AUTH-01 · FR-AUTH-02 · TC-AUTH-01/02/03 | Retirement decision = badge only; GPHN expiry auto-demotes tier |
+| **US-HP-05** | [Admin Portal Sign-In with Mandatory 2FA](epic-a-account-and-access/US-HP-05-staff-mandatory-2fa-signin.md) | `Identity & Consent` | Medical Admin / Operator | SRS §2.1 · FR-ADMIN-01 | 2FA mandatory for Admin only — not for nurses/customers |
+| **US-HP-06** | [Customer Creates Care-Recipient Profiles](epic-b-patient-profile-and-screening/US-HP-06-patient-profile-creation.md) | `Patient Profile` | Customer | FR-AUTH-03 · FR-PRIV-01 · TC-KYC-01 | Customer eKYC mandatory for private-home care |
+| **US-HP-07** | [Customer Declares the Care Recipient's Condition at Booking](epic-b-patient-profile-and-screening/US-HP-07-symptom-screening-classification.md) | `Patient Profile` | Customer; Nurse | FR-AUTH-03 · FR-SHIFT-02 | **No AI/rule-based classification exists in SRS v2.0**; mismatches are reported by the nurse on site |
+| **US-HP-09** | [Customer Books a Shift/Task in Advance](epic-c-booking-and-nurse-matching/US-HP-09-advance-booking.md) | `Booking & Matching` | Customer | FR-BOOK-01 · FR-BOOK-02 · TC-PRICE-01 · TC-BOOK-01 | Invasive services: doctor's-order image + Admin review (PENDING_ADMIN_REVIEW) |
+| **US-HP-10** | [Matching via Radar Push Waves + Job Board](epic-c-booking-and-nurse-matching/US-HP-10-automated-nurse-matching.md) | `Booking & Matching` | Customer; Nurse | FR-BOOK-03 · FR-SCHED-01 · FR-SEARCH-01 · TC-MATCH-01/02 | Radar ≤ 6h (5 km → 10 km waves); Job Board > 6h; direct selection with 15-min response window |
+| **US-HP-11** | [Re-Matching / Refund When the Nurse Cancels](epic-c-booking-and-nurse-matching/US-HP-11-rematching-on-nurse-cancellation.md) | `Booking & Matching` | Customer; Nurse | SRS §5.2 rows 6–8 · TC-CANCEL-01 | Late-cancel penalty funds the Urgent Bonus; no-show ⇒ BANNED + 50,000 VND voucher |
+| **US-HP-12** | [Pre-Shift Reminders & Customer Condition-Note Update](epic-c-booking-and-nurse-matching/US-HP-12-pre-session-reminder-symptom-update.md) | `Booking & Matching`, `Patient Profile` | Customer; Nurse | FR-NOTIF-01 · TC-NFR-01 | Push + in-app; SMS fallback for urgent events / 60s no-ACK |
+| **US-HP-13** | [Customer Cancels Under the §5.2 Refund Matrix](epic-c-booking-and-nurse-matching/US-HP-13-patient-initiated-cancellation.md) | `Booking & Matching`, `Payment` | Customer | SRS §5.2 rows 1–5 | Includes stop-after-check-in (pay actual work, no penalty) and ICU force majeure |
+| **US-HP-14** | [Customer Pays 100% in Advance by Bank Transfer (Escrow) or Chooses Cash](epic-d-deposit-payment-and-refund/US-HP-14-deposit-payment-gateway.md) | `Payment` | Customer | FR-PAY-01 · TC-PAY-01/02 · TC-SETTLE-01 | `payment_method` chosen at booking; webhook HMAC + idempotency |
+| **US-HP-15** | [Nurse Pays the 15% Cash-Job Commission via Payment Link Within 24h](epic-d-deposit-payment-and-refund/US-HP-15-outstanding-balance-pending-payment.md) | `Payment` | Nurse | FR-PAY-02 · FR-PAY-03 · TC-SETTLE-02 · TC-WALLET-01 | Overdue commission or deposit below 300,000 VND ⇒ SUSPENDED / locked from new jobs; commission never deducted from the deposit wallet |
+| **US-HP-18** | [Nurse Reviews Booking & Medical Information Inside the Access Window Before the Shift](epic-e-home-care-visit-execution/US-HP-18-nurse-pre-session-briefing.md) | `Care Session` | Nurse | — | FR-PRIV-01 |
+| **US-HP-19** | [Nurse Checks In with GPS Verification & Live Selfie at the Care Address](epic-e-home-care-visit-execution/US-HP-19-in-app-code-check-in.md) | `Care Session` | Nurse; Customer | — | FR-SHIFT-01 |
+| **US-HP-20** | [Nurse Records Initial Vital Signs & Confirms Patient Condition at Shift Start](epic-e-home-care-visit-execution/US-HP-20-initial-patient-assessment.md) | `Care Session` | Nurse | — | FR-SHIFT-02 |
+| **US-HP-22** | [Nurse Checks Out & Submits the Mandatory Care Report](epic-e-home-care-visit-execution/US-HP-22-mandatory-care-report.md) | `Care Session` | Nurse | — | FR-SHIFT-04 |
+| **US-HP-23** | [Shift Extension — Request, Repricing, Customer Approval & Payment](epic-e-home-care-visit-execution/US-HP-23-in-session-add-on-items.md) | `Care Session`, `Payment` | Nurse; Customer | — | FR-SHIFT-03 |
+| **US-HP-24** | [Nurse Stops a Shift for an Unsafe Environment or Condition Mismatch & Reports It](epic-e-home-care-visit-execution/US-HP-24-unsafe-environment-session-stop.md) | `Care Session` | Nurse | — | FR-SHIFT-02 · FR-BOOK-02 · §5.2 |
+| **US-HP-25** | [Customer No-Show / On-Site Impediment — Nurse Waits, Reports & Leaves](epic-e-home-care-visit-execution/US-HP-25-minimum-visit-fee-patient-impediment.md) | `Care Session`, `Payment` | Nurse | — | §5.2 (gap flagged in story) |
+| **US-HP-26** | [Customer or Nurse Triggers SOS During a Shift](epic-f-emergency-sos-and-safety/US-HP-26-patient-sos-signal.md) | `Safety & SOS` | Customer | — | FR-SHIFT-05 |
+| **US-HP-27** | [Admin Receives the SOS Alert With Live Location, Responds & Closes It](epic-f-emergency-sos-and-safety/US-HP-27-hospital-sos-reception-and-closure.md) | `Safety & SOS` | Medical Admin | — | FR-SHIFT-05 |
+| **US-HP-28** | [Admin Handles Booking Disputes (FR-DISP-01 Workflow)](epic-g-hospital-administration/US-HP-28-fee-dispute-handling-f1a-f1b.md) | `Administration`, `Payment` | Medical Admin | — | FR-DISP-01 |
+| **US-HP-29** | [Admin Records Violations & Applies SLA Sanctions](epic-g-hospital-administration/US-HP-29-violation-recording-staff-suspension.md) | `Administration` | Medical Admin | — | §5.2 · FR-RATE-01 |
+| **US-HP-34** | [Admin Adjudicates Escalated Disputes & Audits Decisions](epic-h-saas-platform-administration/US-HP-34-platform-admin-dispute-escalation.md) | `Platform Administration` | Platform Admin | — | FR-DISP-01 · audit_logs |
+| **US-HP-36** | [Event-Driven Notifications Across the Booking Lifecycle](epic-i-notifications-and-lookup/US-HP-36-event-driven-notifications.md) | `Notification` | All roles | — | FR-NOTIF-01 |
 
 ---
 
@@ -94,24 +97,19 @@ docs/User_Stories/
 
 | Persona | Applicable User Stories | Core Responsibilities |
 | :--- | :--- | :--- |
-| **Patient** | US-HP-01, 06, 07, 09, 10, 11, 12, 13, 14, 15, 19, 23, 26, 36 | Registration, profile management, booking, screening, deposit, check-in, confirmation, payment, SOS |
-| **Family Member / Legal Representative** | US-HP-01, 02, 03, 06, 26, 36 | Proxy consent, legal representation attestation, visit booking assistance, emergency SOS |
-| **Nurse** | US-HP-04, 05, 10, 18, 19, 20, 22, 23, 24, 25, 36 | Two-step activation, 2FA sign-in, shift acceptance, check-in, clinical assessment, care report, safety abort |
-| **On-Duty Physician** | US-HP-04, 05, 27, 36 | Shift credentialing, high-risk screening review, emergency SOS triage & incident closure |
-| **Hospital Administrator / Dispatcher** | US-HP-04, 05, 11, 15, 25, 27, 28, 29, 36 | Staff credential confirmation, manual dispatch intervention, dispute adjudication, violation management |
-| **SaaS Platform Admin** | US-HP-34, 36 | Tenant management, cross-tenant financial arbitration, escalated F1b dispute ruling |
+| **Customer (Patient / Family Member)** | US-HP-01, 02, 03, 06, 07, 09, 10, 11, 12, 13, 14 | Phone + OTP sign-in, eKYC, care-recipient profiles & consent, booking, payment (prepaid transfer or cash), cancellation |
+| **Nurse Tier 1 (TIER_1_BASIC)** | US-HP-04, 10, 15 | Onboarding with degree (no valid GPHN), non-invasive jobs only, deposit top-up, cash-job commission payment |
+| **Nurse Tier 2 (TIER_2_SPECIALIST)** | US-HP-04, 10, 15 | GPHN-verified practice incl. invasive services against a doctor's order, GPHN renewal to restore tier |
+| **Medical Admin / Operator** | US-HP-04, 05 | 2FA-protected Admin Portal sign-in, credential verification & tier assignment, platform operations (FR-ADMIN-01) |
 
 ---
 
-## 4. Note on "Should" Group User Stories
+## 4. Scope Note (MVP vs Phase 2)
 
-Ten additional secondary stories designated as **Should** in the original baseline proposals (`US-HP-08`, `16`, `17`, `21`, `30`, `31`, `32`, `33`, `35`, `37`) remain in outline status. When prioritized for upcoming releases, they will be specified using this exact full format without altering any existing story identifiers.
+Per SRS v2.0 §1.2 and §4.0, the MVP covers task-based and short shift-based booking (4h/8h/12h/24h), both matching mechanisms, both payment methods, the upfront deposit wallet, dual-verification check-in, shift logs, disputes, two-way reviews and Admin operations. Long-term contract booking and lifecycle (FR-BOOK-04, FR-BOOK-05), partial settlement adjudication (FR-DISP-02) and the Elder-Friendly UI for the Patient App are **Phase 2** and are not specified as stories in this catalogue.
 
 ---
 
 ## 5. Specification Precedence Rule
 
-When code and design documentation disagree, **the design documents and business rules win** until officially amended and versioned:
-1. `use_case_v8.1.drawio` (140 UCs, BR-01–BR-23)
-2. `luong_hoat_dong_v8.14.drawio` (Activity flows & decision registers)
-3. User Stories Specification (this documentation suite)
+**SRS HealthCareSystem On-Demand Nursing v2.0 (Updated, 28/10/2026) is the single governing baseline.** Where any story, design document or code disagrees with the SRS, the SRS wins until it is officially amended and re-versioned. The archived hospital-baseline documents (`archive/`, use_case_v8.1, luong_hoat_dong_v8.14, BR-01–BR-23) are historical references only.

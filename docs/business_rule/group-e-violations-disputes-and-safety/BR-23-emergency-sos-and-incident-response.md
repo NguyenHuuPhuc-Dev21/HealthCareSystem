@@ -1,49 +1,57 @@
 # BR-23: Emergency SOS Signal & Incident Response
 
 > **Group:** Group E — Violations, Disputes & Safety  
-> **Source Baseline:** `use_case_v8.1.drawio` (Pages 12, 14) + `luong_hoat_dong_v8.14.drawio`  
-> **Key Decisions:** Q-48 (Hospital backup emergency contacts configuration)  
-> **Status:** Baseline Frozen
+> **Source Baseline:** SRS HealthCareSystem — On-Demand Nursing, Version 2.0 (Updated, 28/10/2026)  
+> **SRS References:** FR-SHIFT-05, FR-NOTIF-01, RISK-03, RISK-04, SRS §10 (TC-SOS-01)  
+> **Status:** Revised per SRS v2.0 — supersedes the hospital-baseline version
 
 ---
 
 ## 1. Context & Business Intent
 
-1. **Immediate Distress Activation:** When life-threatening medical emergencies or violent domestic incidents occur, help must be summonable with a single tap, without procedural friction.
-2. **Accountability via 5-Minute Escalation:** Emergency broadcasts without strict personal ownership fail; on-duty clinical responders must acknowledge alerts within 5 minutes or face automatic escalation.
+1. **115 First, App Second:** In a home-care emergency the only response that saves lives is the national emergency service. SRS v2.0's protocol (FR-SHIFT-05 / RISK-03) therefore makes calling **115** the mandatory first step, performed by the people on site; the platform's role is to alert, locate, log, and coordinate support — it never substitutes for 115.
+2. **No Hospital Response Desk:** This is a marketplace model. SOS alerts go to the **patient's family** and the **platform Admin Portal** — there is no hospital on-duty desk, no hospital dispatcher, and no 5-minute hospital acknowledgement SLA in SRS v2.0.
 
 ---
 
 ## 2. Rule Specifications
 
-### 2.1 Unilateral Distress Activation Triggers
-- **Patient or Present Family Member:** Can press the dedicated SOS button at **any time** (UC140), without waiting for AI screening or physician clearance.
-- **Visiting Nurse:** Can press SOS inside the Nurse App during a visit (UC92).
-- **Automated System Triggers:**
-  - Symptom screening indicating acute emergency (Flows 04, 05, 07A).
-  - High-risk physician triage escalation (Flow 13).
-  - In-session add-on Tier C life-safety signs (Flow 07C).
+### 2.1 Trigger
 
-### 2.2 National Emergency 115 Protocol (No Auto-Calling in MVP)
-- The user interface immediately displays prominent **115 national emergency guidance** and launches the device's native telephone dialer with `115` pre-filled.
-- **The platform DOES NOT make automated telephonic calls to 115 in the MVP.** Automated dialing requires dedicated emergency service integrations and location-handover protocols, deferred beyond Pilot Q-23.
+- The **SOS button in the app** is available during an `IN_PROGRESS` shift and can be pressed by the nurse (or the patient/family at the scene) the moment signs of a critical emergency appear (e.g., apnea, cyanosis, anaphylaxis, stroke symptoms — FR-SHIFT-05). No screening, triage, or clearance step precedes it.
 
-### 2.3 5-Minute Hospital Escalation Protocol (Q-48)
-- The incident dispatches urgent priority push alerts to the hospital's designated on-duty response desk (On-Duty Physician, Hospital Dispatcher, Assigned Nurse).
-- **If unacknowledged within 5 minutes:** The system automatically escalates the alert to the hospital's secondary emergency contact registry (Q-48).
+### 2.2 Step 1 — On-Site: Call 115 & First Aid (FR-SHIFT-05)
 
-### 2.4 Transition to Emergency Early Termination
-- If an SOS is triggered during an active visit, the session transitions immediately to Flow 15 under the **Medical Emergency** classification.
-- **On-site financial collection is strictly prohibited.**
+1. The SOS screen **immediately opens the phone dialer with 115**; the nurse/person on site calls the national emergency number without delay.
+2. The nurse performs basic first aid within their professional scope while awaiting the emergency crew.
+3. The platform does **not** auto-dial 115 and does not interpose any confirmation step between the user and the dialer.
 
-### 2.5 Immutable Incident Logging
-- The incident log records: trigger timestamp, initiator ID, geocoded coordinates, notification timestamps, responder acknowledgements, and final resolution notes.
-- Sensitive unstructured clinical history is excluded from the alert notification payload.
+### 2.3 Step 2 — System Alert: Family & Admin, With Location (FR-SHIFT-05, FR-NOTIF-01)
+
+Simultaneously with Step 1, the app sends an emergency alert containing the **GPS coordinates of the scene** and a **summary of the patient's most recent vital signs** (from `shift_logs`) to:
+
+- the **patient's family** (account holder), and
+- the **Admin Portal**.
+
+Delivery is by high-priority push (FCM); if the push is not acknowledged within **60 seconds**, the fallback SMS/Zalo ZNS channel fires automatically (FR-NOTIF-01). Acceptance target: pressing SOS opens the 115 dialer **and** delivers the alert to Admin/family in **under 2 seconds** (SRS §10, TC-SOS-01).
+
+### 2.4 Admin Response & Closure
+
+- Admin receives the alert on the Admin Portal with the live location, coordinates support (including liaising with the authorities/emergency services as the situation requires), and **closes the alert** once the incident is resolved.
+- The full incident is recorded in the booking's `shift_logs.emergency_incident_log` and is available as evidence for any follow-up dispute (BR-11 §2.4).
+- A detailed Admin-side SOS handling procedure (acknowledgement SLA, escalation chain, closure criteria) beyond the above is **[Not specified in SRS v2.0 — open item]**. A separate personal-safety SOS variant for a nurse who feels unsafe (distinct from a patient medical emergency) is likewise not separately specified in SRS v2.0; the same SOS channel and Admin alerting apply — **[Not specified in SRS v2.0 — open item]** (see also BR-16 §2.5).
+
+### 2.5 Session & Money Consequences
+
+An emergency ends the shift's normal course: pay/refund consequences follow BR-16 (notably SRS §5.2 row 5 — penalty-free refund of unused amounts and the fixed 50,000 VNĐ `ICU_TRAVEL_SUPPORT` where the patient is transferred to ICU) or, if contested, dispute adjudication under BR-11/BR-18. Financial handling never delays the emergency response.
+
+### 2.6 Superseded Hospital-Baseline Mechanics
+
+The following do **not** exist in SRS v2.0: SOS routing to a hospital on-duty response desk (physician/dispatcher/assigned nurse), the 5-minute hospital acknowledgement escalation to a secondary hospital contact registry (old Q-48), and SOS triggers generated by AI symptom screening or physician triage (see BR-10 — SRS v2.0 has no screening/triage layer).
 
 ---
 
 ## 3. Traceability & Dependencies
 
-- **Use Cases:** UC20, UC92, UC134, UC140
-- **Activity Flows:** Flow 15 (Emergency Termination), Flow 17 (Emergency SOS)
-- **Governing Decisions:** Q-48 (Secondary emergency escalation channels)
+- **SRS References:** FR-SHIFT-05, FR-NOTIF-01; RISK-03, RISK-04; SRS §7 (`shift_logs.emergency_incident_log`), §10 (TC-SOS-01)
+- **Related Rules:** BR-16 (emergency stop & money), BR-11 (incident-grounded disputes), BR-07 (in-shift context), BR-22 (vital-signs log feeding the alert)

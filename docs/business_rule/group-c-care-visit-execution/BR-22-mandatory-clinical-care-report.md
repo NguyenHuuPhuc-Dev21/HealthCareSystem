@@ -1,42 +1,62 @@
 # BR-22: Mandatory Clinical Care Report
 
 > **Group:** Group C — Care Visit Execution  
-> **Source Baseline:** `use_case_v8.1.drawio` (Pages 12, 14) + `luong_hoat_dong_v8.14.drawio`  
-> **Key Decisions:** Q-49 (Service-specific reporting forms and mandatory field specifications)  
-> **Status:** Baseline Frozen
+> **Source Baseline:** SRS HealthCareSystem — On-Demand Nursing, Version 2.0 (Updated, 28/10/2026)  
+> **SRS References:** FR-SHIFT-02, FR-SHIFT-04, FR-PRIV-01, FR-PAY-02, FR-RATE-01, SRS §2.2, §7 (`shift_logs`)  
+> **Status:** Revised per SRS v2.0 — supersedes the hospital-baseline version
 
 ---
 
 ## 1. Context & Business Intent
 
-1. **Longitudinal Medical Record Integrity:** Home nursing is an extension of hospital clinical care. Every visit must yield a structured, legally compliant care report.
-2. **Universal Documentation Obligation:** Clinical reporting is non-negotiable. Even when patients submit no pre-visit symptoms, visiting nurses must thoroughly document the encounter.
+1. **The Care Report Is the Completion Gate:** In SRS v2.0 a shift is not "done" when the nurse leaves — it is done when the nurse checks out **and** submits the care report. The report is what starts settlement, opens the dispute window, closes medical-record access, and unlocks two-sided ratings.
+2. **One Minimal, Uniform Report:** SRS v2.0 defines a single minimal mandatory content set for every shift, recorded in `shift_logs`, instead of hospital service-specific clinical templates. Vital signs are captured at the start of the shift (initial condition confirmation) and again at the end (check-out report), giving every booking a before/after clinical record.
 
 ---
 
 ## 2. Rule Specifications
 
-### 2.1 Clinical Workflow Milestones
-- **Visit Initiation:** Immediately following check-in, the nurse records baseline vital signs and physical observations using the standardized form designated for that service type.
-- **In-Session:** Logs all clinical procedures, administered medications, materials, timestamps, and unexpected clinical events.
-- **Distinct Status Milestones:**
-  - `Concluded` (`Da_ket_thuc`): Nurse clicks "Conclude Session"; triggers immediate financial calculation.
-  - `Completed` (`Hoan_tat`): Achieved **strictly when all mandatory report fields are validated**.
-  - If mandatory fields are missing: Status is set to `Pending Report Completion` (`Cho_hoan_thien_bao_cao`). **No administrative exceptions exist** to mark a visit completed without a full report.
+### 2.1 Realtime Care Log During the Shift (FR-SHIFT-02)
 
-### 2.2 Reporting Escalation Timeouts
-- **$> 2	ext{ hours}$ Overdue:** Automated notifications sent to the visiting nurse and Hospital Administrator.
-- **$> 24	ext{ hours}$ Overdue:** The nurse's account is **temporarily suspended from receiving new shifts** until the report is fully filed.
+- Within the **first 30 minutes after check-in**, the nurse confirms the patient's condition and begins the log with the **start-of-shift vital signs**.
+- Throughout the shift, the nurse records **vital signs** (pulse, temperature, blood pressure, SpO2) and **care activities** into the booking's `shift_logs` record (`vital_signs_log`, `care_activities_log` — JSONB), synchronized in realtime via WebSocket.
+- Emergency events during the shift are recorded in the same record (`emergency_incident_log`; see BR-23).
 
-### 2.3 Service-Specific Clinical Templates (Q-49)
-- Reporting forms and mandatory field schemas are tailored per service type and signed off by the hospital clinical board (Q-49) (e.g., wound dimensions and exudate for wound care; infusion rate and volume for IV therapy).
-- Report amendments require elevated authorization and generate audit logs recording the editor ID, timestamp, and clinical justification.
-- Patient handovers (to replacement nurses, family members, or emergency 115 crews) must explicitly record handing-over and receiving parties and patient status at departure.
+### 2.2 Check-Out & the Mandatory Minimal Report (FR-SHIFT-04)
+
+Check-out (`POST /api/v1/bookings/:id/check-out`) requires the nurse to submit:
+
+1. **Actual end time** of the shift (recorded as `checkout_time`).
+2. **Final (end-of-shift) vital signs.**
+3. **List of tasks/services actually performed.**
+4. **Handover notes** for the family/next caregiver.
+
+The system then sets `execution_status = COMPLETED`. Per SRS §2.2, `COMPLETED` is defined as "checked out **and** the full care log submitted" — **there is no path to `COMPLETED` without the report**, and no administrative override exists in SRS v2.0.
+
+### 2.3 Clocks and Gates Started by Check-Out
+
+Submitting the check-out report starts four downstream mechanisms simultaneously:
+
+| Mechanism | Rule | Effect of `checkout_time` |
+| :--- | :--- | :--- |
+| Settlement cooling period | FR-PAY-02 (`SETTLEMENT_COOLING_HOURS = 24`) | Transfer bookings auto-settle 24h after check-out if no dispute (BR-04) |
+| Dispute window | FR-DISP-01 | Either side may dispute until 24h after check-out (BR-11) |
+| Medical-record access closure | FR-PRIV-01 | The nurse's access to the patient's record for this booking closes **12 hours after check-out** (Admin may re-grant time-limited access, audit-logged, for dispute handling) |
+| Two-sided ratings | FR-RATE-01 | Ratings open at `COMPLETED` — they do **not** wait for settlement (BR-19) |
+
+### 2.4 Evidence & Retention Role
+
+- The care report and the full `shift_logs` record are primary evidence in dispute adjudication (FR-DISP-01: Admin reviews GPS log, check-in/out times, the care log, and in-app chat history).
+- Access to medical records is audit-logged (`audit_logs`, action `VIEW_MEDICAL_RECORD`). Medical records are retained for a maximum of **24 months** and are subject to the data-subject deletion/anonymization rights of Decree 13/2023/NĐ-CP (FR-PRIV-01).
+
+### 2.5 Superseded Hospital-Baseline Mechanics
+
+The hospital baseline's report-escalation timeouts (reminder at >2h overdue, suspension at >24h overdue) and its per-service clinical form templates signed off by a hospital clinical board (old Q-49) are **not part of SRS v2.0** and are not carried over. In SRS v2.0 the enforcement is structural — no report, no completion, no settlement. A separate overdue-report penalty/escalation SLA beyond this structural gate is **[Not specified in SRS v2.0 — open item]**.
 
 ---
 
 ## 3. Traceability & Dependencies
 
-- **Use Cases:** UC41–UC44, UC127
-- **Activity Flows:** Flow 07B (Visit Execution), Flow 15 (Early Termination)
-- **Governing Decisions:** Q-49 (Clinical template schemas)
+- **SRS References:** FR-SHIFT-02, FR-SHIFT-04, FR-PRIV-01, FR-PAY-02, FR-RATE-01, FR-DISP-01; SRS §2.2, §7 (`shift_logs`, `audit_logs`)
+- **APIs:** `POST /api/v1/bookings/:id/check-out`
+- **Related Rules:** BR-07 (check-in evidence), BR-16 (early termination), BR-04 (settlement), BR-11 (dispute evidence)

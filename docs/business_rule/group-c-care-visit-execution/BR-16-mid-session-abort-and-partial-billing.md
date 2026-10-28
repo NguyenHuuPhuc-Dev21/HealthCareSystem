@@ -1,59 +1,62 @@
 # BR-16: Mid-Session Abort & Early Termination
 
 > **Group:** Group C — Care Visit Execution  
-> **Source Baseline:** `use_case_v8.1.drawio` (Pages 12, 14) + `luong_hoat_dong_v8.14.drawio`  
-> **Key Decisions:** Q-08 (Partial billing ratios), Q-35 (Default fee retention on timeout), Q-36 (Child orders), Q-40 (Minimum visit fee floor), Q-46 (Penalizing false unsafe declarations)  
-> **Status:** Baseline Frozen
+> **Source Baseline:** SRS HealthCareSystem — On-Demand Nursing, Version 2.0 (Updated, 28/10/2026)  
+> **SRS References:** FR-SHIFT-02, FR-SHIFT-04, FR-SHIFT-05, FR-DISP-01, FR-DISP-02, SRS §2.2, §5.2 rows 4–5  
+> **Status:** Revised per SRS v2.0 — supersedes the hospital-baseline version
 
 ---
 
 ## 1. Context & Business Intent
 
-1. **Clear Boundary Between Start and Abort:** Address unforeseen in-home events (medical emergencies, violence, intoxication, uncooperative patients) while preventing evasion of minimum visit costs.
-2. **Equitable Partial Billing:** Calculate fees fairly based on completed procedural milestones while protecting visiting staff safety.
+1. **Early Endings Are Normal, Not Violations:** Shifts end early for benign reasons (a task-based service finishes ahead of schedule) and for serious ones (medical emergency, unsafe environment, a patient condition that was misreported at booking). SRS v2.0 settles benign early endings on the work actually done, **with no penalty percentage**, and routes contested endings through the dispute workflow — it does not use a partial-billing ratio table.
+2. **No Partial-Settlement State in MVP:** In the MVP, an early-ended shift is closed as `COMPLETED` and settled in full under the rules below. `payment_status = PARTIALLY_SETTLED` exists **only** as an outcome of Phase-2 dispute adjudication (FR-DISP-02) and is never produced by an early termination itself.
 
 ---
 
 ## 2. Rule Specifications
 
-### 2.1 Scope of Mid-Session Abort (Q-40)
-- Applies strictly when the nurse has **checked in, initiated care (UC41), and completed at least one procedure item**.
-- If zero clinical items were performed (even if the nurse clicked "Start"): Treated as "Primary service infeasible" (Flow 07B/08); starting and immediately stopping does not bypass the minimum home-visit fee (Q-40).
+### 2.1 Customer Stops the Shift After Check-In (SRS §5.2 row 4)
 
-### 2.2 Authorized Abort Initiators & Grounds
-- **Nurse-Initiated:** Medical emergency, unsafe environment, uncooperative/hostile patient, or physical incapacity of the nurse.
-- **Patient/Family-Initiated:** Request to cease treatment (confirmed via mobile app or in-app verification code).
+Applies when the booking is `IN_PROGRESS` and the customer asks to end early, not due to any fault of the nurse:
 
-### 2.3 Emergency vs. Unsafe Environment Protocols
-- **Medical Emergency:** Nurse triggers SOS (UC92), dials 115, and remains with the patient providing first aid until emergency medical handover.
-- **Unsafe Environment:** Nurse evacuates the premises immediately, triggers SOS from a safe distance, and notifies Hospital Dispatch.
+- The customer pays **100% of the price for the time actually worked**, with a **minimum billable time of 1 hour**.
+- **Task-based services:** if all tasks of the service are completed in full, the **full service price** is payable even if the shift finishes earlier than scheduled (FR-SHIFT-04).
+- **100% of the unused time is refunded** to the customer — transfer bookings only; a cash booking has no prepaid amount to refund.
+- An early stop under this rule is **not** treated as a cancellation: no penalty applies to either side, and **no `PARTIALLY_SETTLED` state arises**.
 
-### 2.4 Partial Item Billing Schedule (Q-08)
-- **Completed Items:** Billed at **100%** of catalog price.
-- **Incomplete / Disrupted Items:**
-  - *Patient Request / Uncooperative:* Billed at **50%** of that item's price.
-  - *Patient Clinical Incompatibility (Non-emergency):* Incomplete item billed at **0%**.
-  - *Acute Medical Emergency (115):* Incomplete item billed at **0%**; **NO minimum home-visit fee charged** (hospital absorbs transit costs).
-  - *Nurse / Hospital Fault:* Incomplete item billed at **0%**; patient offered a replacement nurse to complete remainder.
-  - *Unsafe Environment for Nurse:* Incomplete item billed at **0%**; **NO minimum home-visit fee charged**.
+### 2.2 Early Finish by Task Completion (FR-SHIFT-04)
 
-### 2.5 Billing Execution & Hospital Review (Q-35, Q-46)
-- The nurse must submit an emergency care report detailing the termination timestamp, justification, patient status, and handover details.
-- Billing runs immediately upon session stop based on the nurse-selected reason; **for unsafe environment or emergency reasons, on-site payment collection is prohibited**—the patient confirms within 24 hours via gateway.
-- Hospital Admin reviews the incident within **24 hours** (UC128) and is authorized **only to maintain or reduce** the provisional fee. Overdue review defaults to the provisional fee (BR-18 F9, Q-35).
-- **Post-Audit on "Unsafe Environment" (Q-46):**
-  - *Truthful Declaration:* No violation for nurse; patient evaluated for service blocking (Flow 12).
-  - *Fraudulent Declaration:* **1 major violation recorded against nurse** (Q-46), escalated for disciplinary action.
+When a task-based service is completed in full ahead of schedule, the nurse checks out normally (BR-22) and the booking is paid at the **full service price**. Finishing early by completing the work is a normal completion, never a penalized "mid-shift stop".
 
-### 2.6 Linked Child Orders for Remainder of Care (Q-36)
-- If the patient requests a replacement nurse to complete interrupted procedures, the remainder is created as a linked **Child Order**:
-  - Requires **zero advance deposit** (deposit settled in parent order).
-  - Balance settled upon child order conclusion; cancellation generates no refund (Q-36).
+### 2.3 Condition Mismatch / Customer Misreporting (FR-SHIFT-02)
+
+Within the first 30 minutes after check-in, the nurse verifies the patient's actual condition against the booking declaration (BR-07 §2.2). If the customer misreported the condition (e.g., bedridden or infectious status not declared — "khai gian tình trạng"):
+
+- The nurse may **request a surcharge correction** (e.g., the heavy-patient surcharge `SURCHARGE_HEAVY_PATIENT = 15%` where the patient is ≥ 80 kg or `BEDRIDDEN`), **or**
+- The nurse may **refuse/stop the shift with no penalty** (no deposit deduction, no TrustScore deduction).
+- The event is flagged on the shift record (`shift_logs.condition_mismatch_reported = true`) and is an explicit dispute ground for both sides (FR-DISP-01; see BR-11, BR-19).
+- The pay treatment of a shift refused at start-of-shift for misreporting (beyond the no-penalty guarantee) is **[Not specified in SRS v2.0 — open item]**.
+
+### 2.4 Medical Emergency Stop (FR-SHIFT-05, SRS §5.2 row 5)
+
+- If the patient deteriorates during the shift, the emergency protocol of BR-23 applies first (call 115, basic first aid, SOS alert); money handling never delays the response.
+- Where the patient is transferred to emergency/ICU care or dies (with supporting documentation), the cancellation is **penalty-free**: **100% of unused amounts are refunded** (transfer bookings), and if the nurse has already travelled, the platform pays the nurse the fixed **50,000 VNĐ** travel support (config `ICU_TRAVEL_SUPPORT`) from the operations fund.
+
+### 2.5 Nurse Safety Stop (Unsafe Environment)
+
+A nurse who faces an unsafe environment leaves immediately and raises the SOS/Admin alert per BR-23. SRS v2.0 defines no separate automatic pay rule for a safety stop: the financial outcome is decided through the dispute workflow (FR-DISP-01) — `RESOLVED_NURSE` settles the booking in full to the nurse (see BR-11, BR-18). Any more specific automatic rule is **[Not specified in SRS v2.0 — open item]**.
+
+### 2.6 What No Longer Exists (Superseded Hospital-Baseline Mechanics)
+
+The following hospital-baseline mechanics are **abolished** and must not be implemented: per-item partial-billing ratios (50%/0% tables), the provisional fee freeze with Admin "maintain-or-reduce" review, linked child orders for the remainder of care, and any percentage penalty on the unused portion of an early-stopped shift.
+
+> **Baseline inconsistency flagged:** The SRS §10 RTM acceptance text for TC-CANCEL-01 still mentions a "30% penalty on remaining hours" for an in-progress cancellation. This contradicts SRS §5.2 row 4 ("no penalty applies"), which is the governing policy and is what this rule follows. The RTM wording should be corrected — **[Open item]**.
 
 ---
 
 ## 3. Traceability & Dependencies
 
-- **Use Cases:** UC41, UC43, UC92, UC127, UC128
-- **Activity Flows:** Flow 15 (Mid-Session Termination), Flow 06 (Replacement), Flow 08 (Billing & Settlement)
-- **Governing Decisions:** Q-08, Q-35, Q-36, Q-40, Q-46
+- **SRS References:** FR-SHIFT-02, FR-SHIFT-04, FR-SHIFT-05, FR-DISP-01, FR-DISP-02; SRS §2.2 (payment axis), §5.2 rows 4–5; configs `SURCHARGE_HEAVY_PATIENT`, `ICU_TRAVEL_SUPPORT`
+- **APIs:** `POST /api/v1/bookings/:id/check-out`; `POST /api/v1/bookings/:id/disputes`
+- **Related Rules:** BR-07 (check-in & first-30-minutes duties), BR-22 (check-out report), BR-23 (emergency protocol), BR-11 / BR-18 (dispute outcomes), BR-04 (refund schedule)

@@ -1,52 +1,59 @@
 # BR-11: Complaints, Dispute Resolution & Incident Escalation
 
 > **Group:** Group E — Violations, Disputes & Safety  
-> **Source Baseline:** `use_case_v8.1.drawio` (Pages 12, 14) + `luong_hoat_dong_v8.14.drawio`  
-> **Key Decisions:** Q-17 (30-day complaint filing limit), Q-24 (Liability and insurance for home incidents), Q-32 (Rotational Admin appeals)  
-> **Status:** Baseline Frozen
+> **Source Baseline:** SRS HealthCareSystem — On-Demand Nursing, Version 2.0 (Updated, 28/10/2026)  
+> **SRS References:** FR-DISP-01, FR-DISP-02, FR-CHAT-01, FR-PRIV-01, FR-RATE-01, SRS §2.2 (dispute axis), §7 (`disputes`, `conversations_messages`)  
+> **Status:** Revised per SRS v2.0 — supersedes the hospital-baseline version
 
 ---
 
 ## 1. Context & Business Intent
 
-1. **Structured Dispute Resolution:** Establish clear timeframes for patient grievances regarding clinical conduct or service quality.
-2. **Neutral Multi-Tier Arbitration:** Prevent hospital conflicts of interest through independent secondary appeals and platform-level arbitration.
+1. **One Dispute Channel, Tied to the Money:** In SRS v2.0 a complaint about a shift is a **booking dispute** (FR-DISP-01): it opens against a specific booking, immediately freezes that booking's escrow, and ends in a deterministic Admin ruling. There is no separate hospital complaint bureaucracy, no 30-day filing window, and no multi-level appeals ladder.
+2. **Evidence Is Built Into the Product:** Because all communication is in-app with masked numbers (FR-CHAT-01) and every shift produces GPS/selfie evidence and a care log (BR-07, BR-22), adjudication works from system records rather than competing recollections.
 
 ---
 
 ## 2. Rule Specifications
 
-### 2.1 Complaint Submission Deadlines (Q-17)
-- **Standard Filing Window:** Must be submitted within **30 days** of visit completion.
-  - *Exception:* Fee-line billing disputes must be submitted within **24 hours** of invoice issuance (BR-04, F1a/F1b).
-- Overdue non-serious complaints are rejected with written explanation.
-- **Overdue Serious Complaints:** Complaints alleging patient safety violations, sexual harassment, physical violence, or clinical fraud are accepted regardless of expiration.
+### 2.1 Opening a Dispute (FR-DISP-01)
 
-### 2.2 Hospital Adjudication SLAs
-- Complaints regarding nurse conduct are transmitted **verbatim** to the hospital.
-- **Hospital Adjudication SLA:** **3 business days**; reminder issued if unaddressed.
-- If overdue $> 5	ext{ business days}$: The SaaS Platform Admin assumes jurisdiction, concluding within 3 business days and returning binding findings (BR-18 F3).
+- **Who:** Either side — customer or nurse.
+- **Window:** From the moment the booking is `IN_PROGRESS` until **24 hours after check-out**. (This is the same 24 hours as the settlement cooling period: opening a dispute is precisely what stops automatic settlement.)
+- **Input:** A reason (e.g., nurse left early, care-process violation, poor attitude, customer misreported the patient's condition), a detailed description, and **up to 5 photo/video evidence files**.
+- **Immediate effect:** `dispute_status = OPEN`; the booking's escrow funds are **frozen at once** and the automatic settlement worker (cronjob) is blocked for that booking.
 
-### 2.3 Serious Safety Incidents & Immediate Suspension
-- If a complaint alleges serious misconduct or physical danger: The nurse's account is **temporarily suspended immediately**.
-- Hospital Admin must review and confirm or lift the suspension within **4 hours**.
+### 2.2 Admin Review (FR-DISP-01)
 
-### 2.4 Independent Re-Adjudication / Appeals (Q-32)
-- Each party (patient or nurse) is entitled to **one appeal**, submitted within 5 business days.
-- **Strict Separation of Deciders:** The appeal arbiter must be independent of the first-instance decider:
-  - *1st Ruling by Hospital Admin:* Appealed to SaaS Platform Admin.
-  - *1st Ruling by Platform Admin (substituting for hospital):* Appealed to Chief Hospital Administrator.
-  - *Platform Complaints (UC99):* Appealed to an independent rotational Platform Admin (Q-32).
-- Overdue appeal review defaults to maintaining the initial ruling (BR-18 F4).
+- Admin takes the dispute into `UNDER_REVIEW` and examines the system evidence: **GPS log, check-in/check-out times, the medical care log (`shift_logs`), and the in-app chat/call history** (`conversations_messages`, retained as evidence per FR-CHAT-01).
+- Access note: the nurse's own access to the patient record closes 12 hours after check-out (FR-PRIV-01); during dispute handling Admin may re-grant time-limited access, recorded in `audit_logs`.
 
-### 2.5 In-Home Physical Incidents (UC134, Q-24)
-- Physical safety incidents occurring in the home are recorded as distinct emergency events and handled immediately under safety and police liaison protocols, completely decoupled from administrative complaint timelines.
-- Ratings and reviews are optional; leaving a rating is never a prerequisite for filing a formal complaint.
+### 2.3 Adjudication Outcomes (FR-DISP-01; BR-18 §2.2)
+
+| Outcome (`dispute_status`) | Financial effect |
+| :--- | :--- |
+| `RESOLVED_CUSTOMER` — customer upheld | Transfer booking: **100% refund** (`payment_status = REFUNDED`); nurse receives a TrustScore deduction (−25 for an upheld violation) and a deposit fine. **Cash booking** (no escrow exists): the penalty/compensation owed to the customer is deducted from the nurse's **deposit wallet** |
+| `RESOLVED_NURSE` — nurse upheld | Booking settles **100%** to the nurse (`payment_status = SETTLED`, normal 85/15 for transfer bookings) |
+| `RESOLVED_PARTIAL` — **Phase 2 only** (FR-DISP-02) | Admin sets a split ratio → `payment_status = PARTIALLY_SETTLED`. **Not available in the MVP** |
+
+### 2.4 Incidents Are Not Disputes
+
+Medical emergencies and safety incidents during a shift are handled **immediately** under the SOS protocol (BR-23 / FR-SHIFT-05) and recorded in `shift_logs.emergency_incident_log`; they are never queued behind dispute timelines. An incident may afterwards ground a dispute under §2.1 (e.g., over pay for the interrupted shift), which is then adjudicated on the incident log and the other system evidence.
+
+### 2.5 Ratings Are Not Disputes (FR-RATE-01)
+
+Two-sided ratings open at `COMPLETED` regardless of disputes (BR-19 §2.1). A low rating is feedback; only a dispute under §2.1 can freeze or move money, and filing a dispute does not require leaving a rating.
+
+### 2.6 Superseded Hospital-Baseline Mechanics & Open Items
+
+**Abolished:** the 30-day complaint filing limit (old Q-17), hospital adjudication SLAs (3 business days) with platform takeover on timeout, the independent re-adjudication/appeals ladder with rotating arbiters (old Q-32), and immediate-suspension-on-allegation with a 4-hour hospital review.
+
+**Open item:** SRS v2.0 defines **no appeal or re-adjudication process** after an Admin ruling — **[Not specified in SRS v2.0 — open item]**.
 
 ---
 
 ## 3. Traceability & Dependencies
 
-- **Use Cases:** UC51–UC53, UC98–UC101, UC134
-- **Activity Flows:** Flow 12 (Dispute Resolution & Complaints)
-- **Governing Decisions:** Q-17, Q-24, Q-32
+- **SRS References:** FR-DISP-01, FR-DISP-02, FR-CHAT-01, FR-PRIV-01, FR-RATE-01; SRS §2.2 (dispute axis: NONE / OPEN / UNDER_REVIEW / RESOLVED_CUSTOMER / RESOLVED_NURSE / RESOLVED_PARTIAL), §7 (`disputes`, `conversations_messages`, `audit_logs`)
+- **APIs:** `POST /api/v1/bookings/:id/disputes`; `PATCH /api/v1/admin/disputes/:id/resolve`
+- **Related Rules:** BR-18 (financial outcomes & penalty mechanics), BR-02 (sanctions), BR-23 (incident protocol), BR-22 (care-log evidence), BR-19 (customer-side grounds)

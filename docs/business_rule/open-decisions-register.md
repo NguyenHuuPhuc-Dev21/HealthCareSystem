@@ -1,49 +1,48 @@
-# Open Decisions Register (Q-01 — Q-51)
+# Open Decisions Register (OD-01 — OD-12)
 
-> **Source Baseline:** `use_case_v8.1.drawio` (Page 00b) + `luong_hoat_dong_v8.14.drawio`  
-> **Status:** Baseline Tracked  
-> **Rule:** Features whose governing decisions have unconfirmed values must not have arbitrary default values hard-coded.
+> **Governing Source:** SRS — HealthCareSystem On-Demand Nursing, **Version 2.0 (Updated, 28/10/2026)**  
+> **Status:** Revised per SRS v2.0 — supersedes the hospital-baseline version. The former Q-01–Q-51 register belonged to the retired hospital baseline (use_case_v8.1 / luong_hoat_dong_v8.14) and is void; none of its values may be reused.  
+> **Rule:** This register lists only points that SRS v2.0 genuinely leaves unspecified or internally inconsistent. Features whose governing decisions are open must not be implemented with invented default values; where a behaviour is needed before a decision exists, it is recorded here as an open item.
 
 ---
 
-## 1. Active Open Decisions Affecting Business Rules
+## 1. Open Items — Not Specified in SRS v2.0
 
-| Decision ID | Description & Context | Affected Business Rules | Current Status & Impact |
+| Decision ID | Description & Context | Affected SRS Requirements | Current Status & Impact |
 | :--- | :--- | :--- | :--- |
-| **Q-03** | Minimum home-visit fee (exact amount and fee structure) | BR-04, BR-16 | **Unspecified Value** — Technical framework implemented; rates retrieved dynamically from hospital configuration once PO & Hospital Accounting sign off. Blocks "service infeasible after departure" branch. |
-| **Q-05** | Hospital confirmation that auto-assignment model complies with labor law | BR-01 | **Pending Hospital HR/Legal** — Required before enabling automated dispatch for employed nurses. |
-| **Q-08** | Partial billing ratio for interrupted service items upon mid-session abort | BR-16 | **Proposed (50%)** — Pending clinical operations validation. |
-| **Q-09** | Ceiling amount for in-session add-on items | BR-04 | **Unspecified Value** — Add-ons require explicit patient consent per item until ceiling is set. |
-| **Q-10** | Automated offset deduction for nurse indemnity when preparing billing statement | BR-18 (F3) | **Excluded from MVP** — Deductions handled manually with a maximum 30% cap per pay period. |
-| **Q-11** | Statutory invoice timing for advance deposits | BR-04 | **Pending Hospital Accounting** — System supports pre-invoicing or post-visit consolidated tax invoicing. |
-| **Q-12** | Default ruling on unresolved cash discrepancy disputes | BR-18 (F5) | **Intentionally Empty** — Cash transactions are excluded from Pilot Q-23 scope. |
-| **Q-13** | Approved home-care clinical procedure catalog | BR-15 | **Pending Hospital Medical & Legal Boards** — Defines `Duoc_phep_lam_tai_nha` flag. |
-| **Q-14** | Statutory clinical care and financial voucher retention schedules | BR-12 | **Pending Legal Counsel** — Default anonymized locking applied pending schedule sign-off. |
-| **Q-17** | Complaint submission deadline (30 days from session completion) | BR-11 | **Proposed (30 days)** — 24-hour limit on fee-line billing complaints is frozen. |
-| **Q-19** | Default presumption on nurse reassignment ("Silence = Acceptance") | BR-13 | **Under Review** — Currently defaults to acceptance if patient does not respond within SLA. |
-| **Q-21** | On-duty physician triage SLA during automated screening failure | BR-10 | **Unspecified Value (Proposed: 10 min)** — Fallback routes to hospital phone contact if physician times out. |
-| **Q-22** | Operating hours (17:00–21:30) and daily shift volume caps (2 weekday / 4 weekend) | BR-03, BR-13 | **Awaiting Field Demand Validation** — Fully configurable per hospital facility. |
-| **Q-24** | Legal liability and insurance coverage for in-home patient/staff accidents | BR-11 | **Pending Hospital Legal & Insurer Counsel** — Decoupled from software platform operations. |
-| **Q-26** | Clinical accuracy validation criteria and benchmarks for AI symptom triage | BR-10 | **Unspecified Benchmark** — AI operates strictly in decision-support mode with physician oversight. |
-| **Q-29** | Minor violation threshold (2/3 unconfirmed assignments in 30 days) | BR-01 | **Proposed (2 / 3 times)** — 24h on-demand lock on 2nd strike; admin referral on 3rd. |
-| **Q-35** | Default fee retention when mid-session abort review times out | BR-16, BR-18 (F9) | **Proposed** — Provisional nurse-selected fee maintained if hospital admin fails to review in 24h. |
-| **Q-37** | Excessive tardiness (>30 min past ETA) treated as 1–12h cancellation | BR-02 | **Proposed** — Increments 3-strike major violation counter. |
-| **Q-42** | Counting administrative auto-waivers/approvals toward patient abuse score | BR-19 | **Proposed** — Unverified write-offs count toward the 2-strike abuse threshold. |
-| **Q-44** | Default resolution when Platform Admin exceeds 3-day SLA on Branch F1b | BR-18 (F1b) | **Proposal Pending PO Sign-off** — Baseline mandates escalating F1b to Admin; default if Admin times out is proposal. |
-| **Q-48** | Secondary emergency escalation focal points when SOS is unacknowledged | BR-23 | **Configurable per Hospital** — Auto-escalates at the 5-minute milestone. |
-| **Q-49** | Service-specific reporting form schemas and mandatory fields | BR-22 | **Architectural Framework Ready** — Field schemas defined by hospital clinical department. |
+| **OD-01** | **Holiday calendar classification.** The SRS fixes the surcharges — Tết Nguyên đán at +300% (`SURCHARGE_HOLIDAY_MAJOR = 3.00`) and "the remaining statutory holidays" at +200% (`SURCHARGE_HOLIDAY_MINOR = 2.00`) — but does not enumerate which calendar days belong to each class in a given year, nor who maintains the list. | FR-BOOK-01; `system_configs` (Annex A) | **Open** — Pricing cannot classify a date as major/minor until the official holiday list is published as configuration data and an owner is assigned. No day other than Tết Nguyên đán may be assumed "major". |
+| **OD-02** | **Phase 2 contract bidding rules.** FR-BOOK-04/05 define the flow (customer posts → nurses apply → trial shift → contract; pause / mid-contract replacement / early termination) but not the bidding mechanics: application format, selection criteria, trial-shift pricing, deposit/escrow handling across a multi-week contract, or the payment schedule per contract period. | FR-BOOK-04, FR-BOOK-05 | **Open (Phase 2)** — No impact on the MVP; must be specified before Phase 2 development starts. |
+| **OD-03** | **Partial settlement guardrails.** FR-DISP-02 lets the Admin enter an arbitrary split ratio on dispute adjudication (Phase 2). No default ratios, bounds, or approval requirements for splits are specified. | FR-DISP-02; `payment_status = PARTIALLY_SETTLED` | **Open (Phase 2)** — MVP is unaffected because `PARTIALLY_SETTLED` cannot occur in the MVP; rules are needed before Phase 2 adjudication ships. |
+| **OD-04** | **Customer late-cancel compensation on cash bookings.** SLA rows 2–3 promise the nurse 15% / 40% compensation when a customer cancels a prepaid booking late. For CASH bookings, §5.2 states the customer's cancellation fee "is not collected through the system" — it is unspecified whether the nurse still receives the compensation on cash bookings and, if so, from which fund. | SRS §5.2 rows 2–3; FR-PAY-01, FR-PAY-02 | **Open** — Until decided, compensation applies only where the SRS defines the money flow (prepaid bookings); no platform-funded guarantee may be assumed. |
+| **OD-05** | **No-show voucher mechanics.** `NO_SHOW_PENALTY` (50,000 VND) is deducted from the nurse's deposit and "converted in full into a voucher" for the customer, but the voucher's validity period, scope of use (which services/bookings), and representation are not specified — there is no voucher entity among the 16 database tables. | SRS §5.2 row 8; `system_configs` | **Open** — The penalty deduction and the 100% refund are implementable as specified; voucher issuance/redemption rules need a decision before the voucher can be honoured in the app. |
+| **OD-06** | **Unspecified compensation amounts.** Two compensations are mandated without amounts: (a) travel-cost compensation for a nurse who rejects a shift on site due to an invalid medical order (FR-BOOK-02, Layer 3); (b) the funding source and accounting treatment of `ICU_TRAVEL_SUPPORT` (50,000 VND), which §5.2 row 5 says is paid "from the operations fund". It is not stated whether (a) equals the ICU amount or a different value. | FR-BOOK-02; SRS §5.2 row 5 | **Open** — Amount (a) and the fund mechanics for (b) must be fixed as `system_configs` values / accounting rules before launch; neither may be silently equated with the other. |
+| **OD-07** | **Chat & voice-call implementation surface.** FR-CHAT-01 mandates in-app chat/calling with masked numbers, content scanning and evidence retention, but SRS §8 defines no chat/call endpoints, and no calling technology (in-app VoIP vs. masked relay) is chosen. | FR-CHAT-01; `conversations_messages` | **Open** — Data model and business rules are specified; the API/technology decision is needed before implementation of the communication module. A dedicated SOS endpoint is likewise absent from §8 (see OD-08). |
+| **OD-08** | **SOS endpoint & acknowledgement SLA.** FR-SHIFT-05 and the RTM require the SOS alert to reach Family/Admin in < 2 seconds, but §8 lists no SOS API endpoint, and no acknowledgement/escalation duty for Admins (who must respond, within what time) is defined — the system "only logs and notifies". | FR-SHIFT-05; FR-NOTIF-01 | **Open** — Alert delivery is specified; the receiving-side operational SLA is a process decision for the operations team. |
+| **OD-09** | **Authentication parameters.** Sign-in is phone + OTP (Admin: mandatory 2FA), but OTP length, validity window, resend/attempt limits, lockout policy, and the SMS/Zalo ZNS provider are not specified in SRS v2.0. | SRS §8 (auth endpoints); FR-AUTH-01, FR-AUTH-03 | **Open** — Security parameters must be decided and documented before implementation; the retired baseline's email-OTP values must not be reused. |
+| **OD-10** | **eKYC verification method.** Customers (home-care) and nurses must complete CCCD eKYC, but the verification provider/method (document OCR, face match, liveness depth beyond the MVP's camera + timestamp/GPS watermark) is not selected in the SRS. | FR-AUTH-01, FR-AUTH-03; NFR-SEC-01.3 | **Open** — Affects onboarding conversion and fraud risk; vendor/method decision required before launch. |
+| **OD-11** | **Withdrawal processing details.** FR-PAY-04 defines the withdrawal flow (`WITHDRAW_REQUESTED → WITHDRAWN`, Admin or payout-gateway approval) but not the minimum withdrawal amount, processing time, fees, or which of the two approval routes applies. Deposit withdrawal on account closure is fixed only by its condition (cooperation ended, 7 days without dispute). | FR-PAY-04; FR-PAY-03 | **Open** — Operational/finance decision; nurses must be shown the decided terms in the app before first withdrawal. |
+| **OD-12** | **Customer-side consequences of ratings.** FR-RATE-01 makes ratings two-way and defines the nurse TrustScore (default 100; −5/−20/−25; +2 recovery; suspension < 60). No customer trust score, threshold or sanction is defined for customers whom nurses rate poorly. | FR-RATE-01 | **Open** — Nurse ratings of customers are stored and shown as specified; any customer-facing consequence needs a separate decision. |
 
----
+## 2. Internal Inconsistencies in SRS v2.0 — To Be Reconciled by the Baseline Owners
 
-## 2. Formally Closed Decisions (Frozen into Baseline Architecture)
+These are conflicts **inside** the governing text. Until the SRS is corrected, implementations follow the functional-requirement section (§4 / §5.2) as noted, and the discrepancy stays visible here.
 
-- **Q-20:** Cross-hospital patient record sharing is **strictly disabled**, even with explicit patient consent (BR-09).
-- **Q-23:** Pilot scope frozen: Single hospital, advance booking only, online gateway only, no cash, rule-based triage with doctor review, 5-minute SOS escalation (no auto-115 dialing).
-- **Q-30:** Collected deposits are allocated first to disputed fee lines up to their value (BR-04).
-- **Q-33:** Two-stage final billing confirmation with 24-hour dispute window (BR-04).
-- **Q-38:** On-demand cancellation refund schedule based on departure status (BR-04).
-- **Q-41 / Q-45:** Nurse cancellation during deposit window records 1 minor violation immediately and reopens a 15-minute matching window (BR-01).
-- **Q-43:** Shift abandonment ("Bom ca") 24-hour automated unlock if unconfirmed by hospital admin (BR-02, BR-07).
-- **Q-46:** False "Unsafe Environment" declarations penalize the nurse with 1 major violation (BR-16).
-- **Q-50:** Two-step staff profile credentialing lifecycle state machine (BR-21).
-- **Q-51:** Email-only account identifier; zero SMS and no national ID card (CCCD) collection (BR-20).
+| ID | Conflict | Texts Involved | Working Resolution Until Fixed |
+| :--- | :--- | :--- | :--- |
+| **IC-01** | Mid-shift stop pricing: §5.2 row 4 states pay for actual hours worked with **no penalty** and explicitly no `PARTIALLY_SETTLED`; the RTM acceptance criterion for CT-08 (§10) states "actual hours + 30% penalty on the remaining hours". | SRS §5.2 row 4 vs §10 (CT-08 row) | Follow §5.2 row 4 (no penalty), consistent with the round-2 team decision recorded in the SRS v2.0 revision history. |
+| **IC-02** | When reviews open: FR-RATE-01 states ratings open immediately at `COMPLETED` without waiting for settlement; the §8 endpoint table describes `POST /api/v1/bookings/:id/reviews` as available "after the shift is SETTLED". | SRS §4.6 (FR-RATE-01) vs §8 | Follow FR-RATE-01 (reviews at `COMPLETED`). |
+| **IC-03** | Medical-record access closure test: FR-PRIV-01 / RISK-03 close the nurse's access **12 hours after check-out**; the RTM acceptance criterion for CT-04 phrases the block as applying "when the booking becomes SETTLED". | SRS §4.1 (FR-PRIV-01), §3 (RISK-03) vs §10 (CT-04 row) | Follow FR-PRIV-01 (12 hours after check-out). |
+
+## 3. Formally Closed by SRS v2.0 (for traceability)
+
+The following were open under the retired hospital baseline or earlier SRS drafts and are **decided** in SRS v2.0 — they must not be re-opened via the old register:
+
+- **Auth model:** phone number + OTP for Patient/Nurse; mandatory 2FA for Admin. (Email-only login is retired.)
+- **Staffing model:** two tiers — `TIER_1_BASIC` (non-invasive only) and `TIER_2_SPECIALIST` (valid, in-scope GPHN required; a retirement decision is an experience badge only). GPHN expiry → automatic demotion to Tier 1; approved renewal → automatic re-upgrade.
+- **Payment model:** `payment_method` per booking — BANK_TRANSFER prepaid 100% into the platform's (simulated) escrow, or CASH paid to the nurse on site with the nurse self-paying the 15% commission within 24 hours of check-out. No deposit-plus-remainder model.
+- **Commission:** flat 15% (`PLATFORM_COMMISSION_RATE = 0.15`), charged on the in-app price only; tips are not commissioned; commission is never taken from the deposit wallet.
+- **Deposit:** 300,000 VND upfront, mandatory before taking jobs; used only for SLA penalties; no progressive retention and no job-value cap.
+- **Settlement:** 24-hour cooling after check-out (or customer early confirmation) with `dispute_status = NONE` → deduct 15%, credit 85% to the nurse's `available_balance`.
+- **No-show:** nurse `BANNED` at the first offence; 50,000 VND fine from the deposit becomes the customer's voucher.
+- **Surcharges:** night +20% for hours from 22:00; Tết +300% and other holidays +200%, additive on the base price; heavy patient +15%.
+- **State model:** bookings use three independent axes (`execution_status` / `payment_status` / `dispute_status`); `nurse_profiles.profile_status` is the single source of truth for job eligibility; all business constants live in `system_configs`.
