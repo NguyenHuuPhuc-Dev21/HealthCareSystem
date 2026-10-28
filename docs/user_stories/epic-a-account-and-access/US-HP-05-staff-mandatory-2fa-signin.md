@@ -1,54 +1,54 @@
-# User Story US-HP-05: Mandatory Two-Factor Sign-In for Staff
+# User Story US-HP-05: Admin Portal Sign-In with Mandatory 2FA
 
 > **Epic:** EPIC A — Account & Access Management  
 > **Bounded Context:** `Identity & Consent`  
-> **Target Release:** Pilot Q-23 (Release 1)  
-> **Status:** Baseline Frozen
+> **Source Baseline:** SRS v2.0 (Updated, 28/10/2026)  
+> **Status:** Revised per SRS v2.0 — supersedes the hospital-baseline version
 
 ---
 
 ## 📌 Story Metadata
 
 - **Story ID:** `US-HP-05`
-- **Story Title:** Mandatory Two-Factor Sign-In for Staff
+- **Story Title:** Admin Portal Sign-In with Mandatory 2FA
 - **Bounded Context:** `Identity & Consent`
-- **Primary Persona:** Hospital Staff (Nurse, Doctor, Admin, Dispatcher)
-- **Target Release:** Pilot Q-23 (Release 1)
-- **Traceability:** BR-20, BR-21 · Activity Flow 01
+- **Primary Persona:** Medical Admin / Platform Operator
+- **Source Baseline:** SRS v2.0 (Updated, 28/10/2026)
+- **Traceability:** SRS §2.1 (Medical Admin / Operator actor) · FR-ADMIN-01 · FR-AUTH-02 (Admin verification powers)
 
 ---
 
 ## 💡 Real-World Context & Problem Statement
 
-1. **Staff accounts access protected health information and financial transactions:** A single compromised staff password exposes sensitive medical records and enables unauthorized financial/shift tampering.
-2. **Enforcing 2FA universally damages usability for elderly patients:** The baseline establishes a clear boundary—staff must use mandatory 2FA, while patients are not burdened with mandatory 2FA.
+1. **The Admin Portal is the platform's control room:** Admins verify GPHN credentials and assign tiers, adjudicate disputes that move money, edit `system_configs` pricing/SLA parameters and lock or unlock user accounts. A single compromised Admin credential would let an attacker approve fake licences or release escrow funds.
+2. **The 2FA mandate is scoped to Admin only:** In SRS v2.0, customers and nurses sign in with phone + OTP (US-HP-01, US-HP-04) and are **not** subject to a mandatory second factor — the retired nurses and elderly customers who use the platform must not be burdened with staff-grade sign-in friction. The mandatory 2FA of this story therefore applies to the Admin Portal, not to nurses as in the superseded hospital baseline.
 
 ---
 
 ## 📖 User Story Statement
 
-> As a **Hospital Staff Member**,  
-> I want to sign in with email and password supplemented by a mandatory second factor,  
-> So that operational healthcare accounts cannot be compromised through credential stuffing or leaked passwords.
+> As a **Medical Admin / Platform Operator**,  
+> I want to sign in to the Admin Portal with my credentials plus a mandatory second factor,  
+> So that the functions which verify licences, move money and change platform configuration cannot be reached with a stolen password alone.
 
 ---
 
 ## 🎯 Acceptance Criteria (AC)
 
-### AC-01: Enforcement of Second Factor for Staff Sessions
-- **Given** a valid hospital staff account,
-- **When** signing in with valid password credentials,
-- **Then** the system requires the second factor verification before issuing an authenticated staff session token.
+### AC-01: Second Factor Required Before Any Admin Session
+- **Given** a valid Admin account,
+- **When** the Admin signs in to the Admin Portal with correct primary credentials,
+- **Then** the system requires successful second-factor verification before issuing an authenticated Admin session; no Admin function (credential verification, dispute resolution, config changes, account locking) is reachable before that step completes.
 
-### AC-02: Patient Exemption from Mandatory 2FA
-- **Given** a patient or family member account,
-- **When** signing in,
-- **Then** the system does not enforce a second factor for routine sign-in.
+### AC-02: Nurses and Customers Are Not Subject to Mandatory 2FA
+- **Given** a nurse or customer account,
+- **When** they sign in on the Nurse Web/Mobile App or Patient Web/App,
+- **Then** sign-in completes with phone number + OTP only; no mandatory second factor is enforced for these roles.
 
-### AC-03: No Self-Service Helpdesk Recovery for Staff
-- **Given** a staff member who has lost access credentials,
-- **When** they request account recovery,
-- **Then** recovery must proceed strictly through hospital administrative governance rather than the patient-facing call center.
+### AC-03: Failed Second Factor Blocks Access and Is Logged
+- **Given** an Admin sign-in attempt,
+- **When** the second factor fails or is not completed,
+- **Then** no session is issued and the failed attempt is recorded for security review.
 
 ---
 
@@ -56,6 +56,8 @@
 
 | Test Case ID | Test Objective | Test Type | Expected Result |
 | :--- | :--- | :--- | :--- |
-| `TC-USHP05-01` | Staff sign-in lacking 2FA verification | Security | Blocked at 2FA step; no session token granted |
-| `TC-USHP05-02` | Patient standard sign-in | Functional | Sign-in succeeds without second factor prompt |
-| `TC-USHP05-03` | Staff account recovery attempt | Security | No self-service call center route exists for staff |
+| `TC-USHP05-01` | Admin sign-in without completing the second factor | Security | Blocked at the 2FA step; no Admin session token granted |
+| `TC-USHP05-02` | Nurse and customer sign-in | Functional | Sign-in succeeds with phone + OTP only; no 2FA prompt enforced |
+| `TC-USHP05-03` | Repeated failed 2FA attempts | Security | Attempts logged; account not accessible via the failed attempts |
+
+> **Open items:** the second-factor channel (authenticator app, SMS OTP or other) and the Admin account-recovery procedure are [Not specified in SRS v2.0 — open item].

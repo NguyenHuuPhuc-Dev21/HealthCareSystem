@@ -1,68 +1,57 @@
-# BR-13: Advance Booking, Nurse Selection & Rescheduling
+# BR-13: Advance Booking, Direct Selection & Shift Extension
 
 > **Group:** Group B — Booking & Dispatch  
-> **Source Baseline:** `use_case_v8.1.drawio` (Pages 12, 14) + `luong_hoat_dong_v8.14.drawio`  
-> **Key Decisions:** Q-19 (Default consent on reassignment under review), Q-22 (Shift caps per day)  
-> **Status:** Baseline Frozen
+> **Source Baseline:** SRS HealthCareSystem On-Demand Nursing — Version 2.0 (Updated, 28/10/2026), §2.2, §4.2 (FR-SEARCH-01), §4.3 (FR-BOOK-01, FR-BOOK-02, FR-BOOK-03), §4.4 (FR-SHIFT-03), §5.2  
+> **Status:** Revised per SRS v2.0 — supersedes the hospital-baseline version  
+> **Supersession Note:** The old advance-booking machinery (2h–14d horizon, per-day shift caps, T-24h/T-3h/T-2h reminder milestones, 30-minute nurse response window, deposit transfer on reschedule) is not part of SRS v2.0. Advance booking now runs on the **Job Board** mechanism, and the only in-flight time change SRS v2.0 defines is **shift extension**.
 
 ---
 
 ## 1. Context & Business Intent
 
-1. **Structured Scheduling Lifecycle:** Give patients the autonomy to select preferred nurses while providing hospitals with clear scheduling foresight (up to 14 days).
-2. **Equitable Workload & Disruption Protection:** Balance nurse shift distributions and provide automated reassignment workflows when nurses become unexpectedly unavailable.
+1. **Planned Care via Broadcast:** Bookings made more than 6 hours ahead do not need radar pressure; they are published on the Job Board where eligible nurses claim them, and Customers may alternatively invite a nurse they have reviewed (FR-SEARCH-01).
+2. **Controlled Flexibility:** Once a shift is running, the SRS allows exactly one time modification — extension by the Customer with the nurse's consent (FR-SHIFT-03). All other changes resolve through the cancellation/SLA matrix (§5.2).
 
 ---
 
 ## 2. Rule Specifications
 
-### 2.1 Booking Horizon & Shift Declaration
-- Advance bookings can be scheduled **earliest 2 hours and latest 14 days** prior to the visit slot.
-- Nurses must publish their open schedule blocks 14 days in advance (UC114). Requests submitted less than 2 hours in advance must use the Fast Match engine (BR-08).
+### 2.1 Advance Booking Flow (FR-BOOK-03, Mechanism B)
+- A booking whose shift starts in **> 6 hours** is published on the **Job Board** (`matching_mode = JOB_BOARD`) for eligible nurses (BR-08 filters) to claim first-come.
+- The booking is created in `DRAFT`; for bank-transfer bookings it enters `MATCHING` once payment is locked in escrow (15-minute payment hold, BR-03 §2.3). Cash bookings are paid at the care location (FR-PAY-01).
+- If still unclaimed **30 minutes before the shift start**, the booking expires with a 100% refund (§5.2 row 9).
 
-### 2.2 Transparent Selection & Privacy Boundaries
-- Patients only view nurses with verified open slots during the chosen time window. Nurse profiles display only professional credentials (certifications, experience, rating).
-- Communication is conducted strictly via in-app channels (UC133; no phone numbers, BR-20).
+### 2.2 Direct Selection of a Nurse (FR-SEARCH-01)
+- Before booking, the Customer can search nurse profiles filtered by service type, geographic area, time slot, tier, and gender, viewing name, photo, tier, years of experience, retired-medical-staff badge, `rating_avg`, and past reviews.
+- The Customer may send a **direct request** to one chosen nurse. That nurse has **15 minutes to respond**; on decline or timeout the booking is broadcast on the Job Board (no violation is recorded for declining a direct request).
 
-### 2.3 Nurse Response Window & Deposit Countdown
-- An assigned nurse has **30 minutes** to respond to a designated appointment request (the slot is temporarily held).
-- If the nurse declines or times out, no violation is recorded; the patient is notified to select another nurse.
-- Once the nurse accepts, the patient has **15 minutes** to pay the 30% deposit (BR-04). Timeout cancels the order and releases the schedule slot.
+### 2.3 Invasive Advance Bookings — Doctor's Order (FR-BOOK-02)
+- If the service is invasive (`is_invasive = true`), the Customer **must attach a doctor's order (y lệnh) image** at booking creation — showing patient name, drug name/dosage, doctor's signature/stamp, and an issue date **≤ 7 days** old — and enter the order's issue date. Missing attachment → **HTTP 400** (RTM TC-BOOK-01).
+- Such bookings are held for **Admin review of the y lệnh (`PENDING_ADMIN_REVIEW`)** before entering matching.
+- The assigned Tier 2 nurse re-checks the order image before accepting, and verifies the original order and the actual medication on site at check-in, with a no-penalty refusal right if the order is invalid (FR-BOOK-02; Group C).
 
-### 2.4 Shift Volume Limits & Anti-Monopolization (Q-22)
-- **Weekends & Holidays:** Maximum **4 shifts / nurse / day**.
-- **Weekdays:** Maximum **2 shifts / nurse / day** (due to the 4.5-hour operational evening window).
-- Recommendation algorithms interleave newer nurses to avoid order concentration.
+### 2.4 Shift Extension (FR-SHIFT-03)
+- **30 minutes before the scheduled end**, the Customer may request an extension in **multiples of 1 hour** (`POST /api/v1/bookings/:id/extend`).
+- The extension takes effect only if the nurse has **no conflicting next shift** (BR-14 §2.5) and **agrees** in the app.
+- For bank-transfer bookings, the Customer pays the extension fee **additionally into escrow** before the extension is confirmed.
 
-### 2.5 Automated Reminder & Confirmation Milestones
-- **T−24h:** Automated appointment reminder sent to patient and nurse.
-- **T−3h:** Mandatory re-confirmation prompt sent to assigned nurse (deadline at T−2h). If unconfirmed by T−2h, automated replacement is triggered (Flow 06).
-- **T−2h:** Optional invitation sent to patient to update medical symptoms (BR-15). This update is **not mandatory**; skipping it never cancels the appointment. If updated symptoms trigger emergency criteria, the shift is blocked and deposit refunded 100%.
+### 2.5 Cancellation Instead of Rescheduling (§5.2)
+- SRS v2.0 defines **no self-service rescheduling flow**. A Customer who cannot keep a slot cancels under the §5.2 matrix (bank-transfer refunds):
+  - **> 12 hours** before start: 0% fee, 100% refund.
+  - **2–12 hours** before start: 20% fee, 80% refund (15% compensates the nurse, 5% to the platform).
+  - **< 2 hours** before start (not yet checked in): 50% fee, 50% refund (40% to the nurse, 10% to the platform).
+  - **Medical force majeure** (patient transferred to ICU / deceased, with confirmation documents): 100% fee waiver and refund; fixed 50,000 VNĐ travel support (`ICU_TRAVEL_SUPPORT`) to a nurse who already travelled.
+- For cash bookings no refund arises (nothing was prepaid); customer cancellation fees are not collected through the system and the cancellation is recorded in the Customer's cancellation history (§5.2 note).
 
-### 2.6 Nurse Replacement Workflow (Flow 06)
-- When a nurse reports inability to fulfill a visit:
-  - Remaining time $> 1	ext{ hour}$: Search available calendar slots ($> 3	ext{h}$) or idle nurses ($\le 3	ext{h}$).
-  - Remaining time $\le 1	ext{ hour}$: Route immediately to Fast Match.
-  - Replacement must match required clinical competencies, operational radius, and patient gender preferences.
-- Patient choices upon replacement notification:
-  1. Accept replacement.
-  2. Select another nurse.
-  3. Reschedule slot.
-  4. Cancel for **100% deposit refund**.
-- Patient response window: 15 minutes (extended to 30 minutes if $> 3	ext{h}$ remain). Timeout defaults to acceptance (Q-19).
-- If no replacement is found by T−1h, the system attempts Fast Match for 15 minutes; if still unfulfilled, the order cancels with 100% deposit refund.
-
-### 2.7 Patient-Initiated Rescheduling Rules (Flow 09)
-- Permitted strictly for advance bookings with paid deposit and submitted **$> 2	ext{ hours}$ before the scheduled visit**.
-- Maximum **2 rescheduling requests per order**; deposit is transferred intact.
-- If the current nurse is unavailable for the new slot, the patient selects a replacement; the existing booking is retained until the new nurse confirms.
-- If $\le 2	ext{ hours}$ remain, rescheduling is prohibited; only cancellation per BR-04 is allowed.
-- *Exception:* Rescheduling selected as a response to nurse replacement (Flow 06, UC117) is exempt from the 2-hour cutoff and does not consume the 2-time limit.
+### 2.6 Open Items
+- [Not specified in SRS v2.0 — open item] Rescheduling rules (eligibility window, per-booking reschedule limits, price-difference handling) are not specified; see §2.5 for the defined alternative.
+- [Not specified in SRS v2.0 — open item] Automated reminder milestones before a shift (the old T-24h / T-3h / T-2h scheme) are not specified in SRS v2.0; notification channels are defined generically in FR-NOTIF-01.
+- [Not specified in SRS v2.0 — open item] Maximum advance-booking horizon (the old 14-day cap) is not specified.
 
 ---
 
 ## 3. Traceability & Dependencies
 
-- **Use Cases:** UC37, UC45, UC78, UC88, UC112–UC120, UC133
-- **Activity Flows:** Flow 04 (Booking), Flow 06 (Replacement), Flow 09 (Rescheduling & Cancellation)
-- **Governing Decisions:** Q-19 (Reassignment acceptance timeout), Q-22 (Shift limits per day)
+- **SRS References:** §2.2 (booking state machine), §4.2 FR-SEARCH-01, §4.3 FR-BOOK-01 / FR-BOOK-02 / FR-BOOK-03, §4.4 FR-SHIFT-03, §5.1 (`ICU_TRAVEL_SUPPORT`), §5.2 rows 1–5 & 9, §10 RTM TC-BOOK-01
+- **API Endpoints:** `POST /api/v1/bookings`, `GET /api/v1/nurses/search`, `POST /api/v1/bookings/:id/extend`
+- **Related Rules:** BR-03 (windows & urgency), BR-08 (Job Board mechanics), BR-14 (prerequisites), Group D (payment & refund execution)

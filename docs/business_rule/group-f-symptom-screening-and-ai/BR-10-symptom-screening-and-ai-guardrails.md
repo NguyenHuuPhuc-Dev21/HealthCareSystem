@@ -1,57 +1,42 @@
-# BR-10: Symptom Screening, 4-Tier Triage & AI Guardrails
+# BR-10: Symptom Screening & AI Guardrails — Scope Note
 
 > **Group:** Group F — Symptom Screening & AI  
-> **Source Baseline:** `use_case_v8.1.drawio` (Pages 12, 14) + `luong_hoat_dong_v8.14.drawio`  
-> **Key Decisions:** Q-21 (Physician triage fallback SLA), Q-26 (AI accuracy validation criteria)  
-> **Status:** Baseline Frozen
+> **Source Baseline:** SRS HealthCareSystem — On-Demand Nursing, Version 2.0 (Updated, 28/10/2026)  
+> **SRS References:** FR-AUTH-03, FR-BOOK-02, FR-SHIFT-02, FR-SHIFT-05, SRS §4.2, RISK-01, RISK-02  
+> **Status:** Revised per SRS v2.0 — supersedes the hospital-baseline version. **This file is a scope note: the topic it governed is not part of SRS v2.0.**
 
 ---
 
-## 1. Context & Business Intent
+## 1. Scope Status
 
-1. **Clinical Decision Support, Not Autonomous Diagnosis:** Symptom screening assists clinical triage; it does not replace a licensed physician.
-2. **Preventing Catastrophic Home Dispatch:** Patients exhibiting acute danger signs must be routed to emergency hospital facilities rather than home care.
+SRS v2.0 contains **no AI symptom screening, no symptom-based triage classification (of any number of tiers), and no doctor/on-duty-physician triage fallback**. Nothing in SRS v2.0:
 
----
+- collects symptoms through a screening questionnaire or classifies them before booking;
+- blocks or reroutes a booking because of an algorithmic or physician triage decision;
+- gives any AI component a role in authorizing care, validating medical orders, or assessing clinical risk.
 
-## 2. Rule Specifications
-
-### 2.1 Deterministic Four-Tier Triage Model
-Symptom screening maps user-reported inputs strictly into one of four clinical tiers:
-1. **Tier 1 (Routine / No Warning Indicators):** No warning signs identified from entered data; routine home-care booking proceeds.
-2. **Tier 2 (Requires Early Clinical Evaluation):** Clinical indicators require review; an on-duty hospital physician contacts the patient prior to appointment confirmation.
-3. **Tier 3 (Emergency Warning / Life-Threatening):** Routine home-care booking is **strictly blocked**; emergency instructions (dial 115) and the SOS trigger are presented (BR-23).
-4. **Tier 4 (Inconclusive / Insufficient Information):** Follow-up clarifying questionnaire is prompted. If AI produces high uncertainty or errors, the case is routed to an on-duty physician.
-
-### 2.2 Pre-Session Symptom Updates
-- Advance booking patients are **not mandated to re-screen** before a visit.
-- Patients may optionally submit updated symptoms up to **$T-1	ext{h}$** (UC119, UC22).
-- Updated symptoms are evaluated under identical triage rules.
-- **Safety Monotonicity:** Patients are permitted only to add symptoms; the system **never permits downgrading symptoms below danger thresholds**.
-
-### 2.3 Screening Engine Timeout Fallback (Q-21)
-- If the automated triage engine encounters an error or timeout during booking: An on-duty hospital physician must classify the symptoms within **10 minutes** (Q-21).
-- If overdue: The patient is prompted to contact the hospital facility directly.
-
-### 2.4 Post-Session Clinical Risk Analysis (Flow 13)
-- For post-visit risk analytics: If the AI engine fails to return findings after **3 retries within 30 minutes**, or if the hospital disables AI:
-  - The visit is treated as high clinical risk by default.
-  - An attending physician reviews all care reports manually.
-
-### 2.5 Strict AI Behavioral Guardrails & Prohibitions
-AI functions strictly as an assistive calculation tool; legal medical accountability rests with hospital physicians (Q-26). **The AI engine is strictly prohibited from:**
-1. Issuing a definitive medical diagnosis.
-2. Prescribing drugs, altering dosages, or authorizing surgical procedures.
-3. Approving staff credentials or certifying nurse practice qualifications.
-4. Modifying physician-approved care plans.
-5. Adjudicating financial settlements, refunds, or complaint disputes.
-6. Accessing patient data outside authorized runtime scopes.
-- **Display Transparency:** Every AI output must explicitly display its purpose, algorithmic limitations, confidence/uncertainty score, and an immediate link to human physician consultation.
+The hospital baseline's BR-10 in its entirety — the deterministic 4-tier triage model, pre-session symptom updates with safety monotonicity, the physician classification fallback on engine timeout (old Q-21), post-session AI risk analysis, and the AI behavioral guardrails with accuracy criteria (old Q-26) — is **superseded and must not be implemented**. Patient safety in SRS v2.0 is instead enforced by the human- and structure-based mechanisms in §2.
 
 ---
 
-## 3. Traceability & Dependencies
+## 2. The Live SRS v2.0 Mechanisms (Closest Equivalent Rules)
 
-- **Use Cases:** UC20–UC23, UC54, UC68, UC119
-- **Activity Flows:** Flow 04 (Booking), Flow 07A (Screening), Flow 13 (Risk Analytics)
-- **Governing Decisions:** Q-21, Q-26
+1. **Customer condition declaration at booking (FR-AUTH-03):** The customer self-declares the patient's condition in the patient profile — medical history, mobility status, weight, infectious status. This declaration is unverified by any screening engine, but it is **binding**: it drives pricing (heavy-patient surcharge) and is checked on site (point 4). Misreporting carries the consequences of BR-19 §2.1 / BR-16 §2.3.
+2. **Catalog & tier safety gating (SRS §4.2, RISK-02):** Dangerous services are excluded structurally — prohibited services cannot be booked at all, and invasive services are hard-gated to TIER_2_SPECIALIST nurses with a valid GPHN (see BR-15 §2.1). This replaces triage as the mechanism that keeps unsafe work off the platform.
+3. **Human y lệnh verification (FR-BOOK-02, RISK-01):** For invasive services, the safety review of the doctor's order is performed by the **Tier-2 nurse** (image review before acceptance, original-document check on site, penalty-free refusal right). Admin's human role is credential/GPHN verification and tier assignment (FR-AUTH-02). No AI validates orders.
+4. **On-site condition verification & mismatch rights (FR-SHIFT-02):** The nurse verifies the declared condition in the first 30 minutes after check-in and may demand a surcharge correction or stop the shift without penalty if reality does not match the declaration (see BR-16 §2.3).
+5. **Emergency protocol instead of pre-triage (FR-SHIFT-05, RISK-03):** Deterioration is handled when it happens, by the 115-first SOS protocol (BR-23), not predicted by a screening layer.
+
+---
+
+## 3. Open Items
+
+- Any future introduction of AI-assisted symptom screening, triage, or clinical decision support would require a new SRS change request with its own safety and liability specification — **[Not specified in SRS v2.0 — open item]**.
+- Automated symptom-based booking blocking or emergency auto-detection: **[Not specified in SRS v2.0 — open item]** (the only emergency trigger in SRS v2.0 is the manual in-app SOS, BR-23).
+
+---
+
+## 4. Traceability & Dependencies
+
+- **SRS References:** FR-AUTH-03, FR-BOOK-02, FR-SHIFT-02, FR-SHIFT-05; SRS §4.2; RISK-01, RISK-02, RISK-03
+- **Related Rules:** BR-15 (catalog gating & y lệnh), BR-16 (mismatch stop), BR-19 (misreporting), BR-23 (emergency protocol)
