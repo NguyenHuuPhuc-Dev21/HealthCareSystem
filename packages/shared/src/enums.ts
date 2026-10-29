@@ -1,181 +1,296 @@
 /**
- * Authoritative Enums for Hospital Home-Care SaaS Platform
- * Source of Truth: docs/database/schema.sql + ERD-2 Page 14
+ * Authoritative Enums for HealthCareSystem — On-Demand Nursing Marketplace
+ * Reconciled against PostgreSQL 16 schema (docs/database/schema.sql)
+ * Total: 41 ENUM Types
  */
 
-export enum AccountType {
-  PATIENT = 'PATIENT',
-  NURSE = 'NURSE',
-  DOCTOR = 'DOCTOR',
-  HOSPITAL_ADMIN = 'HOSPITAL_ADMIN',
-  PLATFORM_ADMIN = 'PLATFORM_ADMIN',
-}
-
-export enum AccountStatus {
-  UNVERIFIED = 'UNVERIFIED',
-  INACTIVE = 'INACTIVE',
-  ACTIVE = 'ACTIVE',
-  TEMP_LOCKED = 'TEMP_LOCKED',
-  DISABLED = 'DISABLED',
-}
-
-export enum MfaMethod {
-  EMAIL = 'EMAIL',
-  TOTP = 'TOTP',
-}
-
-export enum EmailCodePurpose {
-  REGISTER = 'REGISTER',
-  LOGIN_MFA = 'LOGIN_MFA',
-  RESET_PASSWORD = 'RESET_PASSWORD',
-  ACTIVATION = 'ACTIVATION',
-  REAUTH_DELETE = 'REAUTH_DELETE',
-  REAUTH_WITHDRAW_CONSENT = 'REAUTH_WITHDRAW_CONSENT',
-  RELATIVE_CONSENT = 'RELATIVE_CONSENT',
-}
-
-export enum HospitalSubRole {
-  CHIEF = 'CHIEF',
-  COORDINATOR = 'COORDINATOR',
-  ACCOUNTANT = 'ACCOUNTANT',
-  HR_QUALITY = 'HR_QUALITY',
-}
-
-export enum HospitalStatus {
-  ACTIVE = 'ACTIVE',
-  SUSPENDED_NEW_ORDERS = 'SUSPENDED_NEW_ORDERS',
-  TERMINATED = 'TERMINATED',
-}
-
-export enum StaffType {
-  NURSE = 'NURSE',
-  DOCTOR = 'DOCTOR',
-}
-
-export enum StaffStatus {
-  DRAFT = 'DRAFT',
-  PENDING_HOSPITAL_REVIEW = 'PENDING_HOSPITAL_REVIEW',
-  PENDING_PLATFORM_REVIEW = 'PENDING_PLATFORM_REVIEW',
-  APPROVED = 'APPROVED',
-  INFO_REQUESTED = 'INFO_REQUESTED',
-  INFO_EXPIRED = 'INFO_EXPIRED',
-  REJECTED = 'REJECTED',
-  SUSPENDED = 'SUSPENDED',
-  LICENSE_EXPIRED = 'LICENSE_EXPIRED',
-  INACTIVE = 'INACTIVE',
-}
-
+// ============================================================================
+// 1. IDENTITY & CREDENTIALS
+// ============================================================================
 export enum Gender {
   MALE = 'MALE',
   FEMALE = 'FEMALE',
   OTHER = 'OTHER',
 }
 
-export enum ViolationType {
-  NO_ACK_REPEAT = 'NO_ACK_REPEAT',
-  UNACCEPT_AFTER_ACK = 'UNACCEPT_AFTER_ACK',
-  CANCEL_GE_12H = 'CANCEL_GE_12H',
-  CANCEL_1_12H = 'CANCEL_1_12H',
-  CANCEL_LT_1H = 'CANCEL_LT_1H',
-  NO_SHOW = 'NO_SHOW',
-  LATE = 'LATE',
-  REPORT_OVERDUE = 'REPORT_OVERDUE',
-  FALSE_STOP_REASON = 'FALSE_STOP_REASON',
+export enum UserRole {
+  PATIENT = 'PATIENT',
+  NURSE = 'NURSE',
+  ADMIN = 'ADMIN',
 }
 
-export enum ViolationStatus {
-  PENDING_REVIEW = 'PENDING_REVIEW',
-  CONFIRMED = 'CONFIRMED',
-  FORCE_MAJEURE = 'FORCE_MAJEURE',
-  AUTO_WAIVED = 'AUTO_WAIVED',
-}
-
-export enum RelationshipType {
-  SELF = 'SELF',
-  SPOUSE = 'SPOUSE',
-  PARENT = 'PARENT',
-  CHILD = 'CHILD',
-  SIBLING = 'SIBLING',
-  GRANDPARENT = 'GRANDPARENT',
-  OTHER = 'OTHER',
-}
-
-export enum ConsentMode {
-  SELF = 'SELF',
-  RELATIVE_EMAIL = 'RELATIVE_EMAIL',
-  REPRESENTATIVE = 'REPRESENTATIVE',
-}
-
-export enum ConsentStatus {
+export enum KycStatus {
+  UNVERIFIED = 'UNVERIFIED',
   PENDING = 'PENDING',
-  GRANTED = 'GRANTED',
-  DECLINED = 'DECLINED',
-  WITHDRAWN = 'WITHDRAWN',
+  VERIFIED = 'VERIFIED',
+}
+
+export enum UserStatus {
+  PENDING = 'PENDING',
+  ACTIVE = 'ACTIVE',
+  SUSPENDED = 'SUSPENDED',
+  BANNED = 'BANNED',
+}
+
+export enum NurseTier {
+  TIER_1_BASIC = 'TIER_1_BASIC',
+  TIER_2_SPECIALIST = 'TIER_2_SPECIALIST',
+}
+
+export enum ProfileStatus {
+  PENDING_VERIFICATION = 'PENDING_VERIFICATION',
+  ACTIVE = 'ACTIVE',
+  SUSPENDED = 'SUSPENDED',
+  BANNED = 'BANNED',
+}
+
+export enum DocType {
+  CCCD = 'CCCD',
+  DEGREE = 'DEGREE',
+  GPHN = 'GPHN',
+  RETIREMENT_DECISION = 'RETIREMENT_DECISION',
+}
+
+export enum VerificationStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
+export enum AvailabilityType {
+  RECURRING_AVAILABLE = 'RECURRING_AVAILABLE',
+  TIME_OFF_EXCEPTION = 'TIME_OFF_EXCEPTION',
+}
+
+// ============================================================================
+// 2. PATIENTS & PRIVACY
+// ============================================================================
+export enum MobilityStatus {
+  NORMAL = 'NORMAL',
+  PARTIAL = 'PARTIAL',
+  BEDRIDDEN = 'BEDRIDDEN',
+}
+
+export enum LocationType {
+  HOSPITAL = 'HOSPITAL',
+  HOME = 'HOME',
+}
+
+export enum PrivacyRequestType {
+  DELETE = 'DELETE',
+  ANONYMIZE = 'ANONYMIZE',
+}
+
+export enum PrivacyRequestStatus {
+  PENDING = 'PENDING',
+  DONE = 'DONE',
+  REJECTED = 'REJECTED',
+}
+
+// ============================================================================
+// 3. CATALOG & PRICING INPUTS
+// ============================================================================
+export enum ServiceType {
+  TASK_BASED = 'TASK_BASED',
+  SHIFT_BASED = 'SHIFT_BASED',
+  CONTRACT = 'CONTRACT',
+}
+
+export enum ServiceUnit {
+  PER_TIME = 'PER_TIME',
+  PER_HOUR = 'PER_HOUR',
+  PER_SHIFT = 'PER_SHIFT',
+}
+
+export enum HolidayType {
+  TET = 'TET',
+  PUBLIC_HOLIDAY = 'PUBLIC_HOLIDAY',
+}
+
+// ============================================================================
+// 4. BOOKINGS & SHIFT EXECUTION (THREE INDEPENDENT AXES)
+// ============================================================================
+export enum MatchingMode {
+  RADAR_DISPATCH = 'RADAR_DISPATCH',
+  JOB_BOARD = 'JOB_BOARD',
+}
+
+export enum PaymentMethod {
+  BANK_TRANSFER = 'BANK_TRANSFER',
+  CASH = 'CASH',
+}
+
+export enum ExecutionStatus {
+  DRAFT = 'DRAFT',
+  MATCHING = 'MATCHING',
+  CONFIRMED = 'CONFIRMED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
   EXPIRED = 'EXPIRED',
 }
 
-export enum TriageRiskTier {
-  LOW_RISK = 'LOW_RISK',
-  EARLY_REVIEW = 'EARLY_REVIEW',
-  EMERGENCY = 'EMERGENCY',
-  INSUFFICIENT_INFO = 'INSUFFICIENT_INFO',
-}
-
-export enum BookingType {
-  SCHEDULED = 'SCHEDULED',
-  INSTANT = 'INSTANT',
-}
-
-export enum OrderStatus {
-  DRAFT = 'DRAFT',
-  PENDING_MEDICAL_ORDER = 'PENDING_MEDICAL_ORDER',
-  PENDING_ASSIGNMENT = 'PENDING_ASSIGNMENT',
-  PENDING_DEPOSIT = 'PENDING_DEPOSIT',
-  CONFIRMED = 'CONFIRMED',
-  REPLACING = 'REPLACING',
-  EN_ROUTE = 'EN_ROUTE',
-  IN_CARE = 'IN_CARE',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
-}
-
-export enum OrderEndType {
-  NORMAL = 'NORMAL',
-  STOPPED_MIDWAY = 'STOPPED_MIDWAY',
-  BASE_NOT_PERFORMED = 'BASE_NOT_PERFORMED',
-  PATIENT_ABSENT = 'PATIENT_ABSENT',
-}
-
 export enum PaymentStatus {
+  UNPAID = 'UNPAID',
+  ESCROW_HELD = 'ESCROW_HELD',
+  SETTLED = 'SETTLED',
+  REFUNDED = 'REFUNDED',
+  PARTIALLY_SETTLED = 'PARTIALLY_SETTLED', // Phase 2 only
+}
+
+export enum BookingDisputeStatus {
   NONE = 'NONE',
-  AWAITING_DEPOSIT = 'AWAITING_DEPOSIT',
-  DEPOSIT_PAID = 'DEPOSIT_PAID',
-  AWAITING_BALANCE = 'AWAITING_BALANCE',
+  OPEN = 'OPEN',
+  UNDER_REVIEW = 'UNDER_REVIEW',
+  RESOLVED_CUSTOMER = 'RESOLVED_CUSTOMER',
+  RESOLVED_NURSE = 'RESOLVED_NURSE',
+  RESOLVED_PARTIAL = 'RESOLVED_PARTIAL',   // Phase 2 only
+}
+
+export enum OfferType {
+  RADAR = 'RADAR',
+  DIRECT_REQUEST = 'DIRECT_REQUEST',
+  JOB_BOARD = 'JOB_BOARD',
+}
+
+export enum OfferStatus {
+  SENT = 'SENT',
+  ACCEPTED = 'ACCEPTED',
+  DECLINED = 'DECLINED',
+  EXPIRED = 'EXPIRED',
+  LOST_RACE = 'LOST_RACE',
+}
+
+export enum AdjustmentType {
+  EXTENSION = 'EXTENSION',
+  CONDITION_SURCHARGE = 'CONDITION_SURCHARGE',
+}
+
+export enum AdjustmentStatus {
+  REQUESTED = 'REQUESTED',
+  ACCEPTED = 'ACCEPTED',
+  REJECTED = 'REJECTED',
+  PAID = 'PAID',
+}
+
+// ============================================================================
+// 5. MONEY & WALLET LEDGER
+// ============================================================================
+export enum WalletStatus {
+  ACTIVE = 'ACTIVE',
+  FROZEN = 'FROZEN',
+}
+
+export enum BalanceType {
+  AVAILABLE = 'AVAILABLE',
+  ESCROW_LOCKED = 'ESCROW_LOCKED',
+  DEPOSIT = 'DEPOSIT',
+}
+
+export enum TxType {
+  TOPUP = 'TOPUP',
+  ESCROW_HOLD = 'ESCROW_HOLD',
+  ESCROW_RELEASE = 'ESCROW_RELEASE',
+  COMMISSION_PAYMENT = 'COMMISSION_PAYMENT',
+  PENALTY_DEDUCT = 'PENALTY_DEDUCT',
+  URGENT_BONUS = 'URGENT_BONUS',
+  REFUND = 'REFUND',
+  PARTIAL_SETTLE = 'PARTIAL_SETTLE',       // Phase 2 only
+  WITHDRAW = 'WITHDRAW',
+}
+
+export enum TxStatus {
+  PENDING = 'PENDING',
   COMPLETED = 'COMPLETED',
-  REFUNDED_PARTIAL = 'REFUNDED_PARTIAL',
-  REFUNDED_FULL = 'REFUNDED_FULL',
-  CANCELLED = 'CANCELLED',
+  FAILED = 'FAILED',
 }
 
-export enum AddonClass {
-  A = 'A',
-  B = 'B',
-  C = 'C',
+export enum WithdrawalStatus {
+  WITHDRAW_REQUESTED = 'WITHDRAW_REQUESTED',
+  WITHDRAWN = 'WITHDRAWN',
+  REJECTED = 'REJECTED',
 }
 
-export enum SosStatus {
-  TRIGGERED = 'TRIGGERED',
-  ACKNOWLEDGED = 'ACKNOWLEDGED',
-  ESCALATED = 'ESCALATED',
-  RESOLVED = 'RESOLVED',
-  FALSE_ALARM = 'FALSE_ALARM',
+export enum VoucherStatus {
+  ACTIVE = 'ACTIVE',
+  USED = 'USED',
+  EXPIRED = 'EXPIRED',
 }
 
+// ============================================================================
+// 6. AFTER THE SHIFT
+// ============================================================================
 export enum DisputeStatus {
-  OPENED = 'OPENED',
-  UNDER_HOSPITAL_REVIEW = 'UNDER_HOSPITAL_REVIEW',
-  AUTO_WAIVED = 'AUTO_WAIVED',
-  ESCALATED_TO_PLATFORM = 'ESCALATED_TO_PLATFORM',
-  RESOLVED = 'RESOLVED',
+  OPEN = 'OPEN',
+  UNDER_REVIEW = 'UNDER_REVIEW',
+  RESOLVED_CUSTOMER = 'RESOLVED_CUSTOMER',
+  RESOLVED_NURSE = 'RESOLVED_NURSE',
+  RESOLVED_PARTIAL = 'RESOLVED_PARTIAL',   // Phase 2 only
+}
+
+export enum ReviewerRole {
+  PATIENT = 'PATIENT',
+  NURSE = 'NURSE',
+}
+
+export enum MessageType {
+  TEXT = 'TEXT',
+  IMAGE = 'IMAGE',
+  VOICE_CALL_LOG = 'VOICE_CALL_LOG',
+  SYSTEM_ALERT = 'SYSTEM_ALERT',
+}
+
+export enum NotificationChannel {
+  PUSH_FCM = 'PUSH_FCM',
+  IN_APP = 'IN_APP',
+  SMS_FALLBACK = 'SMS_FALLBACK',
+}
+
+export enum NotificationPriority {
+  NORMAL = 'NORMAL',
+  HIGH = 'HIGH',
+}
+
+export enum DeliveryStatus {
+  PENDING = 'PENDING',
+  SENT = 'SENT',
+  FAILED = 'FAILED',
+}
+
+// ============================================================================
+// 7. PLATFORM, AUDIT & CONFIG
+// ============================================================================
+export enum ConfigDataType {
+  NUMBER = 'NUMBER',
+  STRING = 'STRING',
+  BOOLEAN = 'BOOLEAN',
+  JSON = 'JSON',
+}
+
+export enum AuditAction {
+  VIEW_MEDICAL_RECORD = 'VIEW_MEDICAL_RECORD',
+  APPROVE_GPHN = 'APPROVE_GPHN',
+  RESOLVE_DISPUTE = 'RESOLVE_DISPUTE',
+  UPDATE_CONFIG = 'UPDATE_CONFIG',
+  DELETE_PATIENT_DATA = 'DELETE_PATIENT_DATA',
+  GRANT_RECORD_ACCESS = 'GRANT_RECORD_ACCESS',
+}
+
+// ============================================================================
+// 8. CONTRACTS (PHASE 2)
+// ============================================================================
+export enum ContractStatus {
+  OPEN = 'OPEN',
+  TRIAL = 'TRIAL',
+  ACTIVE = 'ACTIVE',
+  PAUSED = 'PAUSED',
+  TERMINATED = 'TERMINATED',
+  COMPLETED = 'COMPLETED',
+}
+
+export enum ApplicationStatus {
+  APPLIED = 'APPLIED',
+  TRIAL = 'TRIAL',
+  SELECTED = 'SELECTED',
   REJECTED = 'REJECTED',
 }

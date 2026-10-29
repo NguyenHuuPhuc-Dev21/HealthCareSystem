@@ -1,14 +1,16 @@
 /**
  * Global Constants & Architectural Invariants
+ * Baseline: SRS Version 2.0 (Updated, 28/10/2026)
  */
 
-export const MINIMUM_DEPOSIT_VND = 50_000;
-export const DEPOSIT_RATIO = 0.3; // 30% advance deposit (BR-04)
+export const DEFAULT_PLATFORM_COMMISSION_RATE = 0.15; // 15% (SRS §5.1)
+export const DEFAULT_MIN_NURSE_DEPOSIT_VND = 300_000;  // 300,000 VND (SRS §5.1, FR-PAY-03)
 
-export const DEPOSIT_PAYMENT_WINDOW_MINUTES = 15; // 15-minute hold window (BR-04)
-export const SOS_ESCALATION_TIMEOUT_SECONDS = 300; // 5-minute escalation SLA (BR-23)
-export const SIGNED_URL_MAX_EXPIRY_SECONDS = 900; // 15 minutes max lifetime (NFR-03.3)
+export const DEFAULT_PAYMENT_TIMEOUT_MINUTES = 15;     // 15-minute hold window (SRS §5.1)
+export const DEFAULT_SETTLEMENT_COOLING_HOURS = 24;    // 24 hours post check-out (SRS §5.1)
+export const DEFAULT_RECORD_ACCESS_EXPIRY_HOURS = 12;  // 12 hours post check-out (Decree 13 / FR-PRIV-01)
 
-export const MAX_ACTIVE_BOOKINGS_PER_PATIENT = 3; // (BR-13)
-export const MAX_RESCHEDULE_COUNT_PER_BOOKING = 2; // (BR-13)
-export const TIMEZONE_DISPLAY = 'Asia/Ho_Chi_Minh'; // (NFR-05.3)
+export const PRESIGNED_URL_MAX_EXPIRY_SECONDS = 600;   // 10 minutes max lifetime (SRS §6 NFR-SEC-01)
+export const CHECKIN_MAX_RADIUS_METERS = 200;          // 200m Haversine distance (SRS §6 NFR-SEC-01)
+
+export const TIMEZONE_DISPLAY = 'Asia/Ho_Chi_Minh';    // Canonical timezone
