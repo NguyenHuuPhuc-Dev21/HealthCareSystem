@@ -3,7 +3,7 @@
 > **Specification Baseline:** SRS HealthCareSystem On-Demand Nursing — **Version 2.0 (Updated, 28/10/2026)**, integrating the 27 review items CT-01–CT-27 and the round-2 review decisions of 28/10/2026  
 > **Scope:** Full 23 Business Rules (`BR-01`–`BR-23`), the SLA / Cancellation / Compensation Matrix (SRS §5.2), and Supplementary Activity Flow Rules (`R-L03`, `R-UC135`)  
 > **Status:** Revised per SRS v2.0 — supersedes the hospital-baseline version  
-> **Original Vietnamese Baseline (superseded):** Preserved in [`archive/business-rules-theo-baseline-v8.1-8.14.vi.md`](archive/business-rules-theo-baseline-v8.1-8.14.vi.md)
+> **Vietnamese Baseline:** The specification in [`archive/business-rules-vi.md`](archive/business-rules-vi.md) provides the complete Vietnamese Business Rules Specification synchronized with SRS v2.0.
 
 ---
 
@@ -30,7 +30,7 @@ docs/business_rule/
 ├── README.md                                                 # Master Catalog, Principles & Traceability (this file)
 ├── open-decisions-register.md                               # Open items not specified by SRS v2.0
 ├── archive/
-│   └── business-rules-theo-baseline-v8.1-8.14.vi.md          # Archived superseded hospital baseline (Vietnamese)
+│   └── business-rules-vi.md                                  # Vietnamese Business Rules Specification (SRS v2.0)
 ├── group-a-identity-access-and-data/                         # Identity, Auth, Privacy & Consent
 │   ├── README.md
 │   ├── BR-20-email-only-identity-and-communication.md        # Phone + OTP Identity (title updated)
