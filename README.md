@@ -198,6 +198,16 @@ npm run test:db        # Schema & constraint tests against a real PostgreSQL 16 
 - [ ] Phase 7 — Admin: catalog, configuration & reconciliation
 - [ ] Phase 8 — Hardening: penetration test, DR drill, UAT and MVP go-live sign-off
 
+## Project Team
+
+| Name | GitLab | Role |
+|---|---|---|
+| Nguyễn Hữu Phúc | [@NguyenHuuPhuc-Dev21](https://gitlab.com/NguyenHuuPhuc-Dev21) | Frontend |
+| Nguyễn Nho Trường Phát | [@phatnguyen.02102005](https://gitlab.com/phatnguyen.02102005) | Frontend |
+| Võ Thị Mỹ Xuân | [@Myxuan10](https://gitlab.com/Myxuan10) | Backend |
+| Tô Thị Oanh | [@W3n3r](https://gitlab.com/W3n3r) | Backend |
+| Kiều Đình Đức | [@KieuDuc179](https://gitlab.com/KieuDuc179) | Backend |
+
 ## Contact & License
 
 - **Repository:** [gitlab.com/group39671542/HealthCareSystem](https://gitlab.com/group39671542/HealthCareSystem)
