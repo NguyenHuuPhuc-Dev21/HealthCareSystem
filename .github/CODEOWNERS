@@ -1,0 +1,76 @@
+# =====================================================================
+# CODEOWNERS for HealthCareSystem (On-Demand Nursing Marketplace v2.0)
+# Role Mapping:
+#   FE-1: Patient Web + Admin Web
+#   FE-2: Nurse Web Portal + Nurse Mobile App
+#   BE-1: Infrastructure, Core Platform, Identity & Auth
+#   BE-2: Scheduling, Bookings, Matching & Shift Execution
+#   BE-3: Payments, Wallets, Disputes, Notifications & Post-Shift
+# =====================================================================
+
+# Global fallback: entire team
+*                       @team-lead
+
+# Frontend surfaces
+apps/patient-web/       @FE-1
+apps/admin-web/         @FE-1
+apps/nurse-web/         @FE-2
+apps/nurse-app/         @FE-2
+
+# Backend Core Infrastructure (Phase 0)
+services/api/src/core/database/       @BE-1
+services/api/src/core/config/         @BE-1
+services/api/src/core/storage/        @BE-1
+services/api/src/core/jobs/           @BE-2
+services/api/src/core/notifications/  @BE-3
+services/api/src/core/audit/          @BE-3
+services/api/src/core/middleware/     @BE-1 @BE-2 @BE-3
+
+# Shared Contracts & Domain Enums (Requires consensus)
+packages/shared/                      @BE-1 @FE-1 @FE-2 @BE-2 @BE-3
+
+# Database, Migrations & Tests
+db/migrations/          @BE-1
+db/seeds/               @BE-1
+db/tests/               @BE-3
+
+# Backend Business Modules (by owner)
+services/api/src/modules/accounts-otp/           @BE-1
+services/api/src/modules/nurse-onboarding/       @BE-1
+services/api/src/modules/credential-review/     @BE-1
+services/api/src/modules/prescription-gate/      @BE-1
+services/api/src/modules/shift-extend/           @BE-1
+services/api/src/modules/prescription-rejection/ @BE-1
+services/api/src/modules/cancellation-policy/    @BE-1
+services/api/src/modules/reviews-trustscore/     @BE-1
+services/api/src/modules/admin-catalog/          @BE-1
+services/api/src/modules/admin-configs/          @BE-1
+
+services/api/src/modules/tier-lifecycle/         @BE-2
+services/api/src/modules/patient-profiles/       @BE-2
+services/api/src/modules/nurse-availabilities/   @BE-2
+services/api/src/modules/availability-engine/    @BE-2
+services/api/src/modules/pricing-engine/         @BE-2
+services/api/src/modules/bookings/               @BE-2
+services/api/src/modules/matching-radar/         @BE-2
+services/api/src/modules/check-in/               @BE-2
+services/api/src/modules/shift-logs/             @BE-2
+services/api/src/modules/check-out/              @BE-2
+services/api/src/modules/deposits/               @BE-2
+services/api/src/modules/cash-commission/        @BE-2
+services/api/src/modules/chat/                   @BE-2
+services/api/src/modules/admin-users/            @BE-2
+
+services/api/src/modules/privacy-consent/        @BE-3
+services/api/src/modules/nurse-search/           @BE-3
+services/api/src/modules/job-board/              @BE-3
+services/api/src/modules/booking-expiry/         @BE-3
+services/api/src/modules/sos/                    @BE-3
+services/api/src/modules/wallets-ledger/         @BE-3
+services/api/src/modules/gateway-webhooks/       @BE-3
+services/api/src/modules/settlements/            @BE-3
+services/api/src/modules/withdrawals/            @BE-3
+services/api/src/modules/disputes/               @BE-3
+services/api/src/modules/notifications/          @BE-3
+services/api/src/modules/admin-finance/          @BE-3
+
