@@ -144,7 +144,7 @@ CREATE UNIQUE INDEX uq_users_cccd_number ON users (cccd_number)
 WHERE
     cccd_number IS NOT NULL;
 
-COMMENT ON TABLE users IS 'SRS §7 table 1. Account root; phone is the login identity. ' 'users.status is never used for nurse job eligibility — see nurse_profiles.profile_status.';
+COMMENT ON TABLE users IS 'SRS §7 table 1. Account root; phone is the login identity.  users.status is never used for nurse job eligibility — see nurse_profiles.profile_status.';
 
 CREATE TABLE nurse_profiles (
     user_id UUID PRIMARY KEY REFERENCES users (id) ON DELETE CASCADE,
@@ -169,7 +169,7 @@ CREATE INDEX idx_nurse_profiles_gphn_expiry ON nurse_profiles (gphn_expiry_date)
 
 CREATE INDEX idx_nurse_profiles_status_tier ON nurse_profiles (profile_status, tier);
 
-COMMENT ON TABLE nurse_profiles IS 'SRS §7 table 2. profile_status is the SINGLE SOURCE OF TRUTH ' 'for job eligibility (development checklist §1.2). gphn_expiry_date drives the daily tier sweep.';
+COMMENT ON TABLE nurse_profiles IS 'SRS §7 table 2. profile_status is the SINGLE SOURCE OF TRUTH  for job eligibility (development checklist §1.2). gphn_expiry_date drives the daily tier sweep.';
 
 CREATE TABLE nurse_credentials (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
@@ -192,7 +192,7 @@ CREATE TABLE nurse_credentials (
 
 CREATE INDEX idx_nurse_credentials_nurse ON nurse_credentials (nurse_id, verification_status);
 
-COMMENT ON TABLE nurse_credentials IS 'SRS §7 table 3. A renewed GPHN is a new row in PENDING ' 'until an Admin approves it (FR-AUTH-01/02).';
+COMMENT ON TABLE nurse_credentials IS 'SRS §7 table 3. A renewed GPHN is a new row in PENDING  until an Admin approves it (FR-AUTH-01/02).';
 
 CREATE TABLE nurse_availabilities (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
@@ -220,7 +220,7 @@ CREATE TABLE nurse_availabilities (
 
 CREATE INDEX idx_availabilities_nurse ON nurse_availabilities (nurse_id, availability_type);
 
-COMMENT ON TABLE nurse_availabilities IS 'SRS §7 table 10 (FR-SCHED-01). Recurring weekly windows ' 'or one-off time-off dates; the availability engine subtracts confirmed bookings + 60-min travel buffer.';
+COMMENT ON TABLE nurse_availabilities IS 'SRS §7 table 10 (FR-SCHED-01). Recurring weekly windows  or one-off time-off dates; the availability engine subtracts confirmed bookings + 60-min travel buffer.';
 
 -- ============================================================================
 -- 2. PATIENTS & PRIVACY — patient_profiles, privacy_requests (+)
@@ -256,7 +256,7 @@ CREATE INDEX idx_patient_profiles_customer ON patient_profiles (customer_id)
 WHERE
     deleted_at IS NULL;
 
-COMMENT ON TABLE patient_profiles IS 'SRS §7 table 4 (FR-AUTH-03). The condition declaration is ' 'binding: it drives pricing (heavy-patient surcharge) and on-site verification.';
+COMMENT ON TABLE patient_profiles IS 'SRS §7 table 4 (FR-AUTH-03). The condition declaration is  binding: it drives pricing (heavy-patient surcharge) and on-site verification.';
 
 CREATE TABLE privacy_requests ( -- (+) added table
     id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
@@ -290,7 +290,7 @@ CREATE TABLE service_categories (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now() -- added (D-07)
 );
 
-COMMENT ON TABLE service_categories IS 'SRS §7 table 5 (§4.2 catalog, 3 groups). ' 'is_prohibited = TRUE rows exist only so the booking path can block them.';
+COMMENT ON TABLE service_categories IS 'SRS §7 table 5 (§4.2 catalog, 3 groups).  is_prohibited = TRUE rows exist only so the booking path can block them.';
 
 CREATE TABLE public_holidays ( -- (+) added table
     holiday_date DATE PRIMARY KEY,
@@ -299,7 +299,7 @@ CREATE TABLE public_holidays ( -- (+) added table
     surcharge_rate NUMERIC(5, 2) NOT NULL CHECK (surcharge_rate >= 0) -- 3.00 for TET, 2.00 otherwise
 );
 
-COMMENT ON TABLE public_holidays IS 'Holiday calendar feeding pricing-engine (FR-BOOK-01). ' 'Which dates belong here beyond Tết is an open SRS item (OD register) — no rows are seeded.';
+COMMENT ON TABLE public_holidays IS 'Holiday calendar feeding pricing-engine (FR-BOOK-01).  Which dates belong here beyond Tết is an open SRS item (OD register) — no rows are seeded.';
 
 -- ============================================================================
 -- 4. CONTRACTS [Phase 2] — contracts (+), contract_applications (+)
@@ -397,7 +397,7 @@ WHERE (
         AND execution_status IN ('CONFIRMED', 'IN_PROGRESS')
     );
 
-COMMENT ON TABLE bookings IS 'SRS §7 table 6 — the central table. Three INDEPENDENT status axes ' '(execution / payment / dispute). Amount columns are an immutable price snapshot taken at creation; ' 'PARTIALLY_SETTLED and RESOLVED_PARTIAL are Phase-2 values no MVP flow may produce.';
+COMMENT ON TABLE bookings IS 'SRS §7 table 6 — the central table. Three INDEPENDENT status axes  (execution / payment / dispute). Amount columns are an immutable price snapshot taken at creation;  PARTIALLY_SETTLED and RESOLVED_PARTIAL are Phase-2 values no MVP flow may produce.';
 
 ALTER TABLE contract_applications
 ADD CONSTRAINT fk_contract_applications_trial_booking FOREIGN KEY (trial_booking_id) REFERENCES bookings (id);
@@ -422,7 +422,7 @@ CREATE INDEX idx_booking_offers_booking ON booking_offers (booking_id, status);
 
 CREATE INDEX idx_booking_offers_nurse ON booking_offers (nurse_id, status);
 
-COMMENT ON TABLE booking_offers IS 'One row per dispatch attempt (FR-BOOK-03): Radar rounds ' '(5 km then 10 km), direct invites (15-min response window) and Job Board broadcasts. ' 'LOST_RACE records nurses who accepted after the first-accept lock was taken.';
+COMMENT ON TABLE booking_offers IS 'One row per dispatch attempt (FR-BOOK-03): Radar rounds  (5 km then 10 km), direct invites (15-min response window) and Job Board broadcasts.  LOST_RACE records nurses who accepted after the first-accept lock was taken.';
 
 CREATE TABLE shift_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
@@ -440,7 +440,7 @@ CREATE TABLE shift_logs (
     emergency_incident_log JSONB
 );
 
-COMMENT ON TABLE shift_logs IS 'SRS §7 table 7 (FR-SHIFT-01/02/04/05). One log per booking. ' 'checkout_time is the single anchor for the record-access closure and settlement/dispute windows.';
+COMMENT ON TABLE shift_logs IS 'SRS §7 table 7 (FR-SHIFT-01/02/04/05). One log per booking.  checkout_time is the single anchor for the record-access closure and settlement/dispute windows.';
 
 CREATE TABLE booking_adjustments ( -- (+) added table
     id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
@@ -460,7 +460,7 @@ CREATE TABLE booking_adjustments ( -- (+) added table
 
 CREATE INDEX idx_booking_adjustments_booking ON booking_adjustments (booking_id, status);
 
-COMMENT ON TABLE booking_adjustments IS 'Shift extensions (FR-SHIFT-03, 1-hour blocks) and ' 'condition-mismatch surcharge requests (FR-SHIFT-02) as auditable request/response rows.';
+COMMENT ON TABLE booking_adjustments IS 'Shift extensions (FR-SHIFT-03, 1-hour blocks) and  condition-mismatch surcharge requests (FR-SHIFT-02) as auditable request/response rows.';
 
 -- ============================================================================
 -- 6. MONEY — wallets, wallet_transactions, withdrawal_requests (+), vouchers (+)
@@ -477,7 +477,7 @@ CREATE TABLE wallets (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-COMMENT ON TABLE wallets IS 'SRS §7 table 8. Three strictly separate balances. deposit_balance is ' 'used ONLY for SLA penalties (PENALTY_DEDUCT) — never for cash-job commission. Balances change ' 'only through wallet_transactions, inside an ACID transaction with row locking.';
+COMMENT ON TABLE wallets IS 'SRS §7 table 8. Three strictly separate balances. deposit_balance is  used ONLY for SLA penalties (PENALTY_DEDUCT) — never for cash-job commission. Balances change  only through wallet_transactions, inside an ACID transaction with row locking.';
 
 CREATE TABLE wallet_transactions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
@@ -499,7 +499,7 @@ CREATE INDEX idx_wallet_tx_booking ON wallet_transactions (booking_id)
 WHERE
     booking_id IS NOT NULL;
 
-COMMENT ON TABLE wallet_transactions IS 'SRS §7 table 9 — the append-only ledger. ' 'COMMISSION_PAYMENT (nurse self-pays the 15% cash-job commission via payment link) is strictly ' 'distinct from PENALTY_DEDUCT (SLA penalty taken from the deposit). PARTIAL_SETTLE is Phase 2 only.';
+COMMENT ON TABLE wallet_transactions IS 'SRS §7 table 9 — the append-only ledger.  COMMISSION_PAYMENT (nurse self-pays the 15% cash-job commission via payment link) is strictly  distinct from PENALTY_DEDUCT (SLA penalty taken from the deposit). PARTIAL_SETTLE is Phase 2 only.';
 
 CREATE TABLE withdrawal_requests ( -- (+) added table
     id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
@@ -532,7 +532,7 @@ CREATE TABLE vouchers ( -- (+) added table
 
 CREATE INDEX idx_vouchers_user ON vouchers (user_id, status);
 
-COMMENT ON TABLE vouchers IS 'The no-show penalty (50,000 VND taken from the nurse deposit) becomes ' 'a customer voucher (§5.2 row 8). This table settles the voucher-entity question the SRS left open.';
+COMMENT ON TABLE vouchers IS 'The no-show penalty (50,000 VND taken from the nurse deposit) becomes  a customer voucher (§5.2 row 8). This table settles the voucher-entity question the SRS left open.';
 
 -- ============================================================================
 -- 7. AFTER THE SHIFT — disputes, reviews, conversations_messages,
@@ -568,7 +568,7 @@ CREATE INDEX idx_disputes_open ON disputes (status)
 WHERE
     status IN ('OPEN', 'UNDER_REVIEW');
 
-COMMENT ON TABLE disputes IS 'SRS §7 table 11 (FR-DISP-01). Opening a dispute freezes settlement. ' 'MVP resolutions are 100% refund or 100% release; RESOLVED_PARTIAL is Phase 2 (FR-DISP-02).';
+COMMENT ON TABLE disputes IS 'SRS §7 table 11 (FR-DISP-01). Opening a dispute freezes settlement.  MVP resolutions are 100% refund or 100% release; RESOLVED_PARTIAL is Phase 2 (FR-DISP-02).';
 
 CREATE TABLE reviews (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
@@ -586,7 +586,7 @@ CREATE TABLE reviews (
 
 CREATE INDEX idx_reviews_reviewee ON reviews (reviewee_id, is_visible);
 
-COMMENT ON TABLE reviews IS 'SRS §7 table 12 (FR-RATE-01). Reviews open at booking COMPLETED, ' 'not at settlement. Visibility is flipped only by the visibility job, never at read time.';
+COMMENT ON TABLE reviews IS 'SRS §7 table 12 (FR-RATE-01). Reviews open at booking COMPLETED,  not at settlement. Visibility is flipped only by the visibility job, never at read time.';
 
 CREATE TABLE conversations_messages (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
@@ -603,7 +603,7 @@ CREATE TABLE conversations_messages (
 
 CREATE INDEX idx_messages_booking ON conversations_messages (booking_id, created_at);
 
-COMMENT ON TABLE conversations_messages IS 'SRS §7 table 13 (FR-CHAT-01). In-app chat/calls with ' 'masked phone numbers; rows are retained as dispute evidence and are never hard-deleted.';
+COMMENT ON TABLE conversations_messages IS 'SRS §7 table 13 (FR-CHAT-01). In-app chat/calls with  masked phone numbers; rows are retained as dispute evidence and are never hard-deleted.';
 
 CREATE TABLE notifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
@@ -629,7 +629,7 @@ CREATE INDEX idx_notifications_fallback ON notifications (delivery_status, creat
 WHERE
     delivery_status = 'PENDING';
 
-COMMENT ON TABLE notifications IS 'SRS §7 table 14 (FR-NOTIF-01). Urgent events are sent ' 'priority = HIGH; if unacknowledged after 60 s the fallback watcher raises an SMS_FALLBACK row.';
+COMMENT ON TABLE notifications IS 'SRS §7 table 14 (FR-NOTIF-01). Urgent events are sent  priority = HIGH; if unacknowledged after 60 s the fallback watcher raises an SMS_FALLBACK row.';
 
 CREATE TABLE record_access_grants ( -- (+) added table
     id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
@@ -643,7 +643,7 @@ CREATE TABLE record_access_grants ( -- (+) added table
 
 CREATE INDEX idx_record_grants_booking ON record_access_grants (booking_id, expires_at);
 
-COMMENT ON TABLE record_access_grants IS 'Exceptional, time-limited re-grant of medical-record ' 'access after the normal window (CONFIRMED → check-out +12h) has closed (FR-PRIV-01). ' 'Every grant is also written to audit_logs with action GRANT_RECORD_ACCESS.';
+COMMENT ON TABLE record_access_grants IS 'Exceptional, time-limited re-grant of medical-record  access after the normal window (CONFIRMED → check-out +12h) has closed (FR-PRIV-01).  Every grant is also written to audit_logs with action GRANT_RECORD_ACCESS.';
 
 -- ============================================================================
 -- 8. PLATFORM — system_configs, audit_logs
@@ -658,7 +658,7 @@ CREATE TABLE system_configs (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-COMMENT ON TABLE system_configs IS 'SRS §7 table 15 (§5.1). Every business number is read from ' 'here at runtime — nothing is hardcoded. Seeded below with the §5.1 values.';
+COMMENT ON TABLE system_configs IS 'SRS §7 table 15 (§5.1). Every business number is read from  here at runtime — nothing is hardcoded. Seeded below with the §5.1 values.';
 
 CREATE TABLE audit_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
@@ -676,7 +676,7 @@ CREATE INDEX idx_audit_target ON audit_logs (target_table, target_id);
 
 CREATE INDEX idx_audit_actor ON audit_logs (actor_id, created_at DESC);
 
-COMMENT ON TABLE audit_logs IS 'SRS §7 table 16. Append-only security audit: medical-record ' 'views, GPHN approvals, dispute resolutions, config changes, data deletions, access grants.';
+COMMENT ON TABLE audit_logs IS 'SRS §7 table 16. Append-only security audit: medical-record  views, GPHN approvals, dispute resolutions, config changes, data deletions, access grants.';
 
 -- ============================================================================
 -- 9. APPEND-ONLY ENFORCEMENT (Golden Rule: the ledger and the audit log
