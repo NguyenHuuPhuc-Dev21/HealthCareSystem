@@ -1,4 +1,4 @@
-# Hướng dẫn từng bước — Bộ thiết kế UI HealthCareSystem
+# Hướng dẫn từng bước — Bộ thiết kế UI CareNest
 
 Dành cho Phúc và nhóm FE đi qua toàn bộ bộ thiết kế theo đúng thứ tự.
 Tổng: **5 board HTML (61 màn/khung) + DESIGN.md + landing page**. Mọi board mở
@@ -17,8 +17,8 @@ trực tiếp bằng trình duyệt, không cần build, có tương tác bấm 
 
 Mở `files/DESIGN.md`. Đây là tài liệu điều hành của cả bộ. Đọc theo thứ tự:
 
-1. **Mục 3 (Token màu)** — ghi nhớ 3 màu nòng cốt: primary `#2563EB`,
-   navy `#0B3C6C` cho tiêu đề, teal `#0D9488` chỉ cho thành công/đã xác thực.
+1. **Mục 3 (Token màu)** — ghi nhớ 3 màu nòng cốt: primary `#166B58`,
+   navy `#143F34` cho tiêu đề, teal `#1E9E50` chỉ cho thành công/đã xác thực.
 2. **Mục 6 (NAV-0)** — chuẩn điều hướng khóa: navbar web từng vai trò, biến thể
    SETUP, bottom nav app, sidebar Admin 10 mục. Mọi màn ở các bước sau đều phải
    đối chiếu được với mục này.
