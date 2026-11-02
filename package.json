@@ -1,8 +1,8 @@
 {
   "name": "healthcare-system",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Hospital Home-Care Nursing SaaS Platform",
+  "description": "HealthCareSystem — On-Demand Nursing Marketplace Platform (SRS v2.0)",
   "workspaces": [
     "apps/*",
     "services/*",
@@ -18,6 +18,8 @@
     "dev:api": "npm run dev --workspace=services/api",
     "dev:admin": "npm run dev --workspace=apps/admin-web",
     "dev:patient": "npm run dev --workspace=apps/patient-web",
+    "dev:nurse-web": "npm run dev --workspace=apps/nurse-web",
+    "dev:nurse-app": "npm run start --workspace=apps/nurse-app",
     "docker:up": "docker compose -f infra/docker/docker-compose.yml up -d",
     "docker:down": "docker compose -f infra/docker/docker-compose.yml down"
   },

@@ -1,0 +1,37 @@
+/**
+ * Elder-Friendly Design Tokens (SRS §6 NFR-UI-01)
+ * Optimized for retired doctors & nurses on desktop/tablet
+ */
+:root {
+  --color-primary: #0d9488;
+  --color-primary-hover: #0f766e;
+  --color-background: #ffffff;
+  --color-surface: #f0fdfa;
+  --color-text-main: #0f172a;
+  --color-text-muted: #334155;
+  --color-border: #cbd5e1;
+  
+  /* WCAG 2.1 AA Contrast >= 4.5:1 */
+  --font-size-base: 18px;
+  --font-size-large: 20px;
+  --line-height-base: 1.6;
+  
+  /* Touch target >= 48x48 dp */
+  --touch-target-min: 48px;
+  --button-padding: 14px 28px;
+}
+
+body {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--color-text-main);
+  background-color: var(--color-background);
+}
+
+button, .btn {
+  min-height: var(--touch-target-min);
+  padding: var(--button-padding);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+}
+

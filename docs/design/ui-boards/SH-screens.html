@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phần SH — Dùng chung & Xác thực · HealthCareSystem (Thiết kế bởi Tom)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#2563EB; --blue-dark:#1D4ED8; --sky:#38BDF8; --navy:#0B3C6C; --teal:#0D9488;
+  --ink:#0F2540; --slate:#4A6076; --muted:#7A8FA6; --bg:#F5F9FC; --line:#E1EBF5;
+  --amber:#B45309; --amber-bg:#FEF3C7; --amber-soft:#FFFBEB;
+  --red:#DC2626; --red-bg:#FEF2F2; --orange:#EA580C; --orange-bg:#FFF7ED;
+  --green-bg:#ECFDF5; --radius:16px;
+  --shadow:0 18px 40px -18px rgba(11,60,108,.22);
+  --shadow-sm:0 6px 20px -8px rgba(11,60,108,.16);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Be Vietnam Pro',system-ui,sans-serif;background:#DCE9F5;color:var(--ink);font-size:16px;line-height:1.55}
+a{color:var(--blue);text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+
+/* ===== BOARD (meta, not product UI) ===== */
+.board-head{max-width:1180px;margin:0 auto;padding:44px 24px 8px}
+.board-head h1{color:var(--navy);font-size:30px;font-weight:900}
+.board-head p{color:var(--slate);max-width:820px;margin-top:8px}
+.board-nav{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 6px}
+.board-nav a{background:#fff;border:1px solid var(--line);padding:8px 16px;border-radius:999px;font-weight:600;font-size:14.5px;color:var(--navy)}
+.board-nav a:hover{border-color:var(--blue);color:var(--blue)}
+.meta-bar{max-width:1180px;margin:34px auto 0;padding:0 24px;display:flex;align-items:baseline;gap:14px}
+.meta-bar .code{font-weight:900;color:#fff;background:var(--navy);border-radius:9px;padding:3px 12px;font-size:15px}
+.meta-bar h2{color:var(--navy);font-size:20px}
+.meta-bar span{color:var(--slate);font-size:14px}
+
+/* ===== SCREEN FRAME ===== */
+.screen{max-width:1180px;margin:12px auto 10px;background:var(--bg);border-radius:22px;box-shadow:0 30px 60px -25px rgba(11,60,108,.45);overflow:hidden;border:1px solid #C9DDF2}
+.screen-body{padding:30px 38px 40px}
+.page{max-width:1064px;margin:0 auto}
+
+/* ===== NAVBAR (NAV-0) ===== */
+.navbar{height:60px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 38px;gap:26px;position:relative;z-index:30}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:17px;color:var(--navy)}
+.logo-mark{width:33px;height:33px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--sky));display:grid;place-items:center;color:#fff;font-size:19px;font-weight:900}
+.nav-links{display:flex;gap:24px;margin-left:6px}
+.nav-links a{font-size:15px;font-weight:500;color:var(--slate);padding:6px 2px;position:relative}
+.nav-links a.active{color:var(--blue);font-weight:600}
+.nav-links a.active::after{content:"";position:absolute;left:0;right:0;bottom:-14px;height:2.5px;background:var(--blue);border-radius:2px}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.bell{position:relative;width:40px;height:40px;border-radius:50%;border:0;background:transparent;font-size:19px;display:grid;place-items:center}
+.bell:hover{background:var(--bg)}
+.bell .dot{position:absolute;top:2px;right:1px;background:var(--red);color:#fff;font-size:10.5px;font-weight:700;min-width:17px;height:17px;border-radius:9px;display:grid;place-items:center;padding:0 4px;border:2px solid #fff}
+.bell.active{background:#EAF2FE}
+.userblock{display:flex;align-items:center;gap:9px;background:none;border:0;padding:5px 6px;border-radius:12px}
+.userblock:hover{background:var(--bg)}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#93C5FD,var(--blue));color:#fff;display:grid;place-items:center;font-weight:700;font-size:13.5px;flex:0 0 36px}
+.avatar.lg{width:46px;height:46px;font-size:16px;flex-basis:46px}
+.userblock .uname{font-size:15px;font-weight:600;color:var(--navy)}
+.caret{color:var(--muted);font-size:12px}
+/* avatar dropdown (CP15 / NAV-0) */
+.avatar-menu{position:absolute;top:56px;right:30px;width:288px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:10px;display:none;z-index:50}
+.avatar-menu.open{display:block}
+.avatar-menu .am-head{display:flex;gap:11px;align-items:center;padding:8px 10px 12px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.avatar-menu .am-head b{color:var(--navy);font-size:15.5px;display:block}
+.avatar-menu .am-head span{color:var(--muted);font-size:13px}
+.avatar-menu a{display:flex;align-items:center;gap:11px;padding:10px;border-radius:10px;color:var(--ink);font-size:15px;font-weight:500}
+.avatar-menu a:hover{background:var(--bg)}
+.avatar-menu a .mi{width:21px;text-align:center}
+.avatar-menu .divider{height:1px;background:var(--line);margin:6px 4px}
+.avatar-menu a.logout{color:var(--red)}
+
+/* ===== PAGE HEADER (NAV-0) ===== */
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:6px 0 20px}
+.page-head h1{font-size:24px;font-weight:800;color:var(--navy);line-height:1.25}
+.page-head p{color:var(--slate);font-size:15px;margin-top:3px}
+
+/* ===== GENERIC CONTROLS ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:16px;padding:0 26px;height:52px;border-radius:13px;border:1px solid transparent;transition:.15s}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue-dark)}
+.btn-secondary{background:#fff;border-color:#C7DBF2;color:var(--navy)}
+.btn-secondary:hover{border-color:var(--blue);color:var(--blue)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-block{width:100%}
+.btn-lg{height:58px;font-size:17px;border-radius:14px}
+.btn:disabled{background:#D7E3F0;color:#8AA3BC;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 11px;border-radius:999px;background:#EAF2FE;color:var(--blue-dark)}
+.chip.teal{background:var(--green-bg);color:var(--teal)}
+.chip.amber{background:var(--amber-bg);color:var(--amber)}
+.chip.orange{background:var(--orange-bg);color:var(--orange)}
+.chip.red{background:var(--red-bg);color:var(--red)}
+.chip.grey{background:#EEF2F6;color:var(--slate)}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm)}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:15px;font-weight:600;color:var(--navy);margin-bottom:8px}
+.field label .req{color:var(--red)}
+.field .hint{font-size:13.5px;color:var(--muted);margin-top:6px}
+.input{width:100%;height:54px;border:1.5px solid var(--line);border-radius:12px;padding:0 16px;font-family:inherit;font-size:16.5px;color:var(--ink);background:#fff;outline:none}
+.input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+textarea.input{height:auto;padding:13px 16px;resize:vertical;line-height:1.55}
+select.input{appearance:none}
+.small-print{font-size:13px;color:var(--muted);text-align:center;line-height:1.6}
+
+/* ===== AUTH (SH1/SH2) ===== */
+.auth-zone{min-height:640px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:44px 20px;background:
+ radial-gradient(700px 380px at 85% -5%,rgba(56,189,248,.22),transparent 60%),
+ radial-gradient(620px 420px at -10% 30%,rgba(37,99,235,.12),transparent 60%),var(--bg)}
+.auth-card{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:38px 40px;width:100%;max-width:480px}
+.auth-card .logo-c{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:24px}
+.auth-card .logo-mark{width:56px;height:56px;border-radius:16px;font-size:30px;margin-bottom:12px}
+.auth-card h1{font-size:26px;font-weight:800;color:var(--navy);text-align:center}
+.auth-card .sub{text-align:center;color:var(--slate);font-size:15.5px;margin:6px 0 26px}
+.phone-wrap{display:flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
+.phone-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+.phone-wrap .prefix{display:flex;align-items:center;gap:7px;padding:0 14px;background:var(--bg);border-right:1px solid var(--line);font-weight:700;color:var(--navy);font-size:16.5px}
+.phone-wrap input{flex:1;border:0;outline:none;height:54px;padding:0 14px;font-family:inherit;font-size:17px;letter-spacing:.4px;color:var(--ink)}
+.divider-or{display:flex;align-items:center;gap:14px;color:var(--muted);font-size:13px;margin:22px 0}
+.divider-or::before,.divider-or::after{content:"";flex:1;height:1px;background:var(--line)}
+.admin-variant{margin-top:26px;width:100%;max-width:480px;background:#fff;border:1.5px dashed #B9D2EE;border-radius:16px;padding:18px 20px}
+.admin-variant h4{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.admin-variant p{font-size:14.5px;color:var(--slate)}
+/* OTP */
+.otp-row{display:flex;gap:11px;justify-content:center;margin:8px 0 6px}
+.otp-row input{width:52px;height:60px;text-align:center;font-family:inherit;font-size:24px;font-weight:700;color:var(--navy);border:1.5px solid var(--line);border-radius:13px;outline:none;background:#fff}
+.otp-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+.alert{display:flex;gap:11px;border-radius:13px;padding:13px 16px;font-size:14.5px;margin:14px 0}
+.alert.red{background:var(--red-bg);color:#7F1D1D}
+.alert b{color:var(--red)}
+/* role cards */
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 22px}
+.role-card{border:2px solid var(--line);border-radius:16px;padding:19px;text-align:left;background:#fff;transition:.15s;width:100%}
+.role-card:hover{border-color:#B9D2EE}
+.role-card.selected{border-color:var(--blue);background:#F4F9FF;box-shadow:0 0 0 3.5px rgba(37,99,235,.12)}
+.role-card .ric{font-size:27px;margin-bottom:9px}
+.role-card h3{font-size:16.5px;color:var(--navy);margin-bottom:4px}
+.role-card p{font-size:14px;color:var(--slate)}
+.role-card .next{margin-top:11px;font-size:13.5px;font-weight:600;color:var(--blue)}
+
+/* ===== STEPPER (body card) ===== */
+.stepper{display:flex;gap:10px;margin-bottom:22px}
+.stepper .st{flex:1;display:flex;align-items:center;gap:11px;padding:14px 16px;border-radius:13px;background:#fff;border:1px solid var(--line)}
+.stepper .st .n{width:34px;height:34px;border-radius:50%;background:#EAF2FE;color:var(--blue);font-weight:800;display:grid;place-items:center;flex:0 0 34px;font-size:15px}
+.stepper .st.done .n{background:var(--teal);color:#fff}
+.stepper .st.now{background:var(--blue);border-color:var(--blue);color:#fff}
+.stepper .st.now .n{background:#fff;color:var(--blue)}
+.stepper .st small{display:block;font-size:12px;opacity:.75;font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.stepper .st b{font-size:15px;line-height:1.3}
+.stepper .st.todo{opacity:.65}
+/* collapsed step summary */
+.step-summary{display:flex;align-items:center;gap:14px;padding:17px 20px;margin-bottom:18px}
+.step-summary .n{width:34px;height:34px;border-radius:50%;background:var(--teal);color:#fff;font-weight:800;display:grid;place-items:center;flex:0 0 34px}
+.step-summary h3{font-size:16.5px;color:var(--navy)}
+.step-summary p{font-size:14px;color:var(--slate)}
+.step-summary .edit{margin-left:auto;font-weight:600;font-size:14.5px;white-space:nowrap}
+/* upload cards CP2 */
+.upload-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.upload{border:1.5px dashed #B9D2EE;border-radius:14px;padding:17px;text-align:center;background:#FBFDFF}
+.upload .uic{font-size:29px}
+.upload h4{font-size:15px;color:var(--navy);margin:7px 0 3px}
+.upload p{font-size:13px;color:var(--muted);margin-bottom:9px}
+.upload.filled{border-style:solid;border-color:#BFE8DC;background:#F7FEFB}
+/* radio / check cards */
+.choice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.choice{border:2px solid var(--line);border-radius:14px;padding:16px;background:#fff;text-align:left;width:100%}
+.choice.selected{border-color:var(--blue);background:#F4F9FF}
+.choice h4{color:var(--navy);font-size:16px;margin-bottom:4px}
+.choice p{font-size:13.5px;color:var(--slate)}
+.chip-select{display:flex;gap:9px;flex-wrap:wrap}
+.chip-select button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:10px 19px;font-size:15px;font-weight:600;color:var(--slate)}
+.chip-select button.selected{background:var(--blue);border-color:var(--blue);color:#fff}
+.cols-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.cols-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.toggle{position:relative;width:58px;height:32px;border-radius:999px;background:#CBD8E5;border:0;flex:0 0 58px;transition:.2s}
+.toggle::after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.toggle.on{background:var(--teal)}
+.toggle.on::after{left:30px}
+.map-ph{height:215px;border-radius:14px;position:relative;overflow:hidden;background:
+ repeating-linear-gradient(0deg,transparent,transparent 34px,rgba(37,99,235,.07) 34px,rgba(37,99,235,.07) 35px),
+ repeating-linear-gradient(90deg,transparent,transparent 34px,rgba(37,99,235,.07) 34px,rgba(37,99,235,.07) 35px),
+ linear-gradient(140deg,#E3F2E8,#DCEBFA)}
+.map-ph .pin{position:absolute;top:44%;left:50%;transform:translate(-50%,-100%);font-size:36px}
+.map-ph .pin-label{position:absolute;top:calc(44% + 8px);left:50%;transform:translateX(-50%);background:#fff;border-radius:9px;box-shadow:var(--shadow-sm);padding:5px 12px;font-size:13px;font-weight:600;color:var(--navy);white-space:nowrap}
+.map-ph .gps-chip{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.94);border-radius:9px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--navy);display:flex;gap:7px;align-items:center}
+.gps-dot{width:9px;height:9px;border-radius:50%;background:var(--teal)}
+
+/* ===== ELDER (nurse surfaces) ===== */
+.elder{font-size:17px}
+.elder .input{height:58px;font-size:17.5px}
+.elder .field label{font-size:16px}
+.elder .btn-lg{height:60px;font-size:17.5px}
+.doc-row{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:#fff}
+.doc-row .dic{width:46px;height:46px;border-radius:12px;background:#EAF2FE;display:grid;place-items:center;font-size:22px;flex:0 0 46px}
+.doc-row h4{color:var(--navy);font-size:16.5px}
+.doc-row p{font-size:14px;color:var(--slate)}
+.doc-row .st{margin-left:auto;text-align:right}
+.svc-group{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fff;margin-bottom:14px}
+.svc-group h4{color:var(--navy);font-size:16.5px;margin-bottom:4px}
+.svc-group .g-sub{font-size:14px;color:var(--slate);margin-bottom:12px}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 18px}
+.check-item{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;padding:9px 11px;border-radius:10px;background:var(--bg)}
+.check-item input{width:20px;height:20px;margin-top:2px;accent-color:var(--blue)}
+.check-item.locked{background:#F1F5F9;color:var(--muted)}
+.timeline-mini{display:flex;gap:0;margin-top:14px}
+.timeline-mini div{flex:1;text-align:center;position:relative;padding-top:20px;font-size:14px;color:var(--slate)}
+.timeline-mini div::before{content:"";position:absolute;top:5px;left:50%;transform:translateX(-50%);width:12px;height:12px;border-radius:50%;background:#CBD8E5}
+.timeline-mini div.done::before{background:var(--teal)}
+.timeline-mini div::after{content:"";position:absolute;top:10px;left:calc(-50% + 8px);right:calc(50% + 8px);height:2px;background:#E1EBF5}
+.timeline-mini div:first-child::after{display:none}
+
+/* ===== TOOLBAR + NOTIFICATIONS (SH5) ===== */
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;padding:13px 0 18px;border-top:1px solid var(--line)}
+.toolbar button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 17px;font-size:14.5px;font-weight:600;color:var(--slate)}
+.toolbar button.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.toolbar button .cnt{background:rgba(255,255,255,.25);border-radius:8px;padding:0 6px;margin-left:5px;font-size:12.5px}
+.toolbar button:not(.active) .cnt{background:#EAF2FE;color:var(--blue-dark)}
+.notif-cols{display:grid;grid-template-columns:1.9fr 1fr;gap:22px;align-items:start}
+.group-label{display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 12px}
+.group-label b{color:var(--navy);font-size:16px}
+.group-label span{color:var(--muted);font-size:13.5px}
+.notif{display:flex;gap:14px;background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px 19px;margin-bottom:13px;position:relative}
+.notif.unread{border-color:#B9D2EE;background:#FBFDFF}
+.notif .nic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:0 0 44px;background:#EAF2FE}
+.notif .nic.red{background:var(--red-bg)}
+.notif .nic.amber{background:var(--amber-bg)}
+.notif .nic.teal{background:var(--green-bg)}
+.notif h4{font-size:15.5px;color:var(--navy);line-height:1.4}
+.notif p{font-size:14.5px;color:var(--slate);margin-top:2px}
+.notif .time{font-size:13px;color:var(--muted);white-space:nowrap}
+.notif .udot{position:absolute;top:16px;right:16px;width:9px;height:9px;border-radius:50%;background:var(--blue)}
+.notif .acts{display:flex;gap:9px;margin-top:11px}
+.btn-sm{height:38px;padding:0 17px;font-size:14px;border-radius:10px}
+.variant-note{border:1.5px dashed #B9D2EE;border-radius:15px;padding:18px;background:#FBFDFF}
+.variant-note h4{font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.variant-note p{font-size:14.5px;color:var(--slate);margin-bottom:9px}
+.variant-note b{color:var(--navy)}
+
+/* ===== SETTINGS (SH6) ===== */
+.set-cols{display:grid;grid-template-columns:1.55fr 1fr;gap:22px;align-items:start}
+.profile-card{padding:24px;display:flex;gap:18px;align-items:center;margin-bottom:20px}
+.profile-card h2{font-size:21px;color:var(--navy)}
+.profile-card .prow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.menu-list{overflow:hidden}
+.menu-list a{display:flex;align-items:center;gap:14px;padding:16.5px 20px;border-bottom:1px solid var(--line);color:var(--ink);font-size:15.5px;font-weight:500}
+.menu-list a:last-child{border-bottom:0}
+.menu-list a:hover{background:var(--bg)}
+.menu-list .mi{width:23px;text-align:center;font-size:17px}
+.menu-list .sub{display:block;font-size:13.5px;color:var(--muted);font-weight:400}
+.menu-list .chev{margin-left:auto;color:var(--muted)}
+.menu-list a.danger{color:var(--red)}
+.banner{border-radius:15px;padding:19px 21px;margin-bottom:14px;border:1px solid}
+.banner h4{font-size:16px;margin-bottom:4px}
+.banner p{font-size:14.5px}
+.banner .acts{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap}
+.banner.amber{background:var(--amber-soft);border-color:#F0DFA8;color:#713F12}
+.banner.amber h4{color:var(--amber)}
+.banner.orange{background:var(--orange-bg);border-color:#F6D3B3;color:#7C2D12}
+.banner.orange h4{color:var(--orange)}
+.banner.red{background:var(--red-bg);border-color:#F3C2C2;color:#7F1D1D}
+.banner.red h4{color:var(--red)}
+.variant-tag{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.65;display:block;margin-bottom:5px}
+.checklist{list-style:none;margin-top:9px;font-size:14.5px}
+.checklist li{padding:3px 0}
+.board-foot{max-width:1180px;margin:0 auto;padding:26px 24px 60px;color:var(--slate);font-size:14px}
+@media(max-width:900px){
+  .screen-body{padding:22px 18px 30px}
+  .navbar{padding:0 18px}.nav-links{display:none}
+  .upload-grid,.choice-grid,.cols-3,.cols-2,.role-grid,.notif-cols,.set-cols{grid-template-columns:1fr}
+  .stepper{flex-direction:column}
+  .auth-card{padding:30px 22px}
+}
+</style>
+</head>
+<body>
+
+<div class="board-head">
+  <h1>Phần SH — Dùng chung &amp; Xác thực</h1>
+  <p>Bản thiết kế do Tom dựng trực tiếp (không qua Stitch), áp đúng chuẩn <b>NAV-0</b> (navbar một hàng, page header tách bạch, menu ở avatar), hệ màu khóa của M0 (xanh chủ đạo #2563EB, Be Vietnam Pro) và dữ liệu mẫu thống nhất của dự án. Nội dung tuân thủ SRS v2.0 Updated — không số hotline, không tuyên bố ngoài đặc tả.</p>
+  <div class="board-nav">
+    <a href="#sh1">SH1 · Đăng nhập</a><a href="#sh2">SH2 · OTP &amp; vai trò</a><a href="#sh3">SH3 · eKYC khách</a>
+    <a href="#sh4">SH4 · Onboarding ĐD</a><a href="#sh5">SH5 · Thông báo</a><a href="#sh6">SH6 · Hồ sơ &amp; cài đặt</a>
+  </div>
+</div>
+
+<!-- ================= SH1 ================= -->
+<div class="meta-bar" id="sh1"><span class="code">SH1</span><h2>Đăng nhập bằng số điện thoại</h2><span>Không navbar — thẻ auth ở giữa màn hình · biến thể Admin ở dưới thẻ</span></div>
+<div class="screen">
+  <div class="auth-zone">
+    <div class="auth-card">
+      <div class="logo-c">
+        <div class="logo-mark">+</div>
+        <div style="font-weight:800;color:var(--navy);font-size:18px">HealthCareSystem</div>
+      </div>
+      <h1>Đăng nhập</h1>
+      <p class="sub">Nhập số điện thoại để nhận mã OTP</p>
+      <form onsubmit="return false">
+        <div class="field">
+          <label for="sh1-phone">Số điện thoại di động</label>
+          <div class="phone-wrap">
+            <span class="prefix">🇻🇳 +84</span>
+            <input id="sh1-phone" type="tel" value="0905 123 456" autocomplete="tel">
+          </div>
+          <div class="hint">ⓘ Mã OTP gồm 6 chữ số sẽ được gửi qua SMS hoặc Zalo ZNS.</div>
+        </div>
+        <button class="btn btn-primary btn-block btn-lg" type="submit">Nhận mã OTP →</button>
+      </form>
+      <div class="divider-or">hoặc</div>
+      <p style="text-align:center;font-size:15.5px;color:var(--slate)">Chưa có tài khoản? <a href="#sh2" style="font-weight:700">Đăng ký ngay</a></p>
+      <p class="small-print" style="margin-top:20px">Bằng việc tiếp tục, bạn đồng ý với <a href="#">Điều khoản sử dụng</a> và chấp thuận việc xử lý dữ liệu cá nhân theo <b>Nghị định 13/2023/NĐ-CP</b>.</p>
+    </div>
+    <div class="admin-variant">
+      <h4>Biến thể · Admin Portal</h4>
+      <p>Cùng một thẻ đăng nhập. Sau bước OTP, tài khoản Admin <b>bắt buộc xác thực thêm lớp thứ hai</b>. Mọi phiên đăng nhập đều được ghi nhật ký (địa chỉ IP, thiết bị) phục vụ kiểm toán.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SH2 ================= -->
+<div class="meta-bar" id="sh2"><span class="code">SH2</span><h2>Nhập OTP &amp; chọn vai trò khi đăng ký</h2><span>Không navbar · trạng thái lỗi OTP hiển thị sẵn · thẻ điều dưỡng = biến thể chữ lớn</span></div>
+<div class="screen">
+  <div class="auth-zone">
+    <div class="auth-card" style="max-width:600px">
+      <a href="#sh1" style="font-weight:600;font-size:15px">← Quay lại nhập số điện thoại</a>
+      <h1 style="text-align:left;margin-top:16px">Nhập mã OTP</h1>
+      <p class="sub" style="text-align:left;margin-bottom:20px">Mã 6 chữ số đã gửi tới <b style="color:var(--navy)">0905 ••• 123</b> · <a href="#sh1" style="font-weight:600">Đổi số</a></p>
+      <div class="otp-row" id="otpRow">
+        <input maxlength="1" value="8" inputmode="numeric"><input maxlength="1" value="4" inputmode="numeric"><input maxlength="1" value="2" inputmode="numeric"><input maxlength="1" value="9" inputmode="numeric"><input maxlength="1" inputmode="numeric"><input maxlength="1" inputmode="numeric">
+      </div>
+      <div class="alert red"><span>⚠️</span><span><b>Mã không đúng — còn 4 lần thử.</b><br>Nếu không nhận được mã, bạn có thể gửi lại sau khi hết đếm ngược.</span></div>
+      <p style="text-align:center;color:var(--slate);font-size:15px">Gửi lại mã sau <b id="resendTimer" style="color:var(--navy)">00:45</b></p>
+      <div style="border-top:1px solid var(--line);margin:24px 0 18px"></div>
+      <div class="field" style="margin-bottom:6px"><label>Lần đầu sử dụng? Chọn vai trò của bạn</label></div>
+      <div class="role-grid">
+        <button class="role-card" type="button">
+          <div class="ric">🏠</div>
+          <h3>Tôi cần thuê điều dưỡng</h3>
+          <p>Đặt chăm sóc cho bản thân hoặc người thân, tại nhà hoặc tại bệnh viện.</p>
+          <div class="next">Tiếp tục: Xác thực CCCD &amp; hồ sơ →</div>
+        </button>
+        <button class="role-card selected" type="button">
+          <div class="ric">🩺</div>
+          <h3>Tôi là điều dưỡng / bác sĩ</h3>
+          <p>Nhận ca chăm sóc tại nhà theo lịch rảnh của bạn, thu nhập minh bạch.</p>
+          <div class="next">Tiếp tục: Nộp hồ sơ thẩm định →</div>
+        </button>
+      </div>
+      <button class="btn btn-primary btn-block btn-lg" type="button">Xác thực &amp; tiếp tục</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SH3 ================= -->
+<div class="meta-bar" id="sh3"><span class="code">SH3</span><h2>eKYC khách hàng &amp; tạo hồ sơ người bệnh đầu tiên</h2><span>Navbar biến thể SETUP (Patient) · stepper nằm trong thân trang</span></div>
+<div class="screen">
+  <div class="navbar">
+    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <div class="nav-right">
+      <span class="chip">Đang thiết lập tài khoản</span>
+      <span class="avatar">AN</span>
+    </div>
+  </div>
+  <div class="screen-body"><div class="page">
+    <div class="page-head">
+      <div><h1>Xác thực danh tính &amp; tạo hồ sơ</h1><p>Hoàn tất 3 bước để bắt đầu đặt lịch chăm sóc</p></div>
+    </div>
+
+    <div class="stepper">
+      <div class="st done"><span class="n">✓</span><span><small>Bước 1</small><b>Xác thực CCCD</b></span></div>
+      <div class="st now"><span class="n">2</span><span><small>Bước 2 · Đang thực hiện</small><b>Hồ sơ người được chăm sóc</b></span></div>
+      <div class="st todo"><span class="n">3</span><span><small>Bước 3</small><b>Đồng ý dữ liệu</b></span></div>
+    </div>
+
+    <!-- Step 1 summary -->
+    <div class="card step-summary">
+      <span class="n">✓</span>
+      <div>
+        <h3>Bước 1 · Xác thực CCCD <span class="chip amber" style="margin-left:8px">Đang chờ duyệt</span></h3>
+        <p>Nguyễn Văn An · CCCD 001092 ••• •88 — hồ sơ do đội ngũ vận hành thẩm định thủ công.</p>
+      </div>
+      <a class="edit" href="#">Chỉnh sửa</a>
+    </div>
+    <div class="upload-grid" style="margin-bottom:22px">
+      <div class="upload filled"><div class="uic">🪪</div><h4>CCCD mặt trước</h4><p>can_cuoc_truoc.jpg</p><span class="chip amber">Đã tải lên · Chờ Admin duyệt</span></div>
+      <div class="upload filled"><div class="uic">🪪</div><h4>CCCD mặt sau</h4><p>can_cuoc_sau.jpg</p><span class="chip amber">Đã tải lên · Chờ Admin duyệt</span></div>
+      <div class="upload filled"><div class="uic">🤳</div><h4>Ảnh chân dung trực tiếp</h4><p>Chụp bằng camera trong ứng dụng</p><span class="chip amber">Đã tải lên · Chờ Admin duyệt</span></div>
+    </div>
+
+    <!-- Step 2 form -->
+    <form class="card" style="padding:26px" onsubmit="return false">
+      <h3 style="color:var(--navy);font-size:18px;margin-bottom:4px">Bước 2 · Hồ sơ người được chăm sóc</h3>
+      <p style="color:var(--slate);font-size:14.5px;margin-bottom:20px">Thông tin này chỉ hiển thị cho điều dưỡng được phân ca và đội ngũ vận hành khi cần hỗ trợ.</p>
+      <div class="field">
+        <label>Mối quan hệ với người được chăm sóc <span class="req">*</span></label>
+        <div class="chip-select">
+          <button type="button">Bản thân</button><button type="button">Bố</button><button type="button" class="selected">Mẹ ✓</button><button type="button">Vợ / Chồng</button><button type="button">Con</button><button type="button">Khác</button>
+        </div>
+      </div>
+      <div class="cols-3">
+        <div class="field"><label>Họ và tên người bệnh <span class="req">*</span></label><input class="input" value="Nguyễn Thị Hoa"></div>
+        <div class="field"><label>Năm sinh <span class="req">*</span></label><input class="input" value="1948 (78 tuổi)"></div>
+        <div class="field"><label>Cân nặng (kg) <span class="req">*</span></label><input class="input" value="52"></div>
+      </div>
+      <div class="field">
+        <label>Mức độ vận động <span class="req">*</span></label>
+        <div class="choice-grid">
+          <button type="button" class="choice"><h4>🚶 Tự đi lại</h4><p>Tự sinh hoạt, đi lại bình thường, không cần hỗ trợ.</p></button>
+          <button type="button" class="choice selected"><h4>🧑‍🦯 Hỗ trợ di chuyển ✓</h4><p>Cần người dìu, dùng gậy hoặc khung tập đi. Nguy cơ té ngã nhẹ.</p></button>
+          <button type="button" class="choice"><h4>🛏️ Nằm tại giường</h4><p>Không thể rời giường. Cần xoay trở chống loét tỳ đè (áp dụng phụ phí bệnh nhân nặng +15%).</p></button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="sh3-history">Tiền sử bệnh &amp; dị ứng <span class="req">*</span></label>
+        <textarea class="input" id="sh3-history" rows="3">Tăng huyết áp (đang dùng Amlodipine 5mg mỗi ngày), đái tháo đường type 2 kiểm soát ổn định. Đã phẫu thuật thay khớp háng phải cách đây 3 tháng. Dị ứng: kháng sinh nhóm Penicillin (nổi mề đay, khó thở nhẹ).</textarea>
+        <div class="hint">Ghi rõ bệnh nền, phẫu thuật gần đây và mọi tiền sử dị ứng thuốc — điều dưỡng sẽ đọc trước khi nhận ca.</div>
+      </div>
+      <div class="card" style="padding:18px 20px;display:flex;gap:16px;align-items:center;background:var(--bg);box-shadow:none;margin-bottom:18px">
+        <div style="flex:1">
+          <b style="color:var(--navy)">Nguy cơ bệnh truyền nhiễm</b>
+          <p style="font-size:14px;color:var(--slate)">Khai báo trung thực để điều dưỡng chuẩn bị đồ bảo hộ phù hợp (viêm gan B, lao, bệnh lây qua đường máu/hô hấp…).</p>
+        </div>
+        <span class="chip teal">Không có</span>
+        <button class="toggle" type="button" aria-label="Bật/tắt nguy cơ truyền nhiễm"></button>
+      </div>
+      <div class="field">
+        <label>Địa chỉ nơi chăm sóc <span class="req">*</span></label>
+        <input class="input" value="Số 25 Quang Trung, phường Hải Châu 1, quận Hải Châu, Đà Nẵng">
+      </div>
+      <div class="map-ph">
+        <span class="gps-chip"><span class="gps-dot"></span> Đã ghim vị trí · Hải Châu, Đà Nẵng</span>
+        <div class="pin">📍</div>
+        <div class="pin-label">Nhà bệnh nhân Hoa</div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:22px">
+        <button class="btn btn-primary btn-lg" type="submit">Lưu &amp; tiếp tục sang Bước 3 →</button>
+      </div>
+    </form>
+
+    <!-- Step 3 summary -->
+    <div class="card step-summary" style="margin-top:18px;margin-bottom:0;opacity:.92">
+      <span class="n" style="background:#EAF2FE;color:var(--blue)">3</span>
+      <div>
+        <h3>Bước 3 · Đồng ý xử lý dữ liệu sức khỏe</h3>
+        <p>Xác nhận theo Nghị định 13/2023/NĐ-CP — hệ thống ghi lại thời điểm và thiết bị khi bạn đồng ý. Hoàn tất Bước 2 để mở bước này.</p>
+      </div>
+      <button class="btn btn-secondary" disabled>Hoàn tất</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= SH4 ================= -->
+<div class="meta-bar" id="sh4"><span class="code">SH4</span><h2>Onboarding điều dưỡng — wizard nộp hồ sơ</h2><span>Navbar SETUP (Nurse) · cỡ chữ &amp; nút bấm lớn (elder-friendly) · Nhóm 3 bị khóa</span></div>
+<div class="screen">
+  <div class="navbar">
+    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <div class="nav-right">
+      <span class="chip amber">Hồ sơ đang chờ thẩm định</span>
+      <span class="avatar">HA</span>
+    </div>
+  </div>
+  <div class="screen-body elder"><div class="page">
+    <div class="page-head">
+      <div><h1>Đăng ký làm điều dưỡng</h1><p>Nộp hồ sơ để Admin thẩm định và phân cấp Cấp 1 / Cấp 2</p></div>
+    </div>
+
+    <div class="stepper">
+      <div class="st done"><span class="n">✓</span><span><small>Bước 1</small><b>Thông tin &amp; CCCD</b></span></div>
+      <div class="st now"><span class="n">2</span><span><small>Bước 2 · Đang thực hiện</small><b>Bằng cấp &amp; chứng chỉ</b></span></div>
+      <div class="st todo"><span class="n">3</span><span><small>Bước 3</small><b>Kinh nghiệm &amp; dịch vụ</b></span></div>
+      <div class="st todo"><span class="n">4</span><span><small>Bước 4</small><b>Xem lại &amp; gửi duyệt</b></span></div>
+    </div>
+
+    <!-- Step 1 summary -->
+    <div class="card step-summary">
+      <span class="n">✓</span>
+      <div style="display:flex;gap:13px;align-items:center">
+        <span class="avatar lg">HA</span>
+        <div>
+          <h3>Phạm Thu Hà</h3>
+          <p>CCCD 048192 ••• •37 · Ảnh chân dung &amp; CCCD 2 mặt đã tải lên</p>
+        </div>
+      </div>
+      <span class="chip amber" style="margin-left:auto">Đã tải lên · Chờ Admin duyệt</span>
+      <a class="edit" href="#">Chỉnh sửa</a>
+    </div>
+
+    <!-- Step 2 expanded -->
+    <div class="card" style="padding:26px;margin-bottom:18px">
+      <h3 style="color:var(--navy);font-size:19px;margin-bottom:16px">Bước 2 · Bằng cấp &amp; chứng chỉ</h3>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="doc-row">
+          <span class="dic">🎓</span>
+          <div><h4>Bằng tốt nghiệp <span class="req" style="color:var(--red)">*</span></h4><p>Bang_tot_nghiep_DieuDuong.pdf · 2,4 MB</p></div>
+          <div class="st"><span class="chip amber">Đã tải lên · Chờ Admin duyệt</span><br><a href="#" style="font-size:14px;font-weight:600">Tải lại</a></div>
+        </div>
+        <div class="doc-row" style="align-items:flex-start">
+          <span class="dic">📜</span>
+          <div style="flex:1">
+            <h4>Giấy phép hành nghề (GPHN)</h4>
+            <p>Bắt buộc nếu muốn nhận ca Cấp 2 (thủ thuật xâm lấn). Chưa có GPHN, bạn vẫn được xét duyệt ở Cấp 1.</p>
+            <div class="cols-2" style="margin-top:14px">
+              <div class="field" style="margin-bottom:0"><label>Số GPHN</label><input class="input" value="01284/GPHN-ĐN"></div>
+              <div class="field" style="margin-bottom:0"><label>Phạm vi chuyên môn</label><input class="input" value="Điều dưỡng đa khoa"></div>
+              <div class="field" style="margin-bottom:0"><label>Ngày cấp</label><input class="input" value="15/05/2020"></div>
+              <div class="field" style="margin-bottom:0"><label>Ngày hết hạn</label><input class="input" value="15/05/2027"></div>
+            </div>
+          </div>
+          <div class="st"><span class="chip amber">Đã tải lên · Chờ Admin duyệt</span></div>
+        </div>
+        <div class="doc-row">
+          <span class="dic">🏅</span>
+          <div><h4>Quyết định nghỉ hưu <span style="color:var(--muted);font-weight:500">(không bắt buộc)</span></h4><p>Chỉ dùng để gắn huy hiệu “Nhân viên y tế hưu trí” trên hồ sơ của bạn — không thay thế GPHN.</p></div>
+          <div class="st"><button class="btn btn-secondary" type="button">＋ Tải lên</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 preview -->
+    <div class="card" style="padding:26px;margin-bottom:18px">
+      <h3 style="color:var(--navy);font-size:19px;margin-bottom:4px">Bước 3 · Kinh nghiệm &amp; dịch vụ bạn nhận</h3>
+      <p style="color:var(--slate);font-size:15px;margin-bottom:18px">Chọn các dịch vụ bạn có thể thực hiện. Sau khi được phân cấp, hệ thống chỉ gửi cho bạn những ca thuộc cấp của bạn.</p>
+      <div class="field" style="max-width:340px"><label>Số năm kinh nghiệm</label><input class="input" value="6 năm"></div>
+      <div class="svc-group">
+        <h4>Nhóm 1 · Chăm sóc cơ bản <span class="chip teal" style="margin-left:6px">Cấp 1 &amp; Cấp 2</span></h4>
+        <div class="check-grid">
+          <label class="check-item"><input type="checkbox" checked> Trông &amp; chăm sóc theo ca</label>
+          <label class="check-item"><input type="checkbox" checked> Vệ sinh cá nhân, xoay trở chống loét</label>
+          <label class="check-item"><input type="checkbox" checked> Đo sinh tồn (HA, SpO2, nhiệt độ)</label>
+          <label class="check-item"><input type="checkbox"> Hỗ trợ vận động, bầu bạn</label>
+        </div>
+      </div>
+      <div class="svc-group">
+        <h4>Nhóm 2 · Thủ thuật xâm lấn theo y lệnh <span class="chip" style="margin-left:6px">Chỉ Cấp 2 · Có GPHN</span></h4>
+        <div class="check-grid">
+          <label class="check-item"><input type="checkbox" checked> Tiêm dưới da / tiêm bắp</label>
+          <label class="check-item"><input type="checkbox" checked> Thay băng, rửa vết thương, cắt chỉ</label>
+          <label class="check-item"><input type="checkbox"> Truyền dịch duy trì theo y lệnh</label>
+          <label class="check-item"><input type="checkbox"> Chăm sóc sonde tiểu / sonde dạ dày</label>
+        </div>
+      </div>
+      <div class="svc-group" style="background:#F8FAFC">
+        <h4 style="color:var(--slate)">Nhóm 3 · Dịch vụ cấm tuyệt đối <span class="chip red" style="margin-left:6px">Không thực hiện trên nền tảng</span></h4>
+        <p class="g-sub">Các dịch vụ sau bị khóa hoàn toàn — không ai được nhận hoặc thực hiện qua hệ thống:</p>
+        <div class="check-grid">
+          <span class="check-item locked">🔒 Truyền máu &amp; chế phẩm máu</span>
+          <span class="check-item locked">🔒 Truyền tĩnh mạch kháng sinh nguy cơ sốc cao / hóa chất</span>
+          <span class="check-item locked">🔒 Tiểu phẫu, rạch áp-xe, khâu cấp cứu, gây mê tại nhà</span>
+          <span class="check-item locked">🔒 Kê đơn mới / tự ý đổi phác đồ điều trị</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 + submit state -->
+    <div class="card" style="padding:26px">
+      <h3 style="color:var(--navy);font-size:19px;margin-bottom:14px">Bước 4 · Xem lại &amp; gửi duyệt</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:16px">
+        <div style="display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding-bottom:9px"><span>CCCD (2 mặt) + ảnh chân dung</span><span class="chip amber">Chờ Admin duyệt</span></div>
+        <div style="display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding-bottom:9px"><span>Bằng tốt nghiệp Điều dưỡng</span><span class="chip amber">Chờ Admin duyệt</span></div>
+        <div style="display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding-bottom:9px"><span>GPHN 01284/GPHN-ĐN · hết hạn 15/05/2027</span><span class="chip amber">Chờ Admin duyệt</span></div>
+        <div style="display:flex;justify-content:space-between"><span>Dịch vụ đã chọn</span><b style="color:var(--navy)">7 dịch vụ · Nhóm 1 + Nhóm 2</b></div>
+      </div>
+      <button class="btn btn-primary btn-block btn-lg" style="margin-top:20px" type="button">Gửi toàn bộ hồ sơ để thẩm định</button>
+      <div style="background:var(--bg);border-radius:14px;padding:18px 20px;margin-top:20px">
+        <b style="color:var(--navy)">Sau khi gửi — Hồ sơ đang chờ duyệt</b>
+        <p style="color:var(--slate);font-size:15px">Admin sẽ thẩm định và gán <b>Cấp 1</b> hoặc <b>Cấp 2</b> cho bạn. Được duyệt xong, bạn nạp ký quỹ 300.000đ là có thể nhận ca.</p>
+        <div class="timeline-mini">
+          <div class="done"><b style="color:var(--teal)">Đã nộp hồ sơ</b></div>
+          <div>Admin thẩm định &amp; phân cấp</div>
+          <div>Nạp ký quỹ · Bắt đầu nhận ca</div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= SH5 ================= -->
+<div class="meta-bar" id="sh5"><span class="code">SH5</span><h2>Trung tâm thông báo</h2><span>Navbar NURSE đầy đủ (chuông đang active) · hàng lọc là toolbar trong thân trang</span></div>
+<div class="screen">
+  <div class="navbar">
+    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <nav class="nav-links">
+      <a href="#">Trang chủ</a><a href="#">Việc làm</a><a href="#">Ca của tôi</a><a href="#">Ví</a><a href="#">Tài khoản</a>
+    </nav>
+    <div class="nav-right">
+      <button class="bell active" aria-label="Thông báo">🔔<span class="dot">3</span></button>
+      <button class="userblock" data-menu="menu-sh5">
+        <span class="avatar">MT</span><span class="uname">Trần Thị Mai</span><span class="chip">Cấp 2</span><span class="caret">▾</span>
+      </button>
+    </div>
+    <div class="avatar-menu" id="menu-sh5">
+      <div class="am-head"><span class="avatar lg">MT</span><div><b>Trần Thị Mai</b><span>0905 ••• 123 · Điều dưỡng Cấp 2</span></div></div>
+      <a href="#sh6"><span class="mi">👤</span>Hồ sơ cá nhân</a>
+      <a href="#"><span class="mi">📜</span>Giấy tờ &amp; GPHN</a>
+      <a href="#"><span class="mi">👛</span>Ví của tôi</a>
+      <a href="#sh5"><span class="mi">🔔</span>Thông báo</a>
+      <a href="#"><span class="mi">🔠</span>Cỡ chữ &amp; hiển thị</a>
+      <a href="#"><span class="mi">🔒</span>Quyền riêng tư &amp; dữ liệu</a>
+      <a href="#"><span class="mi">💬</span>Hỗ trợ</a>
+      <div class="divider"></div>
+      <a href="#" class="logout"><span class="mi">↩️</span>Đăng xuất</a>
+    </div>
+  </div>
+  <div class="screen-body"><div class="page">
+    <div class="page-head">
+      <div><h1>Trung tâm thông báo</h1><p>Cập nhật về ca trực, thanh toán và hồ sơ của bạn</p></div>
+      <button class="btn btn-secondary" type="button">✓ Đánh dấu đã đọc</button>
+    </div>
+
+    <div class="toolbar">
+      <button class="active" type="button">Tất cả<span class="cnt">8</span></button>
+      <button type="button">Chưa đọc<span class="cnt">3</span></button>
+      <button type="button">Ca trực &amp; Việc mới<span class="cnt">3</span></button>
+      <button type="button">Tài chính &amp; Ví<span class="cnt">2</span></button>
+    </div>
+
+    <div class="notif-cols">
+      <div>
+        <div class="group-label"><b>Hôm nay</b><span>4 thông báo</span></div>
+
+        <div class="notif unread">
+          <span class="udot"></span>
+          <span class="nic">📡</span>
+          <div style="flex:1">
+            <h4>Ca mới phù hợp gần bạn (1,2 km)</h4>
+            <p>Thay băng vết mổ hậu phẫu · Hải Châu, Đà Nẵng · Bắt đầu 14:30 hôm nay · <b style="color:var(--navy)">500.000đ</b></p>
+            <div class="acts"><button class="btn btn-primary btn-sm" type="button">Nhận ca ngay</button><button class="btn btn-secondary btn-sm" type="button">Xem chi tiết</button></div>
+          </div>
+          <span class="time">5 phút trước</span>
+        </div>
+
+        <div class="notif unread">
+          <span class="udot"></span>
+          <span class="nic red">💸</span>
+          <div style="flex:1">
+            <h4 style="color:var(--red)">Cảnh báo nộp hoa hồng — còn 20 giờ</h4>
+            <p>Ca tiền mặt <b style="color:var(--navy)">HC-2026-1057</b>: vui lòng nộp hoa hồng <b style="color:var(--navy)">75.000đ</b> trước khi hết hạn. Quá 24 giờ kể từ lúc kết thúc ca, tài khoản sẽ tạm khóa nhận ca mới.</p>
+            <div class="acts"><button class="btn btn-danger btn-sm" type="button">Nộp hoa hồng ngay (75.000đ)</button></div>
+          </div>
+          <span class="time">42 phút trước</span>
+        </div>
+
+        <div class="notif unread">
+          <span class="udot"></span>
+          <span class="nic teal">✅</span>
+          <div style="flex:1">
+            <h4>Đơn HC-2026-1048 đã được xác nhận</h4>
+            <p>Ca chăm sóc ngày mai 08:00 tại Hải Châu. Nhớ kiểm tra y lệnh đính kèm trước khi nhận ca.</p>
+          </div>
+          <span class="time">2 giờ trước</span>
+        </div>
+
+        <div class="notif">
+          <span class="nic teal">💰</span>
+          <div style="flex:1">
+            <h4>Đã quyết toán 425.000đ vào ví khả dụng</h4>
+            <p>Ca HC-2026-1039 hoàn tất, không có khiếu nại sau 24 giờ. Số dư khả dụng hiện tại: <b style="color:var(--navy)">3.850.000đ</b>.</p>
+            <div class="acts"><button class="btn btn-secondary btn-sm" type="button">Xem biến động số dư</button></div>
+          </div>
+          <span class="time">4 giờ trước</span>
+        </div>
+
+        <div class="group-label" style="margin-top:22px"><b>Trước đó</b><span>Trong 7 ngày</span></div>
+
+        <div class="notif">
+          <span class="nic amber">📜</span>
+          <div style="flex:1">
+            <h4>Nhắc gia hạn Giấy phép hành nghề (GPHN)</h4>
+            <p>GPHN của bạn còn <b style="color:var(--navy)">45 ngày</b> hiệu lực (hết hạn 12/04/2027). Cập nhật GPHN mới để không bị tự động hạ xuống Cấp 1 khi hết hạn.</p>
+            <div class="acts"><button class="btn btn-secondary btn-sm" type="button">Cập nhật GPHN</button></div>
+          </div>
+          <span class="time">Hôm qua</span>
+        </div>
+
+        <div class="notif">
+          <span class="nic">⏰</span>
+          <div style="flex:1">
+            <h4>Nhắc ca: ca tại Hải Châu bắt đầu sau 60 phút</h4>
+            <p>Kiểm tra định vị và di chuyển an toàn. Địa chỉ chi tiết đã mở trong màn hình ca của bạn.</p>
+            <div class="acts"><button class="btn btn-secondary btn-sm" type="button">Chỉ đường trên bản đồ</button></div>
+          </div>
+          <span class="time">24/02</span>
+        </div>
+
+        <div class="notif">
+          <span class="nic red">🚨</span>
+          <div style="flex:1">
+            <h4>[SOS] Ca HC-2026-0988 — đã được xử lý</h4>
+            <p>Lúc 21:14, người nhà đã bấm SOS trong ca; hệ thống đã mở cuộc gọi 115 và gửi cảnh báo tới bạn và Admin. Xem lại nhật ký ca để biết chi tiết.</p>
+            <div class="acts"><button class="btn btn-secondary btn-sm" type="button">Xem nhật ký ca</button></div>
+          </div>
+          <span class="time">23/02</span>
+        </div>
+      </div>
+
+      <div class="variant-note">
+        <h4>Ghi chú biến thể</h4>
+        <p><b>Biến thể Patient:</b> cùng khung này với navbar Patient — nội dung gồm xác nhận thanh toán, hoàn tiền, nhắc đánh giá sau ca, nhắc lịch ca sắp tới.</p>
+        <p><b>Biến thể Admin:</b> dùng trong console Admin (sidebar riêng theo M0) — hồ sơ chờ duyệt, khiếu nại mới, cảnh báo SOS, đối soát cuối ngày.</p>
+        <p><b>Trạng thái trống:</b> khi không có thông báo, hiển thị minh họa nhẹ + dòng chữ “Bạn đã xem hết thông báo”.</p>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= SH6 ================= -->
+<div class="meta-bar" id="sh6"><span class="code">SH6</span><h2>Hồ sơ cá nhân, cài đặt &amp; trạng thái tài khoản</h2><span>Navbar NURSE (active: Tài khoản) · menu avatar đang mở · 3 banner trạng thái là biến thể</span></div>
+<div class="screen">
+  <div class="navbar">
+    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <nav class="nav-links">
+      <a href="#">Trang chủ</a><a href="#">Việc làm</a><a href="#">Ca của tôi</a><a href="#">Ví</a><a href="#" class="active">Tài khoản</a>
+    </nav>
+    <div class="nav-right">
+      <button class="bell" aria-label="Thông báo">🔔<span class="dot">3</span></button>
+      <button class="userblock" data-menu="menu-sh6">
+        <span class="avatar">MT</span><span class="uname">Trần Thị Mai</span><span class="chip">Cấp 2</span><span class="caret">▾</span>
+      </button>
+    </div>
+    <div class="avatar-menu open" id="menu-sh6">
+      <div class="am-head"><span class="avatar lg">MT</span><div><b>Trần Thị Mai</b><span>0905 ••• 123 · Điều dưỡng Cấp 2</span></div></div>
+      <a href="#sh6"><span class="mi">👤</span>Hồ sơ cá nhân</a>
+      <a href="#"><span class="mi">📜</span>Giấy tờ &amp; GPHN</a>
+      <a href="#"><span class="mi">👛</span>Ví của tôi</a>
+      <a href="#sh5"><span class="mi">🔔</span>Thông báo</a>
+      <a href="#"><span class="mi">🔠</span>Cỡ chữ &amp; hiển thị</a>
+      <a href="#"><span class="mi">🔒</span>Quyền riêng tư &amp; dữ liệu</a>
+      <a href="#"><span class="mi">💬</span>Hỗ trợ</a>
+      <div class="divider"></div>
+      <a href="#" class="logout"><span class="mi">↩️</span>Đăng xuất</a>
+    </div>
+  </div>
+  <div class="screen-body"><div class="page">
+    <div class="page-head">
+      <div><h1>Hồ sơ &amp; cài đặt</h1><p>Thông tin cá nhân, giấy tờ và tùy chọn tài khoản</p></div>
+    </div>
+
+    <div class="set-cols">
+      <div>
+        <div class="card profile-card">
+          <span class="avatar" style="width:64px;height:64px;flex-basis:64px;font-size:20px">MT</span>
+          <div>
+            <h2>Trần Thị Mai</h2>
+            <div style="color:var(--slate);font-size:14.5px">0905 ••• 123 · Hải Châu, Đà Nẵng · GPHN 00976/GPHN-ĐN (còn hạn tới 12/04/2027)</div>
+            <div class="prow">
+              <span class="chip">Điều dưỡng Cấp 2</span>
+              <span class="chip teal">TrustScore 92/100</span>
+              <span class="chip amber">★ Đánh giá 4.9</span>
+              <span class="chip teal">● Đang hoạt động · Sẵn sàng nhận ca</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card menu-list">
+          <a href="#"><span class="mi">👤</span><span>Thông tin cá nhân<span class="sub">Họ tên, ngày sinh, địa chỉ, ảnh đại diện</span></span><span class="chev">›</span></a>
+          <a href="#"><span class="mi">📜</span><span>Giấy tờ &amp; GPHN<span class="sub">CCCD, bằng cấp, giấy phép hành nghề — cập nhật GPHN mới tại đây</span></span><span class="chev">›</span></a>
+          <a href="#"><span class="mi">🏦</span><span>Tài khoản ngân hàng<span class="sub">Vietcombank •••• 6899 — nhận tiền quyết toán &amp; rút tiền</span></span><span class="chev">›</span></a>
+          <a href="#"><span class="mi">👛</span><span>Ví của tôi<span class="sub">Khả dụng 3.850.000đ · Ký quỹ 300.000đ (chỉ dùng trừ phạt vi phạm cam kết dịch vụ)</span></span><span class="chev">›</span></a>
+          <a href="#sh5"><span class="mi">🔔</span><span>Thông báo<span class="sub">Đẩy, trong ứng dụng và kênh dự phòng cho việc khẩn</span></span><span class="chev">›</span></a>
+          <a href="#"><span class="mi">🔠</span><span>Ngôn ngữ &amp; cỡ chữ<span class="sub">Tiếng Việt · Cỡ chữ lớn đang bật</span></span><button class="toggle on" type="button" aria-label="Cỡ chữ lớn"></button></a>
+          <a href="#"><span class="mi">🔒</span><span>Quyền riêng tư &amp; dữ liệu<span class="sub">Đồng ý xử lý dữ liệu, yêu cầu xóa / ẩn danh hóa theo Nghị định 13/2023</span></span><span class="chev">›</span></a>
+          <a href="#"><span class="mi">💬</span><span>Hỗ trợ<span class="sub">Câu hỏi thường gặp và gửi yêu cầu hỗ trợ trong ứng dụng</span></span><span class="chev">›</span></a>
+          <a href="#" class="danger"><span class="mi">↩️</span><span>Đăng xuất</span></a>
+        </div>
+      </div>
+
+      <div>
+        <div class="banner amber">
+          <span class="variant-tag">Biến thể trạng thái 01</span>
+          <h4>⏳ Hồ sơ đang chờ duyệt</h4>
+          <p>Bạn chưa thể nhận ca cho tới khi Admin thẩm định xong hồ sơ.</p>
+          <ul class="checklist">
+            <li>✓ CCCD &amp; ảnh chân dung — đã nộp</li>
+            <li>✓ Bằng tốt nghiệp — đã nộp</li>
+            <li>◌ GPHN — đang thẩm định</li>
+          </ul>
+        </div>
+        <div class="banner orange">
+          <span class="variant-tag">Biến thể trạng thái 02</span>
+          <h4>🔒 Tạm khóa nhận ca</h4>
+          <p><b>Lý do:</b> chưa nộp hoa hồng ca tiền mặt <b>HC-2026-1057</b> quá 24 giờ kể từ khi kết thúc ca. Số tiền cần nộp: <b>75.000đ</b>.</p>
+          <div class="acts">
+            <button class="btn btn-danger btn-sm" type="button">Nộp hoa hồng ngay (75.000đ)</button>
+            <button class="btn btn-secondary btn-sm" type="button">Xem chi tiết ca</button>
+          </div>
+        </div>
+        <div class="banner red">
+          <span class="variant-tag">Biến thể trạng thái 03</span>
+          <h4>⛔ Tài khoản đã bị khóa vĩnh viễn</h4>
+          <p>Tài khoản bị khóa do vi phạm nghiêm trọng quy tắc nền tảng. Nếu cho rằng có nhầm lẫn, bạn có thể gửi yêu cầu xem xét lại kèm giải trình qua mục Hỗ trợ — đội ngũ vận hành sẽ phản hồi trong ứng dụng.</p>
+          <div class="acts"><button class="btn btn-secondary btn-sm" type="button">Gửi yêu cầu qua mục Hỗ trợ</button></div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<div class="board-foot">
+  Chuẩn áp dụng: NAV-0 (navbar / page header / menu avatar) · M0 design system (Be Vietnam Pro, #2563EB) · Dữ liệu mẫu: Nguyễn Văn An — bà Nguyễn Thị Hoa (78 tuổi, Đà Nẵng) · ĐD. Trần Thị Mai (Cấp 2, TrustScore 92/100) · ĐD. Phạm Thu Hà (Cấp 2) · Đơn HC-2026-1042 / HC-2026-1057 · Nội dung theo SRS v2.0 Updated.
+</div>
+
+<script>
+// OTP auto-advance
+document.querySelectorAll('#otpRow input').forEach((inp,i,arr)=>{
+  inp.addEventListener('input',()=>{ if(inp.value && i<arr.length-1) arr[i+1].focus(); });
+  inp.addEventListener('keydown',e=>{ if(e.key==='Backspace' && !inp.value && i>0) arr[i-1].focus(); });
+});
+// Role cards (SH2)
+document.querySelectorAll('.role-card').forEach(c=>c.addEventListener('click',()=>{
+  document.querySelectorAll('.role-card').forEach(x=>x.classList.remove('selected')); c.classList.add('selected');
+}));
+// Choice cards & chips (SH3/SH4)
+document.querySelectorAll('.choice').forEach(c=>c.addEventListener('click',()=>{
+  c.parentElement.querySelectorAll('.choice').forEach(x=>x.classList.remove('selected')); c.classList.add('selected');
+}));
+document.querySelectorAll('.chip-select').forEach(g=>g.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+  g.querySelectorAll('button').forEach(x=>x.classList.remove('selected')); b.classList.add('selected');
+})));
+// Toggles
+document.querySelectorAll('.toggle').forEach(t=>t.addEventListener('click',e=>{e.preventDefault();t.classList.toggle('on')}));
+// Avatar menus
+document.querySelectorAll('.userblock').forEach(b=>b.addEventListener('click',e=>{
+  e.stopPropagation();
+  const m=document.getElementById(b.dataset.menu);
+  document.querySelectorAll('.avatar-menu').forEach(x=>{ if(x!==m) x.classList.remove('open') });
+  m.classList.toggle('open');
+}));
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.avatar-menu') && !e.target.closest('.userblock'))
+    document.querySelectorAll('.avatar-menu').forEach(x=>x.classList.remove('open'));
+});
+// Toolbar tabs (SH5)
+document.querySelectorAll('.toolbar').forEach(tb=>tb.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+  tb.querySelectorAll('button').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+})));
+// Resend countdown (SH2)
+let sec=45; const el=document.getElementById('resendTimer');
+if(el){ const iv=setInterval(()=>{ sec--; if(sec<=0){ el.textContent='00:00'; clearInterval(iv); el.parentElement.innerHTML='Chưa nhận được mã? <a href="#" style="font-weight:700">Gửi lại mã OTP</a>'; } else { el.textContent='00:'+String(sec).padStart(2,'0'); } },1000); }
+</script>
+</body>
+</html>
