@@ -1,9 +1,9 @@
-# DESIGN.md — HealthCareSystem Design System
+# DESIGN.md — CareNest Design System
 
-> **Tài liệu thiết kế điều hành (single source of truth) cho giao diện HealthCareSystem.**
-> Phiên bản 1.0 · Cập nhật 02/11/2026 · Baseline nghiệp vụ: **SRS v2.0 Updated**
+> **Tài liệu thiết kế điều hành (single source of truth) cho giao diện CareNest.**
+> Phiên bản 1.1 · Cập nhật 02/11/2026 · Baseline nghiệp vụ: **SRS v2.0 Updated**
 > Tài liệu này thay thế hoàn toàn DESIGN.md do Stitch sinh (bản đó trôi token — primary #004AC6, sai font — không dùng).
-> Vị trí trong repo: `docs/design/DESIGN.md` — các board HTML đi kèm nằm tại `docs/design/ui-boards/` (bảng mục 10 giữ đường dẫn gốc trong gói bàn giao).
+> Vị trí trong repo: `docs/design/DESIGN.md` — các board HTML nằm tại `docs/design/ui-boards/`, bộ logo chính thức nằm tại `docs/design/logo/`.
 > Nguồn chuẩn thành phần: `navbar-header-sh/Prompt-NAV-0-navbar-header-chuan.md` (NAV-0) và bộ board HTML đã duyệt (mục 10).
 
 ---
@@ -12,16 +12,17 @@
 
 | Hạng mục | Quy định |
 |---|---|
-| Tên sản phẩm | **HealthCareSystem** (viết liền, đúng chính tả này ở mọi nơi) |
-| Logo mark | Ô vuông bo góc 12px nền `#2563EB`, dấu **+** trắng đậm ở giữa |
-| Wordmark | "HealthCareSystem" — Be Vietnam Pro 800, màu navy `#0B3C6C` |
-| Tính cách | Y tế, tin cậy, sáng sủa; xanh dương — trắng là chủ đạo |
+| Tên sản phẩm | **CareNest** (tên thương hiệu do nhóm chốt 02/11/2026; tên cũ "HealthCareSystem" chỉ còn trong định danh code/repo) |
+| Tagline | **YOUR HOME, OUR CARE** (viết hoa, giãn chữ, đi kèm bản khóa ngang của logo) |
+| Logo mark | Mái nhà + đường cong tổ ấm + chữ thập y tế — nét `#175346`, chữ thập `#2E8B74`; bản app icon: glyph trắng trên ô vuông bo góc nền `#175346`. File chuẩn: `logo/carenest-mark.svg`, `carenest-icon.svg`, `carenest-lockup.svg` (ảnh mẫu của nhóm: `logo/CareNest-logo-reference.png`) |
+| Wordmark | "CARENEST" — Be Vietnam Pro 700, giãn chữ rộng, màu `#175346` |
+| Tính cách | Y tế, tin cậy, ấm áp; xanh teal đậm — trắng là chủ đạo |
 | Cấm | Đổi tên thương hiệu (vd "CareVietnam"), thêm slogan/tuyên bố tự chế |
 
 ## 2. Nguyên tắc thiết kế
 
-1. **Một màu chính duy nhất** — `#2563EB`. Mọi điểm nhấn đều quay về màu này; không thêm hue thứ ba.
-2. **Màu ngữ nghĩa dùng đúng nghĩa** — teal = thành công/đã xác thực, amber = chờ/cảnh báo, orange = tạm khóa, red = lỗi/nguy hiểm/SOS. Không dùng các màu này để trang trí.
+1. **Một màu chính duy nhất** — `#166B58`. Mọi điểm nhấn đều quay về màu này; không thêm hue thứ ba.
+2. **Màu ngữ nghĩa dùng đúng nghĩa** — xanh lá thuần `#1E9E50` = thành công/đã xác thực (chủ đích tách khỏi màu thương hiệu teal để không nhầm "thương hiệu" với "trạng thái xong"), amber = chờ/cảnh báo, orange = tạm khóa, red = lỗi/nguy hiểm/SOS. Không dùng các màu này để trang trí.
 3. **Mỗi component sinh động chỉ xuất hiện đúng chỗ đã chỉ định** ("thêm cho đỡ nhạt nhưng đừng quá màu mè"): bento grid chỉ ở trang chủ/dashboard, carousel chỉ ở hero trang chủ Patient + onboarding app, lightbox chỉ cho ảnh/giấy tờ, một ô gradient tối đa trên một màn.
 4. **Nurse = elder-friendly bắt buộc** (điều dưỡng lớn tuổi): chữ to, nút to, vùng chạm rộng (mục 8).
 5. **Không bịa nội dung** — không hotline, không tuyên bố cơ quan quản lý, không tính năng ngoài SRS (mục 9).
@@ -31,21 +32,21 @@
 
 | Token | Hex | Dùng cho |
 |---|---|---|
-| `--blue` | `#2563EB` | Màu chính: nút primary, link, trạng thái active, logo |
-| `--blue-dark` | `#1D4ED8` | Hover/pressed của primary |
-| `--sky` | `#38BDF8` | Đầu gradient hero (royal → sky), điểm nhấn phụ hiếm hoi |
-| `--navy` | `#0B3C6C` | Tiêu đề (H1/H2), wordmark, chữ nhấn |
-| `--ink` | `#0F2540` | Chữ nội dung chính |
-| `--slate` | `#4A6076` | Chữ phụ, mô tả |
-| `--muted` | `#7A8FA6` | Chữ mờ, nhãn phụ, placeholder |
-| `--bg` | `#F5F9FC` | Nền trang/board |
-| `--line` | `#E1EBF5` | Viền thẻ, đường kẻ |
-| `--teal` | `#0D9488` | Thành công, đã xác thực, hoàn thành (nền nhạt `#ECFDF5`) |
+| `--blue` | `#166B58` | Màu chính: nút primary, link, trạng thái active, logo |
+| `--blue-dark` | `#0E5343` | Hover/pressed của primary |
+| `--sky` | `#5FB3A1` | Đầu gradient hero (teal → mint), điểm nhấn phụ hiếm hoi |
+| `--navy` | `#143F34` | Tiêu đề (H1/H2), wordmark, chữ nhấn |
+| `--ink` | `#12211C` | Chữ nội dung chính |
+| `--slate` | `#46645B` | Chữ phụ, mô tả |
+| `--muted` | `#77948A` | Chữ mờ, nhãn phụ, placeholder |
+| `--bg` | `#F3F8F5` | Nền trang/board |
+| `--line` | `#DCEBE3` | Viền thẻ, đường kẻ |
+| `--teal` | `#1E9E50` | Thành công, đã xác thực, hoàn thành (nền nhạt `#ECFDF5`) |
 | `--amber` | `#B45309` (nền `#FEF3C7` / `#FFFBEB`) | Chờ duyệt, cảnh báo nhẹ, huy hiệu hưu trí, điểm sao |
 | `--orange` | `#EA580C` (nền `#FFF7ED`) | Tạm khóa nhận ca, trạng thái trung gian nghiêm trọng |
 | `--red` | `#DC2626` (nền `#FEF2F2`) | Lỗi, SOS, khóa vĩnh viễn, quá hạn |
 
-Quy tắc gradient: chỉ dùng gradient royal `#2563EB` → navy/sky cho **hero** (landing page, carousel P1). Còn lại nền phẳng trắng/xanh nhạt.
+Quy tắc gradient: chỉ dùng gradient teal `#166B58` → mint `#5FB3A1` / navy-green `#143F34` cho **hero** (landing page, carousel P1). Còn lại nền phẳng trắng/xanh nhạt.
 
 ## 4. Typography
 
@@ -105,10 +106,10 @@ Sidebar trái cố định, đúng 10 mục theo thứ tự: **Tổng quan · Du
 | Chip trạng thái | Bo `999px`, nền nhạt theo màu ngữ nghĩa, chữ `12.5–13.5px/700` |
 | **Chip đơn 3 trục** | Đơn luôn mang 3 chip độc lập: **Thực hiện** (Chờ thanh toán → Chờ ghép ca → Sắp diễn ra → Đang diễn ra → Hoàn thành / Đã hủy) · **Thanh toán** (Chưa thanh toán / Đã tạm giữ / Tiền mặt / Đã quyết toán / Đã hoàn) · **Khiếu nại** (Không / Đang khiếu nại / Đã phân xử) |
 | Thẻ (card) | Trắng, viền `--line`, bo `16px`, bóng nhẹ |
-| Stepper | Nằm trong thân trang; bước xong = teal ✓, đang làm = vòng xanh số trắng, chưa tới = xám |
+| Stepper | Nằm trong thân trang; bước xong = xanh lá ✓, đang làm = vòng xanh số trắng, chưa tới = xám |
 | Upload giấy tờ | Ô dashed; trạng thái tệp dùng chip "Đã tải lên · Chờ Admin duyệt" (thẩm định **thủ công**, không OCR/FaceMatch ở MVP) |
 | Banner trạng thái | Amber = chờ duyệt · Orange = tạm khóa (kèm lý do + CTA xử lý) · Red = khóa vĩnh viễn (kèm lối gửi yêu cầu xem xét) |
-| Timeline | Đường dọc + chấm trạng thái (xong teal, hiện tại xanh, chưa tới xám), mốc giờ in đậm |
+| Timeline | Đường dọc + chấm trạng thái (xong = xanh lá, hiện tại = teal thương hiệu, chưa tới xám), mốc giờ in đậm |
 | Ví 3 ngăn | **Khả dụng / Tạm giữ (đang chờ quyết toán) / Ký quỹ** — luôn tách bạch, ký quỹ ghi rõ "chỉ dùng trừ phạt SLA" |
 | VietQR | Khung QR + chip cổng (PayOS / VNPay / VietQR) + dòng giải thích "hệ thống tạm giữ" |
 | Bản đồ | Placeholder cách điệu + pin; vòng tròn đứt nét 200m cho check-in |
@@ -185,4 +186,5 @@ Không xuất hiện dưới bất kỳ hình thức nào trong UI:
 
 ## 12. Lịch sử thay đổi
 
+- **v1.1 — 02/11/2026:** **Rebrand toàn bộ theo quyết định của nhóm**: tên thương hiệu **CareNest** + tagline "YOUR HOME, OUR CARE" + logo mái nhà/tổ ấm của nhóm; palette UI chuyển từ xanh dương sang **xanh teal đậm** theo logo (primary `#2563EB` → `#166B58`, navy `#0B3C6C` → `#143F34`, sky `#38BDF8` → `#5FB3A1`, các màu nền/viền/chữ dịch hue tương ứng; màu thành công tách sang xanh lá thuần `#1E9E50` để không trùng màu thương hiệu). Đã áp đồng loạt vào 5 board + landing page + các file hướng dẫn. Định danh code (repo, package `@healthcare-system/*`) giữ nguyên.
 - **v1.0 — 02/11/2026:** Ban hành từ bộ board HTML đã duyệt (SH/P/N/A/APP) + NAV-0 + M0. Thay thế DESIGN.md của Stitch (trôi token). Font chính thức: Be Vietnam Pro (thay Inter của M0 gốc). Mọi thay đổi token/điều hướng sau này sửa tại file này trước, rồi mới áp vào các board.

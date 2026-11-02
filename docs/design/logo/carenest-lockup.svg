@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 64">
+  <path d="M9 29.5 L32 10.5 L55 29.5" fill="none" stroke="#175346" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M15.5 39.5 Q32 53 48.5 39.5" fill="none" stroke="#175346" stroke-width="4.6" stroke-linecap="round"/>
+  <rect x="29.3" y="18.5" width="5.4" height="16.5" fill="#2E8B74"/>
+  <rect x="23.8" y="24" width="16.4" height="5.4" fill="#2E8B74"/>
+  <text x="76" y="34" font-family="'Be Vietnam Pro','Segoe UI',sans-serif" font-size="27" font-weight="700" letter-spacing="4.5" fill="#175346">CARENEST</text>
+  <text x="77" y="53" font-family="'Be Vietnam Pro','Segoe UI',sans-serif" font-size="10.5" font-weight="500" letter-spacing="3.4" fill="#46645B">YOUR HOME, OUR CARE</text>
+</svg>

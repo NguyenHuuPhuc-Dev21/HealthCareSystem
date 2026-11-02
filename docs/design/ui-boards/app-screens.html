@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Phần APP — Mobile App (Patient + Nurse) · HealthCareSystem (Thiết kế bởi Tom)</title>
+<title>Phần APP — Mobile App (Patient + Nurse) · CareNest (Thiết kế bởi Tom)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --blue:#2563EB; --blue-dark:#1D4ED8; --sky:#38BDF8; --navy:#0B3C6C; --teal:#0D9488;
-  --ink:#0F2540; --slate:#4A6076; --muted:#7A8FA6; --bg:#F5F9FC; --line:#E1EBF5;
+  --blue:#166B58; --blue-dark:#0E5343; --sky:#5FB3A1; --navy:#143F34; --teal:#1E9E50;
+  --ink:#12211C; --slate:#46645B; --muted:#77948A; --bg:#F3F8F5; --line:#DCEBE3;
   --amber:#B45309; --amber-bg:#FEF3C7; --amber-soft:#FFFBEB;
   --red:#DC2626; --red-bg:#FEF2F2; --orange:#EA580C; --orange-bg:#FFF7ED;
   --green-bg:#ECFDF5; --radius:16px;
-  --shadow:0 18px 40px -18px rgba(11,60,108,.22);
-  --shadow-sm:0 6px 20px -8px rgba(11,60,108,.16);
+  --shadow:0 18px 40px -18px rgba(16,66,54,.22);
+  --shadow-sm:0 6px 20px -8px rgba(16,66,54,.16);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Be Vietnam Pro',system-ui,sans-serif;background:#DCE9F5;color:var(--ink);font-size:16px;line-height:1.55}
@@ -35,7 +35,7 @@ button{font-family:inherit;cursor:pointer}
 .meta-bar span{color:var(--slate);font-size:14px}
 
 /* ===== SCREEN FRAME ===== */
-.screen{max-width:1180px;margin:12px auto 10px;background:var(--bg);border-radius:22px;box-shadow:0 30px 60px -25px rgba(11,60,108,.45);overflow:hidden;border:1px solid #C9DDF2}
+.screen{max-width:1180px;margin:12px auto 10px;background:var(--bg);border-radius:22px;box-shadow:0 30px 60px -25px rgba(16,66,54,.45);overflow:hidden;border:1px solid #C9DDF2}
 .screen-body{padding:30px 38px 40px}
 .page{max-width:1064px;margin:0 auto}
 
@@ -51,7 +51,7 @@ button{font-family:inherit;cursor:pointer}
 .bell{position:relative;width:40px;height:40px;border-radius:50%;border:0;background:transparent;font-size:19px;display:grid;place-items:center}
 .bell:hover{background:var(--bg)}
 .bell .dot{position:absolute;top:2px;right:1px;background:var(--red);color:#fff;font-size:10.5px;font-weight:700;min-width:17px;height:17px;border-radius:9px;display:grid;place-items:center;padding:0 4px;border:2px solid #fff}
-.bell.active{background:#EAF2FE}
+.bell.active{background:#E4F2EC}
 .userblock{display:flex;align-items:center;gap:9px;background:none;border:0;padding:5px 6px;border-radius:12px}
 .userblock:hover{background:var(--bg)}
 .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#93C5FD,var(--blue));color:#fff;display:grid;place-items:center;font-weight:700;font-size:13.5px;flex:0 0 36px}
@@ -84,8 +84,8 @@ button{font-family:inherit;cursor:pointer}
 .btn-danger{background:var(--red);color:#fff}
 .btn-block{width:100%}
 .btn-lg{height:58px;font-size:17px;border-radius:14px}
-.btn:disabled{background:#D7E3F0;color:#8AA3BC;cursor:not-allowed}
-.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 11px;border-radius:999px;background:#EAF2FE;color:var(--blue-dark)}
+.btn:disabled{background:#D3E5DC;color:#8AA3BC;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 11px;border-radius:999px;background:#E4F2EC;color:var(--blue-dark)}
 .chip.teal{background:var(--green-bg);color:var(--teal)}
 .chip.amber{background:var(--amber-bg);color:var(--amber)}
 .chip.orange{background:var(--orange-bg);color:var(--orange)}
@@ -97,7 +97,7 @@ button{font-family:inherit;cursor:pointer}
 .field label .req{color:var(--red)}
 .field .hint{font-size:13.5px;color:var(--muted);margin-top:6px}
 .input{width:100%;height:54px;border:1.5px solid var(--line);border-radius:12px;padding:0 16px;font-family:inherit;font-size:16.5px;color:var(--ink);background:#fff;outline:none}
-.input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+.input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(22,107,88,.14)}
 textarea.input{height:auto;padding:13px 16px;resize:vertical;line-height:1.55}
 select.input{appearance:none}
 .small-print{font-size:13px;color:var(--muted);text-align:center;line-height:1.6}
@@ -105,33 +105,33 @@ select.input{appearance:none}
 /* ===== AUTH (SH1/SH2) ===== */
 .auth-zone{min-height:640px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:44px 20px;background:
  radial-gradient(700px 380px at 85% -5%,rgba(56,189,248,.22),transparent 60%),
- radial-gradient(620px 420px at -10% 30%,rgba(37,99,235,.12),transparent 60%),var(--bg)}
+ radial-gradient(620px 420px at -10% 30%,rgba(22,107,88,.12),transparent 60%),var(--bg)}
 .auth-card{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:38px 40px;width:100%;max-width:480px}
 .auth-card .logo-c{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:24px}
 .auth-card .logo-mark{width:56px;height:56px;border-radius:16px;font-size:30px;margin-bottom:12px}
 .auth-card h1{font-size:26px;font-weight:800;color:var(--navy);text-align:center}
 .auth-card .sub{text-align:center;color:var(--slate);font-size:15.5px;margin:6px 0 26px}
 .phone-wrap{display:flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
-.phone-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+.phone-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(22,107,88,.14)}
 .phone-wrap .prefix{display:flex;align-items:center;gap:7px;padding:0 14px;background:var(--bg);border-right:1px solid var(--line);font-weight:700;color:var(--navy);font-size:16.5px}
 .phone-wrap input{flex:1;border:0;outline:none;height:54px;padding:0 14px;font-family:inherit;font-size:17px;letter-spacing:.4px;color:var(--ink)}
 .divider-or{display:flex;align-items:center;gap:14px;color:var(--muted);font-size:13px;margin:22px 0}
 .divider-or::before,.divider-or::after{content:"";flex:1;height:1px;background:var(--line)}
-.admin-variant{margin-top:26px;width:100%;max-width:480px;background:#fff;border:1.5px dashed #B9D2EE;border-radius:16px;padding:18px 20px}
+.admin-variant{margin-top:26px;width:100%;max-width:480px;background:#fff;border:1.5px dashed #A9CDBE;border-radius:16px;padding:18px 20px}
 .admin-variant h4{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
 .admin-variant p{font-size:14.5px;color:var(--slate)}
 /* OTP */
 .otp-row{display:flex;gap:11px;justify-content:center;margin:8px 0 6px}
 .otp-row input{width:52px;height:60px;text-align:center;font-family:inherit;font-size:24px;font-weight:700;color:var(--navy);border:1.5px solid var(--line);border-radius:13px;outline:none;background:#fff}
-.otp-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+.otp-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(22,107,88,.14)}
 .alert{display:flex;gap:11px;border-radius:13px;padding:13px 16px;font-size:14.5px;margin:14px 0}
 .alert.red{background:var(--red-bg);color:#7F1D1D}
 .alert b{color:var(--red)}
 /* role cards */
 .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 22px}
 .role-card{border:2px solid var(--line);border-radius:16px;padding:19px;text-align:left;background:#fff;transition:.15s;width:100%}
-.role-card:hover{border-color:#B9D2EE}
-.role-card.selected{border-color:var(--blue);background:#F4F9FF;box-shadow:0 0 0 3.5px rgba(37,99,235,.12)}
+.role-card:hover{border-color:#A9CDBE}
+.role-card.selected{border-color:var(--blue);background:#F4F9FF;box-shadow:0 0 0 3.5px rgba(22,107,88,.12)}
 .role-card .ric{font-size:27px;margin-bottom:9px}
 .role-card h3{font-size:16.5px;color:var(--navy);margin-bottom:4px}
 .role-card p{font-size:14px;color:var(--slate)}
@@ -140,7 +140,7 @@ select.input{appearance:none}
 /* ===== STEPPER (body card) ===== */
 .stepper{display:flex;gap:10px;margin-bottom:22px}
 .stepper .st{flex:1;display:flex;align-items:center;gap:11px;padding:14px 16px;border-radius:13px;background:#fff;border:1px solid var(--line)}
-.stepper .st .n{width:34px;height:34px;border-radius:50%;background:#EAF2FE;color:var(--blue);font-weight:800;display:grid;place-items:center;flex:0 0 34px;font-size:15px}
+.stepper .st .n{width:34px;height:34px;border-radius:50%;background:#E4F2EC;color:var(--blue);font-weight:800;display:grid;place-items:center;flex:0 0 34px;font-size:15px}
 .stepper .st.done .n{background:var(--teal);color:#fff}
 .stepper .st.now{background:var(--blue);border-color:var(--blue);color:#fff}
 .stepper .st.now .n{background:#fff;color:var(--blue)}
@@ -155,7 +155,7 @@ select.input{appearance:none}
 .step-summary .edit{margin-left:auto;font-weight:600;font-size:14.5px;white-space:nowrap}
 /* upload cards CP2 */
 .upload-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.upload{border:1.5px dashed #B9D2EE;border-radius:14px;padding:17px;text-align:center;background:#FBFDFF}
+.upload{border:1.5px dashed #A9CDBE;border-radius:14px;padding:17px;text-align:center;background:#FBFDFF}
 .upload .uic{font-size:29px}
 .upload h4{font-size:15px;color:var(--navy);margin:7px 0 3px}
 .upload p{font-size:13px;color:var(--muted);margin-bottom:9px}
@@ -171,13 +171,13 @@ select.input{appearance:none}
 .chip-select button.selected{background:var(--blue);border-color:var(--blue);color:#fff}
 .cols-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
 .cols-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.toggle{position:relative;width:58px;height:32px;border-radius:999px;background:#CBD8E5;border:0;flex:0 0 58px;transition:.2s}
+.toggle{position:relative;width:58px;height:32px;border-radius:999px;background:#C2D6CC;border:0;flex:0 0 58px;transition:.2s}
 .toggle::after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 .toggle.on{background:var(--teal)}
 .toggle.on::after{left:30px}
 .map-ph{height:215px;border-radius:14px;position:relative;overflow:hidden;background:
- repeating-linear-gradient(0deg,transparent,transparent 34px,rgba(37,99,235,.07) 34px,rgba(37,99,235,.07) 35px),
- repeating-linear-gradient(90deg,transparent,transparent 34px,rgba(37,99,235,.07) 34px,rgba(37,99,235,.07) 35px),
+ repeating-linear-gradient(0deg,transparent,transparent 34px,rgba(22,107,88,.07) 34px,rgba(22,107,88,.07) 35px),
+ repeating-linear-gradient(90deg,transparent,transparent 34px,rgba(22,107,88,.07) 34px,rgba(22,107,88,.07) 35px),
  linear-gradient(140deg,#E3F2E8,#DCEBFA)}
 .map-ph .pin{position:absolute;top:44%;left:50%;transform:translate(-50%,-100%);font-size:36px}
 .map-ph .pin-label{position:absolute;top:calc(44% + 8px);left:50%;transform:translateX(-50%);background:#fff;border-radius:9px;box-shadow:var(--shadow-sm);padding:5px 12px;font-size:13px;font-weight:600;color:var(--navy);white-space:nowrap}
@@ -190,7 +190,7 @@ select.input{appearance:none}
 .elder .field label{font-size:16px}
 .elder .btn-lg{height:60px;font-size:17.5px}
 .doc-row{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:#fff}
-.doc-row .dic{width:46px;height:46px;border-radius:12px;background:#EAF2FE;display:grid;place-items:center;font-size:22px;flex:0 0 46px}
+.doc-row .dic{width:46px;height:46px;border-radius:12px;background:#E4F2EC;display:grid;place-items:center;font-size:22px;flex:0 0 46px}
 .doc-row h4{color:var(--navy);font-size:16.5px}
 .doc-row p{font-size:14px;color:var(--slate)}
 .doc-row .st{margin-left:auto;text-align:right}
@@ -203,9 +203,9 @@ select.input{appearance:none}
 .check-item.locked{background:#F1F5F9;color:var(--muted)}
 .timeline-mini{display:flex;gap:0;margin-top:14px}
 .timeline-mini div{flex:1;text-align:center;position:relative;padding-top:20px;font-size:14px;color:var(--slate)}
-.timeline-mini div::before{content:"";position:absolute;top:5px;left:50%;transform:translateX(-50%);width:12px;height:12px;border-radius:50%;background:#CBD8E5}
+.timeline-mini div::before{content:"";position:absolute;top:5px;left:50%;transform:translateX(-50%);width:12px;height:12px;border-radius:50%;background:#C2D6CC}
 .timeline-mini div.done::before{background:var(--teal)}
-.timeline-mini div::after{content:"";position:absolute;top:10px;left:calc(-50% + 8px);right:calc(50% + 8px);height:2px;background:#E1EBF5}
+.timeline-mini div::after{content:"";position:absolute;top:10px;left:calc(-50% + 8px);right:calc(50% + 8px);height:2px;background:#DCEBE3}
 .timeline-mini div:first-child::after{display:none}
 
 /* ===== TOOLBAR + NOTIFICATIONS (SH5) ===== */
@@ -213,14 +213,14 @@ select.input{appearance:none}
 .toolbar button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 17px;font-size:14.5px;font-weight:600;color:var(--slate)}
 .toolbar button.active{background:var(--blue);border-color:var(--blue);color:#fff}
 .toolbar button .cnt{background:rgba(255,255,255,.25);border-radius:8px;padding:0 6px;margin-left:5px;font-size:12.5px}
-.toolbar button:not(.active) .cnt{background:#EAF2FE;color:var(--blue-dark)}
+.toolbar button:not(.active) .cnt{background:#E4F2EC;color:var(--blue-dark)}
 .notif-cols{display:grid;grid-template-columns:1.9fr 1fr;gap:22px;align-items:start}
 .group-label{display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 12px}
 .group-label b{color:var(--navy);font-size:16px}
 .group-label span{color:var(--muted);font-size:13.5px}
 .notif{display:flex;gap:14px;background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px 19px;margin-bottom:13px;position:relative}
-.notif.unread{border-color:#B9D2EE;background:#FBFDFF}
-.notif .nic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:0 0 44px;background:#EAF2FE}
+.notif.unread{border-color:#A9CDBE;background:#FBFDFF}
+.notif .nic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:0 0 44px;background:#E4F2EC}
 .notif .nic.red{background:var(--red-bg)}
 .notif .nic.amber{background:var(--amber-bg)}
 .notif .nic.teal{background:var(--green-bg)}
@@ -230,7 +230,7 @@ select.input{appearance:none}
 .notif .udot{position:absolute;top:16px;right:16px;width:9px;height:9px;border-radius:50%;background:var(--blue)}
 .notif .acts{display:flex;gap:9px;margin-top:11px}
 .btn-sm{height:38px;padding:0 17px;font-size:14px;border-radius:10px}
-.variant-note{border:1.5px dashed #B9D2EE;border-radius:15px;padding:18px;background:#FBFDFF}
+.variant-note{border:1.5px dashed #A9CDBE;border-radius:15px;padding:18px;background:#FBFDFF}
 .variant-note h4{font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .variant-note p{font-size:14.5px;color:var(--slate);margin-bottom:9px}
 .variant-note b{color:var(--navy)}
@@ -272,7 +272,7 @@ select.input{appearance:none}
 
 /* ===== APP additions ===== */
 .phones{display:flex;flex-wrap:wrap;gap:28px;justify-content:center}
-.phone{width:392px;max-width:100%;background:#fff;border:1.5px solid #D8E4F2;border-radius:34px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+.phone{width:392px;max-width:100%;background:#fff;border:1.5px solid #D2E4DA;border-radius:34px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
 .phone .pbody{padding:18px 18px 20px;flex:1;background:#FDFEFF}
 .phone.elder{font-size:17px}
 .app-top{height:56px;display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--line);background:#fff;position:relative}
@@ -293,7 +293,7 @@ select.input{appearance:none}
 .tile2 .t b{color:var(--navy);font-size:15px;display:block}
 .tile2 .t span{font-size:12.5px;color:var(--slate)}
 .bub{max-width:78%;padding:10px 13px;border-radius:16px;font-size:14.5px;margin-bottom:9px;line-height:1.45}
-.bub.them{background:#EFF4FA;border-bottom-left-radius:5px;color:var(--ink)}
+.bub.them{background:#EAF3EE;border-bottom-left-radius:5px;color:var(--ink)}
 .bub.me{background:var(--blue);color:#fff;border-bottom-right-radius:5px;margin-left:auto}
 .bub small{display:block;font-size:11px;opacity:.65;margin-top:4px}
 .sys-note{text-align:center;font-size:12px;color:var(--muted);background:#FFF7E8;border:1px dashed #EBD9A8;border-radius:10px;padding:7px 10px;margin:10px 0}
@@ -323,7 +323,7 @@ select.input{appearance:none}
     <div class="phone">
       <div class="pbody" style="padding-top:34px;text-align:center">
         <div style="font-size:64px">🏥</div>
-        <span class="logo" style="justify-content:center;font-size:21px;margin-top:8px"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <span class="logo" style="justify-content:center;font-size:21px;margin-top:8px"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
         <h3 style="color:var(--navy);font-size:21px;margin-top:26px;line-height:1.35">Chăm sóc y tế tại nhà,<br>an tâm như ở bệnh viện</h3>
         <p style="color:var(--slate);font-size:15px;margin-top:9px">Điều dưỡng đã xác thực giấy phép hành nghề, đặt ca trong vài chạm, tiền của bạn được tạm giữ an toàn tới khi ca hoàn thành.</p>
         <div class="ob-dots"><span class="on"></span><span></span><span></span></div>
@@ -339,7 +339,7 @@ select.input{appearance:none}
   <div>
     <div class="phone">
       <div class="app-top">
-        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
         <div class="nav-right" style="margin-left:auto">
           <button class="bell">🔔<span class="dot">2</span></button><span class="avatar">AN</span>
         </div>
@@ -383,7 +383,7 @@ select.input{appearance:none}
   <div>
     <div class="phone">
       <div class="app-top">
-        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
         <div class="nav-right" style="margin-left:auto"><button class="bell">🔔<span class="dot">2</span></button><span class="avatar">AN</span></div>
       </div>
       <div class="pbody">
@@ -414,7 +414,7 @@ select.input{appearance:none}
   <div>
     <div class="phone">
       <div class="app-top">
-        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
         <div class="nav-right" style="margin-left:auto"><button class="bell">🔔<span class="dot">2</span></button><span class="avatar">AN</span></div>
       </div>
       <div class="pbody">
@@ -485,7 +485,7 @@ select.input{appearance:none}
   <div>
     <div class="phone">
       <div class="app-top">
-        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
         <div class="nav-right" style="margin-left:auto"><button class="bell">🔔<span class="dot">2</span></button><span class="avatar">AN</span></div>
       </div>
       <div class="pbody">
@@ -527,7 +527,7 @@ select.input{appearance:none}
   <div>
     <div class="phone elder">
       <div class="app-top">
-        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
         <div class="nav-right" style="margin-left:auto"><button class="bell">🔔<span class="dot">3</span></button><span class="avatar">MT</span></div>
       </div>
       <div class="pbody">
@@ -541,7 +541,7 @@ select.input{appearance:none}
           <div class="t"><span style="font-size:13px;color:var(--muted);font-weight:700">ĐIỂM UY TÍN</span><b style="font-size:19px">92/100</b><span>Đánh giá 4.9★</span></div>
         </div>
         <b style="color:var(--navy);display:block;margin:16px 0 10px">Ca sắp tới</b>
-        <div class="acard" style="border-color:#B9D2EE">
+        <div class="acard" style="border-color:#A9CDBE">
           <h4>🌙 Ca đêm — HC-2026-1050</h4>
           <p style="color:var(--slate);font-size:15px">Tối nay 20:00 – 06:00 · Nhà bà Hoa, Hải Châu (1,2 km)<br>Thu về dự kiến: <b style="color:var(--navy)">493.000đ</b> (sau hoa hồng 15%)</p>
           <button class="btn btn-primary btn-block" type="button" style="height:56px;margin-top:10px">Mở chi tiết ca</button>
@@ -564,7 +564,7 @@ select.input{appearance:none}
   <div>
     <div class="phone elder">
       <div class="app-top">
-        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
         <div class="nav-right" style="margin-left:auto"><button class="bell">🔔<span class="dot">3</span></button><span class="avatar">MT</span></div>
       </div>
       <div class="pbody">
@@ -606,13 +606,13 @@ select.input{appearance:none}
   <div>
     <div class="phone elder">
       <div class="app-top">
-        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
         <div class="nav-right" style="margin-left:auto"><button class="bell">🔔<span class="dot">3</span></button><span class="avatar">MT</span></div>
       </div>
       <div class="pbody">
         <b style="color:var(--navy);font-size:19px">Ca của tôi</b>
         <div style="display:flex;gap:8px;margin:11px 0 13px"><span class="chip">Sắp tới</span><span class="chip grey">Đã xong</span></div>
-        <div class="acard" style="border-color:#B9D2EE">
+        <div class="acard" style="border-color:#A9CDBE">
           <h4>🌙 HC-2026-1050 · Ca đêm</h4>
           <p style="color:var(--slate);font-size:15px">Tối nay 20:00 – 06:00 · Nhà bà Hoa, Hải Châu</p>
           <button class="btn btn-primary btn-block" type="button" style="height:58px;margin-top:9px">Mở màn hình ca</button>
@@ -643,12 +643,12 @@ select.input{appearance:none}
   <div>
     <div class="phone elder">
       <div class="app-top">
-        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
         <div class="nav-right" style="margin-left:auto"><button class="bell">🔔<span class="dot">3</span></button><span class="avatar">MT</span></div>
       </div>
       <div class="pbody">
         <b style="color:var(--navy);font-size:19px">Ví của tôi</b>
-        <div class="acard" style="margin-top:12px;background:linear-gradient(120deg,#EFF6FF,#fff)">
+        <div class="acard" style="margin-top:12px;background:linear-gradient(120deg,#EDF7F1,#fff)">
           <span style="font-size:13.5px;color:var(--muted);font-weight:700">SỐ DƯ KHẢ DỤNG</span>
           <div style="font-size:27px;font-weight:900;color:var(--navy)">3.850.000đ</div>
           <button class="btn btn-primary" type="button" style="height:54px;margin-top:8px">Rút về ngân hàng •••• 6899</button>
@@ -683,7 +683,7 @@ select.input{appearance:none}
   <div>
     <div class="phone elder">
       <div class="app-top">
-        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
         <div class="nav-right" style="margin-left:auto"><button class="bell">🔔<span class="dot">3</span></button><span class="avatar">MT</span></div>
       </div>
       <div class="pbody">
@@ -778,7 +778,7 @@ select.input{appearance:none}
       <div class="pbody">
         <div class="map-ph" style="height:230px">
           <span class="gps-chip"><span class="gps-dot"></span> Đang định vị…</span>
-          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:180px;height:180px;border:2.5px dashed var(--blue);border-radius:50%;background:rgba(37,99,235,.07)"></div>
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:180px;height:180px;border:2.5px dashed var(--blue);border-radius:50%;background:rgba(22,107,88,.07)"></div>
           <div class="pin" style="position:absolute">📍</div>
           <div class="pin-label">Điểm ca · Nhà bà Hoa</div>
         </div>
@@ -808,12 +808,12 @@ select.input{appearance:none}
         <span style="font-size:19px">✕</span><b style="color:var(--navy);font-size:17px;flex:1">Check-in · Bước 2/3</b><span class="chip grey">Ảnh trực tiếp</span>
       </div>
       <div class="pbody">
-        <div style="background:#0F2540;border-radius:18px;height:300px;position:relative;display:grid;place-items:center;overflow:hidden">
+        <div style="background:#12211C;border-radius:18px;height:300px;position:relative;display:grid;place-items:center;overflow:hidden">
           <div style="width:170px;height:220px;border:3px dashed rgba(255,255,255,.75);border-radius:50%"></div>
-          <span style="position:absolute;top:14px;left:0;right:0;text-align:center;color:#CFE2FF;font-size:14px">Đưa khuôn mặt vào khung oval</span>
+          <span style="position:absolute;top:14px;left:0;right:0;text-align:center;color:#CDEAE0;font-size:14px">Đưa khuôn mặt vào khung oval</span>
           <span style="position:absolute;bottom:12px;left:12px;background:rgba(0,0,0,.45);color:#fff;font-size:12px;padding:5px 10px;border-radius:8px">⏱ 14:30 · 16.108, 108.220 (giờ máy chủ &amp; tọa độ sẽ đóng dấu lên ảnh)</span>
         </div>
-        <div class="alert" style="background:#EAF2FE;color:#1E3A5F;margin:14px 0"><span>🤳</span><span>Chụp <b>trực tiếp bằng camera</b> trong ứng dụng — không chọn ảnh từ thư viện, để bảo đảm chị đang có mặt tại điểm ca.</span></div>
+        <div class="alert" style="background:#E4F2EC;color:#173F34;margin:14px 0"><span>🤳</span><span>Chụp <b>trực tiếp bằng camera</b> trong ứng dụng — không chọn ảnh từ thư viện, để bảo đảm chị đang có mặt tại điểm ca.</span></div>
         <button class="btn btn-primary btn-block" type="button" style="height:60px">📷 Chụp ảnh</button>
         <button class="btn btn-secondary btn-block" type="button" style="height:54px;margin-top:9px">← Quay lại bước GPS</button>
       </div>
@@ -918,7 +918,7 @@ select.input{appearance:none}
 </div>
 
 <div class="board-foot">
-  Chuẩn áp dụng: NAV-0 mobile (top strip + bottom nav 5 mục khóa) · M0 (Be Vietnam Pro, #2563EB) · Elder-friendly riêng Nurse App · Dữ liệu mẫu thống nhất với SH/P/N/A: An — bà Hoa (Đà Nẵng) · ĐD. Mai (Cấp 2, TrustScore 92/100, ví 3.850.000đ) · Đơn HC-2026-1042/1050/1057 · Nội dung theo SRS v2.0 Updated.
+  Chuẩn áp dụng: NAV-0 mobile (top strip + bottom nav 5 mục khóa) · M0 (Be Vietnam Pro, #166B58) · Elder-friendly riêng Nurse App · Dữ liệu mẫu thống nhất với SH/P/N/A: An — bà Hoa (Đà Nẵng) · ĐD. Mai (Cấp 2, TrustScore 92/100, ví 3.850.000đ) · Đơn HC-2026-1042/1050/1057 · Nội dung theo SRS v2.0 Updated.
 </div>
 
 <script>

@@ -1,4 +1,4 @@
-# UI handoff index — HealthCareSystem (SRS v2.0 Updated)
+# UI handoff index — CareNest (SRS v2.0 Updated)
 
 Mục đích: một trang duy nhất để Phúc chuyển cho nhóm FE khi bắt đầu code từ bộ
 màn hình đã thiết kế tay ngày 2026-10-30. File này chỉ lập chỉ mục, không sửa
@@ -31,7 +31,7 @@ và chưa hề có thanh tab dưới ở đâu.
   khóa theo từng vai trò; ngày 02/11 APP được bổ sung luồng ca riêng
   (N5 → N6 ba bước → N7 → N8); P9 (ca trực tiếp phía khách) và N3 (Radar) vẫn là
   khung điện thoại riêng ở phần P và N.
-- **Màu & font:** một màu chính #2563EB; teal chỉ cho thành công/đã xác thực;
+- **Màu & font:** một màu chính #166B58; teal chỉ cho thành công/đã xác thực;
   font tải trong file là Be Vietnam Pro (quyết định Tom đưa ra khi sửa prompt SH
   ngày 2026-10-30 vì dấu tiếng Việt, ghi chú là có thể đảo ngược — nếu nhóm
   muốn về Inter của M0 thì đó là một thay đổi một dòng trong token, không phải

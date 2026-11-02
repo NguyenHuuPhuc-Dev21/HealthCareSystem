@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Phần N — Điều dưỡng (Nurse) · HealthCareSystem (Thiết kế bởi Tom)</title>
+<title>Phần N — Điều dưỡng (Nurse) · CareNest (Thiết kế bởi Tom)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --blue:#2563EB; --blue-dark:#1D4ED8; --sky:#38BDF8; --navy:#0B3C6C; --teal:#0D9488;
-  --ink:#0F2540; --slate:#4A6076; --muted:#7A8FA6; --bg:#F5F9FC; --line:#E1EBF5;
+  --blue:#166B58; --blue-dark:#0E5343; --sky:#5FB3A1; --navy:#143F34; --teal:#1E9E50;
+  --ink:#12211C; --slate:#46645B; --muted:#77948A; --bg:#F3F8F5; --line:#DCEBE3;
   --amber:#B45309; --amber-bg:#FEF3C7; --amber-soft:#FFFBEB;
   --red:#DC2626; --red-bg:#FEF2F2; --orange:#EA580C; --orange-bg:#FFF7ED;
   --green-bg:#ECFDF5; --radius:16px;
-  --shadow:0 18px 40px -18px rgba(11,60,108,.22);
-  --shadow-sm:0 6px 20px -8px rgba(11,60,108,.16);
+  --shadow:0 18px 40px -18px rgba(16,66,54,.22);
+  --shadow-sm:0 6px 20px -8px rgba(16,66,54,.16);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Be Vietnam Pro',system-ui,sans-serif;background:#DCE9F5;color:var(--ink);font-size:16px;line-height:1.55}
@@ -35,7 +35,7 @@ button{font-family:inherit;cursor:pointer}
 .meta-bar span{color:var(--slate);font-size:14px}
 
 /* ===== SCREEN FRAME ===== */
-.screen{max-width:1180px;margin:12px auto 10px;background:var(--bg);border-radius:22px;box-shadow:0 30px 60px -25px rgba(11,60,108,.45);overflow:hidden;border:1px solid #C9DDF2}
+.screen{max-width:1180px;margin:12px auto 10px;background:var(--bg);border-radius:22px;box-shadow:0 30px 60px -25px rgba(16,66,54,.45);overflow:hidden;border:1px solid #C9DDF2}
 .screen-body{padding:30px 38px 40px}
 .page{max-width:1064px;margin:0 auto}
 
@@ -51,7 +51,7 @@ button{font-family:inherit;cursor:pointer}
 .bell{position:relative;width:40px;height:40px;border-radius:50%;border:0;background:transparent;font-size:19px;display:grid;place-items:center}
 .bell:hover{background:var(--bg)}
 .bell .dot{position:absolute;top:2px;right:1px;background:var(--red);color:#fff;font-size:10.5px;font-weight:700;min-width:17px;height:17px;border-radius:9px;display:grid;place-items:center;padding:0 4px;border:2px solid #fff}
-.bell.active{background:#EAF2FE}
+.bell.active{background:#E4F2EC}
 .userblock{display:flex;align-items:center;gap:9px;background:none;border:0;padding:5px 6px;border-radius:12px}
 .userblock:hover{background:var(--bg)}
 .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#93C5FD,var(--blue));color:#fff;display:grid;place-items:center;font-weight:700;font-size:13.5px;flex:0 0 36px}
@@ -84,8 +84,8 @@ button{font-family:inherit;cursor:pointer}
 .btn-danger{background:var(--red);color:#fff}
 .btn-block{width:100%}
 .btn-lg{height:58px;font-size:17px;border-radius:14px}
-.btn:disabled{background:#D7E3F0;color:#8AA3BC;cursor:not-allowed}
-.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 11px;border-radius:999px;background:#EAF2FE;color:var(--blue-dark)}
+.btn:disabled{background:#D3E5DC;color:#8AA3BC;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 11px;border-radius:999px;background:#E4F2EC;color:var(--blue-dark)}
 .chip.teal{background:var(--green-bg);color:var(--teal)}
 .chip.amber{background:var(--amber-bg);color:var(--amber)}
 .chip.orange{background:var(--orange-bg);color:var(--orange)}
@@ -97,7 +97,7 @@ button{font-family:inherit;cursor:pointer}
 .field label .req{color:var(--red)}
 .field .hint{font-size:13.5px;color:var(--muted);margin-top:6px}
 .input{width:100%;height:54px;border:1.5px solid var(--line);border-radius:12px;padding:0 16px;font-family:inherit;font-size:16.5px;color:var(--ink);background:#fff;outline:none}
-.input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+.input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(22,107,88,.14)}
 textarea.input{height:auto;padding:13px 16px;resize:vertical;line-height:1.55}
 select.input{appearance:none}
 .small-print{font-size:13px;color:var(--muted);text-align:center;line-height:1.6}
@@ -105,33 +105,33 @@ select.input{appearance:none}
 /* ===== AUTH (SH1/SH2) ===== */
 .auth-zone{min-height:640px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:44px 20px;background:
  radial-gradient(700px 380px at 85% -5%,rgba(56,189,248,.22),transparent 60%),
- radial-gradient(620px 420px at -10% 30%,rgba(37,99,235,.12),transparent 60%),var(--bg)}
+ radial-gradient(620px 420px at -10% 30%,rgba(22,107,88,.12),transparent 60%),var(--bg)}
 .auth-card{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:38px 40px;width:100%;max-width:480px}
 .auth-card .logo-c{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:24px}
 .auth-card .logo-mark{width:56px;height:56px;border-radius:16px;font-size:30px;margin-bottom:12px}
 .auth-card h1{font-size:26px;font-weight:800;color:var(--navy);text-align:center}
 .auth-card .sub{text-align:center;color:var(--slate);font-size:15.5px;margin:6px 0 26px}
 .phone-wrap{display:flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
-.phone-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+.phone-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(22,107,88,.14)}
 .phone-wrap .prefix{display:flex;align-items:center;gap:7px;padding:0 14px;background:var(--bg);border-right:1px solid var(--line);font-weight:700;color:var(--navy);font-size:16.5px}
 .phone-wrap input{flex:1;border:0;outline:none;height:54px;padding:0 14px;font-family:inherit;font-size:17px;letter-spacing:.4px;color:var(--ink)}
 .divider-or{display:flex;align-items:center;gap:14px;color:var(--muted);font-size:13px;margin:22px 0}
 .divider-or::before,.divider-or::after{content:"";flex:1;height:1px;background:var(--line)}
-.admin-variant{margin-top:26px;width:100%;max-width:480px;background:#fff;border:1.5px dashed #B9D2EE;border-radius:16px;padding:18px 20px}
+.admin-variant{margin-top:26px;width:100%;max-width:480px;background:#fff;border:1.5px dashed #A9CDBE;border-radius:16px;padding:18px 20px}
 .admin-variant h4{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
 .admin-variant p{font-size:14.5px;color:var(--slate)}
 /* OTP */
 .otp-row{display:flex;gap:11px;justify-content:center;margin:8px 0 6px}
 .otp-row input{width:52px;height:60px;text-align:center;font-family:inherit;font-size:24px;font-weight:700;color:var(--navy);border:1.5px solid var(--line);border-radius:13px;outline:none;background:#fff}
-.otp-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+.otp-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(22,107,88,.14)}
 .alert{display:flex;gap:11px;border-radius:13px;padding:13px 16px;font-size:14.5px;margin:14px 0}
 .alert.red{background:var(--red-bg);color:#7F1D1D}
 .alert b{color:var(--red)}
 /* role cards */
 .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 22px}
 .role-card{border:2px solid var(--line);border-radius:16px;padding:19px;text-align:left;background:#fff;transition:.15s;width:100%}
-.role-card:hover{border-color:#B9D2EE}
-.role-card.selected{border-color:var(--blue);background:#F4F9FF;box-shadow:0 0 0 3.5px rgba(37,99,235,.12)}
+.role-card:hover{border-color:#A9CDBE}
+.role-card.selected{border-color:var(--blue);background:#F4F9FF;box-shadow:0 0 0 3.5px rgba(22,107,88,.12)}
 .role-card .ric{font-size:27px;margin-bottom:9px}
 .role-card h3{font-size:16.5px;color:var(--navy);margin-bottom:4px}
 .role-card p{font-size:14px;color:var(--slate)}
@@ -140,7 +140,7 @@ select.input{appearance:none}
 /* ===== STEPPER (body card) ===== */
 .stepper{display:flex;gap:10px;margin-bottom:22px}
 .stepper .st{flex:1;display:flex;align-items:center;gap:11px;padding:14px 16px;border-radius:13px;background:#fff;border:1px solid var(--line)}
-.stepper .st .n{width:34px;height:34px;border-radius:50%;background:#EAF2FE;color:var(--blue);font-weight:800;display:grid;place-items:center;flex:0 0 34px;font-size:15px}
+.stepper .st .n{width:34px;height:34px;border-radius:50%;background:#E4F2EC;color:var(--blue);font-weight:800;display:grid;place-items:center;flex:0 0 34px;font-size:15px}
 .stepper .st.done .n{background:var(--teal);color:#fff}
 .stepper .st.now{background:var(--blue);border-color:var(--blue);color:#fff}
 .stepper .st.now .n{background:#fff;color:var(--blue)}
@@ -155,7 +155,7 @@ select.input{appearance:none}
 .step-summary .edit{margin-left:auto;font-weight:600;font-size:14.5px;white-space:nowrap}
 /* upload cards CP2 */
 .upload-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.upload{border:1.5px dashed #B9D2EE;border-radius:14px;padding:17px;text-align:center;background:#FBFDFF}
+.upload{border:1.5px dashed #A9CDBE;border-radius:14px;padding:17px;text-align:center;background:#FBFDFF}
 .upload .uic{font-size:29px}
 .upload h4{font-size:15px;color:var(--navy);margin:7px 0 3px}
 .upload p{font-size:13px;color:var(--muted);margin-bottom:9px}
@@ -171,13 +171,13 @@ select.input{appearance:none}
 .chip-select button.selected{background:var(--blue);border-color:var(--blue);color:#fff}
 .cols-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
 .cols-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.toggle{position:relative;width:58px;height:32px;border-radius:999px;background:#CBD8E5;border:0;flex:0 0 58px;transition:.2s}
+.toggle{position:relative;width:58px;height:32px;border-radius:999px;background:#C2D6CC;border:0;flex:0 0 58px;transition:.2s}
 .toggle::after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 .toggle.on{background:var(--teal)}
 .toggle.on::after{left:30px}
 .map-ph{height:215px;border-radius:14px;position:relative;overflow:hidden;background:
- repeating-linear-gradient(0deg,transparent,transparent 34px,rgba(37,99,235,.07) 34px,rgba(37,99,235,.07) 35px),
- repeating-linear-gradient(90deg,transparent,transparent 34px,rgba(37,99,235,.07) 34px,rgba(37,99,235,.07) 35px),
+ repeating-linear-gradient(0deg,transparent,transparent 34px,rgba(22,107,88,.07) 34px,rgba(22,107,88,.07) 35px),
+ repeating-linear-gradient(90deg,transparent,transparent 34px,rgba(22,107,88,.07) 34px,rgba(22,107,88,.07) 35px),
  linear-gradient(140deg,#E3F2E8,#DCEBFA)}
 .map-ph .pin{position:absolute;top:44%;left:50%;transform:translate(-50%,-100%);font-size:36px}
 .map-ph .pin-label{position:absolute;top:calc(44% + 8px);left:50%;transform:translateX(-50%);background:#fff;border-radius:9px;box-shadow:var(--shadow-sm);padding:5px 12px;font-size:13px;font-weight:600;color:var(--navy);white-space:nowrap}
@@ -190,7 +190,7 @@ select.input{appearance:none}
 .elder .field label{font-size:16px}
 .elder .btn-lg{height:60px;font-size:17.5px}
 .doc-row{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:#fff}
-.doc-row .dic{width:46px;height:46px;border-radius:12px;background:#EAF2FE;display:grid;place-items:center;font-size:22px;flex:0 0 46px}
+.doc-row .dic{width:46px;height:46px;border-radius:12px;background:#E4F2EC;display:grid;place-items:center;font-size:22px;flex:0 0 46px}
 .doc-row h4{color:var(--navy);font-size:16.5px}
 .doc-row p{font-size:14px;color:var(--slate)}
 .doc-row .st{margin-left:auto;text-align:right}
@@ -203,9 +203,9 @@ select.input{appearance:none}
 .check-item.locked{background:#F1F5F9;color:var(--muted)}
 .timeline-mini{display:flex;gap:0;margin-top:14px}
 .timeline-mini div{flex:1;text-align:center;position:relative;padding-top:20px;font-size:14px;color:var(--slate)}
-.timeline-mini div::before{content:"";position:absolute;top:5px;left:50%;transform:translateX(-50%);width:12px;height:12px;border-radius:50%;background:#CBD8E5}
+.timeline-mini div::before{content:"";position:absolute;top:5px;left:50%;transform:translateX(-50%);width:12px;height:12px;border-radius:50%;background:#C2D6CC}
 .timeline-mini div.done::before{background:var(--teal)}
-.timeline-mini div::after{content:"";position:absolute;top:10px;left:calc(-50% + 8px);right:calc(50% + 8px);height:2px;background:#E1EBF5}
+.timeline-mini div::after{content:"";position:absolute;top:10px;left:calc(-50% + 8px);right:calc(50% + 8px);height:2px;background:#DCEBE3}
 .timeline-mini div:first-child::after{display:none}
 
 /* ===== TOOLBAR + NOTIFICATIONS (SH5) ===== */
@@ -213,14 +213,14 @@ select.input{appearance:none}
 .toolbar button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 17px;font-size:14.5px;font-weight:600;color:var(--slate)}
 .toolbar button.active{background:var(--blue);border-color:var(--blue);color:#fff}
 .toolbar button .cnt{background:rgba(255,255,255,.25);border-radius:8px;padding:0 6px;margin-left:5px;font-size:12.5px}
-.toolbar button:not(.active) .cnt{background:#EAF2FE;color:var(--blue-dark)}
+.toolbar button:not(.active) .cnt{background:#E4F2EC;color:var(--blue-dark)}
 .notif-cols{display:grid;grid-template-columns:1.9fr 1fr;gap:22px;align-items:start}
 .group-label{display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 12px}
 .group-label b{color:var(--navy);font-size:16px}
 .group-label span{color:var(--muted);font-size:13.5px}
 .notif{display:flex;gap:14px;background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px 19px;margin-bottom:13px;position:relative}
-.notif.unread{border-color:#B9D2EE;background:#FBFDFF}
-.notif .nic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:0 0 44px;background:#EAF2FE}
+.notif.unread{border-color:#A9CDBE;background:#FBFDFF}
+.notif .nic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:0 0 44px;background:#E4F2EC}
 .notif .nic.red{background:var(--red-bg)}
 .notif .nic.amber{background:var(--amber-bg)}
 .notif .nic.teal{background:var(--green-bg)}
@@ -230,7 +230,7 @@ select.input{appearance:none}
 .notif .udot{position:absolute;top:16px;right:16px;width:9px;height:9px;border-radius:50%;background:var(--blue)}
 .notif .acts{display:flex;gap:9px;margin-top:11px}
 .btn-sm{height:38px;padding:0 17px;font-size:14px;border-radius:10px}
-.variant-note{border:1.5px dashed #B9D2EE;border-radius:15px;padding:18px;background:#FBFDFF}
+.variant-note{border:1.5px dashed #A9CDBE;border-radius:15px;padding:18px;background:#FBFDFF}
 .variant-note h4{font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .variant-note p{font-size:14.5px;color:var(--slate);margin-bottom:9px}
 .variant-note b{color:var(--navy)}
@@ -280,10 +280,10 @@ select.input{appearance:none}
 .tile h3{color:var(--navy);font-size:17.5px;margin-bottom:5px}
 .tile p{color:var(--slate);font-size:15px}
 .tile .big-num{font-size:31px;font-weight:900;color:var(--navy);line-height:1.15}
-.tile.accent{background:linear-gradient(140deg,var(--blue),#1E40AF);border:0;color:#fff;grid-column:span 2}
+.tile.accent{background:linear-gradient(140deg,var(--blue),#0C4636);border:0;color:#fff;grid-column:span 2}
 .tile.accent h3,.tile.accent .big-num{color:#fff}
-.tile.accent p{color:#CFE2FF}
-.gauge{width:86px;height:86px;border-radius:50%;display:grid;place-items:center;margin:4px auto 8px;background:conic-gradient(var(--teal) 0 92%,#E1EBF5 92% 100%)}
+.tile.accent p{color:#CDEAE0}
+.gauge{width:86px;height:86px;border-radius:50%;display:grid;place-items:center;margin:4px auto 8px;background:conic-gradient(var(--teal) 0 92%,#DCEBE3 92% 100%)}
 .gauge .in{width:66px;height:66px;border-radius:50%;background:#fff;display:grid;place-items:center;font-weight:900;color:var(--navy);font-size:22px}
 .online-card{display:flex;align-items:center;gap:16px;padding:20px 24px;margin-bottom:18px}
 .online-card h3{color:#fff;font-size:20px}
@@ -312,7 +312,7 @@ select.input{appearance:none}
 .quick-acts .cnt{position:absolute;top:-8px;right:-6px;background:var(--red);color:#fff;font-size:12px;font-weight:800;border-radius:999px;padding:2.5px 9px}
 .tx-row{display:flex;align-items:center;gap:14px;padding:15px 4px;border-bottom:1px dashed var(--line);font-size:15.5px}
 .tx-row:last-child{border-bottom:0}
-.tx-row .tic{width:42px;height:42px;border-radius:12px;background:#EAF2FE;display:grid;place-items:center;font-size:19px;flex:0 0 42px}
+.tx-row .tic{width:42px;height:42px;border-radius:12px;background:#E4F2EC;display:grid;place-items:center;font-size:19px;flex:0 0 42px}
 .tx-row .amt{margin-left:auto;font-weight:800;color:var(--navy);white-space:nowrap}
 .tx-row .amt.neg{color:var(--red)}
 .bars{display:flex;align-items:flex-end;gap:14px;height:130px;padding:8px 6px 0}
@@ -322,11 +322,11 @@ select.input{appearance:none}
 .progress{height:13px;border-radius:999px;background:#E7EFF8;overflow:hidden;margin:10px 0 6px}
 .progress i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--sky));border-radius:999px}
 .qr-ph{width:196px;height:196px;border-radius:14px;background:
- repeating-conic-gradient(#0F2540 0% 25%, #fff 0% 50%) 0 0/26px 26px;border:10px solid #fff;box-shadow:var(--shadow-sm);margin:0 auto}
+ repeating-conic-gradient(#12211C 0% 25%, #fff 0% 50%) 0 0/26px 26px;border:10px solid #fff;box-shadow:var(--shadow-sm);margin:0 auto}
 .week-row{display:flex;align-items:center;gap:13px;padding:14px 6px;border-bottom:1px dashed var(--line)}
 .week-row:last-child{border-bottom:0}
 .week-row .dow{width:86px;font-weight:700;color:var(--navy);font-size:16px}
-.range-chip{display:inline-flex;align-items:center;gap:8px;background:#EAF2FE;color:var(--blue-dark);font-weight:600;font-size:15px;border-radius:10px;padding:8px 13px;margin:3px 4px 3px 0}
+.range-chip{display:inline-flex;align-items:center;gap:8px;background:#E4F2EC;color:var(--blue-dark);font-weight:600;font-size:15px;border-radius:10px;padding:8px 13px;margin:3px 4px 3px 0}
 .range-chip.night{background:#EDE9FE;color:#5B21B6}
 .range-chip.locked{background:#F1F5F9;color:var(--muted)}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}
@@ -336,11 +336,11 @@ select.input{appearance:none}
 .cal .cd.dim{opacity:.35}
 .phone-frame{max-width:400px;margin:0 auto;background:#0B2440;border-radius:36px;padding:12px;box-shadow:var(--shadow)}
 .phone-inner{background:var(--bg);border-radius:27px;overflow:hidden;min-height:660px;display:flex;flex-direction:column;position:relative}
-.radar-zone{height:250px;position:relative;background:radial-gradient(circle at 50% 55%,rgba(56,189,248,.4),transparent 62%),linear-gradient(160deg,#123B66,#0B3C6C);overflow:hidden}
+.radar-zone{height:250px;position:relative;background:radial-gradient(circle at 50% 55%,rgba(56,189,248,.4),transparent 62%),linear-gradient(160deg,#123B66,#143F34);overflow:hidden}
 .radar-zone .ring{position:absolute;border:1.5px solid rgba(255,255,255,.35);border-radius:50%;left:50%;top:55%;transform:translate(-50%,-50%)}
 .radar-zone .me{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);width:17px;height:17px;border-radius:50%;background:#fff;border:4px solid var(--sky)}
 .radar-zone .job-dot{position:absolute;left:64%;top:34%;font-size:25px}
-.count-ring{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--red) 0 75%,#E1EBF5 75% 100%);margin:0 auto}
+.count-ring{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--red) 0 75%,#DCEBE3 75% 100%);margin:0 auto}
 .count-ring .in{width:72px;height:72px;border-radius:50%;background:#fff;display:grid;place-items:center;font-weight:900;color:var(--red);font-size:20px}
 .vital-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .vital-grid .field{margin-bottom:0}
@@ -357,7 +357,7 @@ select.input{appearance:none}
 .review-card{padding:19px 21px;margin-bottom:13px}
 .review-card p{color:var(--slate);font-size:15.5px;margin-top:5px}
 .stars{color:#F59E0B;letter-spacing:2px}
-.selfie-ph{width:196px;height:196px;border-radius:50%;margin:0 auto;background:radial-gradient(circle at 50% 34%,#FBD9B8 0 17%,transparent 18%),radial-gradient(circle at 50% 118%,#2563EB 0 44%,transparent 45%),linear-gradient(150deg,#DCEBFA,#EFF6FF);border:3.5px dashed #B9D2EE;display:grid;place-items:end center;padding-bottom:15px}
+.selfie-ph{width:196px;height:196px;border-radius:50%;margin:0 auto;background:radial-gradient(circle at 50% 34%,#FBD9B8 0 17%,transparent 18%),radial-gradient(circle at 50% 118%,#166B58 0 44%,transparent 45%),linear-gradient(150deg,#DCEBFA,#EDF7F1);border:3.5px dashed #A9CDBE;display:grid;place-items:end center;padding-bottom:15px}
 .kv{display:flex;justify-content:space-between;gap:14px;padding:8.5px 0;border-bottom:1px dashed var(--line);font-size:15.5px}
 .kv:last-child{border-bottom:0}
 .kv b{color:var(--navy);text-align:right}
@@ -368,7 +368,7 @@ select.input{appearance:none}
 
 <div class="board-head">
   <h1>Phần N — Điều dưỡng (Nurse)</h1>
-  <p>Bản thiết kế do Tom dựng trực tiếp, áp đúng chuẩn <b>NAV-0</b> (navbar Nurse một hàng: Trang chủ · Việc làm · Ca của tôi · Ví · Tài khoản; menu ở avatar), chuẩn <b>elder-friendly</b> bắt buộc cho mọi màn điều dưỡng (chữ ≥17px, nút ≥56px, vùng chạm ≥48px), hệ màu khóa M0 (#2563EB, Be Vietnam Pro) và dữ liệu mẫu thống nhất. Nội dung tuân thủ SRS v2.0 Updated.</p>
+  <p>Bản thiết kế do Tom dựng trực tiếp, áp đúng chuẩn <b>NAV-0</b> (navbar Nurse một hàng: Trang chủ · Việc làm · Ca của tôi · Ví · Tài khoản; menu ở avatar), chuẩn <b>elder-friendly</b> bắt buộc cho mọi màn điều dưỡng (chữ ≥17px, nút ≥56px, vùng chạm ≥48px), hệ màu khóa M0 (#166B58, Be Vietnam Pro) và dữ liệu mẫu thống nhất. Nội dung tuân thủ SRS v2.0 Updated.</p>
   <div class="board-nav">
     <a href="#n1">N1 · Trang chủ</a><a href="#n2">N2 · Job Board</a><a href="#n3">N3 · Radar</a><a href="#n4">N4 · Ca của tôi</a><a href="#n5">N5 · Chi tiết ca</a>
     <a href="#n6">N6 · Check-in</a><a href="#n7">N7 · Trong ca</a><a href="#n8">N8 · Check-out</a><a href="#n9">N9 · Ví</a><a href="#n10">N10 · Ký quỹ</a>
@@ -380,7 +380,7 @@ select.input{appearance:none}
 <div class="meta-bar" id="n1"><span class="code">N1</span><h2>Trang chủ điều dưỡng</h2><span>Navbar NURSE (active: Trang chủ) · Bento tổng quan · elder-friendly</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links">
       <a href="#n1" class="active">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14">Tài khoản</a>
     </nav>
@@ -419,7 +419,7 @@ select.input{appearance:none}
           <button class="switch-lg on" type="button" aria-label="Sẵn sàng nhận ca"></button>
         </div>
         <div style="margin-top:16px;border-top:1px solid rgba(255,255,255,.25);padding-top:14px;display:flex;justify-content:space-between;align-items:baseline">
-          <span style="color:#CFE2FF;font-size:15.5px">Thu nhập hôm nay (dự kiến quyết toán)</span>
+          <span style="color:#CDEAE0;font-size:15.5px">Thu nhập hôm nay (dự kiến quyết toán)</span>
           <span class="big-num">+425.000đ</span>
         </div>
       </div>
@@ -465,7 +465,7 @@ select.input{appearance:none}
 
     <div class="group-label"><b style="font-size:19px">Ca hôm nay</b><span><a href="#n4" style="font-weight:700">Xem tất cả ca của tôi →</a></span></div>
     <div class="job-card">
-      <span class="nic" style="width:52px;height:52px;border-radius:14px;background:#EAF2FE;display:grid;place-items:center;font-size:24px;flex:0 0 52px">🩹</span>
+      <span class="nic" style="width:52px;height:52px;border-radius:14px;background:#E4F2EC;display:grid;place-items:center;font-size:24px;flex:0 0 52px">🩹</span>
       <div style="flex:1">
         <h4>14:30 – 15:30 · Thay băng vết mổ hậu phẫu <span class="chip" style="margin-left:6px">Đơn HC-2026-1042</span></h4>
         <p>Bà Nguyễn Thị Hoa, 78 tuổi · Hải Châu, Đà Nẵng · Khách đặt: anh Nguyễn Văn An · <span class="chip teal">Chuyển khoản · Đã tạm giữ</span> <span class="chip">Xâm lấn · Cấp 2 · Có y lệnh</span></p>
@@ -476,7 +476,7 @@ select.input{appearance:none}
 
     <div class="group-label" style="margin-top:24px"><b style="font-size:19px">Việc mới gần bạn</b><span><a href="#n2" style="font-weight:700">Mở Bảng việc làm →</a></span></div>
     <div class="job-card">
-      <span class="nic" style="width:52px;height:52px;border-radius:14px;background:#EAF2FE;display:grid;place-items:center;font-size:24px;flex:0 0 52px">💉</span>
+      <span class="nic" style="width:52px;height:52px;border-radius:14px;background:#E4F2EC;display:grid;place-items:center;font-size:24px;flex:0 0 52px">💉</span>
       <div style="flex:1">
         <h4>Tiêm insulin theo y lệnh · Hôm nay 17:00</h4>
         <p>Thanh Khê, Đà Nẵng · cách 2,4 km · Thủ thuật lẻ · <span class="chip">Xâm lấn · Cấp 2</span></p>
@@ -484,7 +484,7 @@ select.input{appearance:none}
       <span class="pay">250.000đ</span>
     </div>
     <div class="job-card">
-      <span class="nic" style="width:52px;height:52px;border-radius:14px;background:#EAF2FE;display:grid;place-items:center;font-size:24px;flex:0 0 52px">🌙</span>
+      <span class="nic" style="width:52px;height:52px;border-radius:14px;background:#E4F2EC;display:grid;place-items:center;font-size:24px;flex:0 0 52px">🌙</span>
       <div style="flex:1">
         <h4>Ca đêm chăm sóc sau phẫu thuật · 20:00 – 06:00</h4>
         <p>Hải Châu, Đà Nẵng · cách 1,8 km · Giá đã gồm phụ phí đêm +20%</p>
@@ -498,7 +498,7 @@ select.input{appearance:none}
 <div class="meta-bar" id="n2"><span class="code">N2</span><h2>Job Board — danh sách việc</h2><span>Navbar NURSE (active: Việc làm) · có biến thể góc nhìn Cấp 1 bị khóa dịch vụ xâm lấn</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links">
       <a href="#n1">Trang chủ</a><a href="#n2" class="active">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14">Tài khoản</a>
     </nav>
@@ -594,7 +594,7 @@ select.input{appearance:none}
 <!-- ================= N3 ================= -->
 <div class="meta-bar" id="n3"><span class="code">N3</span><h2>Radar — ca mới đến</h2><span>Chỉ mobile · toàn màn hình phủ trên bản đồ radar · đếm ngược phản hồi</span></div>
 <div class="screen">
-  <div class="screen-body elder" style="background:linear-gradient(180deg,#EAF2FE,var(--bg))">
+  <div class="screen-body elder" style="background:linear-gradient(180deg,#E4F2EC,var(--bg))">
     <div class="phone-frame">
       <div class="phone-inner">
         <div class="radar-zone">
@@ -635,7 +635,7 @@ select.input{appearance:none}
 <div class="meta-bar" id="n4"><span class="code">N4</span><h2>Ca của tôi</h2><span>Navbar NURSE (active: Ca của tôi) · thẻ ca lớn · trạng thái quyết toán trên từng ca đã xong</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links">
       <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4" class="active">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14">Tài khoản</a>
     </nav>
@@ -735,7 +735,7 @@ select.input{appearance:none}
 <div class="meta-bar" id="n5"><span class="code">N5</span><h2>Chi tiết ca — góc điều dưỡng</h2><span>Navbar NURSE (active: Ca của tôi) · đơn HC-2026-1042 · có y lệnh &amp; đối chiếu tại chỗ</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links">
       <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4" class="active">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14">Tài khoản</a>
     </nav>
@@ -839,7 +839,7 @@ select.input{appearance:none}
 <!-- ================= N6 ================= -->
 <div class="meta-bar" id="n6"><span class="code">N6</span><h2>Check-in — GPS + ảnh trực tiếp</h2><span>Chỉ mobile · vòng bán kính 200 m · có biến thể chặn vị trí giả lập và ngoài bán kính</span></div>
 <div class="screen">
-  <div class="screen-body elder" style="background:linear-gradient(180deg,#EAF2FE,var(--bg))">
+  <div class="screen-body elder" style="background:linear-gradient(180deg,#E4F2EC,var(--bg))">
     <div class="phone-frame">
       <div class="phone-inner">
         <div style="padding:20px 22px 0">
@@ -886,7 +886,7 @@ select.input{appearance:none}
 <div class="meta-bar" id="n7"><span class="code">N7</span><h2>Ca đang thực hiện</h2><span>Navbar NURSE (active: Ca của tôi) · đơn HC-2026-1049 · sinh hiệu, checklist, gia hạn, SOS</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links">
       <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4" class="active">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14">Tài khoản</a>
     </nav>
@@ -976,7 +976,7 @@ select.input{appearance:none}
 <div class="meta-bar" id="n8"><span class="code">N8</span><h2>Check-out &amp; báo cáo ca</h2><span>Navbar NURSE (active: Ca của tôi) · đơn HC-2026-1042 · xem trước quyết toán theo 2 hình thức</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links">
       <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4" class="active">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14">Tài khoản</a>
     </nav>
@@ -1061,7 +1061,7 @@ select.input{appearance:none}
 <div class="meta-bar" id="n9"><span class="code">N9</span><h2>Ví &amp; thu nhập</h2><span>Navbar NURSE (active: Ví) · ví 3 ngăn · lịch sử giao dịch theo sổ cái</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links">
       <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9" class="active">Ví</a><a href="#n14">Tài khoản</a>
     </nav>
@@ -1155,7 +1155,7 @@ select.input{appearance:none}
 <div class="meta-bar" id="n10"><span class="code">N10</span><h2>Ký quỹ điều dưỡng</h2><span>Navbar NURSE (active: Ví) · trạng thái chính: đã đủ 300.000đ · kèm biến thể chưa đủ</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links">
       <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9" class="active">Ví</a><a href="#n14">Tài khoản</a>
     </nav>
@@ -1239,7 +1239,7 @@ select.input{appearance:none}
 <div class="meta-bar" id="n11"><span class="code">N11</span><h2>Nộp hoa hồng ca tiền mặt</h2><span>Navbar NURSE (active: Ví) · tự nộp qua VietQR trong 24 giờ sau check-out · không trừ ví</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links">
       <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9" class="active">Ví</a><a href="#n14">Tài khoản</a>
     </nav>
@@ -1320,7 +1320,7 @@ select.input{appearance:none}
 <div class="meta-bar" id="n12"><span class="code">N12</span><h2>Rút tiền về ngân hàng</h2><span>Navbar NURSE (active: Ví) · chỉ rút từ số dư khả dụng</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links">
       <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9" class="active">Ví</a><a href="#n14">Tài khoản</a>
     </nav>
@@ -1389,7 +1389,7 @@ select.input{appearance:none}
 <div class="meta-bar" id="n13"><span class="code">N13</span><h2>Lịch rảnh &amp; ngày nghỉ</h2><span>Navbar NURSE (active: Tài khoản) · lưới tuần + lịch tháng đăng ký ngày nghỉ</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links">
       <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14" class="active">Tài khoản</a>
     </nav>
@@ -1457,7 +1457,7 @@ select.input{appearance:none}
 <div class="meta-bar" id="n14"><span class="code">N14</span><h2>Giấy tờ &amp; GPHN của tôi</h2><span>Navbar NURSE (active: Tài khoản) · trạng thái từng giấy tờ · cập nhật GPHN chờ Admin duyệt</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links">
       <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14" class="active">Tài khoản</a>
     </nav>
@@ -1485,7 +1485,7 @@ select.input{appearance:none}
       <div><h1>Giấy tờ &amp; GPHN của tôi</h1><p>Quản lý chứng chỉ hành nghề và các giấy tờ đã được thẩm định</p></div>
     </div>
 
-    <div class="card" style="padding:24px;margin-bottom:20px;background:linear-gradient(130deg,#EFF6FF,#fff)">
+    <div class="card" style="padding:24px;margin-bottom:20px;background:linear-gradient(130deg,#EDF7F1,#fff)">
       <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
         <span class="avatar" style="width:60px;height:60px;flex-basis:60px;font-size:19px">MT</span>
         <div style="flex:1;min-width:260px">
@@ -1548,7 +1548,7 @@ select.input{appearance:none}
 <div class="meta-bar" id="n15"><span class="code">N15</span><h2>Đánh giá &amp; điểm TrustScore</h2><span>Navbar NURSE (active: Tài khoản) · TrustScore thang 100 · đánh giá ẩn hai chiều</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links">
       <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14" class="active">Tài khoản</a>
     </nav>
@@ -1641,7 +1641,7 @@ select.input{appearance:none}
 </div>
 
 <div class="board-foot">
-  Chuẩn áp dụng: NAV-0 (navbar Nurse / page header / menu avatar) · M0 design system (Be Vietnam Pro, #2563EB) · Elder-friendly toàn phần N · Dữ liệu mẫu: ĐD. Trần Thị Mai (Cấp 2, TrustScore 92/100, GPHN 00976/GPHN-ĐN hết hạn 12/04/2027, ví 3.850.000đ, ký quỹ 300.000đ) · ĐD. Nguyễn Văn Hùng (Cấp 1, TrustScore 85/100) · Bà Nguyễn Thị Hoa (78 tuổi, Hải Châu, Đà Nẵng) · Đơn HC-2026-1042 / 1048 / 1039 / 1057 · Nội dung theo SRS v2.0 Updated.
+  Chuẩn áp dụng: NAV-0 (navbar Nurse / page header / menu avatar) · M0 design system (Be Vietnam Pro, #166B58) · Elder-friendly toàn phần N · Dữ liệu mẫu: ĐD. Trần Thị Mai (Cấp 2, TrustScore 92/100, GPHN 00976/GPHN-ĐN hết hạn 12/04/2027, ví 3.850.000đ, ký quỹ 300.000đ) · ĐD. Nguyễn Văn Hùng (Cấp 1, TrustScore 85/100) · Bà Nguyễn Thị Hoa (78 tuổi, Hải Châu, Đà Nẵng) · Đơn HC-2026-1042 / 1048 / 1039 / 1057 · Nội dung theo SRS v2.0 Updated.
 </div>
 
 <script>
