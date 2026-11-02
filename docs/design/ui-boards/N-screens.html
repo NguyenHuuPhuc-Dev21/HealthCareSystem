@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phần N — Điều dưỡng (Nurse) · HealthCareSystem (Thiết kế bởi Tom)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#2563EB; --blue-dark:#1D4ED8; --sky:#38BDF8; --navy:#0B3C6C; --teal:#0D9488;
+  --ink:#0F2540; --slate:#4A6076; --muted:#7A8FA6; --bg:#F5F9FC; --line:#E1EBF5;
+  --amber:#B45309; --amber-bg:#FEF3C7; --amber-soft:#FFFBEB;
+  --red:#DC2626; --red-bg:#FEF2F2; --orange:#EA580C; --orange-bg:#FFF7ED;
+  --green-bg:#ECFDF5; --radius:16px;
+  --shadow:0 18px 40px -18px rgba(11,60,108,.22);
+  --shadow-sm:0 6px 20px -8px rgba(11,60,108,.16);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Be Vietnam Pro',system-ui,sans-serif;background:#DCE9F5;color:var(--ink);font-size:16px;line-height:1.55}
+a{color:var(--blue);text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+
+/* ===== BOARD (meta, not product UI) ===== */
+.board-head{max-width:1180px;margin:0 auto;padding:44px 24px 8px}
+.board-head h1{color:var(--navy);font-size:30px;font-weight:900}
+.board-head p{color:var(--slate);max-width:820px;margin-top:8px}
+.board-nav{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 6px}
+.board-nav a{background:#fff;border:1px solid var(--line);padding:8px 16px;border-radius:999px;font-weight:600;font-size:14.5px;color:var(--navy)}
+.board-nav a:hover{border-color:var(--blue);color:var(--blue)}
+.meta-bar{max-width:1180px;margin:34px auto 0;padding:0 24px;display:flex;align-items:baseline;gap:14px}
+.meta-bar .code{font-weight:900;color:#fff;background:var(--navy);border-radius:9px;padding:3px 12px;font-size:15px}
+.meta-bar h2{color:var(--navy);font-size:20px}
+.meta-bar span{color:var(--slate);font-size:14px}
+
+/* ===== SCREEN FRAME ===== */
+.screen{max-width:1180px;margin:12px auto 10px;background:var(--bg);border-radius:22px;box-shadow:0 30px 60px -25px rgba(11,60,108,.45);overflow:hidden;border:1px solid #C9DDF2}
+.screen-body{padding:30px 38px 40px}
+.page{max-width:1064px;margin:0 auto}
+
+/* ===== NAVBAR (NAV-0) ===== */
+.navbar{height:60px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 38px;gap:26px;position:relative;z-index:30}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:17px;color:var(--navy)}
+.logo-mark{width:33px;height:33px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--sky));display:grid;place-items:center;color:#fff;font-size:19px;font-weight:900}
+.nav-links{display:flex;gap:24px;margin-left:6px}
+.nav-links a{font-size:15px;font-weight:500;color:var(--slate);padding:6px 2px;position:relative}
+.nav-links a.active{color:var(--blue);font-weight:600}
+.nav-links a.active::after{content:"";position:absolute;left:0;right:0;bottom:-14px;height:2.5px;background:var(--blue);border-radius:2px}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.bell{position:relative;width:40px;height:40px;border-radius:50%;border:0;background:transparent;font-size:19px;display:grid;place-items:center}
+.bell:hover{background:var(--bg)}
+.bell .dot{position:absolute;top:2px;right:1px;background:var(--red);color:#fff;font-size:10.5px;font-weight:700;min-width:17px;height:17px;border-radius:9px;display:grid;place-items:center;padding:0 4px;border:2px solid #fff}
+.bell.active{background:#EAF2FE}
+.userblock{display:flex;align-items:center;gap:9px;background:none;border:0;padding:5px 6px;border-radius:12px}
+.userblock:hover{background:var(--bg)}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#93C5FD,var(--blue));color:#fff;display:grid;place-items:center;font-weight:700;font-size:13.5px;flex:0 0 36px}
+.avatar.lg{width:46px;height:46px;font-size:16px;flex-basis:46px}
+.userblock .uname{font-size:15px;font-weight:600;color:var(--navy)}
+.caret{color:var(--muted);font-size:12px}
+/* avatar dropdown (CP15 / NAV-0) */
+.avatar-menu{position:absolute;top:56px;right:30px;width:288px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:10px;display:none;z-index:50}
+.avatar-menu.open{display:block}
+.avatar-menu .am-head{display:flex;gap:11px;align-items:center;padding:8px 10px 12px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.avatar-menu .am-head b{color:var(--navy);font-size:15.5px;display:block}
+.avatar-menu .am-head span{color:var(--muted);font-size:13px}
+.avatar-menu a{display:flex;align-items:center;gap:11px;padding:10px;border-radius:10px;color:var(--ink);font-size:15px;font-weight:500}
+.avatar-menu a:hover{background:var(--bg)}
+.avatar-menu a .mi{width:21px;text-align:center}
+.avatar-menu .divider{height:1px;background:var(--line);margin:6px 4px}
+.avatar-menu a.logout{color:var(--red)}
+
+/* ===== PAGE HEADER (NAV-0) ===== */
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:6px 0 20px}
+.page-head h1{font-size:24px;font-weight:800;color:var(--navy);line-height:1.25}
+.page-head p{color:var(--slate);font-size:15px;margin-top:3px}
+
+/* ===== GENERIC CONTROLS ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:16px;padding:0 26px;height:52px;border-radius:13px;border:1px solid transparent;transition:.15s}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue-dark)}
+.btn-secondary{background:#fff;border-color:#C7DBF2;color:var(--navy)}
+.btn-secondary:hover{border-color:var(--blue);color:var(--blue)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-block{width:100%}
+.btn-lg{height:58px;font-size:17px;border-radius:14px}
+.btn:disabled{background:#D7E3F0;color:#8AA3BC;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 11px;border-radius:999px;background:#EAF2FE;color:var(--blue-dark)}
+.chip.teal{background:var(--green-bg);color:var(--teal)}
+.chip.amber{background:var(--amber-bg);color:var(--amber)}
+.chip.orange{background:var(--orange-bg);color:var(--orange)}
+.chip.red{background:var(--red-bg);color:var(--red)}
+.chip.grey{background:#EEF2F6;color:var(--slate)}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm)}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:15px;font-weight:600;color:var(--navy);margin-bottom:8px}
+.field label .req{color:var(--red)}
+.field .hint{font-size:13.5px;color:var(--muted);margin-top:6px}
+.input{width:100%;height:54px;border:1.5px solid var(--line);border-radius:12px;padding:0 16px;font-family:inherit;font-size:16.5px;color:var(--ink);background:#fff;outline:none}
+.input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+textarea.input{height:auto;padding:13px 16px;resize:vertical;line-height:1.55}
+select.input{appearance:none}
+.small-print{font-size:13px;color:var(--muted);text-align:center;line-height:1.6}
+
+/* ===== AUTH (SH1/SH2) ===== */
+.auth-zone{min-height:640px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:44px 20px;background:
+ radial-gradient(700px 380px at 85% -5%,rgba(56,189,248,.22),transparent 60%),
+ radial-gradient(620px 420px at -10% 30%,rgba(37,99,235,.12),transparent 60%),var(--bg)}
+.auth-card{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:38px 40px;width:100%;max-width:480px}
+.auth-card .logo-c{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:24px}
+.auth-card .logo-mark{width:56px;height:56px;border-radius:16px;font-size:30px;margin-bottom:12px}
+.auth-card h1{font-size:26px;font-weight:800;color:var(--navy);text-align:center}
+.auth-card .sub{text-align:center;color:var(--slate);font-size:15.5px;margin:6px 0 26px}
+.phone-wrap{display:flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
+.phone-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+.phone-wrap .prefix{display:flex;align-items:center;gap:7px;padding:0 14px;background:var(--bg);border-right:1px solid var(--line);font-weight:700;color:var(--navy);font-size:16.5px}
+.phone-wrap input{flex:1;border:0;outline:none;height:54px;padding:0 14px;font-family:inherit;font-size:17px;letter-spacing:.4px;color:var(--ink)}
+.divider-or{display:flex;align-items:center;gap:14px;color:var(--muted);font-size:13px;margin:22px 0}
+.divider-or::before,.divider-or::after{content:"";flex:1;height:1px;background:var(--line)}
+.admin-variant{margin-top:26px;width:100%;max-width:480px;background:#fff;border:1.5px dashed #B9D2EE;border-radius:16px;padding:18px 20px}
+.admin-variant h4{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.admin-variant p{font-size:14.5px;color:var(--slate)}
+/* OTP */
+.otp-row{display:flex;gap:11px;justify-content:center;margin:8px 0 6px}
+.otp-row input{width:52px;height:60px;text-align:center;font-family:inherit;font-size:24px;font-weight:700;color:var(--navy);border:1.5px solid var(--line);border-radius:13px;outline:none;background:#fff}
+.otp-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+.alert{display:flex;gap:11px;border-radius:13px;padding:13px 16px;font-size:14.5px;margin:14px 0}
+.alert.red{background:var(--red-bg);color:#7F1D1D}
+.alert b{color:var(--red)}
+/* role cards */
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 22px}
+.role-card{border:2px solid var(--line);border-radius:16px;padding:19px;text-align:left;background:#fff;transition:.15s;width:100%}
+.role-card:hover{border-color:#B9D2EE}
+.role-card.selected{border-color:var(--blue);background:#F4F9FF;box-shadow:0 0 0 3.5px rgba(37,99,235,.12)}
+.role-card .ric{font-size:27px;margin-bottom:9px}
+.role-card h3{font-size:16.5px;color:var(--navy);margin-bottom:4px}
+.role-card p{font-size:14px;color:var(--slate)}
+.role-card .next{margin-top:11px;font-size:13.5px;font-weight:600;color:var(--blue)}
+
+/* ===== STEPPER (body card) ===== */
+.stepper{display:flex;gap:10px;margin-bottom:22px}
+.stepper .st{flex:1;display:flex;align-items:center;gap:11px;padding:14px 16px;border-radius:13px;background:#fff;border:1px solid var(--line)}
+.stepper .st .n{width:34px;height:34px;border-radius:50%;background:#EAF2FE;color:var(--blue);font-weight:800;display:grid;place-items:center;flex:0 0 34px;font-size:15px}
+.stepper .st.done .n{background:var(--teal);color:#fff}
+.stepper .st.now{background:var(--blue);border-color:var(--blue);color:#fff}
+.stepper .st.now .n{background:#fff;color:var(--blue)}
+.stepper .st small{display:block;font-size:12px;opacity:.75;font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.stepper .st b{font-size:15px;line-height:1.3}
+.stepper .st.todo{opacity:.65}
+/* collapsed step summary */
+.step-summary{display:flex;align-items:center;gap:14px;padding:17px 20px;margin-bottom:18px}
+.step-summary .n{width:34px;height:34px;border-radius:50%;background:var(--teal);color:#fff;font-weight:800;display:grid;place-items:center;flex:0 0 34px}
+.step-summary h3{font-size:16.5px;color:var(--navy)}
+.step-summary p{font-size:14px;color:var(--slate)}
+.step-summary .edit{margin-left:auto;font-weight:600;font-size:14.5px;white-space:nowrap}
+/* upload cards CP2 */
+.upload-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.upload{border:1.5px dashed #B9D2EE;border-radius:14px;padding:17px;text-align:center;background:#FBFDFF}
+.upload .uic{font-size:29px}
+.upload h4{font-size:15px;color:var(--navy);margin:7px 0 3px}
+.upload p{font-size:13px;color:var(--muted);margin-bottom:9px}
+.upload.filled{border-style:solid;border-color:#BFE8DC;background:#F7FEFB}
+/* radio / check cards */
+.choice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.choice{border:2px solid var(--line);border-radius:14px;padding:16px;background:#fff;text-align:left;width:100%}
+.choice.selected{border-color:var(--blue);background:#F4F9FF}
+.choice h4{color:var(--navy);font-size:16px;margin-bottom:4px}
+.choice p{font-size:13.5px;color:var(--slate)}
+.chip-select{display:flex;gap:9px;flex-wrap:wrap}
+.chip-select button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:10px 19px;font-size:15px;font-weight:600;color:var(--slate)}
+.chip-select button.selected{background:var(--blue);border-color:var(--blue);color:#fff}
+.cols-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.cols-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.toggle{position:relative;width:58px;height:32px;border-radius:999px;background:#CBD8E5;border:0;flex:0 0 58px;transition:.2s}
+.toggle::after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.toggle.on{background:var(--teal)}
+.toggle.on::after{left:30px}
+.map-ph{height:215px;border-radius:14px;position:relative;overflow:hidden;background:
+ repeating-linear-gradient(0deg,transparent,transparent 34px,rgba(37,99,235,.07) 34px,rgba(37,99,235,.07) 35px),
+ repeating-linear-gradient(90deg,transparent,transparent 34px,rgba(37,99,235,.07) 34px,rgba(37,99,235,.07) 35px),
+ linear-gradient(140deg,#E3F2E8,#DCEBFA)}
+.map-ph .pin{position:absolute;top:44%;left:50%;transform:translate(-50%,-100%);font-size:36px}
+.map-ph .pin-label{position:absolute;top:calc(44% + 8px);left:50%;transform:translateX(-50%);background:#fff;border-radius:9px;box-shadow:var(--shadow-sm);padding:5px 12px;font-size:13px;font-weight:600;color:var(--navy);white-space:nowrap}
+.map-ph .gps-chip{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.94);border-radius:9px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--navy);display:flex;gap:7px;align-items:center}
+.gps-dot{width:9px;height:9px;border-radius:50%;background:var(--teal)}
+
+/* ===== ELDER (nurse surfaces) ===== */
+.elder{font-size:17px}
+.elder .input{height:58px;font-size:17.5px}
+.elder .field label{font-size:16px}
+.elder .btn-lg{height:60px;font-size:17.5px}
+.doc-row{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:#fff}
+.doc-row .dic{width:46px;height:46px;border-radius:12px;background:#EAF2FE;display:grid;place-items:center;font-size:22px;flex:0 0 46px}
+.doc-row h4{color:var(--navy);font-size:16.5px}
+.doc-row p{font-size:14px;color:var(--slate)}
+.doc-row .st{margin-left:auto;text-align:right}
+.svc-group{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fff;margin-bottom:14px}
+.svc-group h4{color:var(--navy);font-size:16.5px;margin-bottom:4px}
+.svc-group .g-sub{font-size:14px;color:var(--slate);margin-bottom:12px}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 18px}
+.check-item{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;padding:9px 11px;border-radius:10px;background:var(--bg)}
+.check-item input{width:20px;height:20px;margin-top:2px;accent-color:var(--blue)}
+.check-item.locked{background:#F1F5F9;color:var(--muted)}
+.timeline-mini{display:flex;gap:0;margin-top:14px}
+.timeline-mini div{flex:1;text-align:center;position:relative;padding-top:20px;font-size:14px;color:var(--slate)}
+.timeline-mini div::before{content:"";position:absolute;top:5px;left:50%;transform:translateX(-50%);width:12px;height:12px;border-radius:50%;background:#CBD8E5}
+.timeline-mini div.done::before{background:var(--teal)}
+.timeline-mini div::after{content:"";position:absolute;top:10px;left:calc(-50% + 8px);right:calc(50% + 8px);height:2px;background:#E1EBF5}
+.timeline-mini div:first-child::after{display:none}
+
+/* ===== TOOLBAR + NOTIFICATIONS (SH5) ===== */
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;padding:13px 0 18px;border-top:1px solid var(--line)}
+.toolbar button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 17px;font-size:14.5px;font-weight:600;color:var(--slate)}
+.toolbar button.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.toolbar button .cnt{background:rgba(255,255,255,.25);border-radius:8px;padding:0 6px;margin-left:5px;font-size:12.5px}
+.toolbar button:not(.active) .cnt{background:#EAF2FE;color:var(--blue-dark)}
+.notif-cols{display:grid;grid-template-columns:1.9fr 1fr;gap:22px;align-items:start}
+.group-label{display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 12px}
+.group-label b{color:var(--navy);font-size:16px}
+.group-label span{color:var(--muted);font-size:13.5px}
+.notif{display:flex;gap:14px;background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px 19px;margin-bottom:13px;position:relative}
+.notif.unread{border-color:#B9D2EE;background:#FBFDFF}
+.notif .nic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:0 0 44px;background:#EAF2FE}
+.notif .nic.red{background:var(--red-bg)}
+.notif .nic.amber{background:var(--amber-bg)}
+.notif .nic.teal{background:var(--green-bg)}
+.notif h4{font-size:15.5px;color:var(--navy);line-height:1.4}
+.notif p{font-size:14.5px;color:var(--slate);margin-top:2px}
+.notif .time{font-size:13px;color:var(--muted);white-space:nowrap}
+.notif .udot{position:absolute;top:16px;right:16px;width:9px;height:9px;border-radius:50%;background:var(--blue)}
+.notif .acts{display:flex;gap:9px;margin-top:11px}
+.btn-sm{height:38px;padding:0 17px;font-size:14px;border-radius:10px}
+.variant-note{border:1.5px dashed #B9D2EE;border-radius:15px;padding:18px;background:#FBFDFF}
+.variant-note h4{font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.variant-note p{font-size:14.5px;color:var(--slate);margin-bottom:9px}
+.variant-note b{color:var(--navy)}
+
+/* ===== SETTINGS (SH6) ===== */
+.set-cols{display:grid;grid-template-columns:1.55fr 1fr;gap:22px;align-items:start}
+.profile-card{padding:24px;display:flex;gap:18px;align-items:center;margin-bottom:20px}
+.profile-card h2{font-size:21px;color:var(--navy)}
+.profile-card .prow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.menu-list{overflow:hidden}
+.menu-list a{display:flex;align-items:center;gap:14px;padding:16.5px 20px;border-bottom:1px solid var(--line);color:var(--ink);font-size:15.5px;font-weight:500}
+.menu-list a:last-child{border-bottom:0}
+.menu-list a:hover{background:var(--bg)}
+.menu-list .mi{width:23px;text-align:center;font-size:17px}
+.menu-list .sub{display:block;font-size:13.5px;color:var(--muted);font-weight:400}
+.menu-list .chev{margin-left:auto;color:var(--muted)}
+.menu-list a.danger{color:var(--red)}
+.banner{border-radius:15px;padding:19px 21px;margin-bottom:14px;border:1px solid}
+.banner h4{font-size:16px;margin-bottom:4px}
+.banner p{font-size:14.5px}
+.banner .acts{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap}
+.banner.amber{background:var(--amber-soft);border-color:#F0DFA8;color:#713F12}
+.banner.amber h4{color:var(--amber)}
+.banner.orange{background:var(--orange-bg);border-color:#F6D3B3;color:#7C2D12}
+.banner.orange h4{color:var(--orange)}
+.banner.red{background:var(--red-bg);border-color:#F3C2C2;color:#7F1D1D}
+.banner.red h4{color:var(--red)}
+.variant-tag{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.65;display:block;margin-bottom:5px}
+.checklist{list-style:none;margin-top:9px;font-size:14.5px}
+.checklist li{padding:3px 0}
+.board-foot{max-width:1180px;margin:0 auto;padding:26px 24px 60px;color:var(--slate);font-size:14px}
+@media(max-width:900px){
+  .screen-body{padding:22px 18px 30px}
+  .navbar{padding:0 18px}.nav-links{display:none}
+  .upload-grid,.choice-grid,.cols-3,.cols-2,.role-grid,.notif-cols,.set-cols{grid-template-columns:1fr}
+  .stepper{flex-direction:column}
+  .auth-card{padding:30px 22px}
+}
+</style>
+<style>
+/* ===== PHẦN N — class mở rộng ===== */
+.elder{font-size:17px}
+.elder .btn{font-size:17px}
+.elder .page-head p{font-size:16px}
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+.tile{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow-sm)}
+.tile h3{color:var(--navy);font-size:17.5px;margin-bottom:5px}
+.tile p{color:var(--slate);font-size:15px}
+.tile .big-num{font-size:31px;font-weight:900;color:var(--navy);line-height:1.15}
+.tile.accent{background:linear-gradient(140deg,var(--blue),#1E40AF);border:0;color:#fff;grid-column:span 2}
+.tile.accent h3,.tile.accent .big-num{color:#fff}
+.tile.accent p{color:#CFE2FF}
+.gauge{width:86px;height:86px;border-radius:50%;display:grid;place-items:center;margin:4px auto 8px;background:conic-gradient(var(--teal) 0 92%,#E1EBF5 92% 100%)}
+.gauge .in{width:66px;height:66px;border-radius:50%;background:#fff;display:grid;place-items:center;font-weight:900;color:var(--navy);font-size:22px}
+.online-card{display:flex;align-items:center;gap:16px;padding:20px 24px;margin-bottom:18px}
+.online-card h3{color:#fff;font-size:20px}
+.switch-lg{position:relative;width:76px;height:42px;border-radius:999px;background:rgba(255,255,255,.35);border:0;flex:0 0 76px}
+.switch-lg::after{content:"";position:absolute;top:5px;left:5px;width:32px;height:32px;border-radius:50%;background:#fff;transition:.2s}
+.switch-lg.on{background:var(--teal)}
+.switch-lg.on::after{left:39px}
+.job-card{display:flex;gap:16px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:19px 21px;margin-bottom:14px;box-shadow:var(--shadow-sm);align-items:flex-start}
+.job-card h4{color:var(--navy);font-size:18px;line-height:1.35}
+.job-card p{color:var(--slate);font-size:15px;margin-top:2px}
+.job-card .pay{font-size:23px;font-weight:900;color:var(--navy);white-space:nowrap}
+.job-card.disabled{opacity:.62;background:#F8FAFC}
+.job-card .acts{display:flex;gap:9px;margin-top:11px;flex-wrap:wrap}
+.shift-tabs{display:flex;gap:9px;margin-bottom:18px}
+.shift-tabs button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:11px 21px;font-size:16px;font-weight:600;color:var(--slate)}
+.shift-tabs button.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.wallet-card{display:grid;grid-template-columns:repeat(3,1fr);gap:0;overflow:hidden;margin-bottom:18px}
+.wallet-card .seg{padding:22px 24px;border-right:1px solid var(--line)}
+.wallet-card .seg:last-child{border-right:0}
+.wallet-card .seg small{display:block;font-size:13.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.wallet-card .seg .amt{font-size:27px;font-weight:900;color:var(--navy)}
+.wallet-card .seg p{font-size:14px;color:var(--slate);margin-top:3px}
+.wallet-card .seg.locked{background:#F8FAFC}
+.quick-acts{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.quick-acts a{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px 19px;color:var(--navy);font-weight:700;font-size:16.5px;box-shadow:var(--shadow-sm);position:relative}
+.quick-acts .cnt{position:absolute;top:-8px;right:-6px;background:var(--red);color:#fff;font-size:12px;font-weight:800;border-radius:999px;padding:2.5px 9px}
+.tx-row{display:flex;align-items:center;gap:14px;padding:15px 4px;border-bottom:1px dashed var(--line);font-size:15.5px}
+.tx-row:last-child{border-bottom:0}
+.tx-row .tic{width:42px;height:42px;border-radius:12px;background:#EAF2FE;display:grid;place-items:center;font-size:19px;flex:0 0 42px}
+.tx-row .amt{margin-left:auto;font-weight:800;color:var(--navy);white-space:nowrap}
+.tx-row .amt.neg{color:var(--red)}
+.bars{display:flex;align-items:flex-end;gap:14px;height:130px;padding:8px 6px 0}
+.bars .b{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;height:100%;justify-content:flex-end}
+.bars .bar{width:100%;max-width:44px;border-radius:8px 8px 0 0;background:linear-gradient(180deg,var(--sky),var(--blue))}
+.bars span{font-size:13px;color:var(--muted)}
+.progress{height:13px;border-radius:999px;background:#E7EFF8;overflow:hidden;margin:10px 0 6px}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--sky));border-radius:999px}
+.qr-ph{width:196px;height:196px;border-radius:14px;background:
+ repeating-conic-gradient(#0F2540 0% 25%, #fff 0% 50%) 0 0/26px 26px;border:10px solid #fff;box-shadow:var(--shadow-sm);margin:0 auto}
+.week-row{display:flex;align-items:center;gap:13px;padding:14px 6px;border-bottom:1px dashed var(--line)}
+.week-row:last-child{border-bottom:0}
+.week-row .dow{width:86px;font-weight:700;color:var(--navy);font-size:16px}
+.range-chip{display:inline-flex;align-items:center;gap:8px;background:#EAF2FE;color:var(--blue-dark);font-weight:600;font-size:15px;border-radius:10px;padding:8px 13px;margin:3px 4px 3px 0}
+.range-chip.night{background:#EDE9FE;color:#5B21B6}
+.range-chip.locked{background:#F1F5F9;color:var(--muted)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}
+.cal .cd{aspect-ratio:1.25;border:1px solid var(--line);border-radius:10px;display:grid;place-items:center;font-weight:600;color:var(--slate);background:#fff;font-size:15px}
+.cal .cd.off{background:var(--red-bg);color:var(--red);border-color:#F3C2C2}
+.cal .cd.avail{background:var(--green-bg);color:var(--teal);border-color:#BFE8DC}
+.cal .cd.dim{opacity:.35}
+.phone-frame{max-width:400px;margin:0 auto;background:#0B2440;border-radius:36px;padding:12px;box-shadow:var(--shadow)}
+.phone-inner{background:var(--bg);border-radius:27px;overflow:hidden;min-height:660px;display:flex;flex-direction:column;position:relative}
+.radar-zone{height:250px;position:relative;background:radial-gradient(circle at 50% 55%,rgba(56,189,248,.4),transparent 62%),linear-gradient(160deg,#123B66,#0B3C6C);overflow:hidden}
+.radar-zone .ring{position:absolute;border:1.5px solid rgba(255,255,255,.35);border-radius:50%;left:50%;top:55%;transform:translate(-50%,-50%)}
+.radar-zone .me{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);width:17px;height:17px;border-radius:50%;background:#fff;border:4px solid var(--sky)}
+.radar-zone .job-dot{position:absolute;left:64%;top:34%;font-size:25px}
+.count-ring{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--red) 0 75%,#E1EBF5 75% 100%);margin:0 auto}
+.count-ring .in{width:72px;height:72px;border-radius:50%;background:#fff;display:grid;place-items:center;font-weight:900;color:var(--red);font-size:20px}
+.vital-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vital-grid .field{margin-bottom:0}
+.vital-grid .input{text-align:center;font-weight:700;color:var(--navy)}
+.task-row{display:flex;gap:12px;align-items:flex-start;padding:12px 13px;border-radius:12px;background:var(--bg);margin-bottom:9px;font-size:16px}
+.task-row input{width:22px;height:22px;margin-top:2px;accent-color:var(--teal)}
+.task-row .tt{margin-left:auto;font-size:13.5px;color:var(--muted);white-space:nowrap}
+.pay-line{display:flex;justify-content:space-between;padding:9.5px 0;border-bottom:1px dashed var(--line);font-size:16px}
+.pay-line:last-child{border-bottom:0}
+.pay-line.total{font-weight:800;color:var(--navy);font-size:18px}
+.dist-row{display:flex;align-items:center;gap:11px;font-size:14.5px;margin-bottom:8px}
+.dist-row .tr{flex:1;height:11px;border-radius:999px;background:#E7EFF8;overflow:hidden}
+.dist-row .tr i{display:block;height:100%;background:var(--blue)}
+.review-card{padding:19px 21px;margin-bottom:13px}
+.review-card p{color:var(--slate);font-size:15.5px;margin-top:5px}
+.stars{color:#F59E0B;letter-spacing:2px}
+.selfie-ph{width:196px;height:196px;border-radius:50%;margin:0 auto;background:radial-gradient(circle at 50% 34%,#FBD9B8 0 17%,transparent 18%),radial-gradient(circle at 50% 118%,#2563EB 0 44%,transparent 45%),linear-gradient(150deg,#DCEBFA,#EFF6FF);border:3.5px dashed #B9D2EE;display:grid;place-items:end center;padding-bottom:15px}
+.kv{display:flex;justify-content:space-between;gap:14px;padding:8.5px 0;border-bottom:1px dashed var(--line);font-size:15.5px}
+.kv:last-child{border-bottom:0}
+.kv b{color:var(--navy);text-align:right}
+@media(max-width:900px){.bento,.wallet-card,.quick-acts{grid-template-columns:1fr}.tile.accent{grid-column:span 1}.wallet-card .seg{border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+
+<div class="board-head">
+  <h1>Phần N — Điều dưỡng (Nurse)</h1>
+  <p>Bản thiết kế do Tom dựng trực tiếp, áp đúng chuẩn <b>NAV-0</b> (navbar Nurse một hàng: Trang chủ · Việc làm · Ca của tôi · Ví · Tài khoản; menu ở avatar), chuẩn <b>elder-friendly</b> bắt buộc cho mọi màn điều dưỡng (chữ ≥17px, nút ≥56px, vùng chạm ≥48px), hệ màu khóa M0 (#2563EB, Be Vietnam Pro) và dữ liệu mẫu thống nhất. Nội dung tuân thủ SRS v2.0 Updated.</p>
+  <div class="board-nav">
+    <a href="#n1">N1 · Trang chủ</a><a href="#n2">N2 · Job Board</a><a href="#n3">N3 · Radar</a><a href="#n4">N4 · Ca của tôi</a><a href="#n5">N5 · Chi tiết ca</a>
+    <a href="#n6">N6 · Check-in</a><a href="#n7">N7 · Trong ca</a><a href="#n8">N8 · Check-out</a><a href="#n9">N9 · Ví</a><a href="#n10">N10 · Ký quỹ</a>
+    <a href="#n11">N11 · Hoa hồng</a><a href="#n12">N12 · Rút tiền</a><a href="#n13">N13 · Lịch rảnh</a><a href="#n14">N14 · Giấy tờ &amp; GPHN</a><a href="#n15">N15 · TrustScore</a>
+  </div>
+</div>
+
+<!-- ================= N1 ================= -->
+<div class="meta-bar" id="n1"><span class="code">N1</span><h2>Trang chủ điều dưỡng</h2><span>Navbar NURSE (active: Trang chủ) · Bento tổng quan · elder-friendly</span></div>
+<div class="screen">
+  <div class="navbar">
+    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <nav class="nav-links">
+      <a href="#n1" class="active">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14">Tài khoản</a>
+    </nav>
+    <div class="nav-right">
+      <button class="bell" aria-label="Thông báo">🔔<span class="dot">3</span></button>
+      <button class="userblock" data-menu="menu-n1">
+        <span class="avatar">MT</span><span class="uname">Trần Thị Mai</span><span class="chip">Cấp 2</span><span class="caret">▾</span>
+      </button>
+    </div>
+    <div class="avatar-menu" id="menu-n1">
+      <div class="am-head"><span class="avatar lg">MT</span><div><b>Trần Thị Mai</b><span>0905 ••• 123 · Điều dưỡng Cấp 2</span></div></div>
+      <a href="#"><span class="mi">👤</span>Hồ sơ cá nhân</a>
+      <a href="#n14"><span class="mi">📜</span>Giấy tờ &amp; GPHN</a>
+      <a href="#n9"><span class="mi">👛</span>Ví của tôi</a>
+      <a href="#"><span class="mi">🔔</span>Thông báo</a>
+      <a href="#"><span class="mi">🔠</span>Cỡ chữ &amp; hiển thị</a>
+      <a href="#"><span class="mi">🔒</span>Quyền riêng tư &amp; dữ liệu</a>
+      <a href="#"><span class="mi">💬</span>Hỗ trợ</a>
+      <div class="divider"></div>
+      <a href="#" class="logout"><span class="mi">↩️</span>Đăng xuất</a>
+    </div>
+  </div>
+  <div class="screen-body elder"><div class="page">
+    <div class="page-head">
+      <div><h1>Xin chào, chị Mai 👋</h1><p>Thứ Sáu, 30/10/2026 · Khu vực hoạt động: Hải Châu, Đà Nẵng</p></div>
+      <span class="chip teal" style="font-size:14.5px;padding:7px 14px">● Đang hoạt động · Sẵn sàng nhận ca</span>
+    </div>
+
+    <div class="bento">
+      <div class="tile accent">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div style="flex:1">
+            <h3>Sẵn sàng nhận ca</h3>
+            <p>Bật để Radar và khách hàng thấy bạn đang rảnh. Tắt khi bạn muốn nghỉ — không bị phạt.</p>
+          </div>
+          <button class="switch-lg on" type="button" aria-label="Sẵn sàng nhận ca"></button>
+        </div>
+        <div style="margin-top:16px;border-top:1px solid rgba(255,255,255,.25);padding-top:14px;display:flex;justify-content:space-between;align-items:baseline">
+          <span style="color:#CFE2FF;font-size:15.5px">Thu nhập hôm nay (dự kiến quyết toán)</span>
+          <span class="big-num">+425.000đ</span>
+        </div>
+      </div>
+      <div class="tile" style="text-align:center">
+        <h3>TrustScore</h3>
+        <div class="gauge"><span class="in">92</span></div>
+        <p>Trên 100 điểm · <a href="#n15" style="font-weight:700">Xem chi tiết →</a></p>
+      </div>
+      <div class="tile">
+        <h3>Thu nhập tuần này</h3>
+        <div class="big-num">1.850.000đ</div>
+        <p>5 ca đã quyết toán · <a href="#n9" style="font-weight:700">Xem ví →</a></p>
+        <h3 style="margin-top:16px">Đánh giá từ khách</h3>
+        <div class="big-num">4.9 <span class="stars" style="font-size:19px">★★★★★</span></div>
+        <p>128 lượt đánh giá</p>
+      </div>
+      <div class="tile">
+        <h3>Ví ký quỹ</h3>
+        <div class="big-num">300.000đ</div>
+        <div class="progress"><i style="width:100%"></i></div>
+        <p><span class="chip teal">✓ Đã đủ ký quỹ</span> Bạn có thể nhận mọi ca thuộc Cấp 2.</p>
+      </div>
+      <div class="tile">
+        <h3>Lịch rảnh hôm nay</h3>
+        <div class="big-num">07:00 – 21:00</div>
+        <p>Đã bật nhận ca · <a href="#n13" style="font-weight:700">Chỉnh sửa lịch →</a></p>
+        <h3 style="margin-top:16px">Ca đã hoàn thành tháng này</h3>
+        <div class="big-num">23 ca</div>
+      </div>
+      <div class="tile" style="grid-column:span 2">
+        <h3>Giấy phép hành nghề (GPHN)</h3>
+        <p style="font-size:16px">Số <b style="color:var(--navy)">00976/GPHN-ĐN</b> · Còn hiệu lực tới <b style="color:var(--navy)">12/04/2027</b></p>
+        <p style="margin-top:8px">Khi GPHN sắp hết hạn, hệ thống sẽ nhắc bạn cập nhật tại mục <a href="#n14" style="font-weight:700">Giấy tờ &amp; GPHN</a> để không bị hạ xuống Cấp 1.</p>
+      </div>
+    </div>
+
+    <div class="banner amber" style="margin-bottom:20px">
+      <span class="variant-tag">Biến thể · Khi ký quỹ chưa đủ</span>
+      <h4>⚠️ Ký quỹ còn 180.000đ / 300.000đ</h4>
+      <p>Nạp thêm <b>120.000đ</b> để tiếp tục nhận ca mới. Ký quỹ chỉ dùng để trừ tiền phạt vi phạm cam kết dịch vụ (SLA).</p>
+      <div class="acts"><a class="btn btn-primary btn-sm" href="#n10" style="height:44px;font-size:15px">Nạp ký quỹ ngay</a></div>
+    </div>
+
+    <div class="group-label"><b style="font-size:19px">Ca hôm nay</b><span><a href="#n4" style="font-weight:700">Xem tất cả ca của tôi →</a></span></div>
+    <div class="job-card">
+      <span class="nic" style="width:52px;height:52px;border-radius:14px;background:#EAF2FE;display:grid;place-items:center;font-size:24px;flex:0 0 52px">🩹</span>
+      <div style="flex:1">
+        <h4>14:30 – 15:30 · Thay băng vết mổ hậu phẫu <span class="chip" style="margin-left:6px">Đơn HC-2026-1042</span></h4>
+        <p>Bà Nguyễn Thị Hoa, 78 tuổi · Hải Châu, Đà Nẵng · Khách đặt: anh Nguyễn Văn An · <span class="chip teal">Chuyển khoản · Đã tạm giữ</span> <span class="chip">Xâm lấn · Cấp 2 · Có y lệnh</span></p>
+        <div class="acts"><a class="btn btn-primary" href="#n5" style="height:54px">Xem chi tiết &amp; Check-in</a><a class="btn btn-secondary" href="#n5" style="height:54px">Chỉ đường</a></div>
+      </div>
+      <span class="pay">500.000đ</span>
+    </div>
+
+    <div class="group-label" style="margin-top:24px"><b style="font-size:19px">Việc mới gần bạn</b><span><a href="#n2" style="font-weight:700">Mở Bảng việc làm →</a></span></div>
+    <div class="job-card">
+      <span class="nic" style="width:52px;height:52px;border-radius:14px;background:#EAF2FE;display:grid;place-items:center;font-size:24px;flex:0 0 52px">💉</span>
+      <div style="flex:1">
+        <h4>Tiêm insulin theo y lệnh · Hôm nay 17:00</h4>
+        <p>Thanh Khê, Đà Nẵng · cách 2,4 km · Thủ thuật lẻ · <span class="chip">Xâm lấn · Cấp 2</span></p>
+      </div>
+      <span class="pay">250.000đ</span>
+    </div>
+    <div class="job-card">
+      <span class="nic" style="width:52px;height:52px;border-radius:14px;background:#EAF2FE;display:grid;place-items:center;font-size:24px;flex:0 0 52px">🌙</span>
+      <div style="flex:1">
+        <h4>Ca đêm chăm sóc sau phẫu thuật · 20:00 – 06:00</h4>
+        <p>Hải Châu, Đà Nẵng · cách 1,8 km · Giá đã gồm phụ phí đêm +20%</p>
+      </div>
+      <span class="pay">580.000đ</span>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= N2 ================= -->
+<div class="meta-bar" id="n2"><span class="code">N2</span><h2>Job Board — danh sách việc</h2><span>Navbar NURSE (active: Việc làm) · có biến thể góc nhìn Cấp 1 bị khóa dịch vụ xâm lấn</span></div>
+<div class="screen">
+  <div class="navbar">
+    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <nav class="nav-links">
+      <a href="#n1">Trang chủ</a><a href="#n2" class="active">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14">Tài khoản</a>
+    </nav>
+    <div class="nav-right">
+      <button class="bell" aria-label="Thông báo">🔔<span class="dot">3</span></button>
+      <button class="userblock" data-menu="menu-n2">
+        <span class="avatar">MT</span><span class="uname">Trần Thị Mai</span><span class="chip">Cấp 2</span><span class="caret">▾</span>
+      </button>
+    </div>
+    <div class="avatar-menu" id="menu-n2">
+      <div class="am-head"><span class="avatar lg">MT</span><div><b>Trần Thị Mai</b><span>0905 ••• 123 · Điều dưỡng Cấp 2</span></div></div>
+      <a href="#"><span class="mi">👤</span>Hồ sơ cá nhân</a>
+      <a href="#n14"><span class="mi">📜</span>Giấy tờ &amp; GPHN</a>
+      <a href="#n9"><span class="mi">👛</span>Ví của tôi</a>
+      <a href="#"><span class="mi">🔔</span>Thông báo</a>
+      <a href="#"><span class="mi">🔠</span>Cỡ chữ &amp; hiển thị</a>
+      <a href="#"><span class="mi">🔒</span>Quyền riêng tư &amp; dữ liệu</a>
+      <a href="#"><span class="mi">💬</span>Hỗ trợ</a>
+      <div class="divider"></div>
+      <a href="#" class="logout"><span class="mi">↩️</span>Đăng xuất</a>
+    </div>
+  </div>
+  <div class="screen-body elder"><div class="page">
+    <div class="page-head">
+      <div><h1>Bảng việc làm</h1><p>Việc phù hợp với cấp bậc, chuyên môn và lịch rảnh của bạn</p></div>
+    </div>
+
+    <div class="card" style="padding:22px 24px;border:2px solid var(--blue);margin-bottom:20px">
+      <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">
+        <span style="font-size:30px">🎯</span>
+        <div style="flex:1;min-width:280px">
+          <h3 style="color:var(--navy);font-size:19px">Khách chọn trực tiếp bạn</h3>
+          <p style="color:var(--slate)">Anh Nguyễn Văn An mời bạn làm ca <b style="color:var(--navy)">chăm sóc sau phẫu thuật cho bà Nguyễn Thị Hoa</b> · Ngày mai 08:00 – 12:00 · Hải Châu · Đơn HC-2026-1048</p>
+        </div>
+        <span class="chip red" style="font-size:15px;padding:8px 15px">⏱ Phản hồi trong 14:20</span>
+      </div>
+      <div style="display:flex;gap:11px;margin-top:16px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-lg" type="button" style="flex:1;min-width:200px">Chấp nhận lời mời · 400.000đ</button>
+        <button class="btn btn-secondary btn-lg" type="button" style="min-width:150px">Từ chối</button>
+      </div>
+    </div>
+
+    <div class="toolbar" style="border-top:0;padding-top:2px">
+      <button class="active" type="button">Tất cả</button>
+      <button type="button">Theo ca</button>
+      <button type="button">Thủ thuật lẻ</button>
+      <button type="button">Gần tôi</button>
+      <button type="button">🔥 Thưởng nóng</button>
+    </div>
+
+    <div class="job-card">
+      <div style="flex:1">
+        <h4>Thay băng vết mổ hậu phẫu <span class="chip" style="margin-left:6px">Xâm lấn · Cấp 2</span> <span class="chip teal">Có y lệnh</span></h4>
+        <p>Hôm nay 15:00 – 16:00 · Hải Châu · cách 1,2 km · Bà Hoa, 78 tuổi · <span class="chip teal">Chuyển khoản · Đã tạm giữ</span></p>
+        <div class="acts"><button class="btn btn-primary" type="button" style="height:54px">Nhận ca này</button><button class="btn btn-secondary" type="button" style="height:54px">Xem chi tiết</button></div>
+      </div>
+      <span class="pay">250.000đ</span>
+    </div>
+
+    <div class="job-card">
+      <div style="flex:1">
+        <h4>Ca đêm chăm sóc sau phẫu thuật <span class="chip" style="margin-left:6px">Theo ca 10 giờ</span> <span class="chip red">🔥 Thưởng nóng +100.000đ</span></h4>
+        <p>Tối nay 20:00 – 06:00 · Hải Châu · cách 1,8 km · Giá đã gồm phụ phí đêm +20% và thưởng nóng</p>
+        <div class="acts"><button class="btn btn-primary" type="button" style="height:54px">Nhận ca này</button><button class="btn btn-secondary" type="button" style="height:54px">Xem chi tiết</button></div>
+      </div>
+      <span class="pay">680.000đ</span>
+    </div>
+
+    <div class="job-card">
+      <div style="flex:1">
+        <h4>Trông &amp; chăm sóc bệnh nhân theo ca 8 giờ <span class="chip teal" style="margin-left:6px">Không xâm lấn · Cấp 1 &amp; 2</span></h4>
+        <p>Ngày mai 07:00 – 15:00 · Sơn Trà · cách 4,6 km · Hỗ trợ ăn uống, xoay trở, nhắc thuốc theo đơn sẵn</p>
+        <div class="acts"><button class="btn btn-primary" type="button" style="height:54px">Nhận ca này</button><button class="btn btn-secondary" type="button" style="height:54px">Xem chi tiết</button></div>
+      </div>
+      <span class="pay">800.000đ</span>
+    </div>
+
+    <div class="banner" style="background:#F8FAFC;border-color:var(--line);color:var(--slate);margin-top:22px">
+      <span class="variant-tag">Biến thể · Góc nhìn điều dưỡng Cấp 1 (ĐD. Nguyễn Văn Hùng)</span>
+      <h4 style="color:var(--navy)">Cùng một danh sách việc — dịch vụ xâm lấn bị khóa theo cấp bậc</h4>
+      <div class="job-card disabled" style="margin-top:12px;margin-bottom:6px">
+        <div style="flex:1">
+          <h4>Thay băng vết mổ hậu phẫu <span class="chip" style="margin-left:6px">Xâm lấn · Cấp 2</span></h4>
+          <p>🔒 <b>Chỉ dành cho Cấp 2 (GPHN)</b> — nộp GPHN hợp lệ và được Admin duyệt để mở khóa nhóm dịch vụ này.</p>
+        </div>
+        <span class="pay">250.000đ</span>
+      </div>
+      <p style="margin-top:8px">Trạng thái trống: khi không còn việc phù hợp, hệ thống hiển thị <b>“Chưa có việc trong bán kính 10 km — thử mở rộng lịch rảnh.”</b></p>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= N3 ================= -->
+<div class="meta-bar" id="n3"><span class="code">N3</span><h2>Radar — ca mới đến</h2><span>Chỉ mobile · toàn màn hình phủ trên bản đồ radar · đếm ngược phản hồi</span></div>
+<div class="screen">
+  <div class="screen-body elder" style="background:linear-gradient(180deg,#EAF2FE,var(--bg))">
+    <div class="phone-frame">
+      <div class="phone-inner">
+        <div class="radar-zone">
+          <span class="ring" style="width:90px;height:90px"></span>
+          <span class="ring" style="width:170px;height:170px"></span>
+          <span class="ring" style="width:250px;height:250px"></span>
+          <span class="me"></span>
+          <span class="job-dot">📍</span>
+          <span class="chip" style="position:absolute;top:14px;left:14px;background:rgba(255,255,255,.95)">📡 Radar · Ca mới gần bạn</span>
+        </div>
+        <div style="padding:22px 22px 26px;flex:1;display:flex;flex-direction:column">
+          <div style="text-align:center">
+            <span class="chip">Xâm lấn · Cấp 2 · Có y lệnh</span>
+            <h2 style="color:var(--navy);font-size:23px;margin-top:11px">Thay băng vết thương</h2>
+            <div style="font-size:40px;font-weight:900;color:var(--navy);line-height:1.15">250.000đ</div>
+            <p style="color:var(--slate);font-size:16px">Bà Hoa, 78 tuổi — Hải Châu · cách 1,2 km<br>Hôm nay 15:00 – 16:00</p>
+            <div style="margin-top:9px"><span class="chip teal">💳 Chuyển khoản · Đã tạm giữ</span></div>
+          </div>
+          <div style="margin:20px 0 6px;text-align:center">
+            <div class="count-ring"><span class="in" id="radarTimer">00:45</span></div>
+            <p style="color:var(--muted);font-size:14px;margin-top:7px">Thời gian phản hồi còn lại</p>
+          </div>
+          <div style="margin-top:auto;display:flex;flex-direction:column;gap:11px">
+            <button class="btn" type="button" style="height:64px;font-size:20px;font-weight:800;background:var(--teal);color:#fff;border-radius:16px">✓ NHẬN CA</button>
+            <button class="btn btn-secondary" type="button" style="height:56px;font-size:17px;border-radius:16px">Bỏ qua</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="variant-note" style="max-width:640px;margin:22px auto 4px">
+      <h4>Biến thể · Ca gấp thay thế</h4>
+      <p>Cùng khung Radar, thêm chip đỏ <b>🔥 Thưởng nóng +100.000đ</b> dưới số tiền khi đây là ca cần người thay thế gấp. Hết đếm ngược mà không phản hồi, ca tự chuyển cho điều dưỡng tiếp theo trong bán kính.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= N4 ================= -->
+<div class="meta-bar" id="n4"><span class="code">N4</span><h2>Ca của tôi</h2><span>Navbar NURSE (active: Ca của tôi) · thẻ ca lớn · trạng thái quyết toán trên từng ca đã xong</span></div>
+<div class="screen">
+  <div class="navbar">
+    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <nav class="nav-links">
+      <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4" class="active">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14">Tài khoản</a>
+    </nav>
+    <div class="nav-right">
+      <button class="bell" aria-label="Thông báo">🔔<span class="dot">3</span></button>
+      <button class="userblock" data-menu="menu-n4">
+        <span class="avatar">MT</span><span class="uname">Trần Thị Mai</span><span class="chip">Cấp 2</span><span class="caret">▾</span>
+      </button>
+    </div>
+    <div class="avatar-menu" id="menu-n4">
+      <div class="am-head"><span class="avatar lg">MT</span><div><b>Trần Thị Mai</b><span>0905 ••• 123 · Điều dưỡng Cấp 2</span></div></div>
+      <a href="#"><span class="mi">👤</span>Hồ sơ cá nhân</a>
+      <a href="#n14"><span class="mi">📜</span>Giấy tờ &amp; GPHN</a>
+      <a href="#n9"><span class="mi">👛</span>Ví của tôi</a>
+      <a href="#"><span class="mi">🔔</span>Thông báo</a>
+      <a href="#"><span class="mi">🔠</span>Cỡ chữ &amp; hiển thị</a>
+      <a href="#"><span class="mi">🔒</span>Quyền riêng tư &amp; dữ liệu</a>
+      <a href="#"><span class="mi">💬</span>Hỗ trợ</a>
+      <div class="divider"></div>
+      <a href="#" class="logout"><span class="mi">↩️</span>Đăng xuất</a>
+    </div>
+  </div>
+  <div class="screen-body elder"><div class="page">
+    <div class="page-head">
+      <div><h1>Ca của tôi</h1><p>Tất cả ca đã nhận — sắp tới, đang thực hiện và đã hoàn thành</p></div>
+    </div>
+
+    <div class="job-card" style="border:2px solid var(--teal);background:#F7FEFB">
+      <span class="nic" style="width:52px;height:52px;border-radius:14px;background:var(--green-bg);display:grid;place-items:center;font-size:24px;flex:0 0 52px">▶️</span>
+      <div style="flex:1">
+        <h4>Đang thực hiện · Ca chăm sóc 4 giờ <span class="chip teal" style="margin-left:6px">Đơn HC-2026-1049</span></h4>
+        <p>13:00 – 17:00 hôm nay · Bà Lê Thị Sáu, 81 tuổi · Thanh Khê · Đã check-in lúc 12:58 · <span class="chip teal">Chuyển khoản · Đã tạm giữ</span></p>
+        <div class="acts"><a class="btn btn-primary" href="#n7" style="height:54px;background:var(--teal)">Vào ca đang thực hiện</a></div>
+      </div>
+      <span class="pay">400.000đ</span>
+    </div>
+
+    <div class="shift-tabs">
+      <button class="active" type="button">Sắp tới</button>
+      <button type="button">Đang thực hiện</button>
+      <button type="button">Đã xong</button>
+    </div>
+
+    <div class="job-card">
+      <div style="flex:1">
+        <h4>14:30 – 15:30 · Thay băng vết mổ hậu phẫu <span class="chip" style="margin-left:6px">Đơn HC-2026-1042</span></h4>
+        <p>Anh An đặt cho mẹ · Bà Nguyễn Thị Hoa, 78 tuổi · Hải Châu · <span class="chip">Xâm lấn · Cấp 2</span> <span class="chip teal">Chuyển khoản · Đã tạm giữ</span></p>
+        <div class="acts"><a class="btn btn-primary" href="#n5" style="height:54px">Xem chi tiết ca</a></div>
+      </div>
+      <span class="pay">500.000đ</span>
+    </div>
+
+    <div class="job-card">
+      <div style="flex:1">
+        <h4>Ngày mai 08:00 – 12:00 · Chăm sóc sau phẫu thuật <span class="chip" style="margin-left:6px">Đơn HC-2026-1048</span></h4>
+        <p>Anh An đặt cho mẹ · Bà Nguyễn Thị Hoa, 78 tuổi · Hải Châu · Khách chọn trực tiếp bạn · <span class="chip teal">Chuyển khoản · Đã tạm giữ</span></p>
+        <div class="acts"><a class="btn btn-secondary" href="#n5" style="height:54px">Xem chi tiết ca</a></div>
+      </div>
+      <span class="pay">400.000đ</span>
+    </div>
+
+    <div class="group-label" style="margin-top:24px"><b style="font-size:18px">Đã xong gần đây</b><span>Trạng thái tiền hiển thị ngay trên thẻ ca</span></div>
+
+    <div class="job-card">
+      <div style="flex:1">
+        <h4>Thay băng vết mổ · 28/10 <span class="chip" style="margin-left:6px">Đơn HC-2026-1039</span></h4>
+        <p>Bà Nguyễn Thị Hoa, 78 tuổi · Hải Châu · <span class="chip teal">✅ Đã quyết toán +425.000đ</span></p>
+      </div>
+      <span class="pay">500.000đ</span>
+    </div>
+
+    <div class="job-card">
+      <div style="flex:1">
+        <h4>Tiêm thuốc theo y lệnh · 29/10 <span class="chip" style="margin-left:6px">Đơn HC-2026-1040</span></h4>
+        <p>Ông Trần Văn Quý, 74 tuổi · Thanh Khê · <span class="chip amber">⏳ Chờ quyết toán — còn 09:12 → +425.000đ</span></p>
+      </div>
+      <span class="pay">500.000đ</span>
+    </div>
+
+    <div class="job-card" style="border-color:#F3C2C2">
+      <div style="flex:1">
+        <h4>Chăm sóc theo ca 8 giờ · 29/10 <span class="chip" style="margin-left:6px">Đơn HC-2026-1057</span> <span class="chip grey">Tiền mặt</span></h4>
+        <p>Bà Phạm Thị Lan, 82 tuổi · Sơn Trà · <span class="chip red">⚠️ Chờ nộp hoa hồng 75.000đ</span></p>
+        <div class="acts"><a class="btn btn-danger" href="#n11" style="height:54px">Nộp hoa hồng ngay</a></div>
+      </div>
+      <span class="pay">500.000đ</span>
+    </div>
+
+    <div class="variant-note" style="margin-top:20px">
+      <h4>Trạng thái trống · Tab “Sắp tới”</h4>
+      <p>Khi chưa có ca nào: <b>“Chưa có ca sắp tới — mở Bảng việc làm hoặc bật Sẵn sàng nhận ca để Radar gợi ý việc cho bạn.”</b></p>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= N5 ================= -->
+<div class="meta-bar" id="n5"><span class="code">N5</span><h2>Chi tiết ca — góc điều dưỡng</h2><span>Navbar NURSE (active: Ca của tôi) · đơn HC-2026-1042 · có y lệnh &amp; đối chiếu tại chỗ</span></div>
+<div class="screen">
+  <div class="navbar">
+    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <nav class="nav-links">
+      <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4" class="active">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14">Tài khoản</a>
+    </nav>
+    <div class="nav-right">
+      <button class="bell" aria-label="Thông báo">🔔<span class="dot">3</span></button>
+      <button class="userblock" data-menu="menu-n5">
+        <span class="avatar">MT</span><span class="uname">Trần Thị Mai</span><span class="chip">Cấp 2</span><span class="caret">▾</span>
+      </button>
+    </div>
+    <div class="avatar-menu" id="menu-n5">
+      <div class="am-head"><span class="avatar lg">MT</span><div><b>Trần Thị Mai</b><span>0905 ••• 123 · Điều dưỡng Cấp 2</span></div></div>
+      <a href="#"><span class="mi">👤</span>Hồ sơ cá nhân</a>
+      <a href="#n14"><span class="mi">📜</span>Giấy tờ &amp; GPHN</a>
+      <a href="#n9"><span class="mi">👛</span>Ví của tôi</a>
+      <a href="#"><span class="mi">🔔</span>Thông báo</a>
+      <a href="#"><span class="mi">🔠</span>Cỡ chữ &amp; hiển thị</a>
+      <a href="#"><span class="mi">🔒</span>Quyền riêng tư &amp; dữ liệu</a>
+      <a href="#"><span class="mi">💬</span>Hỗ trợ</a>
+      <div class="divider"></div>
+      <a href="#" class="logout"><span class="mi">↩️</span>Đăng xuất</a>
+    </div>
+  </div>
+  <div class="screen-body elder"><div class="page">
+    <div class="page-head">
+      <div><h1>Thay băng vết mổ hậu phẫu</h1><p>Đơn HC-2026-1042 · Hôm nay 14:30 – 15:30 · <span class="chip" style="margin-left:4px">Xâm lấn · Chỉ Cấp 2</span> <span class="chip teal">Đã xác nhận</span></p></div>
+      <a class="btn btn-primary btn-lg" href="#n6">Check-in khi tới nơi →</a>
+    </div>
+
+    <div class="cols-2" style="align-items:start">
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="card" style="padding:22px 24px">
+          <div style="display:flex;gap:14px;align-items:center;margin-bottom:12px">
+            <span class="avatar lg">HT</span>
+            <div>
+              <h3 style="color:var(--navy);font-size:19px">Bà Nguyễn Thị Hoa · 78 tuổi</h3>
+              <p style="color:var(--slate)">Vận động: <b style="color:var(--navy)">Hỗ trợ di chuyển</b> · Cân nặng 52 kg</p>
+            </div>
+          </div>
+          <div class="kv"><span>Tình trạng</span><b>Sau phẫu thuật thay khớp háng phải (3 tháng)</b></div>
+          <div class="kv"><span>Tiền sử</span><b>Tăng huyết áp · Đái tháo đường type 2</b></div>
+          <div class="kv"><span>Dị ứng</span><b style="color:var(--red)">Penicillin (mề đay, khó thở nhẹ)</b></div>
+          <div class="kv"><span>Nguy cơ truyền nhiễm</span><b>Không có</b></div>
+          <p style="margin-top:13px"><span class="chip amber">🔒 Xem được tới 12 giờ sau khi kết thúc ca</span></p>
+        </div>
+
+        <div class="card" style="padding:22px 24px">
+          <h3 style="color:var(--navy);font-size:18px;margin-bottom:6px">📜 Y lệnh bác sĩ đính kèm</h3>
+          <p style="color:var(--slate);font-size:15px;margin-bottom:13px">Ảnh y lệnh do khách tải lên khi đặt ca. Bấm vào ảnh để xem lớn (mở lightbox).</p>
+          <div class="upload filled" style="text-align:left;display:flex;gap:14px;align-items:center">
+            <span style="font-size:32px">🖼️</span>
+            <div><h4>ylenh_thaybang_1042.jpg</h4><p style="margin:0">Ngày kê đơn: 26/10/2026 · Còn trong hạn 7 ngày</p></div>
+            <span class="chip teal" style="margin-left:auto">Đã đối chiếu sơ bộ ✓</span>
+          </div>
+          <div style="margin-top:16px">
+            <b style="color:var(--navy)">Đối chiếu khi tới nơi (bắt buộc):</b>
+            <label class="check-item" style="margin-top:9px"><input type="checkbox"> Thuốc &amp; vật tư khớp với y lệnh giấy bản gốc</label>
+            <label class="check-item"><input type="checkbox"> Liều lượng và tên bệnh nhân trùng khớp</label>
+          </div>
+          <button class="btn btn-secondary" type="button" style="height:52px;color:var(--red);border-color:#F3C2C2;margin-top:12px">⚠️ Báo cáo y lệnh không khớp</button>
+          <p style="font-size:14px;color:var(--muted);margin-top:8px">Nếu y lệnh giả mạo, hết hạn hoặc thuốc không khớp: ca hủy ngay, bạn <b>không bị phạt</b> và được hỗ trợ chi phí đi lại.</p>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="card" style="padding:22px 24px">
+          <h3 style="color:var(--navy);font-size:18px;margin-bottom:8px">📍 Địa chỉ làm ca</h3>
+          <p style="font-size:16px"><b style="color:var(--navy)">Số 25 Quang Trung, Hải Châu 1, Hải Châu, Đà Nẵng</b></p>
+          <div class="map-ph" style="height:170px;margin-top:12px">
+            <span class="gps-chip"><span class="gps-dot"></span> Cách bạn 1,2 km</span>
+            <div class="pin">📍</div>
+            <div class="pin-label">Nhà bệnh nhân Hoa</div>
+          </div>
+          <button class="btn btn-secondary btn-block" type="button" style="height:52px;margin-top:14px">🧭 Chỉ đường</button>
+          <div style="display:flex;gap:13px;align-items:center;border-top:1px solid var(--line);margin-top:16px;padding-top:15px">
+            <span class="avatar">AN</span>
+            <div style="flex:1"><b style="color:var(--navy)">Anh Nguyễn Văn An</b><br><span style="color:var(--slate);font-size:14.5px">Người đặt ca · số điện thoại được che</span></div>
+            <button class="btn btn-secondary btn-sm" type="button" style="height:46px">💬 Chat</button>
+            <button class="btn btn-secondary btn-sm" type="button" style="height:46px">📞 Gọi</button>
+          </div>
+        </div>
+
+        <div class="card" style="padding:22px 24px">
+          <h3 style="color:var(--navy);font-size:18px;margin-bottom:8px">💰 Chi tiết tiền ca</h3>
+          <div class="pay-line"><span>Giá dịch vụ thay băng</span><b>500.000đ</b></div>
+          <div class="pay-line"><span>Phụ phí (đêm / lễ / bệnh nhân nặng)</span><b>0đ</b></div>
+          <div class="pay-line"><span>Hình thức</span><b>Chuyển khoản · Đã tạm giữ</b></div>
+          <div class="pay-line total"><span>Bạn nhận sau quyết toán (85%)</span><span>425.000đ</span></div>
+          <p style="font-size:14px;color:var(--muted);margin-top:9px">Quyết toán sau khi kết thúc ca 24 giờ nếu không có khiếu nại, hoặc sớm hơn khi khách xác nhận.</p>
+        </div>
+
+        <div class="card" style="padding:20px 24px;border-color:#F3C2C2">
+          <h3 style="color:var(--red);font-size:17px;margin-bottom:5px">Hủy ca này</h3>
+          <p style="color:var(--slate);font-size:15px">Hủy bây giờ (trước giờ hẹn trên 12 giờ): <b style="color:var(--navy)">−5 điểm TrustScore</b>, không phạt tiền.<br>Hủy trong vòng 12 giờ trước ca: <b style="color:var(--navy)">−20 điểm TrustScore, trừ 20% giá trị ca (100.000đ) từ ký quỹ</b> — khoản phạt chuyển thành thưởng nóng cho điều dưỡng thay thế.</p>
+          <button class="btn btn-secondary" type="button" style="height:50px;color:var(--red);border-color:#F3C2C2;margin-top:11px">Hủy ca</button>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= N6 ================= -->
+<div class="meta-bar" id="n6"><span class="code">N6</span><h2>Check-in — GPS + ảnh trực tiếp</h2><span>Chỉ mobile · vòng bán kính 200 m · có biến thể chặn vị trí giả lập và ngoài bán kính</span></div>
+<div class="screen">
+  <div class="screen-body elder" style="background:linear-gradient(180deg,#EAF2FE,var(--bg))">
+    <div class="phone-frame">
+      <div class="phone-inner">
+        <div style="padding:20px 22px 0">
+          <a href="#n5" style="font-weight:700;font-size:16px">← Chi tiết ca HC-2026-1042</a>
+          <h2 style="color:var(--navy);font-size:23px;margin-top:10px">Check-in bắt đầu ca</h2>
+          <p style="color:var(--slate)">Thay băng vết mổ · Bà Nguyễn Thị Hoa · 14:30</p>
+        </div>
+        <div style="padding:16px 22px 0">
+          <div class="map-ph" style="height:230px">
+            <span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:170px;height:170px;border-radius:50%;border:2.5px solid rgba(13,148,136,.65);background:rgba(13,148,136,.10)"></span>
+            <span class="gps-chip"><span class="gps-dot"></span> Vòng bán kính cho phép: 200 m</span>
+            <div class="pin" style="top:52%">📍</div>
+            <div class="pin-label" style="top:calc(52% + 6px)">Nhà bệnh nhân Hoa</div>
+            <span style="position:absolute;left:58%;top:38%;font-size:21px">🔵</span>
+          </div>
+          <div class="alert" style="background:var(--green-bg);color:#065F46;margin-top:14px"><span>✅</span><span><b style="color:var(--teal)">Bạn đang cách điểm hẹn 120 m — đủ điều kiện check-in.</b></span></div>
+        </div>
+        <div style="padding:6px 22px 24px;flex:1;display:flex;flex-direction:column">
+          <div class="selfie-ph"><span class="chip" style="background:rgba(255,255,255,.95)">📸 Chụp ảnh trực tiếp tại điểm hẹn</span></div>
+          <p style="text-align:center;margin-top:12px"><span class="chip grey">🕐 Giờ máy chủ 14:28 · 📍 16.0540, 108.2022</span></p>
+          <p style="text-align:center;color:var(--muted);font-size:14px;margin-top:6px">Ảnh chỉ chụp trực tiếp bằng camera — không chọn từ thư viện.</p>
+          <label class="check-item" style="margin-top:14px"><input type="checkbox" checked> Tình trạng bệnh nhân khớp với khai báo trong hồ sơ</label>
+          <button class="btn btn-primary" type="button" style="height:64px;font-size:19px;font-weight:800;border-radius:16px;margin-top:auto">✓ CHECK-IN BẮT ĐẦU CA</button>
+        </div>
+      </div>
+    </div>
+    <div style="max-width:640px;margin:22px auto 4px;display:flex;flex-direction:column;gap:12px">
+      <div class="banner red" style="margin:0">
+        <span class="variant-tag">Biến thể · Chặn gian lận</span>
+        <h4>🚫 Phát hiện vị trí giả lập — không thể check-in</h4>
+        <p>Hệ thống phát hiện ứng dụng giả lập vị trí (mock location) đang bật. Tắt mọi ứng dụng giả lập và thử lại tại đúng điểm hẹn.</p>
+      </div>
+      <div class="banner" style="margin:0;background:#fff;border-color:var(--line);color:var(--slate)">
+        <span class="variant-tag">Biến thể · Ngoài bán kính</span>
+        <h4 style="color:var(--navy)">Bạn đang cách điểm hẹn 480 m</h4>
+        <p>Di chuyển tới trong vòng 200 m quanh địa chỉ làm ca để nút check-in mở.</p>
+        <div class="acts"><button class="btn btn-primary" type="button" disabled style="height:52px">Check-in bắt đầu ca (đang khóa)</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= N7 ================= -->
+<div class="meta-bar" id="n7"><span class="code">N7</span><h2>Ca đang thực hiện</h2><span>Navbar NURSE (active: Ca của tôi) · đơn HC-2026-1049 · sinh hiệu, checklist, gia hạn, SOS</span></div>
+<div class="screen">
+  <div class="navbar">
+    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <nav class="nav-links">
+      <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4" class="active">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14">Tài khoản</a>
+    </nav>
+    <div class="nav-right">
+      <button class="bell" aria-label="Thông báo">🔔<span class="dot">3</span></button>
+      <button class="userblock" data-menu="menu-n7">
+        <span class="avatar">MT</span><span class="uname">Trần Thị Mai</span><span class="chip">Cấp 2</span><span class="caret">▾</span>
+      </button>
+    </div>
+    <div class="avatar-menu" id="menu-n7">
+      <div class="am-head"><span class="avatar lg">MT</span><div><b>Trần Thị Mai</b><span>0905 ••• 123 · Điều dưỡng Cấp 2</span></div></div>
+      <a href="#"><span class="mi">👤</span>Hồ sơ cá nhân</a>
+      <a href="#n14"><span class="mi">📜</span>Giấy tờ &amp; GPHN</a>
+      <a href="#n9"><span class="mi">👛</span>Ví của tôi</a>
+      <a href="#"><span class="mi">🔔</span>Thông báo</a>
+      <a href="#"><span class="mi">🔠</span>Cỡ chữ &amp; hiển thị</a>
+      <a href="#"><span class="mi">🔒</span>Quyền riêng tư &amp; dữ liệu</a>
+      <a href="#"><span class="mi">💬</span>Hỗ trợ</a>
+      <div class="divider"></div>
+      <a href="#" class="logout"><span class="mi">↩️</span>Đăng xuất</a>
+    </div>
+  </div>
+  <div class="screen-body elder"><div class="page">
+    <div class="page-head">
+      <div><h1>Ca đang thực hiện · HC-2026-1049</h1><p>Ca chăm sóc 4 giờ (13:00 – 17:00) · Bà Lê Thị Sáu, 81 tuổi · Thanh Khê</p></div>
+      <span class="chip teal" style="font-size:17px;padding:10px 18px">⏱ Đã qua 01:12:30</span>
+    </div>
+
+    <div class="cols-2" style="align-items:start">
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="card" style="padding:22px 24px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <h3 style="color:var(--navy);font-size:18px">❤️ Sinh hiệu đầu ca</h3>
+            <span class="chip teal">✓ Đã lưu lúc 13:10</span>
+          </div>
+          <div class="vital-grid">
+            <div class="field"><label>Huyết áp (mmHg)</label><input class="input" value="118 / 76"></div>
+            <div class="field"><label>Mạch (lần/phút)</label><input class="input" value="76"></div>
+            <div class="field"><label>SpO2 (%)</label><input class="input" value="98"></div>
+            <div class="field"><label>Nhiệt độ (°C)</label><input class="input" value="36,7"></div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:22px 24px">
+          <h3 style="color:var(--navy);font-size:18px;margin-bottom:13px">✅ Checklist công việc trong ca</h3>
+          <label class="task-row"><input type="checkbox" checked> Đo sinh hiệu đầu ca <span class="tt">13:10 ✓</span></label>
+          <label class="task-row"><input type="checkbox" checked> Hỗ trợ ăn trưa &amp; uống nước <span class="tt">13:40 ✓</span></label>
+          <label class="task-row"><input type="checkbox"> Nhắc uống thuốc theo đơn có sẵn (14:30)</label>
+          <label class="task-row"><input type="checkbox"> Xoay trở chống loét tỳ đè mỗi 2 giờ</label>
+          <div class="field" style="margin-top:15px;margin-bottom:10px"><label>Ghi chú thêm vào nhật ký ca</label><textarea class="input" rows="2" placeholder="Ví dụ: bệnh nhân ăn hết suất, tinh thần tỉnh táo…"></textarea></div>
+          <button class="btn btn-secondary" type="button" style="height:52px">📷 Chụp ảnh chăm sóc đính kèm</button>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="card" style="padding:22px 24px">
+          <h3 style="color:var(--navy);font-size:18px;margin-bottom:8px">⏰ Đề xuất gia hạn ca</h3>
+          <p style="color:var(--slate);font-size:15.5px;margin-bottom:13px">Gia hạn theo khối 1 giờ. Khách phải xác nhận và thanh toán phần bổ sung thì gia hạn mới có hiệu lực.</p>
+          <div style="display:flex;align-items:center;gap:14px">
+            <button class="btn btn-secondary" type="button" style="width:56px;height:56px;padding:0;font-size:22px">−</button>
+            <b style="font-size:20px;color:var(--navy)">1 giờ</b>
+            <button class="btn btn-secondary" type="button" style="width:56px;height:56px;padding:0;font-size:22px">+</button>
+            <span style="margin-left:auto;text-align:right"><span style="color:var(--slate);font-size:14.5px">Khách trả thêm</span><br><b style="color:var(--navy);font-size:19px">+100.000đ</b></span>
+          </div>
+          <button class="btn btn-primary btn-block" type="button" style="height:54px;margin-top:15px">Gửi đề xuất gia hạn cho khách</button>
+        </div>
+
+        <div class="card" style="padding:22px 24px">
+          <h3 style="color:var(--navy);font-size:18px;margin-bottom:12px">Liên lạc &amp; an toàn</h3>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-secondary" type="button" style="height:54px;flex:1;min-width:130px">💬 Chat với khách</button>
+            <button class="btn btn-secondary" type="button" style="height:54px;flex:1;min-width:130px">📞 Gọi (che số)</button>
+          </div>
+          <button class="btn btn-danger btn-block" type="button" style="height:58px;font-size:17.5px;margin-top:12px">🚨 SOS — Gọi 115 &amp; báo khẩn</button>
+          <p style="font-size:14px;color:var(--muted);margin-top:8px">SOS mở ngay trình gọi <b>115</b>, đồng thời gửi cảnh báo tới người nhà bệnh nhân và Admin.</p>
+          <button class="btn btn-secondary btn-block" type="button" style="height:52px;color:var(--orange);border-color:#F6D3B3;margin-top:6px">⚠️ Báo cáo: tình trạng thực tế khác khai báo</button>
+          <p style="font-size:14px;color:var(--muted);margin-top:8px">Nếu tình trạng thật khác hồ sơ, bạn có thể dừng ca an toàn — <b>bạn được bảo vệ và không bị phạt</b>; hệ thống ghi nhận lý do để xử lý với khách.</p>
+        </div>
+
+        <a class="btn btn-primary btn-lg btn-block" href="#n8" style="height:62px">Kết thúc ca &amp; Check-out →</a>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= N8 ================= -->
+<div class="meta-bar" id="n8"><span class="code">N8</span><h2>Check-out &amp; báo cáo ca</h2><span>Navbar NURSE (active: Ca của tôi) · đơn HC-2026-1042 · xem trước quyết toán theo 2 hình thức</span></div>
+<div class="screen">
+  <div class="navbar">
+    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <nav class="nav-links">
+      <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4" class="active">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14">Tài khoản</a>
+    </nav>
+    <div class="nav-right">
+      <button class="bell" aria-label="Thông báo">🔔<span class="dot">3</span></button>
+      <button class="userblock" data-menu="menu-n8">
+        <span class="avatar">MT</span><span class="uname">Trần Thị Mai</span><span class="chip">Cấp 2</span><span class="caret">▾</span>
+      </button>
+    </div>
+    <div class="avatar-menu" id="menu-n8">
+      <div class="am-head"><span class="avatar lg">MT</span><div><b>Trần Thị Mai</b><span>0905 ••• 123 · Điều dưỡng Cấp 2</span></div></div>
+      <a href="#"><span class="mi">👤</span>Hồ sơ cá nhân</a>
+      <a href="#n14"><span class="mi">📜</span>Giấy tờ &amp; GPHN</a>
+      <a href="#n9"><span class="mi">👛</span>Ví của tôi</a>
+      <a href="#"><span class="mi">🔔</span>Thông báo</a>
+      <a href="#"><span class="mi">🔠</span>Cỡ chữ &amp; hiển thị</a>
+      <a href="#"><span class="mi">🔒</span>Quyền riêng tư &amp; dữ liệu</a>
+      <a href="#"><span class="mi">💬</span>Hỗ trợ</a>
+      <div class="divider"></div>
+      <a href="#" class="logout"><span class="mi">↩️</span>Đăng xuất</a>
+    </div>
+  </div>
+  <div class="screen-body elder"><div class="page">
+    <div class="page-head">
+      <div><h1>Check-out &amp; báo cáo ca</h1><p>Đơn HC-2026-1042 · Thay băng vết mổ · Bà Nguyễn Thị Hoa · Bắt đầu 14:30</p></div>
+      <span class="chip teal" style="font-size:15px;padding:8px 15px">Biến thể thành công: ✓ Đã check-out 16:02 — báo cáo đã lưu</span>
+    </div>
+
+    <div class="cols-2" style="align-items:start">
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="card" style="padding:22px 24px">
+          <div class="field"><label>Giờ kết thúc thực tế</label><input class="input" value="16:02 · Hôm nay"><div class="hint">Tự điền theo giờ hiện tại — bạn có thể sửa nếu check-out muộn.</div></div>
+          <h3 style="color:var(--navy);font-size:17.5px;margin:6px 0 13px">❤️ Sinh hiệu cuối ca</h3>
+          <div class="vital-grid">
+            <div class="field"><label>Huyết áp (mmHg)</label><input class="input" value="120 / 78"></div>
+            <div class="field"><label>Mạch (lần/phút)</label><input class="input" value="74"></div>
+            <div class="field"><label>SpO2 (%)</label><input class="input" value="98"></div>
+            <div class="field"><label>Nhiệt độ (°C)</label><input class="input" value="36,6"></div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:22px 24px">
+          <h3 style="color:var(--navy);font-size:17.5px;margin-bottom:12px">✅ Công việc đã hoàn thành</h3>
+          <label class="task-row"><input type="checkbox" checked> Đo sinh hiệu đầu ca <span class="tt">14:35 ✓</span></label>
+          <label class="task-row"><input type="checkbox" checked> Thay băng &amp; rửa vết mổ theo y lệnh <span class="tt">15:05 ✓</span></label>
+          <label class="task-row"><input type="checkbox" checked> Đo sinh hiệu cuối ca <span class="tt">15:55 ✓</span></label>
+          <div class="field" style="margin-top:14px;margin-bottom:0"><label>Ghi chú bàn giao cho gia đình</label><textarea class="input" rows="3">Vết mổ khô, không rỉ dịch. Bà ăn uống bình thường. Gia đình theo dõi: nếu vết mổ sưng đỏ hoặc sốt trên 38°C thì liên hệ bác sĩ điều trị.</textarea></div>
+        </div>
+
+        <div class="card" style="padding:20px 24px;display:flex;gap:15px;align-items:center">
+          <div style="flex:1">
+            <b style="color:var(--navy);font-size:17px">Có sự cố trong ca?</b>
+            <p style="color:var(--slate);font-size:15px">Bật lên và mô tả — báo cáo sự cố trung thực không làm giảm TrustScore của bạn.</p>
+          </div>
+          <button class="toggle" type="button" aria-label="Có sự cố trong ca"></button>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="card" style="padding:22px 24px;border:2px solid var(--teal)">
+          <span class="chip teal" style="margin-bottom:10px">Hình thức: Chuyển khoản</span>
+          <h3 style="color:var(--navy);font-size:18px;margin-bottom:6px">Xem trước quyết toán</h3>
+          <p style="font-size:16px;color:var(--slate)">Quyết toán sau <b style="color:var(--navy)">24 giờ</b> nếu không có khiếu nại:</p>
+          <div style="font-size:30px;font-weight:900;color:var(--teal);margin-top:8px">+425.000đ <span style="font-size:16px;color:var(--slate);font-weight:600">vào ví khả dụng</span></div>
+          <p style="font-size:14.5px;color:var(--muted);margin-top:7px">Khách xác nhận hài lòng sớm thì quyết toán ngay. Sau check-out, quyền xem hồ sơ bệnh nhân còn mở thêm 12 giờ.</p>
+        </div>
+
+        <div class="card" style="padding:22px 24px">
+          <span class="chip grey" style="margin-bottom:10px">Biến thể: Tiền mặt</span>
+          <h3 style="color:var(--navy);font-size:18px;margin-bottom:6px">Nếu khách trả tiền mặt</h3>
+          <p style="font-size:16px;color:var(--slate)">Khách trả tiền mặt trực tiếp cho bạn — sau khi check-out, hệ thống tạo <b style="color:var(--navy)">mã nộp hoa hồng 75.000đ (hạn 24 giờ)</b> tại mục <a href="#n11" style="font-weight:700">Nộp hoa hồng</a>. Hoa hồng không trừ vào ví hay ký quỹ của bạn.</p>
+        </div>
+
+        <button class="btn btn-primary btn-block" type="button" style="height:62px;font-size:18px">Nộp báo cáo &amp; Check-out</button>
+        <p class="small-print">Báo cáo ca là bắt buộc để đóng ca. Sau khi nộp, ca chuyển sang chờ quyết toán và mở cửa sổ khiếu nại 24 giờ cho khách.</p>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= N9 ================= -->
+<div class="meta-bar" id="n9"><span class="code">N9</span><h2>Ví &amp; thu nhập</h2><span>Navbar NURSE (active: Ví) · ví 3 ngăn · lịch sử giao dịch theo sổ cái</span></div>
+<div class="screen">
+  <div class="navbar">
+    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <nav class="nav-links">
+      <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9" class="active">Ví</a><a href="#n14">Tài khoản</a>
+    </nav>
+    <div class="nav-right">
+      <button class="bell" aria-label="Thông báo">🔔<span class="dot">3</span></button>
+      <button class="userblock" data-menu="menu-n9">
+        <span class="avatar">MT</span><span class="uname">Trần Thị Mai</span><span class="chip">Cấp 2</span><span class="caret">▾</span>
+      </button>
+    </div>
+    <div class="avatar-menu" id="menu-n9">
+      <div class="am-head"><span class="avatar lg">MT</span><div><b>Trần Thị Mai</b><span>0905 ••• 123 · Điều dưỡng Cấp 2</span></div></div>
+      <a href="#"><span class="mi">👤</span>Hồ sơ cá nhân</a>
+      <a href="#n14"><span class="mi">📜</span>Giấy tờ &amp; GPHN</a>
+      <a href="#n9"><span class="mi">👛</span>Ví của tôi</a>
+      <a href="#"><span class="mi">🔔</span>Thông báo</a>
+      <a href="#"><span class="mi">🔠</span>Cỡ chữ &amp; hiển thị</a>
+      <a href="#"><span class="mi">🔒</span>Quyền riêng tư &amp; dữ liệu</a>
+      <a href="#"><span class="mi">💬</span>Hỗ trợ</a>
+      <div class="divider"></div>
+      <a href="#" class="logout"><span class="mi">↩️</span>Đăng xuất</a>
+    </div>
+  </div>
+  <div class="screen-body elder"><div class="page">
+    <div class="page-head">
+      <div><h1>Ví &amp; thu nhập</h1><p>Ba ngăn tách bạch — mọi biến động đều có dòng sổ cái riêng, không sửa, không xóa</p></div>
+    </div>
+
+    <div class="card wallet-card">
+      <div class="seg">
+        <small>💰 Khả dụng</small>
+        <div class="amt">3.850.000đ</div>
+        <p>Rút được về ngân hàng bất cứ lúc nào qua mục Rút tiền.</p>
+      </div>
+      <div class="seg locked">
+        <small>⏳ Đang tạm giữ</small>
+        <div class="amt">500.000đ</div>
+        <p>Đơn HC-2026-1048 (ngày mai) — tiền khách đã trả trước, chờ quyết toán sau ca.</p>
+      </div>
+      <div class="seg locked">
+        <small>🛡️ Ký quỹ</small>
+        <div class="amt">300.000đ</div>
+        <p>Đã đủ mức yêu cầu · Chỉ dùng trừ phạt vi phạm cam kết dịch vụ (SLA).</p>
+      </div>
+    </div>
+
+    <div class="quick-acts">
+      <a href="#n10">➕ Nạp ký quỹ</a>
+      <a href="#n12">🏦 Rút tiền về ngân hàng</a>
+      <a href="#n11">💸 Nộp hoa hồng<span class="cnt">1 ca chờ nộp</span></a>
+    </div>
+
+    <div class="cols-2" style="align-items:start">
+      <div class="card" style="padding:22px 24px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3 style="color:var(--navy);font-size:18px">Thu nhập theo tuần</h3>
+          <span class="chip">Tuần này: 1.850.000đ</span>
+        </div>
+        <div class="bars">
+          <div class="b"><div class="bar" style="height:38%"></div><span>T2</span></div>
+          <div class="b"><div class="bar" style="height:62%"></div><span>T3</span></div>
+          <div class="b"><div class="bar" style="height:45%"></div><span>T4</span></div>
+          <div class="b"><div class="bar" style="height:80%"></div><span>T5</span></div>
+          <div class="b"><div class="bar" style="height:100%"></div><span>T6</span></div>
+          <div class="b"><div class="bar" style="height:55%"></div><span>T7</span></div>
+          <div class="b"><div class="bar" style="height:22%"></div><span>CN</span></div>
+        </div>
+        <div class="banner" style="background:var(--amber-soft);border-color:#F0DFA8;color:#713F12;margin:16px 0 0">
+          <h4 style="color:var(--amber)">⏳ Sắp quyết toán</h4>
+          <p>Còn <b>09:12</b> nữa sẽ quyết toán <b>+425.000đ</b> cho đơn HC-2026-1040 vào ví khả dụng.</p>
+        </div>
+      </div>
+
+      <div class="card" style="padding:22px 24px">
+        <h3 style="color:var(--navy);font-size:18px;margin-bottom:6px">Lịch sử giao dịch</h3>
+        <div class="toolbar" style="border-top:0;padding:6px 0 10px">
+          <button class="active" type="button">Tất cả</button>
+          <button type="button">Quyết toán</button>
+          <button type="button">Phạt</button>
+          <button type="button">Rút tiền</button>
+        </div>
+        <div class="tx-row"><span class="tic">✅</span><div><b style="color:var(--navy)">Quyết toán ca HC-2026-1039</b><br><span style="color:var(--muted);font-size:14px">28/10 · Vào ví khả dụng</span></div><span class="amt">+425.000đ</span></div>
+        <div class="tx-row"><span class="tic">🏦</span><div><b style="color:var(--navy)">Rút tiền về Vietcombank •••• 6899</b><br><span style="color:var(--muted);font-size:14px">27/10 · Đã chuyển</span></div><span class="amt neg">−2.000.000đ</span></div>
+        <div class="tx-row"><span class="tic">⚠️</span><div><b style="color:var(--navy)">Phạt hủy ca gấp HC-2026-1031</b><br><span style="color:var(--muted);font-size:14px">25/10 · Trừ từ ký quỹ (20% giá trị ca)</span></div><span class="amt neg">−100.000đ</span></div>
+        <div class="tx-row"><span class="tic">🛡️</span><div><b style="color:var(--navy)">Nạp ký quỹ qua VietQR</b><br><span style="color:var(--muted);font-size:14px">20/10 · Đủ mức 300.000đ</span></div><span class="amt">+300.000đ</span></div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= N10 ================= -->
+<div class="meta-bar" id="n10"><span class="code">N10</span><h2>Ký quỹ điều dưỡng</h2><span>Navbar NURSE (active: Ví) · trạng thái chính: đã đủ 300.000đ · kèm biến thể chưa đủ</span></div>
+<div class="screen">
+  <div class="navbar">
+    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <nav class="nav-links">
+      <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9" class="active">Ví</a><a href="#n14">Tài khoản</a>
+    </nav>
+    <div class="nav-right">
+      <button class="bell" aria-label="Thông báo">🔔<span class="dot">3</span></button>
+      <button class="userblock" data-menu="menu-n10">
+        <span class="avatar">MT</span><span class="uname">Trần Thị Mai</span><span class="chip">Cấp 2</span><span class="caret">▾</span>
+      </button>
+    </div>
+    <div class="avatar-menu" id="menu-n10">
+      <div class="am-head"><span class="avatar lg">MT</span><div><b>Trần Thị Mai</b><span>0905 ••• 123 · Điều dưỡng Cấp 2</span></div></div>
+      <a href="#"><span class="mi">👤</span>Hồ sơ cá nhân</a>
+      <a href="#n14"><span class="mi">📜</span>Giấy tờ &amp; GPHN</a>
+      <a href="#n9"><span class="mi">👛</span>Ví của tôi</a>
+      <a href="#"><span class="mi">🔔</span>Thông báo</a>
+      <a href="#"><span class="mi">🔠</span>Cỡ chữ &amp; hiển thị</a>
+      <a href="#"><span class="mi">🔒</span>Quyền riêng tư &amp; dữ liệu</a>
+      <a href="#"><span class="mi">💬</span>Hỗ trợ</a>
+      <div class="divider"></div>
+      <a href="#" class="logout"><span class="mi">↩️</span>Đăng xuất</a>
+    </div>
+  </div>
+  <div class="screen-body elder"><div class="page">
+    <div class="page-head">
+      <div><h1>Ví ký quỹ</h1><p>Khoản đảm bảo cam kết dịch vụ — nạp một lần, duy trì ở mức 300.000đ</p></div>
+    </div>
+
+    <div class="cols-2" style="align-items:start">
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="card" style="padding:26px">
+          <small style="font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-size:13.5px">Số dư ký quỹ hiện tại</small>
+          <div style="font-size:38px;font-weight:900;color:var(--navy);line-height:1.2">300.000đ <span style="font-size:20px;color:var(--muted)">/ 300.000đ</span></div>
+          <div class="progress"><i style="width:100%"></i></div>
+          <p><span class="chip teal" style="font-size:14.5px;padding:6px 13px">✓ Đã đủ ký quỹ — bạn có thể nhận ca mới</span></p>
+          <div style="background:var(--bg);border-radius:13px;padding:16px 18px;margin-top:16px">
+            <b style="color:var(--navy)">Ký quỹ dùng để làm gì?</b>
+            <p style="color:var(--slate);font-size:15.5px;margin-top:4px">Ký quỹ <b>chỉ</b> dùng để trừ tiền phạt vi phạm cam kết dịch vụ (SLA) — ví dụ hủy ca gấp hoặc vắng mặt không báo. <b>Hoa hồng ca tiền mặt KHÔNG trừ vào ký quỹ</b> (bạn tự nộp riêng tại mục Nộp hoa hồng).</p>
+          </div>
+        </div>
+
+        <div class="banner amber" style="margin:0">
+          <span class="variant-tag">Biến thể · Khi bị trừ phạt và chưa nạp bù</span>
+          <h4>⚠️ Chưa đủ ký quỹ — bạn chưa thể nhận ca mới</h4>
+          <p>Số dư <b>180.000đ / 300.000đ</b> (sau một lần trừ phạt). Nạp bù <b>120.000đ</b> để mở lại quyền nhận ca.</p>
+          <div class="progress" style="background:#F0DFA8"><i style="width:60%"></i></div>
+          <div class="acts"><button class="btn btn-primary" type="button" style="height:52px">Nạp bù 120.000đ</button></div>
+        </div>
+
+        <div class="card" style="padding:22px 24px">
+          <h3 style="color:var(--navy);font-size:18px;margin-bottom:8px">Lịch sử phạt trừ từ ký quỹ</h3>
+          <div class="tx-row"><span class="tic">⚠️</span><div><b style="color:var(--navy)">Hủy ca gấp HC-2026-1031</b><br><span style="color:var(--muted);font-size:14px">25/10 · Hủy trong vòng 12 giờ trước ca · 20% giá trị ca</span></div><span class="amt neg">−100.000đ</span></div>
+          <div class="tx-row"><span class="tic">🛡️</span><div><b style="color:var(--navy)">Nạp bù ký quỹ qua VietQR</b><br><span style="color:var(--muted);font-size:14px">26/10 · Về đủ mức 300.000đ</span></div><span class="amt">+100.000đ</span></div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="card" style="padding:24px;text-align:center">
+          <h3 style="color:var(--navy);font-size:18px;margin-bottom:6px">Nạp ký quỹ qua VietQR</h3>
+          <p style="color:var(--slate);font-size:15px;margin-bottom:14px">Quét bằng ứng dụng ngân hàng bất kỳ — tiền vào ký quỹ ngay khi hệ thống nhận được chuyển khoản.</p>
+          <div class="qr-ph"></div>
+          <div class="chip-select" style="justify-content:center;margin-top:18px">
+            <button type="button">50.000đ</button>
+            <button type="button">100.000đ</button>
+            <button type="button" class="selected">120.000đ</button>
+            <button type="button">300.000đ</button>
+          </div>
+          <p style="font-size:14px;color:var(--muted);margin-top:12px">Nội dung chuyển khoản: <b style="color:var(--navy)">KYQUY TRAN THI MAI</b></p>
+          <button class="btn btn-primary btn-block" type="button" style="height:56px;margin-top:8px">Tôi đã chuyển khoản</button>
+        </div>
+
+        <div class="variant-note">
+          <h4>Ghi chú · Rút ký quỹ khi ngừng hợp tác</h4>
+          <p>Khi bạn ngừng hợp tác với nền tảng, ký quỹ được hoàn về tài khoản ngân hàng <b>sau 7 ngày</b> kể từ ca cuối cùng và khi không còn tranh chấp nào đang mở.</p>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= N11 ================= -->
+<div class="meta-bar" id="n11"><span class="code">N11</span><h2>Nộp hoa hồng ca tiền mặt</h2><span>Navbar NURSE (active: Ví) · tự nộp qua VietQR trong 24 giờ sau check-out · không trừ ví</span></div>
+<div class="screen">
+  <div class="navbar">
+    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <nav class="nav-links">
+      <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9" class="active">Ví</a><a href="#n14">Tài khoản</a>
+    </nav>
+    <div class="nav-right">
+      <button class="bell" aria-label="Thông báo">🔔<span class="dot">3</span></button>
+      <button class="userblock" data-menu="menu-n11">
+        <span class="avatar">MT</span><span class="uname">Trần Thị Mai</span><span class="chip">Cấp 2</span><span class="caret">▾</span>
+      </button>
+    </div>
+    <div class="avatar-menu" id="menu-n11">
+      <div class="am-head"><span class="avatar lg">MT</span><div><b>Trần Thị Mai</b><span>0905 ••• 123 · Điều dưỡng Cấp 2</span></div></div>
+      <a href="#"><span class="mi">👤</span>Hồ sơ cá nhân</a>
+      <a href="#n14"><span class="mi">📜</span>Giấy tờ &amp; GPHN</a>
+      <a href="#n9"><span class="mi">👛</span>Ví của tôi</a>
+      <a href="#"><span class="mi">🔔</span>Thông báo</a>
+      <a href="#"><span class="mi">🔠</span>Cỡ chữ &amp; hiển thị</a>
+      <a href="#"><span class="mi">🔒</span>Quyền riêng tư &amp; dữ liệu</a>
+      <a href="#"><span class="mi">💬</span>Hỗ trợ</a>
+      <div class="divider"></div>
+      <a href="#" class="logout"><span class="mi">↩️</span>Đăng xuất</a>
+    </div>
+  </div>
+  <div class="screen-body elder"><div class="page">
+    <div class="page-head">
+      <div><h1>Nộp hoa hồng ca tiền mặt</h1><p>Ca tiền mặt: khách trả bạn 100% — bạn tự nộp 15% hoa hồng cho nền tảng trong 24 giờ sau check-out</p></div>
+    </div>
+
+    <div class="banner red">
+      <span class="variant-tag">Biến thể · Khi quá hạn</span>
+      <h4>🔒 Quá hạn nộp hoa hồng — tài khoản tạm khóa nhận ca</h4>
+      <p>Tài khoản bị tạm khóa nhận ca mới cho tới khi nộp đủ. Nộp ngay bên dưới để mở khóa tự động.</p>
+    </div>
+
+    <div class="cols-2" style="align-items:start">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card" style="padding:22px 24px;border:2px solid var(--red)">
+          <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
+            <div>
+              <h3 style="color:var(--navy);font-size:19px">Đơn HC-2026-1057 · Chăm sóc theo ca 8 giờ</h3>
+              <p style="color:var(--slate)">29/10 · Khách trả tiền mặt trực tiếp · Giá ca 500.000đ</p>
+            </div>
+            <span class="chip red" style="font-size:15px;padding:8px 14px">⏱ Còn <span id="commTimer">20:14:05</span></span>
+          </div>
+          <div class="pay-line" style="margin-top:10px"><span>Giá trị ca (tiền mặt bạn đã nhận)</span><b>500.000đ</b></div>
+          <div class="pay-line total"><span>Hoa hồng 15% cần nộp</span><span style="color:var(--red)">75.000đ</span></div>
+          <p style="font-size:14.5px;color:var(--muted);margin-top:8px">Hoa hồng không trừ từ ví khả dụng hay ký quỹ — bạn chuyển khoản riêng bằng mã VietQR bên cạnh.</p>
+        </div>
+
+        <div class="banner" style="background:var(--green-bg);border-color:#BFE8DC;color:#065F46;margin:0">
+          <span class="variant-tag">Biến thể · Sau khi nộp thành công</span>
+          <h4 style="color:var(--teal)">✅ Đã xác nhận nộp 75.000đ</h4>
+          <p>Đơn HC-2026-1057 đã quyết toán. Nếu tài khoản đang tạm khóa vì quá hạn, khóa được gỡ ngay khi hệ thống xác nhận giao dịch.</p>
+        </div>
+
+        <div class="variant-note">
+          <h4>Trạng thái trống</h4>
+          <p>Khi không còn ca nào chờ: <b>“Không có ca tiền mặt nào đang chờ nộp hoa hồng.”</b></p>
+        </div>
+      </div>
+
+      <div class="card" style="padding:24px;text-align:center">
+        <h3 style="color:var(--navy);font-size:18px;margin-bottom:6px">Quét VietQR để nộp 75.000đ</h3>
+        <p style="color:var(--slate);font-size:15px;margin-bottom:14px">Mã thanh toán được hệ thống tạo riêng cho đơn HC-2026-1057.</p>
+        <div class="qr-ph"></div>
+        <div style="text-align:left;max-width:340px;margin:16px auto 0">
+          <div class="kv"><span>Số tiền</span><b>75.000đ</b></div>
+          <div class="kv"><span>Nội dung chuyển khoản</span><b>HOAHONG HC20261057</b></div>
+          <div class="kv"><span>Hạn nộp</span><b>Còn 20:14:05 kể từ check-out</b></div>
+        </div>
+        <button class="btn btn-primary btn-block" type="button" style="height:58px;margin-top:16px">Tôi đã chuyển khoản</button>
+        <p style="font-size:14px;color:var(--muted);margin-top:9px">Hệ thống tự đối soát theo nội dung chuyển khoản — thường xác nhận trong vài phút.</p>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= N12 ================= -->
+<div class="meta-bar" id="n12"><span class="code">N12</span><h2>Rút tiền về ngân hàng</h2><span>Navbar NURSE (active: Ví) · chỉ rút từ số dư khả dụng</span></div>
+<div class="screen">
+  <div class="navbar">
+    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <nav class="nav-links">
+      <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9" class="active">Ví</a><a href="#n14">Tài khoản</a>
+    </nav>
+    <div class="nav-right">
+      <button class="bell" aria-label="Thông báo">🔔<span class="dot">3</span></button>
+      <button class="userblock" data-menu="menu-n12">
+        <span class="avatar">MT</span><span class="uname">Trần Thị Mai</span><span class="chip">Cấp 2</span><span class="caret">▾</span>
+      </button>
+    </div>
+    <div class="avatar-menu" id="menu-n12">
+      <div class="am-head"><span class="avatar lg">MT</span><div><b>Trần Thị Mai</b><span>0905 ••• 123 · Điều dưỡng Cấp 2</span></div></div>
+      <a href="#"><span class="mi">👤</span>Hồ sơ cá nhân</a>
+      <a href="#n14"><span class="mi">📜</span>Giấy tờ &amp; GPHN</a>
+      <a href="#n9"><span class="mi">👛</span>Ví của tôi</a>
+      <a href="#"><span class="mi">🔔</span>Thông báo</a>
+      <a href="#"><span class="mi">🔠</span>Cỡ chữ &amp; hiển thị</a>
+      <a href="#"><span class="mi">🔒</span>Quyền riêng tư &amp; dữ liệu</a>
+      <a href="#"><span class="mi">💬</span>Hỗ trợ</a>
+      <div class="divider"></div>
+      <a href="#" class="logout"><span class="mi">↩️</span>Đăng xuất</a>
+    </div>
+  </div>
+  <div class="screen-body elder"><div class="page">
+    <div class="page-head">
+      <div><h1>Rút tiền về ngân hàng</h1><p>Tiền chỉ rút được từ ngăn Khả dụng — hai ngăn còn lại đang bị khóa theo quy tắc</p></div>
+    </div>
+
+    <div class="cols-2" style="align-items:start">
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="card" style="padding:24px">
+          <small style="font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-size:13.5px">Số dư khả dụng</small>
+          <div style="font-size:36px;font-weight:900;color:var(--navy)">3.850.000đ</div>
+          <p style="font-size:15px;color:var(--slate)"><span style="margin-right:14px">🔒 Ký quỹ: <b style="color:var(--navy)">300.000đ</b> — không rút được</span><span>🔒 Tạm giữ: <b style="color:var(--navy)">500.000đ</b> — chờ quyết toán</span></p>
+        </div>
+
+        <form class="card" style="padding:24px" onsubmit="return false">
+          <div class="field">
+            <label>Số tiền muốn rút <span class="req">*</span></label>
+            <input class="input" value="1.000.000đ" style="font-weight:700;color:var(--navy);font-size:19px">
+            <div class="hint">Số tiền phải ≤ số dư khả dụng (3.850.000đ). <a href="#" style="font-weight:700">Rút tối đa</a></div>
+          </div>
+          <div class="field" style="margin-bottom:20px">
+            <label>Tài khoản nhận tiền</label>
+            <div class="doc-row" style="border:2px solid var(--blue);background:#F4F9FF">
+              <span class="dic">🏦</span>
+              <div><h4>Vietcombank •••• 6899</h4><p>Chủ tài khoản: TRAN THI MAI · Mặc định</p></div>
+              <span class="chip teal" style="margin-left:auto">✓ Đang chọn</span>
+            </div>
+            <button class="btn btn-secondary" type="button" style="height:52px;margin-top:11px">＋ Thêm tài khoản ngân hàng</button>
+          </div>
+          <button class="btn btn-primary btn-block btn-lg" type="submit">Tạo yêu cầu rút tiền</button>
+        </form>
+      </div>
+
+      <div class="card" style="padding:22px 24px">
+        <h3 style="color:var(--navy);font-size:18px;margin-bottom:10px">Lịch sử rút tiền</h3>
+        <div class="tx-row"><span class="tic">⏳</span><div><b style="color:var(--navy)">Rút 1.000.000đ · Vietcombank •••• 6899</b><br><span style="color:var(--muted);font-size:14px">Hôm nay · <span class="chip amber">Đang chờ duyệt</span></span></div><span class="amt neg">−1.000.000đ</span></div>
+        <div class="tx-row"><span class="tic">🏦</span><div><b style="color:var(--navy)">Rút 2.000.000đ · Vietcombank •••• 6899</b><br><span style="color:var(--muted);font-size:14px">27/10 · <span class="chip teal">Đã chuyển</span></span></div><span class="amt neg">−2.000.000đ</span></div>
+        <div class="tx-row"><span class="tic">↩️</span><div><b style="color:var(--navy)">Rút 500.000đ — bị từ chối</b><br><span style="color:var(--muted);font-size:14px">18/10 · <span class="chip red">Từ chối</span> Lý do: tên chủ tài khoản chưa khớp hồ sơ — tiền đã hoàn về ví khả dụng</span></div><span class="amt">500.000đ</span></div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= N13 ================= -->
+<div class="meta-bar" id="n13"><span class="code">N13</span><h2>Lịch rảnh &amp; ngày nghỉ</h2><span>Navbar NURSE (active: Tài khoản) · lưới tuần + lịch tháng đăng ký ngày nghỉ</span></div>
+<div class="screen">
+  <div class="navbar">
+    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <nav class="nav-links">
+      <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14" class="active">Tài khoản</a>
+    </nav>
+    <div class="nav-right">
+      <button class="bell" aria-label="Thông báo">🔔<span class="dot">3</span></button>
+      <button class="userblock" data-menu="menu-n13">
+        <span class="avatar">MT</span><span class="uname">Trần Thị Mai</span><span class="chip">Cấp 2</span><span class="caret">▾</span>
+      </button>
+    </div>
+    <div class="avatar-menu" id="menu-n13">
+      <div class="am-head"><span class="avatar lg">MT</span><div><b>Trần Thị Mai</b><span>0905 ••• 123 · Điều dưỡng Cấp 2</span></div></div>
+      <a href="#"><span class="mi">👤</span>Hồ sơ cá nhân</a>
+      <a href="#n14"><span class="mi">📜</span>Giấy tờ &amp; GPHN</a>
+      <a href="#n9"><span class="mi">👛</span>Ví của tôi</a>
+      <a href="#"><span class="mi">🔔</span>Thông báo</a>
+      <a href="#"><span class="mi">🔠</span>Cỡ chữ &amp; hiển thị</a>
+      <a href="#"><span class="mi">🔒</span>Quyền riêng tư &amp; dữ liệu</a>
+      <a href="#"><span class="mi">💬</span>Hỗ trợ</a>
+      <div class="divider"></div>
+      <a href="#" class="logout"><span class="mi">↩️</span>Đăng xuất</a>
+    </div>
+  </div>
+  <div class="screen-body elder"><div class="page">
+    <div class="page-head">
+      <div><h1>Lịch rảnh &amp; ngày nghỉ</h1><p>Radar &amp; Job Board chỉ gợi ý việc trong khung giờ bạn đã mở</p></div>
+    </div>
+
+    <div class="cols-2" style="align-items:start;grid-template-columns:1.35fr 1fr">
+      <div class="card" style="padding:22px 24px">
+        <h3 style="color:var(--navy);font-size:18px;margin-bottom:8px">Khung giờ rảnh hằng tuần</h3>
+        <div class="week-row"><span class="dow">Thứ 2</span><span><span class="range-chip">07:00 – 12:00 ✕</span><span class="range-chip night">19:00 – 06:00 · ca đêm ✕</span></span><button class="btn btn-secondary btn-sm" type="button" style="height:46px;margin-left:auto">＋ Thêm khung</button></div>
+        <div class="week-row"><span class="dow">Thứ 3</span><span><span class="range-chip">07:00 – 12:00 ✕</span><span class="range-chip night">19:00 – 06:00 · ca đêm ✕</span></span><button class="btn btn-secondary btn-sm" type="button" style="height:46px;margin-left:auto">＋ Thêm khung</button></div>
+        <div class="week-row"><span class="dow">Thứ 4</span><span><span class="range-chip">07:00 – 21:00 ✕</span></span><button class="btn btn-secondary btn-sm" type="button" style="height:46px;margin-left:auto">＋ Thêm khung</button></div>
+        <div class="week-row"><span class="dow">Thứ 5</span><span><span class="range-chip">07:00 – 12:00 ✕</span></span><button class="btn btn-secondary btn-sm" type="button" style="height:46px;margin-left:auto">＋ Thêm khung</button></div>
+        <div class="week-row"><span class="dow">Thứ 6</span><span><span class="range-chip locked">🔒 20:00 – 06:00 · Đã có ca — không sửa được</span></span><span class="chip grey" style="margin-left:auto">Đơn HC-2026-1052</span></div>
+        <div class="week-row"><span class="dow">Thứ 7</span><span><span class="range-chip">Cả ngày ✕</span></span><button class="btn btn-secondary btn-sm" type="button" style="height:46px;margin-left:auto">＋ Thêm khung</button></div>
+        <div class="week-row"><span class="dow">Chủ nhật</span><span style="color:var(--muted)">Nghỉ — chưa mở khung giờ nào</span><button class="btn btn-secondary btn-sm" type="button" style="height:46px;margin-left:auto">＋ Thêm khung</button></div>
+        <p style="font-size:14.5px;color:var(--muted);margin-top:13px">Hệ thống tự cộng thêm 60 phút đệm di chuyển giữa hai ca và tự chặn ca trùng giờ — bạn không thể bị xếp hai ca chồng nhau.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="card" style="padding:22px 24px">
+          <h3 style="color:var(--navy);font-size:18px;margin-bottom:6px">Ngày nghỉ cụ thể · Tháng 11/2026</h3>
+          <p style="color:var(--slate);font-size:15px;margin-bottom:13px">Chạm vào một ngày để đánh dấu <b style="color:var(--red)">Nghỉ</b> hoặc mở rảnh riêng ngày đó.</p>
+          <div class="cal">
+            <span class="cd">1</span><span class="cd">2</span><span class="cd avail">3</span><span class="cd">4</span><span class="cd">5</span><span class="cd">6</span><span class="cd">7</span>
+            <span class="cd off">8</span><span class="cd">9</span><span class="cd">10</span><span class="cd">11</span><span class="cd">12</span><span class="cd avail">13</span><span class="cd">14</span>
+            <span class="cd off">15</span><span class="cd">16</span><span class="cd">17</span><span class="cd">18</span><span class="cd">19</span><span class="cd">20</span><span class="cd">21</span>
+            <span class="cd off">22</span><span class="cd">23</span><span class="cd">24</span><span class="cd">25</span><span class="cd">26</span><span class="cd avail">27</span><span class="cd">28</span>
+            <span class="cd">29</span><span class="cd">30</span><span class="cd dim">·</span><span class="cd dim">·</span><span class="cd dim">·</span><span class="cd dim">·</span><span class="cd dim">·</span>
+          </div>
+          <p style="font-size:14.5px;margin-top:12px"><span class="chip red">Đỏ = Nghỉ</span> <span class="chip teal">Xanh = Mở rảnh riêng</span> <span class="chip grey">Trắng = Theo lịch tuần</span></p>
+        </div>
+
+        <div class="card" style="padding:20px 24px">
+          <button class="btn btn-primary btn-block btn-lg" type="button">Lưu lịch rảnh</button>
+          <p style="font-size:14.5px;color:var(--muted);margin-top:10px;text-align:center">Lịch rảnh dùng để Radar &amp; Job Board gợi ý việc phù hợp; hệ thống tự chặn ca trùng giờ.</p>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= N14 ================= -->
+<div class="meta-bar" id="n14"><span class="code">N14</span><h2>Giấy tờ &amp; GPHN của tôi</h2><span>Navbar NURSE (active: Tài khoản) · trạng thái từng giấy tờ · cập nhật GPHN chờ Admin duyệt</span></div>
+<div class="screen">
+  <div class="navbar">
+    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <nav class="nav-links">
+      <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14" class="active">Tài khoản</a>
+    </nav>
+    <div class="nav-right">
+      <button class="bell" aria-label="Thông báo">🔔<span class="dot">3</span></button>
+      <button class="userblock" data-menu="menu-n14">
+        <span class="avatar">MT</span><span class="uname">Trần Thị Mai</span><span class="chip">Cấp 2</span><span class="caret">▾</span>
+      </button>
+    </div>
+    <div class="avatar-menu" id="menu-n14">
+      <div class="am-head"><span class="avatar lg">MT</span><div><b>Trần Thị Mai</b><span>0905 ••• 123 · Điều dưỡng Cấp 2</span></div></div>
+      <a href="#"><span class="mi">👤</span>Hồ sơ cá nhân</a>
+      <a href="#n14"><span class="mi">📜</span>Giấy tờ &amp; GPHN</a>
+      <a href="#n9"><span class="mi">👛</span>Ví của tôi</a>
+      <a href="#"><span class="mi">🔔</span>Thông báo</a>
+      <a href="#"><span class="mi">🔠</span>Cỡ chữ &amp; hiển thị</a>
+      <a href="#"><span class="mi">🔒</span>Quyền riêng tư &amp; dữ liệu</a>
+      <a href="#"><span class="mi">💬</span>Hỗ trợ</a>
+      <div class="divider"></div>
+      <a href="#" class="logout"><span class="mi">↩️</span>Đăng xuất</a>
+    </div>
+  </div>
+  <div class="screen-body elder"><div class="page">
+    <div class="page-head">
+      <div><h1>Giấy tờ &amp; GPHN của tôi</h1><p>Quản lý chứng chỉ hành nghề và các giấy tờ đã được thẩm định</p></div>
+    </div>
+
+    <div class="card" style="padding:24px;margin-bottom:20px;background:linear-gradient(130deg,#EFF6FF,#fff)">
+      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+        <span class="avatar" style="width:60px;height:60px;flex-basis:60px;font-size:19px">MT</span>
+        <div style="flex:1;min-width:260px">
+          <h2 style="color:var(--navy);font-size:21px">Bạn đang ở <span class="chip" style="font-size:15px;padding:6px 14px">Điều dưỡng Cấp 2 — Chuyên môn</span></h2>
+          <p style="color:var(--slate);margin-top:4px">Cấp 2 mở khóa toàn bộ dịch vụ Nhóm 1 và các thủ thuật xâm lấn Nhóm 2 theo y lệnh. GPHN hết hạn sẽ tự hạ xuống Cấp 1; nộp GPHN mới được duyệt là tự nâng lại Cấp 2.</p>
+        </div>
+        <button class="btn btn-primary btn-lg" type="button">📜 Cập nhật GPHN mới</button>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="doc-row">
+        <span class="dic">🪪</span>
+        <div><h4>Căn cước công dân (2 mặt)</h4><p>Số 001148 ••• •26 · Ảnh chân dung trực tiếp đã nộp kèm</p></div>
+        <div class="st"><span class="chip teal">✓ Đã duyệt</span><br><span style="font-size:13.5px;color:var(--muted)">Duyệt bởi Admin · 28/10/2026</span></div>
+      </div>
+
+      <div class="doc-row">
+        <span class="dic">🎓</span>
+        <div><h4>Bằng tốt nghiệp Điều dưỡng</h4><p>Bang_tot_nghiep.pdf · Trường Cao đẳng Y tế</p></div>
+        <div class="st"><span class="chip teal">✓ Đã duyệt</span><br><span style="font-size:13.5px;color:var(--muted)">Duyệt bởi Admin · 28/10/2026</span></div>
+      </div>
+
+      <div class="doc-row" style="border:2px solid var(--blue);align-items:flex-start">
+        <span class="dic">📜</span>
+        <div style="flex:1">
+          <h4>Giấy phép hành nghề (GPHN)</h4>
+          <p>Số <b style="color:var(--navy)">00976/GPHN-ĐN</b> · Phạm vi: Điều dưỡng đa khoa · Hết hạn <b style="color:var(--navy)">12/04/2027</b></p>
+          <p style="margin-top:9px;display:flex;gap:8px;flex-wrap:wrap">
+            <span class="chip teal">✓ Đã duyệt · Còn hiệu lực</span>
+            <span class="chip amber">Biến thể: Còn 23 ngày — nên cập nhật sớm</span>
+            <span class="chip red">Biến thể: Đã hết hạn — bạn đang ở Cấp 1</span>
+          </p>
+        </div>
+        <div class="st"><span class="chip teal">✓ Đã duyệt</span><br><span style="font-size:13.5px;color:var(--muted)">Duyệt bởi Admin · 28/10/2026</span></div>
+      </div>
+
+      <div class="doc-row">
+        <span class="dic">🏅</span>
+        <div><h4>Quyết định nghỉ hưu</h4><p>Dùng để gắn huy hiệu “Nhân viên y tế hưu trí” trên hồ sơ — không thay thế GPHN</p></div>
+        <div class="st"><span class="chip teal">✓ Đã duyệt · Đã gắn huy hiệu</span></div>
+      </div>
+
+      <div class="doc-row" style="border-style:dashed;border-width:1.5px;background:#FFFBEB">
+        <span class="dic" style="background:var(--amber-bg)">⏳</span>
+        <div><h4>GPHN mới vừa nộp (biến thể sau khi bấm “Cập nhật GPHN mới”)</h4><p>Tải lên bản GPHN đã gia hạn kèm số, ngày cấp và ngày hết hạn mới.</p></div>
+        <div class="st"><span class="chip amber">Đang chờ Admin duyệt</span><br><span style="font-size:13.5px;color:var(--muted)">Duyệt xong bạn tự động trở lại Cấp 2</span></div>
+      </div>
+
+      <div class="doc-row" style="background:#FFF7F7">
+        <span class="dic" style="background:var(--red-bg)">⚠️</span>
+        <div><h4>Biến thể · Giấy tờ bị từ chối</h4><p>Ảnh GPHN mờ, không đọc được số giấy phép. Vui lòng chụp lại rõ nét, đủ 4 góc.</p></div>
+        <div class="st"><span class="chip red">Từ chối kèm lý do</span><br><a href="#" style="font-size:14px;font-weight:700">Tải lại ngay</a></div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= N15 ================= -->
+<div class="meta-bar" id="n15"><span class="code">N15</span><h2>Đánh giá &amp; điểm TrustScore</h2><span>Navbar NURSE (active: Tài khoản) · TrustScore thang 100 · đánh giá ẩn hai chiều</span></div>
+<div class="screen">
+  <div class="navbar">
+    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <nav class="nav-links">
+      <a href="#n1">Trang chủ</a><a href="#n2">Việc làm</a><a href="#n4">Ca của tôi</a><a href="#n9">Ví</a><a href="#n14" class="active">Tài khoản</a>
+    </nav>
+    <div class="nav-right">
+      <button class="bell" aria-label="Thông báo">🔔<span class="dot">3</span></button>
+      <button class="userblock" data-menu="menu-n15">
+        <span class="avatar">MT</span><span class="uname">Trần Thị Mai</span><span class="chip">Cấp 2</span><span class="caret">▾</span>
+      </button>
+    </div>
+    <div class="avatar-menu" id="menu-n15">
+      <div class="am-head"><span class="avatar lg">MT</span><div><b>Trần Thị Mai</b><span>0905 ••• 123 · Điều dưỡng Cấp 2</span></div></div>
+      <a href="#"><span class="mi">👤</span>Hồ sơ cá nhân</a>
+      <a href="#n14"><span class="mi">📜</span>Giấy tờ &amp; GPHN</a>
+      <a href="#n9"><span class="mi">👛</span>Ví của tôi</a>
+      <a href="#"><span class="mi">🔔</span>Thông báo</a>
+      <a href="#"><span class="mi">🔠</span>Cỡ chữ &amp; hiển thị</a>
+      <a href="#"><span class="mi">🔒</span>Quyền riêng tư &amp; dữ liệu</a>
+      <a href="#"><span class="mi">💬</span>Hỗ trợ</a>
+      <div class="divider"></div>
+      <a href="#" class="logout"><span class="mi">↩️</span>Đăng xuất</a>
+    </div>
+  </div>
+  <div class="screen-body elder"><div class="page">
+    <div class="page-head">
+      <div><h1>Đánh giá &amp; điểm TrustScore</h1><p>Điểm uy tín quyết định thứ hạng gợi ý việc — minh bạch từng lần thay đổi</p></div>
+    </div>
+
+    <div class="cols-2" style="align-items:start;grid-template-columns:1fr 1.5fr">
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="card" style="padding:26px;text-align:center">
+          <div class="gauge" style="width:132px;height:132px"><span class="in" style="width:104px;height:104px;font-size:36px">92</span></div>
+          <h3 style="color:var(--navy);font-size:19px">TrustScore · 92 / 100</h3>
+          <p style="color:var(--slate);font-size:15px;margin-top:4px">Mức tốt — bạn được ưu tiên gợi ý ca. <b style="color:var(--red)">Dưới 60 điểm: tạm khóa nhận ca.</b></p>
+          <div style="text-align:left;background:var(--bg);border-radius:13px;padding:15px 17px;margin-top:15px;font-size:15px">
+            <div class="kv"><span>Ca quyết toán, được đánh giá ≥ 4★</span><b style="color:var(--teal)">+2 điểm</b></div>
+            <div class="kv"><span>Hủy ca trước giờ hẹn trên 12 giờ</span><b style="color:var(--orange)">−5 điểm</b></div>
+            <div class="kv"><span>Hủy ca gấp (trong 12 giờ)</span><b style="color:var(--red)">−20 điểm</b></div>
+            <div class="kv"><span>Khiếu nại của khách được xác nhận đúng</span><b style="color:var(--red)">−25 điểm</b></div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:22px 24px">
+          <h3 style="color:var(--navy);font-size:18px">Lịch sử thay đổi điểm</h3>
+          <div class="tx-row"><span class="tic">⭐</span><div><b style="color:var(--navy)">Ca HC-2026-1039 được đánh giá 5★</b><br><span style="color:var(--muted);font-size:14px">29/10 · Ca đã quyết toán</span></div><span class="amt" style="color:var(--teal)">+2</span></div>
+          <div class="tx-row"><span class="tic">⭐</span><div><b style="color:var(--navy)">Ca HC-2026-1027 được đánh giá 4★</b><br><span style="color:var(--muted);font-size:14px">27/10 · Ca đã quyết toán</span></div><span class="amt" style="color:var(--teal)">+2</span></div>
+          <div class="tx-row"><span class="tic">⚠️</span><div><b style="color:var(--navy)">Hủy ca gấp HC-2026-1031</b><br><span style="color:var(--muted);font-size:14px">25/10 · Đồng thời trừ 100.000đ ký quỹ</span></div><span class="amt neg">−20</span></div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="card" style="padding:22px 24px">
+          <div style="display:flex;gap:22px;align-items:center;flex-wrap:wrap">
+            <div style="text-align:center">
+              <div style="font-size:40px;font-weight:900;color:var(--navy);line-height:1">4.9</div>
+              <div class="stars">★★★★★</div>
+              <p style="color:var(--muted);font-size:14px">128 lượt đánh giá</p>
+            </div>
+            <div style="flex:1;min-width:230px">
+              <div class="dist-row"><span style="width:28px">5★</span><span class="tr"><i style="width:84%"></i></span><span>84%</span></div>
+              <div class="dist-row"><span style="width:28px">4★</span><span class="tr"><i style="width:12%"></i></span><span>12%</span></div>
+              <div class="dist-row"><span style="width:28px">3★</span><span class="tr"><i style="width:3%"></i></span><span>3%</span></div>
+              <div class="dist-row"><span style="width:28px">2★</span><span class="tr"><i style="width:1%"></i></span><span>1%</span></div>
+              <div class="dist-row" style="margin-bottom:0"><span style="width:28px">1★</span><span class="tr"><i style="width:0%"></i></span><span>0%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="shift-tabs" style="margin-bottom:4px">
+          <button class="active" type="button">Đánh giá về tôi</button>
+          <button type="button">Đánh giá tôi đã gửi</button>
+        </div>
+
+        <div class="card review-card">
+          <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><b style="color:var(--navy)">Anh Nguyễn Văn An · Đơn HC-2026-1039</b><span class="stars">★★★★★</span></div>
+          <p>“Chị Mai thay băng rất nhẹ nhàng, đến đúng giờ, còn hướng dẫn gia đình cách theo dõi vết mổ. Rất yên tâm.”</p>
+        </div>
+
+        <div class="card review-card" style="border-style:dashed;background:#FFFBEB">
+          <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><b style="color:var(--navy)">Đơn HC-2026-1042 · Đánh giá đang ẩn</b><span class="chip amber">🔒 Ẩn hai chiều</span></div>
+          <p>Đánh giá của khách cho ca này sẽ hiện khi khách gửi đánh giá của họ, hoặc tự mở sau <b>7 ngày</b> kể từ khi ca kết thúc — để hai bên đánh giá độc lập, không ảnh hưởng lẫn nhau.</p>
+        </div>
+
+        <div class="variant-note">
+          <h4>Tab “Đánh giá tôi đã gửi”</h4>
+          <p>Sau mỗi ca, bạn cũng đánh giá khách hàng (thái độ, độ chính xác của khai báo, điều kiện làm việc). Đánh giá hai chiều áp dụng cùng quy tắc ẩn: ví dụ bạn đã gửi <b>5★ cho anh Nguyễn Văn An · ca HC-2026-1039</b> — đang chờ phía khách gửi để cùng mở.</p>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<div class="board-foot">
+  Chuẩn áp dụng: NAV-0 (navbar Nurse / page header / menu avatar) · M0 design system (Be Vietnam Pro, #2563EB) · Elder-friendly toàn phần N · Dữ liệu mẫu: ĐD. Trần Thị Mai (Cấp 2, TrustScore 92/100, GPHN 00976/GPHN-ĐN hết hạn 12/04/2027, ví 3.850.000đ, ký quỹ 300.000đ) · ĐD. Nguyễn Văn Hùng (Cấp 1, TrustScore 85/100) · Bà Nguyễn Thị Hoa (78 tuổi, Hải Châu, Đà Nẵng) · Đơn HC-2026-1042 / 1048 / 1039 / 1057 · Nội dung theo SRS v2.0 Updated.
+</div>
+
+<script>
+// Avatar menus
+document.querySelectorAll('.userblock').forEach(b=>b.addEventListener('click',e=>{
+  e.stopPropagation();
+  const m=document.getElementById(b.dataset.menu);
+  document.querySelectorAll('.avatar-menu').forEach(x=>{ if(x!==m) x.classList.remove('open') });
+  m.classList.toggle('open');
+}));
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.avatar-menu') && !e.target.closest('.userblock'))
+    document.querySelectorAll('.avatar-menu').forEach(x=>x.classList.remove('open'));
+});
+// Toggles (online switch, generic toggles)
+document.querySelectorAll('.toggle,.switch-lg').forEach(t=>t.addEventListener('click',e=>{e.preventDefault();t.classList.toggle('on')}));
+// Tabs & chip groups
+document.querySelectorAll('.toolbar,.shift-tabs').forEach(tb=>tb.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+  tb.querySelectorAll('button').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+})));
+document.querySelectorAll('.chip-select').forEach(g=>g.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+  g.querySelectorAll('button').forEach(x=>x.classList.remove('selected')); b.classList.add('selected');
+})));
+// Choice cards
+document.querySelectorAll('.choice').forEach(c=>c.addEventListener('click',()=>{
+  c.parentElement.querySelectorAll('.choice').forEach(x=>x.classList.remove('selected')); c.classList.add('selected');
+}));
+// Radar countdown 45s
+(function(){ const el=document.getElementById('radarTimer'); if(!el) return; let s=45;
+  setInterval(()=>{ s=s>0?s-1:45; el.textContent='00:'+String(s).padStart(2,'0'); },1000); })();
+// Commission countdown (N11) from 20:14:05
+(function(){ const el=document.getElementById('commTimer'); if(!el) return; let s=20*3600+14*60+5;
+  setInterval(()=>{ if(s>0) s--; const h=String(Math.floor(s/3600)).padStart(2,'0'),m=String(Math.floor(s%3600/60)).padStart(2,'0'),ss=String(s%60).padStart(2,'0');
+    el.textContent=h+':'+m+':'+ss; },1000); })();
+</script>
+</body>
+</html>

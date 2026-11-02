@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phần APP — Mobile App (Patient + Nurse) · HealthCareSystem (Thiết kế bởi Tom)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#2563EB; --blue-dark:#1D4ED8; --sky:#38BDF8; --navy:#0B3C6C; --teal:#0D9488;
+  --ink:#0F2540; --slate:#4A6076; --muted:#7A8FA6; --bg:#F5F9FC; --line:#E1EBF5;
+  --amber:#B45309; --amber-bg:#FEF3C7; --amber-soft:#FFFBEB;
+  --red:#DC2626; --red-bg:#FEF2F2; --orange:#EA580C; --orange-bg:#FFF7ED;
+  --green-bg:#ECFDF5; --radius:16px;
+  --shadow:0 18px 40px -18px rgba(11,60,108,.22);
+  --shadow-sm:0 6px 20px -8px rgba(11,60,108,.16);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Be Vietnam Pro',system-ui,sans-serif;background:#DCE9F5;color:var(--ink);font-size:16px;line-height:1.55}
+a{color:var(--blue);text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+
+/* ===== BOARD (meta, not product UI) ===== */
+.board-head{max-width:1180px;margin:0 auto;padding:44px 24px 8px}
+.board-head h1{color:var(--navy);font-size:30px;font-weight:900}
+.board-head p{color:var(--slate);max-width:820px;margin-top:8px}
+.board-nav{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 6px}
+.board-nav a{background:#fff;border:1px solid var(--line);padding:8px 16px;border-radius:999px;font-weight:600;font-size:14.5px;color:var(--navy)}
+.board-nav a:hover{border-color:var(--blue);color:var(--blue)}
+.meta-bar{max-width:1180px;margin:34px auto 0;padding:0 24px;display:flex;align-items:baseline;gap:14px}
+.meta-bar .code{font-weight:900;color:#fff;background:var(--navy);border-radius:9px;padding:3px 12px;font-size:15px}
+.meta-bar h2{color:var(--navy);font-size:20px}
+.meta-bar span{color:var(--slate);font-size:14px}
+
+/* ===== SCREEN FRAME ===== */
+.screen{max-width:1180px;margin:12px auto 10px;background:var(--bg);border-radius:22px;box-shadow:0 30px 60px -25px rgba(11,60,108,.45);overflow:hidden;border:1px solid #C9DDF2}
+.screen-body{padding:30px 38px 40px}
+.page{max-width:1064px;margin:0 auto}
+
+/* ===== NAVBAR (NAV-0) ===== */
+.navbar{height:60px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 38px;gap:26px;position:relative;z-index:30}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:17px;color:var(--navy)}
+.logo-mark{width:33px;height:33px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--sky));display:grid;place-items:center;color:#fff;font-size:19px;font-weight:900}
+.nav-links{display:flex;gap:24px;margin-left:6px}
+.nav-links a{font-size:15px;font-weight:500;color:var(--slate);padding:6px 2px;position:relative}
+.nav-links a.active{color:var(--blue);font-weight:600}
+.nav-links a.active::after{content:"";position:absolute;left:0;right:0;bottom:-14px;height:2.5px;background:var(--blue);border-radius:2px}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.bell{position:relative;width:40px;height:40px;border-radius:50%;border:0;background:transparent;font-size:19px;display:grid;place-items:center}
+.bell:hover{background:var(--bg)}
+.bell .dot{position:absolute;top:2px;right:1px;background:var(--red);color:#fff;font-size:10.5px;font-weight:700;min-width:17px;height:17px;border-radius:9px;display:grid;place-items:center;padding:0 4px;border:2px solid #fff}
+.bell.active{background:#EAF2FE}
+.userblock{display:flex;align-items:center;gap:9px;background:none;border:0;padding:5px 6px;border-radius:12px}
+.userblock:hover{background:var(--bg)}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#93C5FD,var(--blue));color:#fff;display:grid;place-items:center;font-weight:700;font-size:13.5px;flex:0 0 36px}
+.avatar.lg{width:46px;height:46px;font-size:16px;flex-basis:46px}
+.userblock .uname{font-size:15px;font-weight:600;color:var(--navy)}
+.caret{color:var(--muted);font-size:12px}
+/* avatar dropdown (CP15 / NAV-0) */
+.avatar-menu{position:absolute;top:56px;right:30px;width:288px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:10px;display:none;z-index:50}
+.avatar-menu.open{display:block}
+.avatar-menu .am-head{display:flex;gap:11px;align-items:center;padding:8px 10px 12px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.avatar-menu .am-head b{color:var(--navy);font-size:15.5px;display:block}
+.avatar-menu .am-head span{color:var(--muted);font-size:13px}
+.avatar-menu a{display:flex;align-items:center;gap:11px;padding:10px;border-radius:10px;color:var(--ink);font-size:15px;font-weight:500}
+.avatar-menu a:hover{background:var(--bg)}
+.avatar-menu a .mi{width:21px;text-align:center}
+.avatar-menu .divider{height:1px;background:var(--line);margin:6px 4px}
+.avatar-menu a.logout{color:var(--red)}
+
+/* ===== PAGE HEADER (NAV-0) ===== */
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:6px 0 20px}
+.page-head h1{font-size:24px;font-weight:800;color:var(--navy);line-height:1.25}
+.page-head p{color:var(--slate);font-size:15px;margin-top:3px}
+
+/* ===== GENERIC CONTROLS ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:16px;padding:0 26px;height:52px;border-radius:13px;border:1px solid transparent;transition:.15s}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue-dark)}
+.btn-secondary{background:#fff;border-color:#C7DBF2;color:var(--navy)}
+.btn-secondary:hover{border-color:var(--blue);color:var(--blue)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-block{width:100%}
+.btn-lg{height:58px;font-size:17px;border-radius:14px}
+.btn:disabled{background:#D7E3F0;color:#8AA3BC;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 11px;border-radius:999px;background:#EAF2FE;color:var(--blue-dark)}
+.chip.teal{background:var(--green-bg);color:var(--teal)}
+.chip.amber{background:var(--amber-bg);color:var(--amber)}
+.chip.orange{background:var(--orange-bg);color:var(--orange)}
+.chip.red{background:var(--red-bg);color:var(--red)}
+.chip.grey{background:#EEF2F6;color:var(--slate)}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm)}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:15px;font-weight:600;color:var(--navy);margin-bottom:8px}
+.field label .req{color:var(--red)}
+.field .hint{font-size:13.5px;color:var(--muted);margin-top:6px}
+.input{width:100%;height:54px;border:1.5px solid var(--line);border-radius:12px;padding:0 16px;font-family:inherit;font-size:16.5px;color:var(--ink);background:#fff;outline:none}
+.input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+textarea.input{height:auto;padding:13px 16px;resize:vertical;line-height:1.55}
+select.input{appearance:none}
+.small-print{font-size:13px;color:var(--muted);text-align:center;line-height:1.6}
+
+/* ===== AUTH (SH1/SH2) ===== */
+.auth-zone{min-height:640px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:44px 20px;background:
+ radial-gradient(700px 380px at 85% -5%,rgba(56,189,248,.22),transparent 60%),
+ radial-gradient(620px 420px at -10% 30%,rgba(37,99,235,.12),transparent 60%),var(--bg)}
+.auth-card{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:38px 40px;width:100%;max-width:480px}
+.auth-card .logo-c{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:24px}
+.auth-card .logo-mark{width:56px;height:56px;border-radius:16px;font-size:30px;margin-bottom:12px}
+.auth-card h1{font-size:26px;font-weight:800;color:var(--navy);text-align:center}
+.auth-card .sub{text-align:center;color:var(--slate);font-size:15.5px;margin:6px 0 26px}
+.phone-wrap{display:flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
+.phone-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+.phone-wrap .prefix{display:flex;align-items:center;gap:7px;padding:0 14px;background:var(--bg);border-right:1px solid var(--line);font-weight:700;color:var(--navy);font-size:16.5px}
+.phone-wrap input{flex:1;border:0;outline:none;height:54px;padding:0 14px;font-family:inherit;font-size:17px;letter-spacing:.4px;color:var(--ink)}
+.divider-or{display:flex;align-items:center;gap:14px;color:var(--muted);font-size:13px;margin:22px 0}
+.divider-or::before,.divider-or::after{content:"";flex:1;height:1px;background:var(--line)}
+.admin-variant{margin-top:26px;width:100%;max-width:480px;background:#fff;border:1.5px dashed #B9D2EE;border-radius:16px;padding:18px 20px}
+.admin-variant h4{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.admin-variant p{font-size:14.5px;color:var(--slate)}
+/* OTP */
+.otp-row{display:flex;gap:11px;justify-content:center;margin:8px 0 6px}
+.otp-row input{width:52px;height:60px;text-align:center;font-family:inherit;font-size:24px;font-weight:700;color:var(--navy);border:1.5px solid var(--line);border-radius:13px;outline:none;background:#fff}
+.otp-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+.alert{display:flex;gap:11px;border-radius:13px;padding:13px 16px;font-size:14.5px;margin:14px 0}
+.alert.red{background:var(--red-bg);color:#7F1D1D}
+.alert b{color:var(--red)}
+/* role cards */
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 22px}
+.role-card{border:2px solid var(--line);border-radius:16px;padding:19px;text-align:left;background:#fff;transition:.15s;width:100%}
+.role-card:hover{border-color:#B9D2EE}
+.role-card.selected{border-color:var(--blue);background:#F4F9FF;box-shadow:0 0 0 3.5px rgba(37,99,235,.12)}
+.role-card .ric{font-size:27px;margin-bottom:9px}
+.role-card h3{font-size:16.5px;color:var(--navy);margin-bottom:4px}
+.role-card p{font-size:14px;color:var(--slate)}
+.role-card .next{margin-top:11px;font-size:13.5px;font-weight:600;color:var(--blue)}
+
+/* ===== STEPPER (body card) ===== */
+.stepper{display:flex;gap:10px;margin-bottom:22px}
+.stepper .st{flex:1;display:flex;align-items:center;gap:11px;padding:14px 16px;border-radius:13px;background:#fff;border:1px solid var(--line)}
+.stepper .st .n{width:34px;height:34px;border-radius:50%;background:#EAF2FE;color:var(--blue);font-weight:800;display:grid;place-items:center;flex:0 0 34px;font-size:15px}
+.stepper .st.done .n{background:var(--teal);color:#fff}
+.stepper .st.now{background:var(--blue);border-color:var(--blue);color:#fff}
+.stepper .st.now .n{background:#fff;color:var(--blue)}
+.stepper .st small{display:block;font-size:12px;opacity:.75;font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.stepper .st b{font-size:15px;line-height:1.3}
+.stepper .st.todo{opacity:.65}
+/* collapsed step summary */
+.step-summary{display:flex;align-items:center;gap:14px;padding:17px 20px;margin-bottom:18px}
+.step-summary .n{width:34px;height:34px;border-radius:50%;background:var(--teal);color:#fff;font-weight:800;display:grid;place-items:center;flex:0 0 34px}
+.step-summary h3{font-size:16.5px;color:var(--navy)}
+.step-summary p{font-size:14px;color:var(--slate)}
+.step-summary .edit{margin-left:auto;font-weight:600;font-size:14.5px;white-space:nowrap}
+/* upload cards CP2 */
+.upload-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.upload{border:1.5px dashed #B9D2EE;border-radius:14px;padding:17px;text-align:center;background:#FBFDFF}
+.upload .uic{font-size:29px}
+.upload h4{font-size:15px;color:var(--navy);margin:7px 0 3px}
+.upload p{font-size:13px;color:var(--muted);margin-bottom:9px}
+.upload.filled{border-style:solid;border-color:#BFE8DC;background:#F7FEFB}
+/* radio / check cards */
+.choice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.choice{border:2px solid var(--line);border-radius:14px;padding:16px;background:#fff;text-align:left;width:100%}
+.choice.selected{border-color:var(--blue);background:#F4F9FF}
+.choice h4{color:var(--navy);font-size:16px;margin-bottom:4px}
+.choice p{font-size:13.5px;color:var(--slate)}
+.chip-select{display:flex;gap:9px;flex-wrap:wrap}
+.chip-select button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:10px 19px;font-size:15px;font-weight:600;color:var(--slate)}
+.chip-select button.selected{background:var(--blue);border-color:var(--blue);color:#fff}
+.cols-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.cols-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.toggle{position:relative;width:58px;height:32px;border-radius:999px;background:#CBD8E5;border:0;flex:0 0 58px;transition:.2s}
+.toggle::after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.toggle.on{background:var(--teal)}
+.toggle.on::after{left:30px}
+.map-ph{height:215px;border-radius:14px;position:relative;overflow:hidden;background:
+ repeating-linear-gradient(0deg,transparent,transparent 34px,rgba(37,99,235,.07) 34px,rgba(37,99,235,.07) 35px),
+ repeating-linear-gradient(90deg,transparent,transparent 34px,rgba(37,99,235,.07) 34px,rgba(37,99,235,.07) 35px),
+ linear-gradient(140deg,#E3F2E8,#DCEBFA)}
+.map-ph .pin{position:absolute;top:44%;left:50%;transform:translate(-50%,-100%);font-size:36px}
+.map-ph .pin-label{position:absolute;top:calc(44% + 8px);left:50%;transform:translateX(-50%);background:#fff;border-radius:9px;box-shadow:var(--shadow-sm);padding:5px 12px;font-size:13px;font-weight:600;color:var(--navy);white-space:nowrap}
+.map-ph .gps-chip{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.94);border-radius:9px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--navy);display:flex;gap:7px;align-items:center}
+.gps-dot{width:9px;height:9px;border-radius:50%;background:var(--teal)}
+
+/* ===== ELDER (nurse surfaces) ===== */
+.elder{font-size:17px}
+.elder .input{height:58px;font-size:17.5px}
+.elder .field label{font-size:16px}
+.elder .btn-lg{height:60px;font-size:17.5px}
+.doc-row{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:#fff}
+.doc-row .dic{width:46px;height:46px;border-radius:12px;background:#EAF2FE;display:grid;place-items:center;font-size:22px;flex:0 0 46px}
+.doc-row h4{color:var(--navy);font-size:16.5px}
+.doc-row p{font-size:14px;color:var(--slate)}
+.doc-row .st{margin-left:auto;text-align:right}
+.svc-group{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fff;margin-bottom:14px}
+.svc-group h4{color:var(--navy);font-size:16.5px;margin-bottom:4px}
+.svc-group .g-sub{font-size:14px;color:var(--slate);margin-bottom:12px}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 18px}
+.check-item{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;padding:9px 11px;border-radius:10px;background:var(--bg)}
+.check-item input{width:20px;height:20px;margin-top:2px;accent-color:var(--blue)}
+.check-item.locked{background:#F1F5F9;color:var(--muted)}
+.timeline-mini{display:flex;gap:0;margin-top:14px}
+.timeline-mini div{flex:1;text-align:center;position:relative;padding-top:20px;font-size:14px;color:var(--slate)}
+.timeline-mini div::before{content:"";position:absolute;top:5px;left:50%;transform:translateX(-50%);width:12px;height:12px;border-radius:50%;background:#CBD8E5}
+.timeline-mini div.done::before{background:var(--teal)}
+.timeline-mini div::after{content:"";position:absolute;top:10px;left:calc(-50% + 8px);right:calc(50% + 8px);height:2px;background:#E1EBF5}
+.timeline-mini div:first-child::after{display:none}
+
+/* ===== TOOLBAR + NOTIFICATIONS (SH5) ===== */
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;padding:13px 0 18px;border-top:1px solid var(--line)}
+.toolbar button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 17px;font-size:14.5px;font-weight:600;color:var(--slate)}
+.toolbar button.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.toolbar button .cnt{background:rgba(255,255,255,.25);border-radius:8px;padding:0 6px;margin-left:5px;font-size:12.5px}
+.toolbar button:not(.active) .cnt{background:#EAF2FE;color:var(--blue-dark)}
+.notif-cols{display:grid;grid-template-columns:1.9fr 1fr;gap:22px;align-items:start}
+.group-label{display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 12px}
+.group-label b{color:var(--navy);font-size:16px}
+.group-label span{color:var(--muted);font-size:13.5px}
+.notif{display:flex;gap:14px;background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px 19px;margin-bottom:13px;position:relative}
+.notif.unread{border-color:#B9D2EE;background:#FBFDFF}
+.notif .nic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:0 0 44px;background:#EAF2FE}
+.notif .nic.red{background:var(--red-bg)}
+.notif .nic.amber{background:var(--amber-bg)}
+.notif .nic.teal{background:var(--green-bg)}
+.notif h4{font-size:15.5px;color:var(--navy);line-height:1.4}
+.notif p{font-size:14.5px;color:var(--slate);margin-top:2px}
+.notif .time{font-size:13px;color:var(--muted);white-space:nowrap}
+.notif .udot{position:absolute;top:16px;right:16px;width:9px;height:9px;border-radius:50%;background:var(--blue)}
+.notif .acts{display:flex;gap:9px;margin-top:11px}
+.btn-sm{height:38px;padding:0 17px;font-size:14px;border-radius:10px}
+.variant-note{border:1.5px dashed #B9D2EE;border-radius:15px;padding:18px;background:#FBFDFF}
+.variant-note h4{font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.variant-note p{font-size:14.5px;color:var(--slate);margin-bottom:9px}
+.variant-note b{color:var(--navy)}
+
+/* ===== SETTINGS (SH6) ===== */
+.set-cols{display:grid;grid-template-columns:1.55fr 1fr;gap:22px;align-items:start}
+.profile-card{padding:24px;display:flex;gap:18px;align-items:center;margin-bottom:20px}
+.profile-card h2{font-size:21px;color:var(--navy)}
+.profile-card .prow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.menu-list{overflow:hidden}
+.menu-list a{display:flex;align-items:center;gap:14px;padding:16.5px 20px;border-bottom:1px solid var(--line);color:var(--ink);font-size:15.5px;font-weight:500}
+.menu-list a:last-child{border-bottom:0}
+.menu-list a:hover{background:var(--bg)}
+.menu-list .mi{width:23px;text-align:center;font-size:17px}
+.menu-list .sub{display:block;font-size:13.5px;color:var(--muted);font-weight:400}
+.menu-list .chev{margin-left:auto;color:var(--muted)}
+.menu-list a.danger{color:var(--red)}
+.banner{border-radius:15px;padding:19px 21px;margin-bottom:14px;border:1px solid}
+.banner h4{font-size:16px;margin-bottom:4px}
+.banner p{font-size:14.5px}
+.banner .acts{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap}
+.banner.amber{background:var(--amber-soft);border-color:#F0DFA8;color:#713F12}
+.banner.amber h4{color:var(--amber)}
+.banner.orange{background:var(--orange-bg);border-color:#F6D3B3;color:#7C2D12}
+.banner.orange h4{color:var(--orange)}
+.banner.red{background:var(--red-bg);border-color:#F3C2C2;color:#7F1D1D}
+.banner.red h4{color:var(--red)}
+.variant-tag{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.65;display:block;margin-bottom:5px}
+.checklist{list-style:none;margin-top:9px;font-size:14.5px}
+.checklist li{padding:3px 0}
+.board-foot{max-width:1180px;margin:0 auto;padding:26px 24px 60px;color:var(--slate);font-size:14px}
+@media(max-width:900px){
+  .screen-body{padding:22px 18px 30px}
+  .navbar{padding:0 18px}.nav-links{display:none}
+  .upload-grid,.choice-grid,.cols-3,.cols-2,.role-grid,.notif-cols,.set-cols{grid-template-columns:1fr}
+  .stepper{flex-direction:column}
+  .auth-card{padding:30px 22px}
+}
+
+/* ===== APP additions ===== */
+.phones{display:flex;flex-wrap:wrap;gap:28px;justify-content:center}
+.phone{width:392px;max-width:100%;background:#fff;border:1.5px solid #D8E4F2;border-radius:34px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+.phone .pbody{padding:18px 18px 20px;flex:1;background:#FDFEFF}
+.phone.elder{font-size:17px}
+.app-top{height:56px;display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--line);background:#fff;position:relative}
+.app-top .logo{font-size:16.5px}
+.app-top .logo-mark{width:27px;height:27px;font-size:17px;border-radius:8px}
+.tabbar{display:flex;border-top:1px solid var(--line);background:#fff;padding:7px 4px 10px}
+.tabbar a{flex:1;text-align:center;text-decoration:none;color:var(--muted);font-size:11.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;padding:3px 0}
+.tabbar a .ti{font-size:21px;line-height:1.15}
+.tabbar a.active{color:var(--blue)}
+.tabbar a .bdg{position:absolute;top:-2px;right:calc(50% - 19px);background:var(--red);color:#fff;font-size:10px;font-weight:800;min-width:17px;height:17px;border-radius:9px;display:grid;place-items:center;padding:0 4px}
+.acard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px;box-shadow:var(--shadow-sm);margin-bottom:12px}
+.acard h4{color:var(--navy);font-size:16px}
+.phone.elder .acard h4{font-size:17.5px}
+.mini-search{display:flex;align-items:center;gap:9px;border:1.5px solid var(--line);border-radius:13px;padding:0 14px;height:48px;background:#fff;color:var(--muted);font-size:15px;margin-bottom:13px}
+.tile2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.tile2 .t{border:1px solid var(--line);border-radius:15px;padding:14px;background:#fff}
+.tile2 .t .bic{font-size:23px;display:block;margin-bottom:6px}
+.tile2 .t b{color:var(--navy);font-size:15px;display:block}
+.tile2 .t span{font-size:12.5px;color:var(--slate)}
+.bub{max-width:78%;padding:10px 13px;border-radius:16px;font-size:14.5px;margin-bottom:9px;line-height:1.45}
+.bub.them{background:#EFF4FA;border-bottom-left-radius:5px;color:var(--ink)}
+.bub.me{background:var(--blue);color:#fff;border-bottom-right-radius:5px;margin-left:auto}
+.bub small{display:block;font-size:11px;opacity:.65;margin-top:4px}
+.sys-note{text-align:center;font-size:12px;color:var(--muted);background:#FFF7E8;border:1px dashed #EBD9A8;border-radius:10px;padding:7px 10px;margin:10px 0}
+.ob-dots{display:flex;gap:7px;justify-content:center;margin:14px 0 4px}
+.ob-dots span{width:8px;height:8px;border-radius:50%;background:#CFE0F2}
+.ob-dots span.on{background:var(--blue);width:22px;border-radius:5px}
+.frame-cap{text-align:center;font-weight:700;color:var(--navy);margin-top:13px;font-size:15px}
+.frame-sub{text-align:center;color:var(--muted);font-size:13px;margin:3px auto 0;max-width:392px}
+</style>
+</head>
+<body>
+<div class="board-head">
+  <h1>Phần APP — Màn hình Mobile App</h1>
+  <p>Khung điện thoại cho 2 ứng dụng theo SRS: <b>Patient App</b> và <b>Nurse App</b>. Điều hướng app theo NAV-0/M0: <b>thanh trên (top strip)</b> gồm logo + chuông + avatar; <b>thanh tab dưới (bottom nav)</b> 5 mục khóa — Patient: Trang chủ · Dịch vụ · Đơn của tôi · Tin nhắn · Tài khoản; Nurse: Trang chủ · Việc làm · Ca của tôi · Ví · Tài khoản. Phía Nurse giữ chuẩn elder-friendly (chữ ≥17px, nút ≥56px). Các màn nghiệp vụ sâu trong app (Radar, Check-in, ca trực tiếp) đã có khung riêng ở N3/N6/P9 của phần N và P.</p>
+  <div class="board-nav">
+    <a href="#app-p">App Patient (6)</a><a href="#app-n">App Nurse (5)</a><a href="#app-flow">Luồng trong ca Nurse: N5 → N6 → N7 → N8 (6 khung)</a>
+  </div>
+</div>
+
+<!-- ================= APP PATIENT ================= -->
+<div class="meta-bar" id="app-p"><span class="code">APP-P</span><h2>Patient App — Ứng dụng khách hàng</h2><span>Bottom nav khóa: Trang chủ · Dịch vụ · Đơn của tôi · Tin nhắn · Tài khoản</span></div>
+<div class="screen" style="background:transparent;border:0;box-shadow:none">
+<div class="phones">
+
+  <!-- APP-P0 Onboarding -->
+  <div>
+    <div class="phone">
+      <div class="pbody" style="padding-top:34px;text-align:center">
+        <div style="font-size:64px">🏥</div>
+        <span class="logo" style="justify-content:center;font-size:21px;margin-top:8px"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <h3 style="color:var(--navy);font-size:21px;margin-top:26px;line-height:1.35">Chăm sóc y tế tại nhà,<br>an tâm như ở bệnh viện</h3>
+        <p style="color:var(--slate);font-size:15px;margin-top:9px">Điều dưỡng đã xác thực giấy phép hành nghề, đặt ca trong vài chạm, tiền của bạn được tạm giữ an toàn tới khi ca hoàn thành.</p>
+        <div class="ob-dots"><span class="on"></span><span></span><span></span></div>
+        <button class="btn btn-primary btn-block btn-lg" type="button" style="margin-top:18px">Bắt đầu — Đăng nhập bằng SĐT</button>
+        <p style="font-size:12.5px;color:var(--muted);margin-top:12px">Bằng cách tiếp tục, bạn đồng ý Điều khoản &amp; Chính sách dữ liệu (Nghị định 13/2023).</p>
+      </div>
+    </div>
+    <div class="frame-cap">APP-P0 · Màn hình chào (Onboarding)</div>
+    <p class="frame-sub">Chỉ hiện lần đầu mở app · 3 slide, vuốt hoặc bấm Bắt đầu</p>
+  </div>
+
+  <!-- APP-P1 Home -->
+  <div>
+    <div class="phone">
+      <div class="app-top">
+        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <div class="nav-right" style="margin-left:auto">
+          <button class="bell">🔔<span class="dot">2</span></button><span class="avatar">AN</span>
+        </div>
+      </div>
+      <div class="pbody">
+        <b style="color:var(--navy);font-size:17px">Xin chào, anh An 👋</b>
+        <div style="font-size:13.5px;color:var(--slate);margin-bottom:12px">📍 Giao ca tại: Hải Châu, Đà Nẵng ▾</div>
+        <div class="mini-search">🔍 Tìm dịch vụ hoặc điều dưỡng…</div>
+        <div class="acard" style="background:#FFFBEB;border-color:#F0DFA8">
+          <h4>🌙 Ca tối nay 20:00 — ĐD. Trần Thị Mai</h4>
+          <p style="font-size:13.5px;color:var(--slate)">Ca đêm sau phẫu thuật · HC-2026-1050 · Đã xác nhận</p>
+          <button class="btn btn-secondary btn-sm" type="button" style="margin-top:8px">Xem chi tiết đơn</button>
+        </div>
+        <div class="tile2">
+          <div class="t"><span class="bic">🩹</span><b>Thủ thuật tại nhà</b><span>Xâm lấn · Chỉ Cấp 2</span></div>
+          <div class="t"><span class="bic">🤲</span><b>Chăm sóc cơ bản</b><span>Không xâm lấn</span></div>
+          <div class="t"><span class="bic">🕗</span><b>Theo ca 4h/8h/12h</b><span>Kèm ca đêm</span></div>
+          <div class="t"><span class="bic">🎟️</span><b>Voucher: 1</b><span>50.000đ khả dụng</span></div>
+        </div>
+        <b style="color:var(--navy);display:block;margin:16px 0 10px;font-size:16px">Điều dưỡng gần bạn</b>
+        <div class="acard" style="display:flex;gap:11px;align-items:center">
+          <span class="avatar lg">MT</span>
+          <div style="flex:1"><h4>ĐD. Trần Thị Mai</h4><p style="font-size:13px;color:var(--slate)">★★★★★ 4.9 · 1,2 km · <span class="chip" style="padding:1px 8px">Cấp 2</span> <span class="chip teal" style="padding:1px 8px">Trống tối nay</span></p></div>
+          <button class="btn btn-primary btn-sm" type="button">Đặt</button>
+        </div>
+        <p style="text-align:center;font-size:12.5px;color:var(--muted)">🛡️ GPHN đã xác thực · 💰 Tạm giữ an toàn · ⏱️ Khiếu nại 24 giờ</p>
+      </div>
+      <div class="tabbar">
+        <a href="#" class="active"><span class="ti">🏠</span>Trang chủ</a>
+        <a href="#"><span class="ti">🩺</span>Dịch vụ</a>
+        <a href="#"><span class="ti">📋</span>Đơn của tôi</a>
+        <a href="#"><span class="ti">💬</span>Tin nhắn<span class="bdg">1</span></a>
+        <a href="#"><span class="ti">👤</span>Tài khoản</a>
+      </div>
+    </div>
+    <div class="frame-cap">APP-P1 · Trang chủ</div>
+    <p class="frame-sub">Thu gọn từ P1 web — bento rút thành lưới 2 cột</p>
+  </div>
+
+  <!-- APP-P2 Services -->
+  <div>
+    <div class="phone">
+      <div class="app-top">
+        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <div class="nav-right" style="margin-left:auto"><button class="bell">🔔<span class="dot">2</span></button><span class="avatar">AN</span></div>
+      </div>
+      <div class="pbody">
+        <b style="color:var(--navy);font-size:18px">Dịch vụ</b>
+        <div class="mini-search" style="margin-top:11px">🔍 Tìm dịch vụ…</div>
+        <div style="display:flex;gap:8px;margin-bottom:13px;overflow:hidden">
+          <span class="chip">Thủ thuật · Cấp 2</span><span class="chip grey">Cơ bản</span><span class="chip grey">Gói theo ca</span>
+        </div>
+        <div class="acard" style="display:flex;gap:11px;align-items:center"><span style="font-size:26px">🩹</span><div style="flex:1"><h4>Thay băng &amp; chăm sóc vết thương</h4><p style="font-size:13px;color:var(--slate)">Cần y lệnh · 45–60 phút</p></div><b style="color:var(--navy)">500.000đ</b></div>
+        <div class="acard" style="display:flex;gap:11px;align-items:center"><span style="font-size:26px">💉</span><div style="flex:1"><h4>Tiêm dưới da / tiêm bắp</h4><p style="font-size:13px;color:var(--slate)">Cần y lệnh</p></div><b style="color:var(--navy)">150.000đ</b></div>
+        <div class="acard" style="display:flex;gap:11px;align-items:center"><span style="font-size:26px">🧴</span><div style="flex:1"><h4>Truyền dịch duy trì</h4><p style="font-size:13px;color:var(--slate)">Theo y lệnh</p></div><b style="color:var(--navy)">350.000đ</b></div>
+        <div class="acard" style="display:flex;gap:11px;align-items:center"><span style="font-size:26px">✂️</span><div style="flex:1"><h4>Cắt chỉ vết mổ</h4><p style="font-size:13px;color:var(--slate)">Kèm vệ sinh vết mổ</p></div><b style="color:var(--navy)">200.000đ</b></div>
+        <p style="font-size:12.5px;color:var(--muted);text-align:center">Dịch vụ Nhóm 3 (cấm) không hiển thị trong app.</p>
+      </div>
+      <div class="tabbar">
+        <a href="#"><span class="ti">🏠</span>Trang chủ</a>
+        <a href="#" class="active"><span class="ti">🩺</span>Dịch vụ</a>
+        <a href="#"><span class="ti">📋</span>Đơn của tôi</a>
+        <a href="#"><span class="ti">💬</span>Tin nhắn<span class="bdg">1</span></a>
+        <a href="#"><span class="ti">👤</span>Tài khoản</a>
+      </div>
+    </div>
+    <div class="frame-cap">APP-P2 · Danh mục dịch vụ</div>
+    <p class="frame-sub">Chạm vào dịch vụ → chi tiết (P2 web) → đặt lịch (P5)</p>
+  </div>
+
+  <!-- APP-P3 My bookings -->
+  <div>
+    <div class="phone">
+      <div class="app-top">
+        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <div class="nav-right" style="margin-left:auto"><button class="bell">🔔<span class="dot">2</span></button><span class="avatar">AN</span></div>
+      </div>
+      <div class="pbody">
+        <b style="color:var(--navy);font-size:18px">Đơn của tôi</b>
+        <div style="display:flex;gap:8px;margin:11px 0 13px;overflow:hidden">
+          <span class="chip">Sắp tới</span><span class="chip grey">Đang diễn ra</span><span class="chip grey">Đã xong</span><span class="chip grey">Đã hủy</span>
+        </div>
+        <div class="acard">
+          <div style="display:flex;justify-content:space-between"><h4>HC-2026-1050 · Ca đêm</h4><span class="chip">Sắp diễn ra</span></div>
+          <p style="font-size:13.5px;color:var(--slate)">ĐD. Trần Thị Mai · Tối nay 20:00 – 06:00<br>Đã tạm giữ 580.000đ</p>
+        </div>
+        <div class="acard" style="border-color:#BFE8DC">
+          <div style="display:flex;justify-content:space-between"><h4>HC-2026-1042 · Thay băng</h4><span class="chip teal">Đang diễn ra</span></div>
+          <p style="font-size:13.5px;color:var(--slate)">ĐD. Trần Thị Mai · Đã thực hiện 03:24 / 08:00</p>
+          <button class="btn btn-primary btn-sm" type="button" style="margin-top:8px">Vào ca trực tiếp →</button>
+        </div>
+        <div class="acard">
+          <div style="display:flex;justify-content:space-between"><h4>HC-2026-1057 · Ca 8 giờ</h4><span class="chip grey">Đã xong</span></div>
+          <p style="font-size:13.5px;color:var(--slate)">ĐD. Trần Thị Mai · Hôm qua · Tiền mặt</p>
+          <button class="btn btn-secondary btn-sm" type="button" style="margin-top:8px">Đánh giá ca này</button>
+        </div>
+      </div>
+      <div class="tabbar">
+        <a href="#"><span class="ti">🏠</span>Trang chủ</a>
+        <a href="#"><span class="ti">🩺</span>Dịch vụ</a>
+        <a href="#" class="active"><span class="ti">📋</span>Đơn của tôi</a>
+        <a href="#"><span class="ti">💬</span>Tin nhắn<span class="bdg">1</span></a>
+        <a href="#"><span class="ti">👤</span>Tài khoản</a>
+      </div>
+    </div>
+    <div class="frame-cap">APP-P3 · Đơn của tôi</div>
+    <p class="frame-sub">Chip 3 trục rút gọn trên mobile — đầy đủ ở chi tiết đơn</p>
+  </div>
+
+  <!-- APP-P4 Chat -->
+  <div>
+    <div class="phone">
+      <div class="app-top">
+        <span style="font-size:19px">‹</span><span class="avatar">MT</span>
+        <div style="flex:1"><b style="color:var(--navy);font-size:15.5px;display:block;line-height:1.2">ĐD. Trần Thị Mai</b><span style="font-size:12px;color:var(--teal);font-weight:600">Đang hoạt động · Đơn HC-2026-1050</span></div>
+        <button class="bell" aria-label="Gọi">📞</button>
+      </div>
+      <div class="pbody">
+        <div class="sys-note">🔒 Liên lạc qua ứng dụng — số điện thoại hai phía được che. Hệ thống tự ẩn dãy số trông giống SĐT trong tin nhắn.</div>
+        <div class="bub them">Chào anh An, tối nay 20:00 em tới thay băng và trực đêm cho bà. Anh chuẩn bị giúp em y lệnh bản gốc nhé.<small>14:02</small></div>
+        <div class="bub me">Ok em, y lệnh anh để sẵn ở bàn. Mẹ anh vừa ngủ trưa dậy.<small>14:05</small></div>
+        <div class="bub them">Dạ, em sẽ qua sớm 10 phút để nhận định trước ca.<small>14:06</small></div>
+        <div class="bub me">Cảm ơn em 👍<small>14:06</small></div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <input class="input" placeholder="Nhắn tin…" style="flex:1;height:48px">
+          <button class="btn btn-primary" type="button" style="height:48px;padding:0 18px">Gửi</button>
+        </div>
+        <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:9px">Chat chỉ mở khi có đơn đã xác nhận · Lịch sử chat được giữ làm bằng chứng khi khiếu nại</p>
+      </div>
+      <div class="tabbar">
+        <a href="#"><span class="ti">🏠</span>Trang chủ</a>
+        <a href="#"><span class="ti">🩺</span>Dịch vụ</a>
+        <a href="#"><span class="ti">📋</span>Đơn của tôi</a>
+        <a href="#" class="active"><span class="ti">💬</span>Tin nhắn<span class="bdg">1</span></a>
+        <a href="#"><span class="ti">👤</span>Tài khoản</a>
+      </div>
+    </div>
+    <div class="frame-cap">APP-P4 · Tin nhắn (Chat trong ca)</div>
+    <p class="frame-sub">Header chat thay top strip khi vào hội thoại</p>
+  </div>
+
+  <!-- APP-P5 Account -->
+  <div>
+    <div class="phone">
+      <div class="app-top">
+        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <div class="nav-right" style="margin-left:auto"><button class="bell">🔔<span class="dot">2</span></button><span class="avatar">AN</span></div>
+      </div>
+      <div class="pbody">
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px">
+          <span class="avatar lg">AN</span>
+          <div><b style="color:var(--navy);font-size:17px">Nguyễn Văn An</b><div style="font-size:13.5px;color:var(--slate)">0905 ••• 123 · Hải Châu, Đà Nẵng</div></div>
+        </div>
+        <div class="card menu-list" style="box-shadow:none">
+          <a href="#"><span class="mi">👤</span><span>Thông tin cá nhân</span><span class="chev">›</span></a>
+          <a href="#"><span class="mi">🩺</span><span>Hồ sơ người được chăm sóc<span class="sub">Bà Nguyễn Thị Hoa · Ông Nguyễn Văn Đức</span></span><span class="chev">›</span></a>
+          <a href="#"><span class="mi">💳</span><span>Thanh toán &amp; voucher<span class="sub">1 voucher 50.000đ khả dụng</span></span><span class="chev">›</span></a>
+          <a href="#"><span class="mi">🔔</span><span>Thông báo</span><span class="chev">›</span></a>
+          <a href="#"><span class="mi">🔒</span><span>Quyền riêng tư &amp; dữ liệu</span><span class="chev">›</span></a>
+          <a href="#"><span class="mi">💬</span><span>Hỗ trợ</span><span class="chev">›</span></a>
+          <a href="#" class="danger"><span class="mi">↩️</span><span>Đăng xuất</span></a>
+        </div>
+      </div>
+      <div class="tabbar">
+        <a href="#"><span class="ti">🏠</span>Trang chủ</a>
+        <a href="#"><span class="ti">🩺</span>Dịch vụ</a>
+        <a href="#"><span class="ti">📋</span>Đơn của tôi</a>
+        <a href="#"><span class="ti">💬</span>Tin nhắn<span class="bdg">1</span></a>
+        <a href="#" class="active"><span class="ti">👤</span>Tài khoản</a>
+      </div>
+    </div>
+    <div class="frame-cap">APP-P5 · Tài khoản</div>
+    <p class="frame-sub">Cùng danh mục với menu avatar trên web (NAV-0)</p>
+  </div>
+
+</div>
+</div>
+
+<!-- ================= APP NURSE ================= -->
+<div class="meta-bar" id="app-n"><span class="code">APP-N</span><h2>Nurse App — Ứng dụng điều dưỡng</h2><span>Bottom nav khóa: Trang chủ · Việc làm · Ca của tôi · Ví · Tài khoản · elder-friendly</span></div>
+<div class="screen" style="background:transparent;border:0;box-shadow:none">
+<div class="phones">
+
+  <!-- APP-N1 Home -->
+  <div>
+    <div class="phone elder">
+      <div class="app-top">
+        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <div class="nav-right" style="margin-left:auto"><button class="bell">🔔<span class="dot">3</span></button><span class="avatar">MT</span></div>
+      </div>
+      <div class="pbody">
+        <b style="color:var(--navy);font-size:19px">Chào chị Mai 🌿</b>
+        <div class="acard" style="display:flex;gap:12px;align-items:center;margin-top:12px">
+          <div style="flex:1"><b style="color:var(--navy)">Sẵn sàng nhận ca</b><div style="font-size:14.5px;color:var(--slate)">Radar đang bật trong bán kính 5 km</div></div>
+          <button class="toggle on" type="button" style="width:62px;height:36px" aria-label="Sẵn sàng nhận ca"></button>
+        </div>
+        <div class="tile2">
+          <div class="t"><span style="font-size:13px;color:var(--muted);font-weight:700">THU NHẬP HÔM NAY</span><b style="font-size:19px">425.000đ</b><span>Đã quyết toán 1 ca</span></div>
+          <div class="t"><span style="font-size:13px;color:var(--muted);font-weight:700">ĐIỂM UY TÍN</span><b style="font-size:19px">92/100</b><span>Đánh giá 4.9★</span></div>
+        </div>
+        <b style="color:var(--navy);display:block;margin:16px 0 10px">Ca sắp tới</b>
+        <div class="acard" style="border-color:#B9D2EE">
+          <h4>🌙 Ca đêm — HC-2026-1050</h4>
+          <p style="color:var(--slate);font-size:15px">Tối nay 20:00 – 06:00 · Nhà bà Hoa, Hải Châu (1,2 km)<br>Thu về dự kiến: <b style="color:var(--navy)">493.000đ</b> (sau hoa hồng 15%)</p>
+          <button class="btn btn-primary btn-block" type="button" style="height:56px;margin-top:10px">Mở chi tiết ca</button>
+        </div>
+        <button class="btn btn-secondary btn-block" type="button" style="height:56px">📡 Xem 3 việc mới gần bạn</button>
+      </div>
+      <div class="tabbar">
+        <a href="#" class="active"><span class="ti">🏠</span>Trang chủ</a>
+        <a href="#"><span class="ti">💼</span>Việc làm<span class="bdg">3</span></a>
+        <a href="#"><span class="ti">🗓️</span>Ca của tôi</a>
+        <a href="#"><span class="ti">👛</span>Ví</a>
+        <a href="#"><span class="ti">👤</span>Tài khoản</a>
+      </div>
+    </div>
+    <div class="frame-cap">APP-N1 · Trang chủ điều dưỡng</div>
+    <p class="frame-sub">Công tắc nhận ca là phần tử quan trọng nhất — luôn ở đầu màn</p>
+  </div>
+
+  <!-- APP-N2 Jobs -->
+  <div>
+    <div class="phone elder">
+      <div class="app-top">
+        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <div class="nav-right" style="margin-left:auto"><button class="bell">🔔<span class="dot">3</span></button><span class="avatar">MT</span></div>
+      </div>
+      <div class="pbody">
+        <b style="color:var(--navy);font-size:19px">Việc làm gần bạn</b>
+        <p style="color:var(--slate);font-size:15px">Trong bán kính 5 km · Chỉ hiện ca thuộc Cấp 2 của chị</p>
+        <div class="acard" style="border-color:#F0C36D;background:#FFFBEB;margin-top:12px">
+          <span class="chip amber">⭐ Khách chọn trực tiếp bạn</span>
+          <h4 style="margin-top:8px">Thay băng vết mổ — 500.000đ</h4>
+          <p style="color:var(--slate);font-size:15px">14:30 hôm nay · Hải Châu · Cách 1,2 km · Thu về 425.000đ</p>
+          <p style="color:var(--red);font-weight:700;font-size:15px">⏱ Còn 14:20 để phản hồi</p>
+          <button class="btn btn-primary btn-block" type="button" style="height:58px;margin-top:8px">Nhận ca này</button>
+        </div>
+        <div class="acard">
+          <span class="chip">📡 Radar</span>
+          <h4 style="margin-top:8px">Tiêm bắp theo y lệnh — 150.000đ</h4>
+          <p style="color:var(--slate);font-size:15px">16:00 hôm nay · Thanh Khê · Cách 2,8 km · Thu về 127.500đ</p>
+          <button class="btn btn-secondary btn-block" type="button" style="height:58px;margin-top:8px">Xem chi tiết</button>
+        </div>
+        <div class="acard">
+          <span class="chip">📡 Radar</span>
+          <h4 style="margin-top:8px">Ca đêm chăm sóc — 580.000đ</h4>
+          <p style="color:var(--slate);font-size:15px">20:00 tối mai · Hải Châu · Đã gồm phụ phí đêm · Thu về 493.000đ</p>
+          <button class="btn btn-secondary btn-block" type="button" style="height:58px;margin-top:8px">Xem chi tiết</button>
+        </div>
+      </div>
+      <div class="tabbar">
+        <a href="#"><span class="ti">🏠</span>Trang chủ</a>
+        <a href="#" class="active"><span class="ti">💼</span>Việc làm<span class="bdg">3</span></a>
+        <a href="#"><span class="ti">🗓️</span>Ca của tôi</a>
+        <a href="#"><span class="ti">👛</span>Ví</a>
+        <a href="#"><span class="ti">👤</span>Tài khoản</a>
+      </div>
+    </div>
+    <div class="frame-cap">APP-N2 · Việc làm (Job Board)</div>
+    <p class="frame-sub">Giá hiển thị kèm số tiền thực nhận sau hoa hồng 15%</p>
+  </div>
+
+  <!-- APP-N3 My shifts -->
+  <div>
+    <div class="phone elder">
+      <div class="app-top">
+        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <div class="nav-right" style="margin-left:auto"><button class="bell">🔔<span class="dot">3</span></button><span class="avatar">MT</span></div>
+      </div>
+      <div class="pbody">
+        <b style="color:var(--navy);font-size:19px">Ca của tôi</b>
+        <div style="display:flex;gap:8px;margin:11px 0 13px"><span class="chip">Sắp tới</span><span class="chip grey">Đã xong</span></div>
+        <div class="acard" style="border-color:#B9D2EE">
+          <h4>🌙 HC-2026-1050 · Ca đêm</h4>
+          <p style="color:var(--slate);font-size:15px">Tối nay 20:00 – 06:00 · Nhà bà Hoa, Hải Châu</p>
+          <button class="btn btn-primary btn-block" type="button" style="height:58px;margin-top:9px">Mở màn hình ca</button>
+          <p style="font-size:13.5px;color:var(--muted);text-align:center;margin-top:7px">Nút Check-in (GPS + selfie) nằm trong màn hình ca, mở khi chị tới nơi</p>
+        </div>
+        <div class="acard">
+          <div style="display:flex;justify-content:space-between;gap:8px"><h4>HC-2026-1042 · Thay băng</h4><span class="chip teal">+425.000đ đang chờ 24h</span></div>
+          <p style="color:var(--slate);font-size:15px">Hôm nay 14:30 · Đã check-out 15:20</p>
+        </div>
+        <div class="acard">
+          <div style="display:flex;justify-content:space-between;gap:8px"><h4>HC-2026-1057 · Ca 8 giờ (tiền mặt)</h4><span class="chip red">Chờ nộp hoa hồng</span></div>
+          <p style="color:var(--slate);font-size:15px">Hôm qua · Cần nộp 75.000đ — xem ở tab Ví</p>
+        </div>
+      </div>
+      <div class="tabbar">
+        <a href="#"><span class="ti">🏠</span>Trang chủ</a>
+        <a href="#"><span class="ti">💼</span>Việc làm<span class="bdg">3</span></a>
+        <a href="#" class="active"><span class="ti">🗓️</span>Ca của tôi</a>
+        <a href="#"><span class="ti">👛</span>Ví</a>
+        <a href="#"><span class="ti">👤</span>Tài khoản</a>
+      </div>
+    </div>
+    <div class="frame-cap">APP-N3 · Ca của tôi</div>
+    <p class="frame-sub">Trạng thái tiền đi cùng từng ca để điều dưỡng tự đối chiếu</p>
+  </div>
+
+  <!-- APP-N4 Wallet -->
+  <div>
+    <div class="phone elder">
+      <div class="app-top">
+        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <div class="nav-right" style="margin-left:auto"><button class="bell">🔔<span class="dot">3</span></button><span class="avatar">MT</span></div>
+      </div>
+      <div class="pbody">
+        <b style="color:var(--navy);font-size:19px">Ví của tôi</b>
+        <div class="acard" style="margin-top:12px;background:linear-gradient(120deg,#EFF6FF,#fff)">
+          <span style="font-size:13.5px;color:var(--muted);font-weight:700">SỐ DƯ KHẢ DỤNG</span>
+          <div style="font-size:27px;font-weight:900;color:var(--navy)">3.850.000đ</div>
+          <button class="btn btn-primary" type="button" style="height:54px;margin-top:8px">Rút về ngân hàng •••• 6899</button>
+        </div>
+        <div class="acard" style="display:flex;justify-content:space-between;align-items:center">
+          <div><b style="color:var(--navy)">Đang tạm giữ</b><div style="font-size:14.5px;color:var(--slate)">Ca HC-2026-1042 · quyết toán sau 24h</div></div>
+          <b style="color:var(--navy)">425.000đ</b>
+        </div>
+        <div class="acard" style="display:flex;justify-content:space-between;align-items:center">
+          <div><b style="color:var(--navy)">Ví ký quỹ</b><div style="font-size:14.5px;color:var(--slate)">Chỉ dùng trừ phạt vi phạm cam kết (SLA)</div></div>
+          <b style="color:var(--navy)">300.000đ</b>
+        </div>
+        <div class="acard" style="border-color:#F3C2C2;background:#FFF9F9">
+          <b style="color:var(--red)">⚠️ 1 ca chờ nộp hoa hồng</b>
+          <p style="font-size:15px;color:var(--slate)">Ca tiền mặt HC-2026-1057 · 75.000đ · Còn 20 giờ — quá hạn sẽ tạm khóa nhận ca</p>
+          <button class="btn btn-danger btn-block" type="button" style="height:56px;margin-top:9px">Nộp hoa hồng ngay</button>
+        </div>
+      </div>
+      <div class="tabbar">
+        <a href="#"><span class="ti">🏠</span>Trang chủ</a>
+        <a href="#"><span class="ti">💼</span>Việc làm<span class="bdg">3</span></a>
+        <a href="#"><span class="ti">🗓️</span>Ca của tôi</a>
+        <a href="#" class="active"><span class="ti">👛</span>Ví</a>
+        <a href="#"><span class="ti">👤</span>Tài khoản</a>
+      </div>
+    </div>
+    <div class="frame-cap">APP-N4 · Ví điều dưỡng</div>
+    <p class="frame-sub">3 ngăn tiền tách bạch ngay trên mobile — khớp ví web (N9)</p>
+  </div>
+
+  <!-- APP-N5 Account -->
+  <div>
+    <div class="phone elder">
+      <div class="app-top">
+        <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+        <div class="nav-right" style="margin-left:auto"><button class="bell">🔔<span class="dot">3</span></button><span class="avatar">MT</span></div>
+      </div>
+      <div class="pbody">
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:6px">
+          <span class="avatar lg">MT</span>
+          <div><b style="color:var(--navy);font-size:18px">Trần Thị Mai</b><div style="font-size:14px;color:var(--slate)">0905 ••• 123 · Hải Châu, Đà Nẵng</div></div>
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px">
+          <span class="chip">Cấp 2</span><span class="chip teal">TrustScore 92/100</span><span class="chip amber">★ 4.9</span><span class="chip teal">● Sẵn sàng nhận ca</span>
+        </div>
+        <div class="card menu-list" style="box-shadow:none;font-size:16.5px">
+          <a href="#"><span class="mi">👤</span><span>Thông tin cá nhân</span><span class="chev">›</span></a>
+          <a href="#"><span class="mi">📜</span><span>Giấy tờ &amp; GPHN<span class="sub">Hết hạn 12/04/2027 — còn 45 ngày</span></span><span class="chev">›</span></a>
+          <a href="#"><span class="mi">🗓️</span><span>Lịch rảnh &amp; ngày nghỉ</span><span class="chev">›</span></a>
+          <a href="#"><span class="mi">🏦</span><span>Tài khoản ngân hàng<span class="sub">Vietcombank •••• 6899</span></span><span class="chev">›</span></a>
+          <a href="#"><span class="mi">🔠</span><span>Cỡ chữ lớn</span><button class="toggle on" type="button" aria-label="Cỡ chữ lớn"></button></a>
+          <a href="#"><span class="mi">🔒</span><span>Quyền riêng tư &amp; dữ liệu</span><span class="chev">›</span></a>
+          <a href="#"><span class="mi">💬</span><span>Hỗ trợ</span><span class="chev">›</span></a>
+          <a href="#" class="danger"><span class="mi">↩️</span><span>Đăng xuất</span></a>
+        </div>
+      </div>
+      <div class="tabbar">
+        <a href="#"><span class="ti">🏠</span>Trang chủ</a>
+        <a href="#"><span class="ti">💼</span>Việc làm<span class="bdg">3</span></a>
+        <a href="#"><span class="ti">🗓️</span>Ca của tôi</a>
+        <a href="#"><span class="ti">👛</span>Ví</a>
+        <a href="#" class="active"><span class="ti">👤</span>Tài khoản</a>
+      </div>
+    </div>
+    <div class="frame-cap">APP-N5 · Tài khoản điều dưỡng</div>
+    <p class="frame-sub">Thu gọn từ SH6 — giữ nguyên thứ tự mục đã khóa</p>
+  </div>
+
+</div>
+</div>
+
+<!-- ================= APP FLOW: N5 → N6 → N7 → N8 ================= -->
+<div class="meta-bar" id="app-flow"><span class="code">APP-FLOW</span><h2>Luồng trong ca trên Nurse App — HC-2026-1042</h2><span>Một ca xuyên suốt 4 chặng: xem chi tiết → check-in → trong ca → check-out · elder-friendly · màn hình luồng dùng header riêng, không bottom nav</span></div>
+<div class="screen" style="background:transparent;border:0;box-shadow:none">
+<div class="phones">
+
+  <!-- APP-N5 Shift detail preview -->
+  <div>
+    <div class="phone elder">
+      <div class="app-top">
+        <span style="font-size:20px">‹</span><b style="color:var(--navy);font-size:17px;flex:1">Chi tiết ca HC-2026-1042</b>
+        <span class="chip">Đã xác nhận</span>
+      </div>
+      <div class="pbody">
+        <div class="acard">
+          <h4>🩹 Thay băng &amp; chăm sóc vết thương</h4>
+          <p style="color:var(--slate);font-size:15.5px">Hôm nay 14:30 · Khoảng 45–60 phút<br>Giá ca: <b style="color:var(--navy)">500.000đ</b> · Chị thực nhận <b style="color:var(--navy)">425.000đ</b></p>
+        </div>
+        <div class="acard">
+          <b style="color:var(--navy)">Người bệnh</b>
+          <p style="color:var(--slate);font-size:15.5px">Bà Nguyễn Thị Hoa · 78 tuổi · Hỗ trợ di chuyển<br>📍 25 Quang Trung, Hải Châu 1, Đà Nẵng (cách 1,2 km)<br>Người nhà: anh Nguyễn Văn An · 0905 ••• 123</p>
+          <div class="alert" style="background:#FFF7E8;color:#713F12;margin:10px 0 0"><span>⚠️</span><span><b>Lưu ý hồ sơ:</b> Dị ứng kháng sinh nhóm Penicillin — đọc kỹ trước khi dùng thuốc sát khuẩn theo y lệnh.</span></div>
+          <button class="btn btn-secondary btn-block" type="button" style="height:54px;margin-top:11px">🧭 Chỉ đường tới điểm ca</button>
+        </div>
+        <div class="acard" style="display:flex;gap:12px;align-items:center">
+          <span style="font-size:30px">📄</span>
+          <div style="flex:1"><b style="color:var(--navy)">Y lệnh của bác sĩ</b><div style="font-size:14.5px;color:var(--slate)">Cấp ngày 27/10/2026 · BS. Lê Hoàng Long<br>Chị sẽ đối chiếu bản gốc khi tới nơi</div></div>
+          <button class="btn btn-secondary btn-sm" type="button">Xem y lệnh</button>
+        </div>
+        <b style="color:var(--navy);display:block;margin:4px 0 9px">Chị cần chuẩn bị</b>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:15.5px;color:var(--slate)">
+          <span>✓ Bộ thay băng vô khuẩn cá nhân</span>
+          <span>✓ Máy đo huyết áp &amp; SpO2</span>
+          <span>✓ Găng tay, khẩu trang dự phòng</span>
+        </div>
+        <button class="btn btn-primary btn-block" type="button" style="height:60px;margin-top:16px">Bắt đầu check-in →</button>
+        <p style="font-size:13.5px;color:var(--muted);text-align:center;margin-top:8px">Check-in mở khi chị ở trong bán kính 200 m quanh điểm ca</p>
+      </div>
+      <div class="tabbar">
+        <a href="#"><span class="ti">🏠</span>Trang chủ</a>
+        <a href="#"><span class="ti">💼</span>Việc làm<span class="bdg">3</span></a>
+        <a href="#" class="active"><span class="ti">🗓️</span>Ca của tôi</a>
+        <a href="#"><span class="ti">👛</span>Ví</a>
+        <a href="#"><span class="ti">👤</span>Tài khoản</a>
+      </div>
+    </div>
+    <div class="frame-cap">APP-N5 · Chi tiết ca trước khi check-in</div>
+    <p class="frame-sub">Xem trước toàn bộ: người bệnh, địa chỉ, y lệnh, lưu ý dị ứng, số tiền thực nhận</p>
+  </div>
+
+  <!-- APP-N6 step 1 GPS -->
+  <div>
+    <div class="phone elder">
+      <div class="app-top">
+        <span style="font-size:19px">✕</span><b style="color:var(--navy);font-size:17px;flex:1">Check-in · Bước 1/3</b><span class="chip grey">Vị trí GPS</span>
+      </div>
+      <div class="pbody">
+        <div class="map-ph" style="height:230px">
+          <span class="gps-chip"><span class="gps-dot"></span> Đang định vị…</span>
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:180px;height:180px;border:2.5px dashed var(--blue);border-radius:50%;background:rgba(37,99,235,.07)"></div>
+          <div class="pin" style="position:absolute">📍</div>
+          <div class="pin-label">Điểm ca · Nhà bà Hoa</div>
+        </div>
+        <div class="acard" style="margin-top:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <b style="color:var(--navy)">Khoảng cách tới điểm ca</b><b style="color:var(--teal);font-size:21px">42 m</b>
+          </div>
+          <p style="color:var(--teal);font-weight:700;font-size:15.5px;margin-top:5px">✓ Trong bán kính cho phép (≤ 200 m)</p>
+          <div style="display:flex;flex-direction:column;gap:7px;font-size:15.5px;color:var(--slate);margin-top:10px">
+            <span>✓ GPS đang bật, độ chính xác 8 m</span>
+            <span>✓ Không phát hiện vị trí giả (mock location)</span>
+            <span>✓ Đúng địa chỉ đơn HC-2026-1042</span>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" type="button" style="height:60px">Tiếp tục: Chụp ảnh xác nhận →</button>
+        <p style="font-size:13.5px;color:var(--muted);text-align:center;margin-top:8px">Ngoài bán kính 200 m, nút tiếp tục sẽ bị khóa kèm hướng dẫn di chuyển lại gần điểm ca</p>
+      </div>
+    </div>
+    <div class="frame-cap">APP-N6a · Check-in — Kiểm tra GPS</div>
+    <p class="frame-sub">Vòng tròn 200 m quanh điểm ca · chống mock location</p>
+  </div>
+
+  <!-- APP-N6 step 2 Selfie -->
+  <div>
+    <div class="phone elder">
+      <div class="app-top">
+        <span style="font-size:19px">✕</span><b style="color:var(--navy);font-size:17px;flex:1">Check-in · Bước 2/3</b><span class="chip grey">Ảnh trực tiếp</span>
+      </div>
+      <div class="pbody">
+        <div style="background:#0F2540;border-radius:18px;height:300px;position:relative;display:grid;place-items:center;overflow:hidden">
+          <div style="width:170px;height:220px;border:3px dashed rgba(255,255,255,.75);border-radius:50%"></div>
+          <span style="position:absolute;top:14px;left:0;right:0;text-align:center;color:#CFE2FF;font-size:14px">Đưa khuôn mặt vào khung oval</span>
+          <span style="position:absolute;bottom:12px;left:12px;background:rgba(0,0,0,.45);color:#fff;font-size:12px;padding:5px 10px;border-radius:8px">⏱ 14:30 · 16.108, 108.220 (giờ máy chủ &amp; tọa độ sẽ đóng dấu lên ảnh)</span>
+        </div>
+        <div class="alert" style="background:#EAF2FE;color:#1E3A5F;margin:14px 0"><span>🤳</span><span>Chụp <b>trực tiếp bằng camera</b> trong ứng dụng — không chọn ảnh từ thư viện, để bảo đảm chị đang có mặt tại điểm ca.</span></div>
+        <button class="btn btn-primary btn-block" type="button" style="height:60px">📷 Chụp ảnh</button>
+        <button class="btn btn-secondary btn-block" type="button" style="height:54px;margin-top:9px">← Quay lại bước GPS</button>
+      </div>
+    </div>
+    <div class="frame-cap">APP-N6b · Check-in — Selfie trực tiếp</div>
+    <p class="frame-sub">Ảnh đóng dấu giờ máy chủ + tọa độ làm minh chứng check-in</p>
+  </div>
+
+  <!-- APP-N6 step 3 Success -->
+  <div>
+    <div class="phone elder">
+      <div class="app-top">
+        <span style="font-size:19px">✕</span><b style="color:var(--navy);font-size:17px;flex:1">Check-in · Bước 3/3</b><span class="chip teal">Hoàn tất</span>
+      </div>
+      <div class="pbody" style="text-align:center;padding-top:28px">
+        <div style="width:84px;height:84px;margin:0 auto;border-radius:50%;background:var(--green-bg);display:grid;place-items:center;font-size:40px;color:var(--teal)">✓</div>
+        <h3 style="color:var(--navy);font-size:21px;margin-top:15px">Check-in thành công</h3>
+        <p style="color:var(--slate);font-size:15.5px">Lúc <b style="color:var(--navy)">14:30</b> · Ca HC-2026-1042 bắt đầu được tính giờ</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:15px 0">
+          <span class="chip teal">GPS 42 m ✓</span><span class="chip teal">Selfie đã lưu ✓</span><span class="chip teal">Người nhà đã nhận thông báo ✓</span>
+        </div>
+        <div class="acard" style="text-align:left">
+          <b style="color:var(--navy)">Việc đầu tiên trong ca</b>
+          <p style="color:var(--slate);font-size:15.5px">Đối chiếu y lệnh bản gốc với người nhà, rồi ghi nhận sinh tồn đầu ca trong màn hình Trong ca.</p>
+        </div>
+        <button class="btn btn-primary btn-block" type="button" style="height:60px">Vào ca làm việc →</button>
+      </div>
+    </div>
+    <div class="frame-cap">APP-N6c · Check-in — Thành công</div>
+    <p class="frame-sub">Đủ 3 minh chứng: vị trí, ảnh trực tiếp, thời gian máy chủ</p>
+  </div>
+
+  <!-- APP-N7 In-shift -->
+  <div>
+    <div class="phone elder">
+      <div class="app-top">
+        <b style="color:var(--navy);font-size:17px;flex:1">Đang trong ca · HC-2026-1042</b>
+        <span class="chip red">● 00:35</span>
+      </div>
+      <div class="pbody">
+        <div class="acard" style="display:flex;gap:11px;align-items:center">
+          <span class="avatar lg">HO</span>
+          <div><b style="color:var(--navy)">Bà Nguyễn Thị Hoa</b><div style="font-size:14.5px;color:var(--slate)">Thay băng vết mổ · Check-in 14:30</div></div>
+        </div>
+        <b style="color:var(--navy);display:block;margin-bottom:9px">Việc chăm sóc trong ca</b>
+        <div style="display:flex;flex-direction:column;gap:9px;font-size:15.5px">
+          <div class="acard" style="margin:0;display:flex;gap:10px;align-items:center"><span style="color:var(--teal);font-weight:800">✓</span><span style="flex:1">Đối chiếu y lệnh bản gốc</span><span class="chip grey">14:32</span></div>
+          <div class="acard" style="margin:0;display:flex;gap:10px;align-items:center"><span style="color:var(--teal);font-weight:800">✓</span><span style="flex:1">Đo sinh tồn đầu ca — HA 128/82 · SpO2 98% · 36,7°C</span><span class="chip grey">14:35</span></div>
+          <div class="acard" style="margin:0;display:flex;gap:10px;align-items:center"><span style="color:var(--teal);font-weight:800">✓</span><span style="flex:1">Thay băng lần 1 + chụp ảnh tiến triển</span><span class="chip grey">14:50</span></div>
+          <div class="acard" style="margin:0;display:flex;gap:10px;align-items:center"><span style="width:19px;height:19px;border:2px solid var(--line);border-radius:6px;display:inline-block"></span><span style="flex:1">Kiểm tra lại vết thương &amp; dặn dò trước khi kết thúc</span></div>
+        </div>
+        <div style="display:flex;gap:9px;margin-top:13px">
+          <button class="btn btn-secondary" type="button" style="flex:1;height:54px">＋ Ghi sinh hiệu</button>
+          <button class="btn btn-secondary" type="button" style="flex:1;height:54px">＋ Ghi chú ca</button>
+        </div>
+        <div style="display:flex;gap:9px;margin-top:9px">
+          <button class="btn btn-primary" type="button" style="flex:1;height:54px">💬 Chat người nhà</button>
+          <button class="btn btn-secondary" type="button" style="flex:1;height:54px">📞 Gọi</button>
+        </div>
+        <button class="btn btn-danger btn-block" type="button" style="height:58px;margin-top:13px">🚨 SOS — Gọi 115 &amp; báo người nhà, Admin</button>
+        <p style="text-align:center;margin-top:10px"><a href="#" style="font-weight:600;font-size:15px">Báo cáo tình trạng khác khai báo</a></p>
+      </div>
+    </div>
+    <div class="frame-cap">APP-N7 · Trong ca thực hiện quy trình</div>
+    <p class="frame-sub">Checklist có dấu thời gian — đồng bộ với màn hình ca phía khách (P9)</p>
+  </div>
+
+  <!-- APP-N8 Check-out -->
+  <div>
+    <div class="phone elder">
+      <div class="app-top">
+        <span style="font-size:19px">✕</span><b style="color:var(--navy);font-size:17px;flex:1">Check-out &amp; báo cáo ca</b><span class="chip grey">HC-2026-1042</span>
+      </div>
+      <div class="pbody">
+        <div class="acard" style="display:flex;justify-content:space-around;text-align:center">
+          <div><span style="font-size:13px;color:var(--muted);font-weight:700">CHECK-IN</span><b style="display:block;color:var(--navy);font-size:18px">14:30</b></div>
+          <div><span style="font-size:13px;color:var(--muted);font-weight:700">CHECK-OUT</span><b style="display:block;color:var(--navy);font-size:18px">15:20</b></div>
+          <div><span style="font-size:13px;color:var(--muted);font-weight:700">THỜI LƯỢNG</span><b style="display:block;color:var(--navy);font-size:18px">50 phút</b></div>
+        </div>
+        <div class="field"><label>Hoạt động đã thực hiện</label>
+          <div class="tag-chips"><button type="button" class="selected">Đối chiếu y lệnh</button><button type="button" class="selected">Đo sinh tồn</button><button type="button" class="selected">Thay băng</button><button type="button" class="selected">Dặn dò gia đình</button></div>
+        </div>
+        <div class="field"><label>Tình trạng người bệnh sau ca</label>
+          <textarea class="input" rows="3">Vết mổ khô, rìa vết thương hồng, không sưng đỏ hay rỉ dịch. Bệnh nhân tỉnh táo, đã hướng dẫn gia đình theo dõi nhiệt độ và liên hệ lại nếu sốt trên 38°C.</textarea>
+        </div>
+        <div class="field"><label>Ảnh sau ca (đính vào báo cáo)</label>
+          <div class="upload filled" style="padding:15px"><div class="uic">🖼️</div><h4>anh_vet_thuong_sau_ca.jpg</h4><span class="chip teal">Đã đính kèm</span></div>
+        </div>
+        <div class="acard" style="background:var(--green-bg);border-color:#BFE8DC;margin-top:4px">
+          <b style="color:#065F46">Quyết toán dự kiến</b>
+          <p style="font-size:15.5px;color:#065F46">Khách đã trả trước (hệ thống tạm giữ). Chị nhận <b>425.000đ</b> vào ví khả dụng sau 24 giờ nếu không có khiếu nại — hoặc sớm hơn khi khách xác nhận hài lòng.</p>
+          <p style="font-size:13.5px;color:#065F46;margin-top:6px">Nếu là ca tiền mặt: hệ thống tạo sẵn khoản nộp hoa hồng 15% trong mục Ví, hạn nộp 24 giờ.</p>
+        </div>
+        <button class="btn btn-primary btn-block" type="button" style="height:60px">Hoàn tất check-out ✓</button>
+      </div>
+    </div>
+    <div class="frame-cap">APP-N8 · Check-out &amp; Báo cáo kết thúc ca</div>
+    <p class="frame-sub">Báo cáo ca là căn cứ quyết toán và phân xử khiếu nại về sau</p>
+  </div>
+
+</div>
+</div>
+
+<div class="board-foot">
+  Chuẩn áp dụng: NAV-0 mobile (top strip + bottom nav 5 mục khóa) · M0 (Be Vietnam Pro, #2563EB) · Elder-friendly riêng Nurse App · Dữ liệu mẫu thống nhất với SH/P/N/A: An — bà Hoa (Đà Nẵng) · ĐD. Mai (Cấp 2, TrustScore 92/100, ví 3.850.000đ) · Đơn HC-2026-1042/1050/1057 · Nội dung theo SRS v2.0 Updated.
+</div>
+
+<script>
+document.querySelectorAll('.toggle').forEach(t=>t.addEventListener('click',e=>{e.preventDefault();t.classList.toggle('on')}));
+document.querySelectorAll('.tabbar').forEach(tb=>tb.querySelectorAll('a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();})));
+</script>
+</body>
+</html>
