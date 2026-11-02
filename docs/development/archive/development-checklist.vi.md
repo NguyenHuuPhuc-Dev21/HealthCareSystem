@@ -6,8 +6,8 @@
 
 ## 0. Chuẩn bị chung (làm một lần, trước Giai đoạn 0)
 
-- [ ] Điền tên thật vào bảng phân vai: FE-1 = ……… · FE-2 = ……… · BE-1 = ……… · BE-2 = ……… · BE-3 = ………
-- [ ] Cả 5 người đã đọc SRS v2.0 Updated (§4 FR, §5 cấu hình & SLA, §7 CSDL, §8 API)
+- [ ] Điền tên thật vào bảng phân vai: FE-1 = Phát · FE-2 = Phúc · BE-1 = ……… · BE-2 = ……… · BE-3 = ………
+- [x] Cả 5 người đã đọc SRS v2.0 Updated (§4 FR, §5 cấu hình & SLA, §7 CSDL, §8 API)
 - [ ] Thống nhất phân vai cố định: FE-1 = Patient Web + Admin Web · FE-2 = Nurse Web + Nurse App · BE-1 = nền tảng/định danh · BE-2 = đặt ca/ca trực · BE-3 = tiền/sau ca
 - [ ] Thống nhất: mọi số nghiệp vụ lấy từ `system_configs` (§5.1), không hardcode (hoa hồng 15%, ký quỹ 300.000đ, đêm +20%, Tết +300%, lễ +200%, nặng +15%, timeout 15 phút, quyết toán +24h, check-in ≤ 200 m, ICU 50.000đ, no-show 50.000đ)
 - [ ] Thống nhất: tiền chỉ đi qua sổ cái `wallet_transactions` (append-only, có `idempotency_key`); ký quỹ chỉ trừ phạt SLA, không thu hoa hồng
