@@ -11,6 +11,7 @@
     "start": "node dist/index.js",
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "vitest run test/unit",
+    "pretest": "npm run build --prefix ../../packages/shared",
     "test:integration": "vitest run test/integration",
     "db:migrate": "tsx src/scripts/migrate.ts"
   },

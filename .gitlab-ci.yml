@@ -1,0 +1,73 @@
+# =====================================================================
+# GitLab CI — HealthCareSystem (Phase 0 quality gate, owner: BE-3)
+# Mirrors .github/workflows/ci.yml: typecheck, migration + seed with
+# ON_ERROR_STOP, DB constraint tests, API unit + integration tests,
+# secret scanning.
+# =====================================================================
+
+stages:
+  - check
+  - test
+  - security
+
+# Run for merge requests, and for branch pushes that have no open MR
+# (avoids duplicate pipelines).
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
+default:
+  image: node:20
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm/
+  before_script:
+    - npm ci --cache .npm --prefer-offline || npm install --cache .npm
+    - npm run build --workspace=packages/shared
+
+typecheck:
+  stage: check
+  script:
+    # There is no root tsconfig.json, so each backend project is checked on its own.
+    - npx tsc --noEmit -p packages/shared
+    - npx tsc --noEmit -p services/api
+    - npx tsc --noEmit -p db/tests
+
+db-and-api-tests:
+  stage: test
+  services:
+    - name: postgres:16-alpine
+      alias: postgres
+  variables:
+    POSTGRES_DB: healthcare_test
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgrespassword
+    PGPASSWORD: postgrespassword
+    DATABASE_URL: postgresql://postgres:postgrespassword@postgres:5432/healthcare_test
+  script:
+    - apt-get update -qq && apt-get install -y -qq postgresql-client > /dev/null
+    - until pg_isready -h postgres -U postgres; do sleep 1; done
+    # ON_ERROR_STOP makes a broken migration or seed fail the pipeline.
+    - psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d healthcare_test -f db/migrations/0001_initial_schema.sql
+    - psql -v ON_ERROR_STOP=1 -h postgres -U postgres -d healthcare_test -f db/seeds/001_reference_and_demo.sql
+    - npm run test:db
+    - npm run test --workspace=services/api
+
+secret-scan:
+  stage: security
+  image:
+    name: trufflesecurity/trufflehog:latest
+    entrypoint: [""]
+  variables:
+    GIT_DEPTH: "0"
+  cache: []
+  before_script: []
+  script:
+    # Fails only on verified (live) secrets, same as the GitHub workflow.
+    - trufflehog git file://. --results=verified --fail --no-update
