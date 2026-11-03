@@ -6,7 +6,9 @@
 
 import express, { Router, type Express } from 'express';
 import { checkConnection } from './core/database';
-import { errorHandler, notFoundHandler } from './core/middleware';
+import { errorHandler, notFoundHandler, setTokenVerifier } from './core/middleware';
+import { createAccountsOtpRouter } from './modules/accounts-otp/accounts-otp.routes';
+import { getAccountsOtpService } from './modules/accounts-otp/accounts-otp.service';
 
 function buildApiRouter(): Router {
   const api = Router();
@@ -21,8 +23,10 @@ function buildApiRouter(): Router {
     }
   });
 
-  // ---- Phase 1+ module routers are mounted here (one line per module) ----
-  // api.use('/auth', accountsOtpRouter);            // BE-1 · Phase 1
+  // ---- Module routers (one line per module) ----
+  const auth = getAccountsOtpService();
+  setTokenVerifier((token) => auth.sessions.verifyAccessToken(token)); // authGuard now works
+  api.use('/auth', createAccountsOtpRouter(auth)); // BE-1 · Phase 1 · accounts-otp
   // api.use('/admin/nurses', credentialReviewRouter); // BE-1 · Phase 1
 
   return api;
