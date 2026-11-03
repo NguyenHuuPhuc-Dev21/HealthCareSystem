@@ -2,7 +2,7 @@
   "name": "@healthcare-system/admin-web",
   "version": "1.0.0",
   "private": true,
-  "description": "Hospital Administration & SaaS Platform Web Portal",
+  "description": "CareNest Admin Console — Medical Admin / Operator (SRS v2.0)",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -10,12 +10,15 @@
   },
   "dependencies": {
     "@healthcare-system/shared": "*",
+    "lucide-react": "^1.67.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
     "typescript": "^5.4.5",
     "vite": "^5.2.11"
   }

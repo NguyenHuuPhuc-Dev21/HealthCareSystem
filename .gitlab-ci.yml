@@ -1,0 +1,80 @@
+# =====================================================================
+# GitLab CI — HealthCareSystem (Phase 0 quality gate, owner: BE-3)
+# typecheck · migration + seed (runner của BE-1) · test DB · test API
+# (cần Postgres + Redis) · quét secret.
+# =====================================================================
+
+stages:
+  - check
+  - test
+  - security
+
+# Chạy cho merge request, và cho push lên nhánh chưa có MR mở
+# (tránh chạy trùng 2 pipeline).
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
+default:
+  image: node:20
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm/
+  before_script:
+    - npm ci --cache .npm --prefer-offline || npm install --cache .npm
+    - npm run build --workspace=packages/shared
+
+typecheck:
+  stage: check
+  script:
+    # Không có tsconfig.json ở gốc -> typecheck từng project backend.
+    - npx tsc --noEmit -p packages/shared
+    - npx tsc --noEmit -p services/api
+    - npx tsc --noEmit -p db/tests
+
+db-and-api-tests:
+  stage: test
+  services:
+    - name: postgres:16-alpine
+      alias: postgres
+    - name: redis:7-alpine
+      alias: redis
+  variables:
+    POSTGRES_DB: healthcare_ci
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgrespassword
+    PGPASSWORD: postgrespassword
+    NODE_ENV: test
+    # DB đã migrate + seed: dùng cho test của BE-3 và db/tests
+    DATABASE_URL: postgresql://postgres:postgrespassword@postgres:5432/healthcare_ci
+    # DB trống, tên phải chứa "test": core-platform test (BE-1) tự reset và migrate
+    TEST_DATABASE_URL: postgresql://postgres:postgrespassword@postgres:5432/healthcare_test
+    REDIS_URL: redis://redis:6379
+    REDIS_TEST_URL: redis://redis:6379/15
+  script:
+    - apt-get update -qq && apt-get install -y -qq postgresql-client > /dev/null
+    - until pg_isready -h postgres -U postgres; do sleep 1; done
+    - createdb -h postgres -U postgres healthcare_test
+    # Runner của BE-1: mọi file db/migrations + db/seeds, mỗi file 1 transaction; SQL lỗi là job đỏ.
+    - npm run db:migrate
+    - npm run test:db
+    - npm run test --workspace=services/api
+
+secret-scan:
+  stage: security
+  image:
+    name: trufflesecurity/trufflehog:latest
+    entrypoint: [""]
+  variables:
+    GIT_DEPTH: "0"
+  cache: []
+  before_script: []
+  script:
+    # Chỉ đỏ khi phát hiện secret còn hiệu lực (verified).
+    - trufflehog git file://. --results=verified --fail --no-update

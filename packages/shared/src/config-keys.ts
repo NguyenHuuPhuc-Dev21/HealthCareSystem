@@ -29,6 +29,21 @@ export const SYSTEM_CONFIG_KEYS = {
   // SLA Penalties & Compensations
   ICU_TRAVEL_SUPPORT: 'ICU_TRAVEL_SUPPORT',                   // 50000 (50,000 VND)
   NO_SHOW_PENALTY: 'NO_SHOW_PENALTY',                         // 50000 (50,000 VND)
+
+  // Authentication (accounts-otp — migration 0003; proposed values, OD-09 pending PO)
+  OTP_LENGTH: 'OTP_LENGTH',                                   // 6 digits
+  OTP_TTL_SECONDS: 'OTP_TTL_SECONDS',                         // 300 (5 minutes)
+  OTP_MAX_VERIFY_ATTEMPTS: 'OTP_MAX_VERIFY_ATTEMPTS',         // 5
+  OTP_RESEND_COOLDOWN_SECONDS: 'OTP_RESEND_COOLDOWN_SECONDS', // 60
+  OTP_MAX_SENDS_PER_PHONE_PER_HOUR: 'OTP_MAX_SENDS_PER_PHONE_PER_HOUR', // 5
+  OTP_MAX_SENDS_PER_IP_PER_HOUR: 'OTP_MAX_SENDS_PER_IP_PER_HOUR',       // 20
+  ACCESS_TOKEN_TTL_MINUTES: 'ACCESS_TOKEN_TTL_MINUTES',       // 15
+  REFRESH_TOKEN_TTL_DAYS: 'REFRESH_TOKEN_TTL_DAYS',           // 30
+  ADMIN_SESSION_IDLE_MINUTES: 'ADMIN_SESSION_IDLE_MINUTES',   // 30
+
+  // Privacy & medical records (privacy-consent — migration 0006)
+  RECORD_ACCESS_GRANT_MAX_HOURS: 'RECORD_ACCESS_GRANT_MAX_HOURS',     // 24 (proposed, pending PO)
+  MEDICAL_RECORD_RETENTION_MONTHS: 'MEDICAL_RECORD_RETENTION_MONTHS', // 24 (NFR-PRIV-02)
 } as const;
 
 export type SystemConfigKey = keyof typeof SYSTEM_CONFIG_KEYS;
