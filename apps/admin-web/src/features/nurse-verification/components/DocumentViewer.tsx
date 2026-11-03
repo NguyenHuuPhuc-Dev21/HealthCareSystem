@@ -1,3 +1,4 @@
+import { X, ZoomIn } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { Credential } from '../nurse-verification.types';
 import { DOC_META } from '../nurse-verification.types';
@@ -75,7 +76,7 @@ export function DocumentViewer({ nurseId, credentials, initialDocType = 'GPHN' }
     <div className="doc-viewer">
       <button type="button" className="doc-viewer__main" onClick={() => setLightbox(true)} aria-label={`Mở ${meta.label} toàn màn hình`}>
         {image('doc-viewer__img')}
-        <span className="doc-viewer__hint">🔍 Bấm để phóng to · {meta.label}</span>
+        <span className="doc-viewer__hint"><ZoomIn size={14} aria-hidden="true" /> Bấm để phóng to · {meta.label}</span>
       </button>
 
       <div className="doc-viewer__thumbs" role="tablist" aria-label="Giấy tờ đã nộp">
@@ -89,7 +90,7 @@ export function DocumentViewer({ nurseId, credentials, initialDocType = 'GPHN' }
             onClick={() => { setIndex(i); setZoom(0); }}
             title={DOC_META[c.doc_type].label}
           >
-            <span aria-hidden="true">{DOC_META[c.doc_type].icon}</span>
+            <span aria-hidden="true">{(() => { const ThumbIcon = DOC_META[c.doc_type].icon; return <ThumbIcon size={17} />; })()}</span>
           </button>
         ))}
       </div>
@@ -98,12 +99,12 @@ export function DocumentViewer({ nurseId, credentials, initialDocType = 'GPHN' }
       {lightbox && (
         <div className="lightbox" role="dialog" aria-modal="true" aria-label={`${meta.label} — xem toàn màn hình`} onClick={() => setLightbox(false)}>
           <div className="lightbox__bar" onClick={(e) => e.stopPropagation()}>
-            <span>{meta.icon} {meta.label} ({index + 1}/{credentials.length})</span>
+            <span><meta.icon size={15} /> {meta.label} ({index + 1}/{credentials.length})</span>
             <div className="lightbox__tools">
               <button type="button" onClick={() => setZoom((z) => Math.max(0, z - 1))} disabled={zoom === 0} aria-label="Thu nhỏ">－</button>
               <span>{Math.round(ZOOMS[zoom] * 100)}%</span>
               <button type="button" onClick={() => setZoom((z) => Math.min(ZOOMS.length - 1, z + 1))} disabled={zoom === ZOOMS.length - 1} aria-label="Phóng to">＋</button>
-              <button type="button" onClick={() => setLightbox(false)} aria-label="Đóng">✕</button>
+              <button type="button" onClick={() => setLightbox(false)} aria-label="Đóng"><X size={17} /></button>
             </div>
           </div>
           <button type="button" className="lightbox__nav lightbox__nav--prev" onClick={(e) => { e.stopPropagation(); go(-1); }} aria-label="Ảnh trước">‹</button>

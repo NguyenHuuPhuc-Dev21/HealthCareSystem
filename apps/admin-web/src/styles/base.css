@@ -1993,3 +1993,139 @@ a.sidebar__item:hover {
 .doc-card p {
   margin-bottom: 8px;
 }
+
+
+/* Icon trong ô tìm kiếm hàng đợi + đoạn trạng thái giấy tờ (thay ký tự 🔍/✓) */
+.toolbar__search-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.toolbar__search-icon {
+  position: absolute;
+  left: 11px;
+  color: var(--muted);
+  pointer-events: none;
+}
+.toolbar__search-wrap .toolbar__search {
+  padding-left: 34px;
+}
+.doc-seg svg {
+  vertical-align: -2px;
+}
+.chip svg,
+.doc-viewer__hint svg,
+.audit-note svg,
+.decision__note svg {
+  vertical-align: -2px;
+}
+
+/* ===== Sidebar thu gọn (toggle trong AdminLayout) + icon Lucide ===== */
+.sidebar__brand {
+  position: relative;
+}
+.sidebar__toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--slate);
+  cursor: pointer;
+}
+.sidebar__toggle:hover {
+  background: var(--bg);
+  color: var(--navy);
+}
+.sidebar__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.sidebar__2fa {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+}
+.sidebar__signout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.sidebar__signout-icon {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--slate);
+  cursor: pointer;
+}
+.admin-shell--collapsed {
+  grid-template-columns: 84px 1fr;
+}
+.admin-shell--collapsed .sidebar {
+  padding: 20px 10px;
+  align-items: center;
+}
+.admin-shell--collapsed .sidebar__brand {
+  padding: 2px 0 18px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.admin-shell--collapsed .sidebar__brand-name,
+.admin-shell--collapsed .sidebar__brand small,
+.admin-shell--collapsed .sidebar__label,
+.admin-shell--collapsed .sidebar__badge,
+.admin-shell--collapsed .sidebar__user-text {
+  display: none;
+}
+.admin-shell--collapsed .sidebar__toggle {
+  position: static;
+  margin-left: 6px;
+}
+.admin-shell--collapsed .sidebar__item {
+  justify-content: center;
+  padding: 11px 0;
+  width: 52px;
+}
+.admin-shell--collapsed .sidebar__nav {
+  align-items: center;
+  width: 100%;
+}
+.admin-shell--collapsed .sidebar__user {
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 0 0;
+  width: 100%;
+}
+.admin-shell--collapsed .sidebar__signout-icon {
+  display: inline-flex;
+}
+@media (max-width: 860px) {
+  .admin-shell--collapsed {
+    grid-template-columns: 1fr;
+  }
+  .admin-shell--collapsed .sidebar__brand-name,
+  .admin-shell--collapsed .sidebar__brand small,
+  .admin-shell--collapsed .sidebar__label,
+  .admin-shell--collapsed .sidebar__user-text {
+    display: block;
+  }
+  .admin-shell--collapsed .sidebar__item {
+    width: auto;
+    padding: 11px 12px;
+  }
+}
