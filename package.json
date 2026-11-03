@@ -14,6 +14,7 @@
     "test": "npm run test --workspaces --if-present",
     "test:unit": "npm run test:unit --workspace=services/api --if-present",
     "test:db": "npm run test --workspace=db/tests --if-present",
+    "db:migrate": "npm run db:migrate --workspace=services/api",
     "lint": "npm run lint --workspaces --if-present",
     "dev:api": "npm run dev --workspace=services/api",
     "dev:admin": "npm run dev --workspace=apps/admin-web",
