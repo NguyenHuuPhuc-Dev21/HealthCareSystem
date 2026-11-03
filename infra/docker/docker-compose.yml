@@ -1,4 +1,4 @@
-version: '3.8'
+# version: '3.8'
 
 services:
   postgres:
@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: healthcare_dev
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_PASSWORD: tothioanh15
     ports:
       - '5432:5432'
     volumes:
@@ -23,6 +23,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: healthcare_redis
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
     ports:
       - '6379:6379'
     volumes:
@@ -32,7 +33,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
 volumes:
   postgres_data:
   redis_data:

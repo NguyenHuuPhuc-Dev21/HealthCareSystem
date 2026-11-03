@@ -7,6 +7,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch src/index.ts",
+    "worker": "tsx watch src/worker.ts",
     "start": "node dist/index.js",
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "vitest run test/unit",
@@ -14,16 +15,17 @@
   },
   "dependencies": {
     "@healthcare-system/shared": "*",
-    "pg": "^8.11.5",
-    "ioredis": "^5.4.1",
+    "bullmq": "^6.5.4",
     "dotenv": "^16.4.5",
+    "ioredis": "^5.4.1",
+    "pg": "^8.11.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/pg": "^8.11.6",
     "@types/node": "^20.12.12",
+    "@types/pg": "^8.11.6",
+    "tsx": "^4.10.5",
     "typescript": "^5.4.5",
-    "vitest": "^1.6.0",
-    "tsx": "^4.10.5"
+    "vitest": "^1.6.0"
   }
 }

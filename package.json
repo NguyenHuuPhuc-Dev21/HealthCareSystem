@@ -16,6 +16,7 @@
     "test:db": "npm run test --workspace=db/tests --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "dev:api": "npm run dev --workspace=services/api",
+    "dev:worker": "npm run worker --workspace=services/api",
     "dev:admin": "npm run dev --workspace=apps/admin-web",
     "dev:patient": "npm run dev --workspace=apps/patient-web",
     "dev:nurse-web": "npm run dev --workspace=apps/nurse-web",
