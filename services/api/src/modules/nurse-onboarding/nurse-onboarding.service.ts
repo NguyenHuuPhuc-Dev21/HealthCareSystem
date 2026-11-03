@@ -82,8 +82,11 @@ export class NurseOnboardingService {
     return results;
   }
 
-  /** Checks one uploaded file end-to-end. Throws a 400 with a specific code on failure. */
-  private async verifyFile(userId: string, purpose: UploadPurpose, key: string): Promise<void> {
+  /**
+   * Checks one uploaded file end-to-end (owner, purpose, exists, size, magic bytes).
+   * Throws a 400 with a specific code on failure. Also used by credential-review (GPHN renewal).
+   */
+  async verifyUploadedFile(userId: string, purpose: UploadPurpose, key: string): Promise<void> {
     const rule = PURPOSES[purpose];
     const details = { purpose, key };
     if (!storage.objectKeyBelongsTo(key, userId) || !key.startsWith(`${rule.category}/`)) {
@@ -127,7 +130,7 @@ export class NurseOnboardingService {
     if (new Set(files.map(([, k]) => k)).size !== files.length) {
       throw badRequest('DUPLICATE_FILE', 'Each document must be a different file');
     }
-    for (const [purpose, key] of files) await this.verifyFile(userId, purpose, key);
+    for (const [purpose, key] of files) await this.verifyUploadedFile(userId, purpose, key);
 
     const credentials: NewCredential[] = [
       { docType: DocType.CCCD, side: 'FRONT', fileKey: body.identity.cccdFrontKey, documentNumber: body.cccdNumber },
