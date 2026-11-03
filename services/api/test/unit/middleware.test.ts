@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { UserRole } from '@healthcare-system/shared';
 import { haversineDistanceMeters } from '@healthcare-system/shared';
-import { AppError } from '../../src/core/errors';
+import { AppError, describeError } from '../../src/core/errors';
 import { authGuard, errorHandler, roleGuard, setTokenVerifier } from '../../src/core/middleware';
 
 function run(mw: (req: any, res: any, next: (err?: unknown) => void) => unknown, req: any): Promise<unknown> {
@@ -80,5 +80,16 @@ describe('haversineDistanceMeters (shared/geo)', () => {
   it('rejects invalid coordinates', () => {
     expect(() => haversineDistanceMeters(NaN, 0, 0, 0)).toThrow();
     expect(() => haversineDistanceMeters(91, 0, 0, 0)).toThrow();
+  });
+});
+
+describe('describeError', () => {
+  it('unwraps an AggregateError with an empty message (Windows ECONNREFUSED)', () => {
+    const e1 = Object.assign(new Error('connect ECONNREFUSED ::1:5432'), { code: 'ECONNREFUSED' });
+    const e2 = Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:5432'), { code: 'ECONNREFUSED' });
+    const text = describeError(new AggregateError([e1, e2], ''));
+    expect(text).toContain('127.0.0.1:5432');
+    expect(text).toContain('::1:5432');
+    expect(describeError('plain')).toBe('plain');
   });
 });

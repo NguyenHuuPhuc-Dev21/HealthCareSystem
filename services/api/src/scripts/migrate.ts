@@ -4,6 +4,7 @@
  */
 import 'dotenv/config';
 import { runMigrations } from '../core/database/migrator';
+import { describeError } from '../core/errors';
 
 async function main(): Promise<void> {
   const connectionString = process.env.DATABASE_URL;
@@ -11,7 +12,8 @@ async function main(): Promise<void> {
   await runMigrations({ connectionString, includeSeeds: !process.argv.includes('--no-seeds') });
 }
 
-main().catch((err: Error) => {
-  console.error(err.message);
+main().catch((err: unknown) => {
+  console.error(`[migrate] ${describeError(err)}`);
+  console.error('[migrate] Is PostgreSQL running? Check with: docker ps');
   process.exit(1);
 });

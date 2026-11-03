@@ -8,6 +8,7 @@ import 'dotenv/config';
 import { createApp } from './app';
 import { checkConnection, closePool } from './core/database';
 import { assertAllConfigKeysPresent } from './core/config';
+import { describeError } from './core/errors';
 
 export async function bootstrap(): Promise<void> {
   await checkConnection();
@@ -30,7 +31,7 @@ export async function bootstrap(): Promise<void> {
   process.on('SIGTERM', () => shutdown('SIGTERM'));
 }
 
-bootstrap().catch((err: Error) => {
-  console.error('[Bootstrap Error]', err.message);
+bootstrap().catch((err: unknown) => {
+  console.error('[Bootstrap Error]', describeError(err));
   process.exit(1);
 });

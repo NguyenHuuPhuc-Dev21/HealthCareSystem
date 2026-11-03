@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Local infrastructure for development.
 # The schema is NOT applied by the container any more: run `npm run db:migrate`
 # after `npm run docker:up` (the runner tracks history in schema_migrations).
@@ -38,8 +36,11 @@ services:
       retries: 5
 
   # S3-compatible private object storage (CCCD, GPHN, prescriptions, selfies).
+  # minio/minio and minio/mc were removed from Docker Hub in Sept 2026 (quay.io
+  # now requires login). pgsty/silo is a MinIO build that ships both the server
+  # and the `mc` client and runs as root. Pinned tag: never use :latest here.
   minio:
-    image: minio/minio:latest
+    image: pgsty/silo:RELEASE.2026-10-15T00-00-00Z
     container_name: healthcare_minio
     command: server /data --console-address ":9001"
     environment:
@@ -58,7 +59,7 @@ services:
 
   # One-shot: create the private bucket (no anonymous access).
   minio-init:
-    image: minio/mc:latest
+    image: pgsty/silo:RELEASE.2026-10-15T00-00-00Z
     container_name: healthcare_minio_init
     depends_on:
       minio:
