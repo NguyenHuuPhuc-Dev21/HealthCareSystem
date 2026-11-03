@@ -1,5 +1,6 @@
 /** SQL for credential-review (ADR-0002). Write methods expect a transaction client. */
 import type { KycStatus } from '@healthcare-system/shared';
+import { writeAuditLog } from '../../core/audit';
 import { query, type Queryable, type QueryResultRow } from '../../core/database';
 import type {
   DossierRecord,
@@ -88,13 +89,18 @@ export class PgReviewRepo extends Base implements ReviewRepo {
     await this.run('UPDATE users SET kyc_status = $2::kyc_status_enum WHERE id = $1', [nurseId, kycStatus]);
   }
 
-  async insertAudit(e: { actorId: string; action: 'APPROVE_GPHN'; targetId: string; oldValue: unknown; newValue: unknown; ip: string | null }) {
-    // audit_logs is append-only (DB trigger). Written in the same transaction as the decision.
-    await this.run(
-      `INSERT INTO audit_logs (actor_id, action_type, target_table, target_id, old_value, new_value, ip_address)
-       VALUES ($1, $2::audit_action_enum, 'nurse_profiles', $3, $4::jsonb, $5::jsonb, $6)`,
-      [e.actorId, e.action, e.targetId, JSON.stringify(e.oldValue), JSON.stringify(e.newValue), e.ip],
-    );
+  async insertAudit(e: Parameters<ReviewRepo['insertAudit']>[0]) {
+    // Agreed internal interface (plan §4.1): BE-3's writeAuditLog, on THIS transaction's client,
+    // so the audit row commits or rolls back together with the review decision.
+    await writeAuditLog(this.db ?? { query: (text, params) => query(text, params) }, {
+      actorId: e.actorId,
+      action: e.action,
+      targetTable: 'nurse_profiles',
+      targetId: e.targetId,
+      oldValue: e.oldValue,
+      newValue: e.newValue,
+      ...(e.ip ? { ipAddress: e.ip } : {}),
+    });
   }
 
   async insertGphn(

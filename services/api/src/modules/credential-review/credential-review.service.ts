@@ -8,7 +8,7 @@
  * change and the APPROVE_GPHN audit entry are written in ONE transaction with the profile and the
  * pending credentials locked (FOR UPDATE), so two Admins cannot review the same dossier at once.
  */
-import { DocType, PRESIGNED_URL_MAX_EXPIRY_SECONDS, ProfileStatus } from '@healthcare-system/shared';
+import { AuditAction, DocType, PRESIGNED_URL_MAX_EXPIRY_SECONDS, ProfileStatus } from '@healthcare-system/shared';
 import { withTransaction } from '../../core/database';
 import { badRequest, conflict, forbidden, notFound } from '../../core/errors';
 import * as storage from '../../core/storage';
@@ -91,7 +91,7 @@ export class CredentialReviewService {
       if (outcome.approvedGphn) {
         await repo.insertAudit({
           actorId: adminId,
-          action: 'APPROVE_GPHN',
+          action: AuditAction.APPROVE_GPHN,
           targetId: nurseId,
           oldValue: { tier: profile.tier, gphnNumber: profile.gphnNumber, gphnExpiryDate: profile.gphnExpiryDate },
           newValue: { tier: outcome.tier, gphnNumber: outcome.approvedGphn.number, gphnExpiryDate: outcome.approvedGphn.expiryDate },
