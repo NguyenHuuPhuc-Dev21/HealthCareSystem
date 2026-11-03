@@ -40,6 +40,10 @@ export const SYSTEM_CONFIG_KEYS = {
   ACCESS_TOKEN_TTL_MINUTES: 'ACCESS_TOKEN_TTL_MINUTES',       // 15
   REFRESH_TOKEN_TTL_DAYS: 'REFRESH_TOKEN_TTL_DAYS',           // 30
   ADMIN_SESSION_IDLE_MINUTES: 'ADMIN_SESSION_IDLE_MINUTES',   // 30
+
+  // Privacy & medical records (privacy-consent — migration 0006)
+  RECORD_ACCESS_GRANT_MAX_HOURS: 'RECORD_ACCESS_GRANT_MAX_HOURS',     // 24 (proposed, pending PO)
+  MEDICAL_RECORD_RETENTION_MONTHS: 'MEDICAL_RECORD_RETENTION_MONTHS', // 24 (NFR-PRIV-02)
 } as const;
 
 export type SystemConfigKey = keyof typeof SYSTEM_CONFIG_KEYS;

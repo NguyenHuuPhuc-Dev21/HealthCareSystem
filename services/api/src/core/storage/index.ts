@@ -38,6 +38,25 @@ export const ALLOWED_UPLOAD_CONTENT_TYPES: ReadonlySet<string> = new Set([
   'application/pdf',
 ]);
 
+/** Per-file upload limit (SEC-7.1 retained engineering standard: max 10 MB per file). */
+export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+/**
+ * Detects the real file type from its first bytes (SEC-7.1: check magic bytes,
+ * not only the declared MIME type). Returns null for anything not whitelisted.
+ */
+export function detectContentType(head: Buffer): string | null {
+  if (head.length >= 3 && head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff) return 'image/jpeg';
+  if (head.length >= 8 && head.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
+    return 'image/png';
+  }
+  if (head.length >= 12 && head.subarray(0, 4).toString('latin1') === 'RIFF' && head.subarray(8, 12).toString('latin1') === 'WEBP') {
+    return 'image/webp';
+  }
+  if (head.length >= 5 && head.subarray(0, 5).toString('latin1') === '%PDF-') return 'application/pdf';
+  return null;
+}
+
 export interface PresignedUrlResult {
   url: string;
   objectKey: string;
@@ -143,6 +162,23 @@ export async function createDownloadUrl(
     expiresIn,
   });
   return { url, objectKey, expiresInSeconds: expiresIn };
+}
+
+/** Reads the first `bytes` of an object (for magic-byte checks); null if missing. */
+export async function readObjectHead(objectKey: string, bytes = 16): Promise<Buffer | null> {
+  if (!isValidObjectKey(objectKey)) throw new StorageError('Invalid object key');
+  try {
+    const res = await getClient().send(
+      new GetObjectCommand({ Bucket: bucket(), Key: objectKey, Range: `bytes=0-${bytes - 1}` }),
+    );
+    const body = res.Body as { transformToByteArray?: () => Promise<Uint8Array> } | undefined;
+    if (!body?.transformToByteArray) return Buffer.alloc(0);
+    return Buffer.from(await body.transformToByteArray());
+  } catch (err) {
+    const status = (err as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode;
+    if (status === 404) return null;
+    throw err;
+  }
 }
 
 /** Returns size/content type, or null if the object does not exist. */

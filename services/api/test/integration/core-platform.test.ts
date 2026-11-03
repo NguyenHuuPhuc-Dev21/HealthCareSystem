@@ -46,7 +46,11 @@ suite('core platform on PostgreSQL', () => {
     expect(await svc.getNumber('PLATFORM_COMMISSION_RATE')).toBe(0.15);
     expect(await svc.getNumber('MIN_NURSE_DEPOSIT')).toBe(300000);
     expect(await svc.getNumber('TRAVEL_BUFFER_MINUTES')).toBe(60);
-    expect(Object.keys(SYSTEM_CONFIG_KEYS)).toHaveLength(16);
+    // Every key declared in packages/shared must have a row. No hardcoded count:
+    // the key list grows with each phase (16 in Phase 0, 25 after migration 0003, …).
+    const { rows } = await query<{ config_key: string }>('SELECT config_key FROM system_configs');
+    const inDb = new Set(rows.map((r) => r.config_key));
+    expect(Object.values(SYSTEM_CONFIG_KEYS).filter((k) => !inDb.has(k))).toEqual([]);
   });
 
   it('withTransaction really rolls back on error', async () => {
