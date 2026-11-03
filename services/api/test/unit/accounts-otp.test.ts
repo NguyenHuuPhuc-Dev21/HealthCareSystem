@@ -1,10 +1,11 @@
-import { createHmac } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import { KycStatus, ProfileStatus, UserRole, UserStatus, type SystemConfigKey } from '@healthcare-system/shared';
 import { AppError } from '../../src/core/errors';
 import { MemoryKeyValueStore } from '../../src/core/redis';
 import { normalizeVietnamPhone } from '../../src/modules/accounts-otp/accounts-otp.schema';
 import { AccountsOtpService } from '../../src/modules/accounts-otp/accounts-otp.service';
+import { base32Decode, hotp, totpStep } from '../../src/modules/accounts-otp/accounts-otp.totp';
 import type { AccountsRepo, AuthUserRecord, OtpSender } from '../../src/modules/accounts-otp/accounts-otp.types';
 
 const CONFIG: Partial<Record<SystemConfigKey, number>> = {
@@ -21,6 +22,17 @@ const CONFIG: Partial<Record<SystemConfigKey, number>> = {
 
 class FakeRepo implements AccountsRepo {
   users: AuthUserRecord[] = [];
+  totp = new Map<string, string>();
+  async getTotpSecretEnc(userId: string) {
+    return this.totp.get(userId) ?? null;
+  }
+  async enableTotp(userId: string, enc: string) {
+    const u = this.users.find((x) => x.id === userId);
+    if (!u || u.role !== UserRole.ADMIN || u.totpEnabled) return false;
+    this.totp.set(userId, enc);
+    u.totpEnabled = true;
+    return true;
+  }
   async findByPhone(phone: string) {
     return this.users.find((u) => u.phone === phone) ?? null;
   }
@@ -37,6 +49,7 @@ class FakeRepo implements AccountsRepo {
       status: UserStatus.ACTIVE,
       kycStatus: KycStatus.UNVERIFIED,
       nurseProfileStatus: null,
+      totpEnabled: false,
     };
     this.users.push(u);
     return u;
@@ -76,6 +89,8 @@ function setup() {
       return v;
     },
     otpSecret: 'x'.repeat(40),
+    totpKey: Buffer.alloc(32, 9),
+    now: clock.now,
   });
   return { svc, repo, sender, kv, clock };
 }
@@ -92,6 +107,7 @@ function user(over: Partial<AuthUserRecord> = {}): AuthUserRecord {
     status: UserStatus.ACTIVE,
     kycStatus: KycStatus.UNVERIFIED,
     nurseProfileStatus: null,
+    totpEnabled: false,
     ...over,
   };
 }
@@ -288,6 +304,7 @@ describe('verify-otp', () => {
     const res = await svc.verifyOtp(PHONE, sender.last(), ctx);
     expect(res.status).toBe('SECOND_FACTOR_REQUIRED');
     expect('tokens' in res).toBe(false);
+    if (res.status === 'SECOND_FACTOR_REQUIRED') expect(res.enrolled).toBe(false);
   });
 });
 
@@ -359,7 +376,107 @@ describe('construction', () => {
           sender: new CapturingSender(),
           getNumber: async () => 1,
           otpSecret: 'short',
+          totpKey: Buffer.alloc(32),
         }),
     ).toThrow(/OTP_SECRET/);
+  });
+});
+
+describe('admin 2FA (TOTP)', () => {
+  const ADMIN_ID = '22222222-2222-4222-8222-222222222222';
+
+  async function adminChallenge(s: ReturnType<typeof setup>) {
+    if (!s.repo.users.some((u) => u.id === ADMIN_ID)) s.repo.users.push(user({ id: ADMIN_ID, role: UserRole.ADMIN }));
+    await s.svc.requestOtp(PHONE, ctx);
+    const res = await s.svc.verifyOtp(PHONE, s.sender.last(), ctx);
+    if (res.status !== 'SECOND_FACTOR_REQUIRED') throw new Error('expected 2FA challenge');
+    return res;
+  }
+
+  const codeFor = (secret: string, nowMs: number, offsetSteps = 0) =>
+    hotp(base32Decode(secret), totpStep(nowMs) + offsetSteps);
+
+  it('first sign-in: setup returns a QR URI, verify enrols and issues the session', async () => {
+    const s = setup();
+    const ch = await adminChallenge(s);
+    const setupRes = await s.svc.setupSecondFactor(ch.challengeToken);
+    expect(setupRes.otpauthUrl).toMatch(/^otpauth:\/\/totp\/HealthCareSystem%3A0901000001\?secret=/);
+    expect(setupRes.secret).toMatch(/^[A-Z2-7]{32}$/);
+
+    const done = await s.svc.verifySecondFactor(ch.challengeToken, codeFor(setupRes.secret, s.clock.now()), ctx);
+    expect(done.status).toBe('AUTHENTICATED');
+    expect(await s.svc.sessions.verifyAccessToken(done.tokens.accessToken)).toEqual({ id: ADMIN_ID, role: UserRole.ADMIN });
+    // secret is stored encrypted, never in clear
+    const stored = s.repo.totp.get(ADMIN_ID)!;
+    expect(stored.startsWith('v1.')).toBe(true);
+    expect(stored).not.toContain(setupRes.secret);
+  });
+
+  it('later sign-in uses the enrolled secret; setup is refused once enrolled', async () => {
+    const s = setup();
+    const first = await adminChallenge(s);
+    const { secret } = await s.svc.setupSecondFactor(first.challengeToken);
+    await s.svc.verifySecondFactor(first.challengeToken, codeFor(secret, s.clock.now()), ctx);
+
+    s.clock.advance(61);
+    const second = await adminChallenge(s);
+    expect(second.enrolled).toBe(true);
+    await expectAppError(s.svc.setupSecondFactor(second.challengeToken), 409, 'TOTP_ALREADY_ENROLLED');
+    const ok = await s.svc.verifySecondFactor(second.challengeToken, codeFor(secret, s.clock.now()), ctx);
+    expect(ok.status).toBe('AUTHENTICATED');
+  });
+
+  it('accepts ±1 time step of clock drift but not 2', async () => {
+    const s = setup();
+    const ch = await adminChallenge(s);
+    const { secret } = await s.svc.setupSecondFactor(ch.challengeToken);
+    await expectAppError(s.svc.verifySecondFactor(ch.challengeToken, codeFor(secret, s.clock.now(), -2), ctx), 400, 'TOTP_INVALID');
+    const ok = await s.svc.verifySecondFactor(ch.challengeToken, codeFor(secret, s.clock.now(), -1), ctx);
+    expect(ok.status).toBe('AUTHENTICATED');
+  });
+
+  it('the same authenticator code cannot be used twice (replay)', async () => {
+    const s = setup();
+    const first = await adminChallenge(s);
+    const { secret } = await s.svc.setupSecondFactor(first.challengeToken);
+    const code = codeFor(secret, s.clock.now());
+    await s.svc.verifySecondFactor(first.challengeToken, code, ctx);
+
+    // A second challenge within the same 30-second step (planted directly: the phone
+    // OTP cooldown would otherwise push us past the TOTP window).
+    const token = 'B'.repeat(43);
+    await s.kv.set(`auth:2fa:${createHash('sha256').update(token).digest('hex')}`, JSON.stringify({ userId: ADMIN_ID }), 300);
+    await expectAppError(s.svc.verifySecondFactor(token, code, ctx), 400, 'TOTP_INVALID');
+  });
+
+  it('verify before setup → TOTP_NOT_ENROLLED; no session (TC-USHP05-01)', async () => {
+    const s = setup();
+    const ch = await adminChallenge(s);
+    await expectAppError(s.svc.verifySecondFactor(ch.challengeToken, '123456', ctx), 400, 'TOTP_NOT_ENROLLED');
+  });
+
+  it('too many wrong codes destroys the challenge (TC-USHP05-03)', async () => {
+    const s = setup();
+    const ch = await adminChallenge(s);
+    const { secret } = await s.svc.setupSecondFactor(ch.challengeToken);
+    const right = codeFor(secret, s.clock.now());
+    const wrong = right === '000000' ? '111111' : '000000';
+    for (let i = 0; i < 4; i++) await expectAppError(s.svc.verifySecondFactor(ch.challengeToken, wrong, ctx), 400, 'TOTP_INVALID');
+    await expectAppError(s.svc.verifySecondFactor(ch.challengeToken, wrong, ctx), 400, 'TOTP_ATTEMPTS_EXCEEDED');
+    await expectAppError(s.svc.verifySecondFactor(ch.challengeToken, right, ctx), 400, 'CHALLENGE_INVALID');
+  });
+
+  it('the challenge expires with the OTP TTL', async () => {
+    const s = setup();
+    const ch = await adminChallenge(s);
+    s.clock.advance(301);
+    await expectAppError(s.svc.setupSecondFactor(ch.challengeToken), 400, 'CHALLENGE_INVALID');
+  });
+
+  it('a challenge token can never be used for a non-admin', async () => {
+    const s = setup();
+    const ch = await adminChallenge(s);
+    s.repo.users[0]!.role = UserRole.PATIENT; // role changed meanwhile
+    await expectAppError(s.svc.setupSecondFactor(ch.challengeToken), 400, 'CHALLENGE_INVALID');
   });
 });

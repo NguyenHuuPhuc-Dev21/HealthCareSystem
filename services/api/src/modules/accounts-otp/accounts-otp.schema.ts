@@ -50,9 +50,21 @@ export const completeRegistrationSchema = z
   })
   .strict();
 
+export const twoFactorSetupSchema = z.object({ challengeToken: opaqueToken }).strict();
+
+export const verifyTwoFactorSchema = z
+  .object({
+    challengeToken: opaqueToken,
+    code: z.string().regex(/^\d{6}$/, 'Authenticator code must be 6 digits'),
+    deviceId,
+  })
+  .strict();
+
 export const refreshSchema = z.object({ refreshToken: opaqueToken, deviceId }).strict();
 
 export type RequestOtpBody = z.infer<typeof requestOtpSchema>;
 export type VerifyOtpBody = z.infer<typeof verifyOtpSchema>;
 export type CompleteRegistrationBody = z.infer<typeof completeRegistrationSchema>;
 export type RefreshBody = z.infer<typeof refreshSchema>;
+export type TwoFactorSetupBody = z.infer<typeof twoFactorSetupSchema>;
+export type VerifyTwoFactorBody = z.infer<typeof verifyTwoFactorSchema>;

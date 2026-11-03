@@ -10,11 +10,15 @@ import {
   completeRegistrationSchema,
   refreshSchema,
   requestOtpSchema,
+  twoFactorSetupSchema,
   verifyOtpSchema,
+  verifyTwoFactorSchema,
   type CompleteRegistrationBody,
   type RefreshBody,
   type RequestOtpBody,
+  type TwoFactorSetupBody,
   type VerifyOtpBody,
+  type VerifyTwoFactorBody,
 } from './accounts-otp.schema';
 import type { AccountsOtpService } from './accounts-otp.service';
 import type { RequestContext } from './accounts-otp.types';
@@ -59,6 +63,27 @@ export function createAccountsOtpRouter(service: AccountsOtpService): Router {
         context(req, body.deviceId),
       );
       res.status(201).json({ success: true, data: { status: 'AUTHENTICATED', ...data } });
+    }),
+  );
+
+  router.post(
+    '/2fa/setup',
+    validateBody(twoFactorSetupSchema),
+    asyncHandler(async (req, res) => {
+      const body = req.body as TwoFactorSetupBody;
+      res.json({ success: true, data: await service.setupSecondFactor(body.challengeToken) });
+    }),
+  );
+
+  router.post(
+    '/verify-2fa',
+    validateBody(verifyTwoFactorSchema),
+    asyncHandler(async (req, res) => {
+      const body = req.body as VerifyTwoFactorBody;
+      res.json({
+        success: true,
+        data: await service.verifySecondFactor(body.challengeToken, body.code, context(req, body.deviceId)),
+      });
     }),
   );
 

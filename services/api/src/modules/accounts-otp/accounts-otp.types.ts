@@ -13,6 +13,8 @@ export interface AuthUserRecord {
   kycStatus: KycStatus;
   /** null for non-nurses and for nurses who have not onboarded yet. */
   nurseProfileStatus: ProfileStatus | null;
+  /** Admin has completed TOTP enrolment (users.totp_enabled_at IS NOT NULL). */
+  totpEnabled: boolean;
 }
 
 /** Safe subset returned to clients. */
@@ -29,6 +31,10 @@ export interface AccountsRepo {
   findById(id: string): Promise<AuthUserRecord | null>;
   /** Returns null if the phone is already taken (unique constraint). */
   createUser(input: { phone: string; fullName: string; role: SelfRegisterRole }): Promise<AuthUserRecord | null>;
+  /** Encrypted TOTP secret of an enrolled Admin, or null. */
+  getTotpSecretEnc(userId: string): Promise<string | null>;
+  /** Stores the encrypted secret and marks enrolment complete (only if not already enrolled). */
+  enableTotp(userId: string, secretEnc: string): Promise<boolean>;
 }
 
 /**
@@ -63,7 +69,16 @@ export interface RequestOtpResult {
 export type VerifyOtpResult =
   | { status: 'AUTHENTICATED'; user: PublicUser; tokens: TokenPair }
   | { status: 'REGISTRATION_REQUIRED'; registrationToken: string; expiresInSeconds: number }
-  | { status: 'SECOND_FACTOR_REQUIRED'; challengeToken: string; expiresInSeconds: number };
+  | { status: 'SECOND_FACTOR_REQUIRED'; challengeToken: string; expiresInSeconds: number; enrolled: boolean };
+
+export interface TotpSetupResult {
+  /** base32 secret — show it as text for manual entry. */
+  secret: string;
+  /** otpauth:// URI — render it as a QR code. */
+  otpauthUrl: string;
+  issuer: string;
+  accountName: string;
+}
 
 /** Stored against an access/refresh token hash. */
 export interface SessionRecord {

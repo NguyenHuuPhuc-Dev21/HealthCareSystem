@@ -10,7 +10,8 @@ Phone numbers are accepted as `0901000001`, `+84 901 000 001`, `84901000001`, `0
 ```
 request-otp ──► verify-otp ──┬─ AUTHENTICATED ─────────────► use accessToken
                              ├─ REGISTRATION_REQUIRED ─► complete-registration ─► use accessToken
-                             └─ SECOND_FACTOR_REQUIRED (ADMIN) ─► verify-2fa (coming next)
+                             └─ SECOND_FACTOR_REQUIRED (ADMIN) ─┬─ enrolled=false ─► 2fa/setup (QR) ─► verify-2fa
+                                                                 └─ enrolled=true  ─────────────────► verify-2fa
 access token expires ─► refresh (rotates both tokens) · logout ─► session revoked
 ```
 
@@ -50,7 +51,7 @@ Send the access token as `Authorization: Bearer <accessToken>`.
 { "status": "REGISTRATION_REQUIRED", "registrationToken": "…", "expiresInSeconds": 300 }
 ```
 ```json
-{ "status": "SECOND_FACTOR_REQUIRED", "challengeToken": "…", "expiresInSeconds": 300 }
+{ "status": "SECOND_FACTOR_REQUIRED", "challengeToken": "…", "expiresInSeconds": 300, "enrolled": false }
 ```
 
 | Error | When |
@@ -72,6 +73,36 @@ Send the access token as `Authorization: Bearer <accessToken>`.
 | `409 PHONE_ALREADY_REGISTERED` | number was registered meanwhile — sign in instead |
 
 A new nurse is only an account at this point: next step is `POST /auth/nurse-onboarding` (eKYC). Job eligibility stays governed by `nurse_profiles.profile_status`.
+
+### `POST /auth/2fa/setup` (Admin, first sign-in only — when `enrolled` is `false`)
+```json
+{ "challengeToken": "…" }
+```
+`200`
+```json
+{ "secret": "JBSWY3DPEHPK3PXP…", "otpauthUrl": "otpauth://totp/HealthCareSystem%3A0901000001?secret=…",
+  "issuer": "HealthCareSystem", "accountName": "0901000001" }
+```
+Render `otpauthUrl` as a QR code (Google/Microsoft Authenticator, Authy); show `secret` for manual entry.
+Nothing is saved until the first valid code is sent to `verify-2fa`.
+
+| Error | When |
+|---|---|
+| `400 CHALLENGE_INVALID` | challenge expired/used — restart from `request-otp` |
+| `409 TOTP_ALREADY_ENROLLED` | account already has an authenticator — go straight to `verify-2fa` |
+
+### `POST /auth/verify-2fa` (Admin)
+```json
+{ "challengeToken": "…", "code": "123456", "deviceId": "optional" }
+```
+`200` → same body as `AUTHENTICATED` (Admin session; refresh token expires after 30 idle minutes).
+
+| Error | When |
+|---|---|
+| `400 TOTP_INVALID` | wrong or already-used code; `details.attemptsRemaining` |
+| `400 TOTP_ATTEMPTS_EXCEEDED` | too many wrong codes — restart from `request-otp` |
+| `400 TOTP_NOT_ENROLLED` | call `2fa/setup` first |
+| `400 CHALLENGE_INVALID` | challenge expired/used |
 
 ### `POST /auth/refresh`
 ```json

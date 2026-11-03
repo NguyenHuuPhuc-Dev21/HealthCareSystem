@@ -17,6 +17,7 @@ Phone number + OTP sign-in, first-time registration, and session management for 
 | `accounts-otp.policy.ts` | who may sign in (BANNED blocked, SUSPENDED allowed), Admin needs 2FA |
 | `accounts-otp.schema.ts` | Zod whitelists + Vietnamese phone normalisation (`0xxxxxxxxx`) |
 | `accounts-otp.types.ts` | DTOs and interfaces (`AccountsRepo`, `OtpSender`) |
+| `accounts-otp.totp.ts` | RFC 6238 TOTP + AES-256-GCM encryption of Admin secrets (node:crypto only) |
 | — `jobs.ts` | not needed: every expiry is a Redis TTL, no business timer |
 
 ## Rules implemented
@@ -24,6 +25,9 @@ Phone number + OTP sign-in, first-time registration, and session management for 
 - OTP: CSPRNG, `OTP_LENGTH` digits, valid `OTP_TTL_SECONDS`, stored only as HMAC-SHA256 with `OTP_SECRET`, single use, invalid after `OTP_MAX_VERIFY_ATTEMPTS` wrong tries.
 - Throttling: `OTP_RESEND_COOLDOWN_SECONDS` per phone, `OTP_MAX_SENDS_PER_PHONE_PER_HOUR`, `OTP_MAX_SENDS_PER_IP_PER_HOUR`.
 - Anti-enumeration: `request-otp` gives the same answer for any number; banned numbers get no SMS.
+- Admin 2FA: `verify-otp` → `SECOND_FACTOR_REQUIRED` (+ `enrolled`). First time `/2fa/setup` returns a QR URI;
+  `/verify-2fa` enrols and signs in. Secrets AES-256-GCM encrypted (`TOTP_ENCRYPTION_KEY`), ±30 s drift,
+  each code usable once, challenge destroyed after `OTP_MAX_VERIFY_ATTEMPTS` wrong codes. Migration `0004`.
 - Sessions: opaque random tokens hashed in Redis — revocable immediately. Refresh tokens rotate and are single-use.
   Admin refresh tokens expire after `ADMIN_SESSION_IDLE_MINUTES` idle.
 - All numbers come from `system_configs` (migration `0003`). **Values are proposed and pending PO approval (OD-09).**
@@ -37,8 +41,9 @@ await revokeAllSessionsForUser(userId); // on BAN / SUSPEND / phone re-binding (
 
 ## Open items
 
-1. **Admin 2FA (TOTP)** — `verify-otp` returns `SECOND_FACTOR_REQUIRED` for ADMIN; `POST /auth/verify-2fa`
-   and TOTP enrolment are the next increment. Until then no Admin can sign in (fail closed).
+1. **Admin 2FA backup codes / reset** — SEC-1.5 asks for single-use backup codes; not built yet. A lost
+   authenticator is reset by clearing `users.totp_secret_enc` + `totp_enabled_at` (future admin-users action, audited).
+   First enrolment relies on the phone OTP only — seed Admin phones must be real, controlled numbers.
 2. **SMS/ZNS provider** (OD-09) — dev uses `DevOtpSender` + `OTP_DEV_ECHO`; production refuses to start without a provider.
 3. **Login audit** — SEC-1.5 asks to record Admin logins (IP, device). `audit_action_enum` has no login action yet (BE-3 owns `core/audit`).
 4. **Web cookies** — tokens are returned in the JSON body (works for mobile + web). HttpOnly cookie delivery for web (SEC-1.7) to agree with FE-1.
