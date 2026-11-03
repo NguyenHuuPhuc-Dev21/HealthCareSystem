@@ -3,7 +3,7 @@ import { DocType, VerificationStatus } from '@healthcare-system/shared';
 import type { NurseCredential } from '@healthcare-system/shared';
 import { Button, StatusBadge } from '../../components';
 import { useAuth } from '../auth/AuthContext';
-import { USE_MOCK } from '../auth/auth.api';
+import { USE_MOCK_CREDENTIALS } from '../../lib/mock-flags';
 import { getMyCredentials, mockAdminApproveGphn, uploadRenewedGphn } from './credentials.api';
 
 const DOC_LABEL: Record<string, string> = {
@@ -25,6 +25,10 @@ export const CredentialsPage: React.FC = () => {
     const profile = session?.profile;
     const [credentials, setCredentials] = useState<NurseCredential[]>(session?.credentials ?? []);
     const [file, setFile] = useState<File | null>(null);
+    const [gphnNumber, setGphnNumber] = useState(profile?.gphn_number ?? '');
+    const [issued, setIssued] = useState('');
+    const [authority, setAuthority] = useState('');
+    const [scope, setScope] = useState('');
     const [expiry, setExpiry] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
@@ -56,15 +60,40 @@ export const CredentialsPage: React.FC = () => {
             setError('Vui lòng chọn ảnh GPHN đã gia hạn');
             return;
         }
+        if (!gphnNumber.trim()) {
+            setError('Vui lòng nhập số GPHN mới');
+            return;
+        }
+        if (!issued) {
+            setError('Vui lòng nhập ngày cấp');
+            return;
+        }
+        if (!authority.trim()) {
+            setError('Vui lòng nhập cơ quan cấp');
+            return;
+        }
+        if (!scope.trim()) {
+            setError('Vui lòng nhập phạm vi hành nghề');
+            return;
+        }
         if (!expiry || expiry <= today) {
             setError('Ngày hết hạn của GPHN mới phải sau hôm nay');
             return;
         }
+        if (expiry <= issued) {
+            setError('Ngày hết hạn phải sau ngày cấp');
+            return;
+        }
+
         setLoading(true);
-        const form = new FormData();
-        form.append('gphn', file);
-        form.append('gphnExpiryDate', expiry);
-        const res = await uploadRenewedGphn(form);
+        const res = await uploadRenewedGphn({
+            file,
+            number: gphnNumber.trim(),
+            issuedDate: issued,
+            expiryDate: expiry,
+            issuingAuthority: authority.trim(),
+            scopeOfPractice: scope.trim(),
+        });
         setLoading(false);
         if (!res.success) {
             setError(res.error?.message ?? 'Tải GPHN thất bại');
@@ -73,7 +102,7 @@ export const CredentialsPage: React.FC = () => {
         const refreshed = await getMyCredentials();
         if (refreshed.success) {
             setCredentials(refreshed.data);
-            updateProfile(profile, refreshed.data);
+            updateProfile(res.data.profile ?? profile, refreshed.data);
         }
         setFile(null);
         setMessage('Đã tải GPHN mới. GPHN đang chờ Admin duyệt — tier chỉ thay đổi sau khi được duyệt.');
@@ -149,6 +178,45 @@ export const CredentialsPage: React.FC = () => {
                             {file && <div className="hint">Đã chọn: {file.name}</div>}
                         </div>
                         <div className="field">
+                            <label htmlFor="gphn-number">Số GPHN mới</label>
+                            <input
+                                id="gphn-number"
+                                type="text"
+                                placeholder="01284/GPHN-ĐN"
+                                value={gphnNumber}
+                                onChange={(e) => setGphnNumber(e.target.value)}
+                            />
+                        </div>
+                        <div className="field">
+                            <label htmlFor="gphn-issued">Ngày cấp</label>
+                            <input
+                                id="gphn-issued"
+                                type="date"
+                                value={issued}
+                                onChange={(e) => setIssued(e.target.value)}
+                            />
+                        </div>
+                        <div className="field">
+                            <label htmlFor="gphn-authority">Cơ quan cấp</label>
+                            <input
+                                id="gphn-authority"
+                                type="text"
+                                placeholder="Sở Y tế TP. Đà Nẵng"
+                                value={authority}
+                                onChange={(e) => setAuthority(e.target.value)}
+                            />
+                        </div>
+                        <div className="field">
+                            <label htmlFor="gphn-scope">Phạm vi hành nghề</label>
+                            <input
+                                id="gphn-scope"
+                                type="text"
+                                placeholder="Điều dưỡng đa khoa"
+                                value={scope}
+                                onChange={(e) => setScope(e.target.value)}
+                            />
+                        </div>
+                        <div className="field">
                             <label htmlFor="gphn-expiry">Ngày hết hạn của GPHN mới</label>
                             <input
                                 id="gphn-expiry"
@@ -164,7 +232,7 @@ export const CredentialsPage: React.FC = () => {
                         </Button>
                     </form>
                 )}
-                {USE_MOCK && gphnPending && (
+                {USE_MOCK_CREDENTIALS && gphnPending && (
                     <div className="actions-row">
                         <Button type="button" variant="secondary" onClick={handleMockApprove}>
                             [Chỉ mock] Giả lập Admin duyệt GPHN này

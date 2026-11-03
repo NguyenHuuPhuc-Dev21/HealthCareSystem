@@ -9,14 +9,13 @@ export interface SessionUser {
 }
 
 /**
- * Dữ liệu phiên đăng nhập — ĐIỂM CHỐT CONTRACT VỚI BE-1:
- * response `POST /auth/verify-otp` hiện trong scaffold chỉ có { token, user }.
- * FE Giai đoạn 1 cần thêm `profile` (null nếu điều dưỡng chưa nộp hồ sơ) để biết
- * điều hướng theo profile_status. Nếu BE không trả kèm, thay bằng
- * `GET /nurse/profile/me` ngay sau đăng nhập — nhưng phải chốt một trong hai.
+ * Dữ liệu phiên đăng nhập:
+ * Cung cấp token, refresh token, thông tin người dùng và hồ sơ/văn bằng.
  */
 export interface SessionData {
     token: string;
+    refreshToken?: string;
+    profileSource?: 'API' | 'MOCK';
     user: SessionUser;
     profile: NurseProfile | null;
     credentials: NurseCredential[];
@@ -28,4 +27,5 @@ export interface RequestOtpData {
     resendAfterSeconds: number;
     /** Giây mã còn hiệu lực. */
     expiresInSeconds: number;
+    devOtp?: string;
 }

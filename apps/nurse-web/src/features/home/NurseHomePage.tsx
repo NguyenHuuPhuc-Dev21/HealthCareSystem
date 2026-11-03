@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, StatusBadge } from '../../components';
 import { useAuth } from '../auth/AuthContext';
+import { USE_MOCK_AUTH } from '../../lib/mock-flags';
 
 /**
  * Trang chủ điều dưỡng đã ACTIVE (khung tối thiểu của Giai đoạn 1).
@@ -20,7 +21,8 @@ export const NurseHomePage: React.FC = () => {
                 <h1>Xin chào, {session.user.full_name}</h1>
                 <p>
                     Hồ sơ: <StatusBadge status={profile.profile_status} /> Tier:{' '}
-                    <StatusBadge status={profile.tier} /> TrustScore: {profile.trust_score}/100
+                    <StatusBadge status={profile.tier} />
+                    {USE_MOCK_AUTH && <> TrustScore: {profile.trust_score}/100</>}
                 </p>
                 <div className="cred-row">
                     <span>GPHN</span>
