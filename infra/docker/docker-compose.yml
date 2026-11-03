@@ -11,7 +11,7 @@ services:
     environment:
       POSTGRES_DB: healthcare_dev
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_PASSWORD: tothioanh15
     ports:
       - '5432:5432'
     volumes:
@@ -25,6 +25,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: healthcare_redis
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
     ports:
       - '6379:6379'
     volumes:
