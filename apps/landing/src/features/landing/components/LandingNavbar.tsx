@@ -25,6 +25,9 @@ export default function LandingNavbar() {
                     ))}
                 </nav>
                 <div className="nav-cta">
+                    <a className="nav-login" href={CTA_LINKS.patientApp}>
+                        Đăng nhập
+                    </a>
                     <a className="btn btn-primary" href={CTA_LINKS.primaryBooking}>
                         Đặt điều dưỡng ngay
                     </a>
@@ -45,6 +48,18 @@ export default function LandingNavbar() {
                         {link.label}
                     </a>
                 ))}
+                <a
+                    href={CTA_LINKS.patientApp}
+                    onClick={() => setMenuOpen(false)}
+                >
+                    Đăng nhập (gia đình)
+                </a>
+                <a
+                    href={CTA_LINKS.nurseApp}
+                    onClick={() => setMenuOpen(false)}
+                >
+                    Đăng nhập (điều dưỡng)
+                </a>
                 <a
                     href={CTA_LINKS.primaryBooking}
                     style={{ color: 'var(--blue)', fontWeight: 700 }}

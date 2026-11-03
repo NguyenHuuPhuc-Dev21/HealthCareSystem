@@ -5,12 +5,17 @@
  * landing đã duyệt (docs/design/ui-boards/landing-page.html).
  */
 
+// Địa chỉ các app khi chạy demo local (xem DEMO.md ở gốc repo). Khi có domain thật,
+// đặt VITE_PATIENT_WEB_URL / VITE_NURSE_WEB_URL trong .env của landing — không sửa code.
+const PATIENT_WEB_URL = import.meta.env.VITE_PATIENT_WEB_URL ?? 'http://localhost:5173';
+const NURSE_WEB_URL = import.meta.env.VITE_NURSE_WEB_URL ?? 'http://localhost:5175';
+
 export const CTA_LINKS = {
     primaryBooking: '#dat-ca', // section CTA cuối trang — đích của các nút "Đặt điều dưỡng ngay"
     nurseSection: '#dieu-duong',
     faq: '#faq',
-    patientApp: '#', // TODO: thay bằng địa chỉ patient-web khi có domain/port chính thức
-    nurseApp: '#', // TODO: thay bằng địa chỉ nurse-web khi có domain/port chính thức
+    patientApp: PATIENT_WEB_URL, // cổng bệnh nhân/gia đình (patient-web)
+    nurseApp: `${NURSE_WEB_URL}/login`, // cổng điều dưỡng — vào thẳng màn đăng nhập
 };
 
 export const NAV_LINKS = [
