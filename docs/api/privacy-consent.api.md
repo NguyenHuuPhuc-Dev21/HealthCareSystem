@@ -92,7 +92,7 @@ Auth: `NURSE`. Runs `assertRecordAccess`, then writes `audit_logs` **VIEW_MEDICA
 `prescription` is `null` when the service is not invasive or no image exists. The image URL is a
 10-minute presigned URL from `core/storage` (BE-1).
 
-**Errors:** `401 UNAUTHORIZED` · `403 FORBIDDEN` (not a nurse) · `403 RECORD_ACCESS_DENIED`
+**Errors:** `400 VALIDATION_ERROR` (bookingId is not a UUID) · `401 UNAUTHORIZED` · `403 FORBIDDEN` (not a nurse) · `403 RECORD_ACCESS_DENIED`
 (`details.reason`: `NOT_ASSIGNED` | `WINDOW_CLOSED` | `CONSENT_WITHDRAWN`) · `404 BOOKING_NOT_FOUND`
 
 ---
