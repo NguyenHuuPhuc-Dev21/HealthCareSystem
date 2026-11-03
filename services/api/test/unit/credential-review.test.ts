@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { DocType, KycStatus, NurseTier, ProfileStatus } from '@healthcare-system/shared';
+import { AuditAction, DocType, KycStatus, NurseTier, ProfileStatus } from '@healthcare-system/shared';
 import { AppError } from '../../src/core/errors';
 import { computeTier, decideReviewOutcome } from '../../src/modules/credential-review/credential-review.policy';
+import { PgReviewRepo } from '../../src/modules/credential-review/credential-review.repo';
 import { verifySchema } from '../../src/modules/credential-review/credential-review.schema';
 import { CredentialReviewService } from '../../src/modules/credential-review/credential-review.service';
 import type {
@@ -294,5 +295,45 @@ describe('CredentialReviewService.submitGphnRenewal', () => {
     await expect(service(repo).submitGphnRenewal(NURSE, { ...body, expiryDate: '2026-11-02' })).rejects.toThrow(/expired/);
     await expect(service(repo, false).submitGphnRenewal(NURSE, body)).rejects.toThrow();
     expect(repo.gphnInserted).toBe(0);
+  });
+});
+
+describe('PgReviewRepo.insertAudit → core/audit writeAuditLog', () => {
+  it('writes through the transaction client with the agreed fields', async () => {
+    const calls: { text: string; params?: unknown[] }[] = [];
+    const tx = {
+      query: async (text: string, params?: unknown[]) => {
+        calls.push({ text, params });
+        return { rows: [{ id: 'a1', created_at: '2026-11-03T00:00:00Z' }], rowCount: 1 } as never;
+      },
+    };
+    await new PgReviewRepo(tx).insertAudit({
+      actorId: ADMIN,
+      action: AuditAction.APPROVE_GPHN,
+      targetId: NURSE,
+      oldValue: { tier: 'TIER_1_BASIC' },
+      newValue: { tier: 'TIER_2_SPECIALIST' },
+      ip: '1.2.3.4',
+    });
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.text).toContain('INSERT INTO audit_logs');
+    expect(calls[0]!.params).toEqual([
+      ADMIN,
+      'APPROVE_GPHN',
+      'nurse_profiles',
+      NURSE,
+      JSON.stringify({ tier: 'TIER_1_BASIC' }),
+      JSON.stringify({ tier: 'TIER_2_SPECIALIST' }),
+      '1.2.3.4',
+    ]);
+  });
+
+  it('rejects an invalid actor id before touching the DB (core/audit validation)', async () => {
+    let called = false;
+    const tx = { query: async () => ((called = true), { rows: [], rowCount: 0 }) as never };
+    await expect(
+      new PgReviewRepo(tx).insertAudit({ actorId: 'not-a-uuid', action: AuditAction.APPROVE_GPHN, targetId: NURSE, oldValue: null, newValue: null, ip: null }),
+    ).rejects.toThrow(/actorId/);
+    expect(called).toBe(false);
   });
 });

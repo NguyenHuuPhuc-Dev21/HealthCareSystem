@@ -28,7 +28,7 @@ Admin verification of nurse documents, tier assignment, and GPHN renewal.
 ## Notes for the team
 - **BE-2 (`tier-lifecycle`)**: import `computeTier` from `credential-review.policy.ts` for the daily sweep so the
   demote rule and the approve rule can never disagree.
-- **BE-3 (`core/audit`)**: this module inserts into `audit_logs` directly (inside the transaction) because `core/audit`
-  does not persist yet. Only `APPROVE_GPHN` exists in `audit_action_enum`; rejections and dossier views are not audited
-  until the enum gets more actions.
+- **Audit**: GPHN approvals go through BE-3's `writeAuditLog(tx, …)` (`core/audit`) on the review transaction.
+  Only `APPROVE_GPHN` exists in `audit_action_enum`; rejections and dossier views are not audited yet —
+  adding actions (e.g. `REJECT_CREDENTIAL`, `VIEW_NURSE_DOSSIER`) needs BE-3 to extend the enum + `AuditAction`.
 - Wallet creation on activation (deposit) is BE-3's `wallets-ledger` / BE-2's `deposits`.

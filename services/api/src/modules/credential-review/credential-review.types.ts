@@ -1,4 +1,5 @@
 import type {
+  AuditAction,
   DocType,
   Gender,
   KycStatus,
@@ -96,7 +97,7 @@ export interface ReviewRepo {
   setKycStatus(nurseId: string, kycStatus: KycStatus): Promise<void>;
   insertAudit(entry: {
     actorId: string;
-    action: 'APPROVE_GPHN';
+    action: AuditAction.APPROVE_GPHN;
     targetId: string;
     oldValue: unknown;
     newValue: unknown;
