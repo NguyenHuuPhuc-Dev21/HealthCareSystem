@@ -9,6 +9,7 @@
     "dev": "tsx watch src/index.ts",
     "worker": "tsx watch src/worker.ts",
     "start": "node dist/index.js",
+    "pretest": "npm run build --prefix ../../packages/shared",
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "vitest run test/unit",
     "test:integration": "vitest run test/integration",
