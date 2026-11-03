@@ -9,6 +9,8 @@ import { checkConnection } from './core/database';
 import { errorHandler, notFoundHandler, setTokenVerifier } from './core/middleware';
 import { createAccountsOtpRouter } from './modules/accounts-otp/accounts-otp.routes';
 import { getAccountsOtpService } from './modules/accounts-otp/accounts-otp.service';
+import { createNurseOnboardingRouter } from './modules/nurse-onboarding/nurse-onboarding.routes';
+import { getNurseOnboardingService } from './modules/nurse-onboarding/nurse-onboarding.service';
 
 function buildApiRouter(): Router {
   const api = Router();
@@ -27,6 +29,7 @@ function buildApiRouter(): Router {
   const auth = getAccountsOtpService();
   setTokenVerifier((token) => auth.sessions.verifyAccessToken(token)); // authGuard now works
   api.use('/auth', createAccountsOtpRouter(auth)); // BE-1 · Phase 1 · accounts-otp
+  api.use(createNurseOnboardingRouter(getNurseOnboardingService())); // BE-1 · Phase 1 · nurse-onboarding
   // api.use('/admin/nurses', credentialReviewRouter); // BE-1 · Phase 1
 
   return api;
