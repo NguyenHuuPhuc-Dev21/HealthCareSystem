@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Phần P — Patient (Khách hàng) · HealthCareSystem (Thiết kế bởi Tom)</title>
+<title>Phần P — Patient (Khách hàng) · CareNest (Thiết kế bởi Tom)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --blue:#2563EB; --blue-dark:#1D4ED8; --sky:#38BDF8; --navy:#0B3C6C; --teal:#0D9488;
-  --ink:#0F2540; --slate:#4A6076; --muted:#7A8FA6; --bg:#F5F9FC; --line:#E1EBF5;
+  --blue:#166B58; --blue-dark:#0E5343; --sky:#5FB3A1; --navy:#143F34; --teal:#1E9E50;
+  --ink:#12211C; --slate:#46645B; --muted:#77948A; --bg:#F3F8F5; --line:#DCEBE3;
   --amber:#B45309; --amber-bg:#FEF3C7; --amber-soft:#FFFBEB;
   --red:#DC2626; --red-bg:#FEF2F2; --orange:#EA580C; --orange-bg:#FFF7ED;
   --green-bg:#ECFDF5; --radius:16px;
-  --shadow:0 18px 40px -18px rgba(11,60,108,.22);
-  --shadow-sm:0 6px 20px -8px rgba(11,60,108,.16);
+  --shadow:0 18px 40px -18px rgba(16,66,54,.22);
+  --shadow-sm:0 6px 20px -8px rgba(16,66,54,.16);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Be Vietnam Pro',system-ui,sans-serif;background:#DCE9F5;color:var(--ink);font-size:16px;line-height:1.55}
@@ -35,7 +35,7 @@ button{font-family:inherit;cursor:pointer}
 .meta-bar span{color:var(--slate);font-size:14px}
 
 /* ===== SCREEN FRAME ===== */
-.screen{max-width:1180px;margin:12px auto 10px;background:var(--bg);border-radius:22px;box-shadow:0 30px 60px -25px rgba(11,60,108,.45);overflow:hidden;border:1px solid #C9DDF2}
+.screen{max-width:1180px;margin:12px auto 10px;background:var(--bg);border-radius:22px;box-shadow:0 30px 60px -25px rgba(16,66,54,.45);overflow:hidden;border:1px solid #C9DDF2}
 .screen-body{padding:30px 38px 40px}
 .page{max-width:1064px;margin:0 auto}
 
@@ -51,7 +51,7 @@ button{font-family:inherit;cursor:pointer}
 .bell{position:relative;width:40px;height:40px;border-radius:50%;border:0;background:transparent;font-size:19px;display:grid;place-items:center}
 .bell:hover{background:var(--bg)}
 .bell .dot{position:absolute;top:2px;right:1px;background:var(--red);color:#fff;font-size:10.5px;font-weight:700;min-width:17px;height:17px;border-radius:9px;display:grid;place-items:center;padding:0 4px;border:2px solid #fff}
-.bell.active{background:#EAF2FE}
+.bell.active{background:#E4F2EC}
 .userblock{display:flex;align-items:center;gap:9px;background:none;border:0;padding:5px 6px;border-radius:12px}
 .userblock:hover{background:var(--bg)}
 .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#93C5FD,var(--blue));color:#fff;display:grid;place-items:center;font-weight:700;font-size:13.5px;flex:0 0 36px}
@@ -84,8 +84,8 @@ button{font-family:inherit;cursor:pointer}
 .btn-danger{background:var(--red);color:#fff}
 .btn-block{width:100%}
 .btn-lg{height:58px;font-size:17px;border-radius:14px}
-.btn:disabled{background:#D7E3F0;color:#8AA3BC;cursor:not-allowed}
-.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 11px;border-radius:999px;background:#EAF2FE;color:var(--blue-dark)}
+.btn:disabled{background:#D3E5DC;color:#8AA3BC;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 11px;border-radius:999px;background:#E4F2EC;color:var(--blue-dark)}
 .chip.teal{background:var(--green-bg);color:var(--teal)}
 .chip.amber{background:var(--amber-bg);color:var(--amber)}
 .chip.orange{background:var(--orange-bg);color:var(--orange)}
@@ -97,7 +97,7 @@ button{font-family:inherit;cursor:pointer}
 .field label .req{color:var(--red)}
 .field .hint{font-size:13.5px;color:var(--muted);margin-top:6px}
 .input{width:100%;height:54px;border:1.5px solid var(--line);border-radius:12px;padding:0 16px;font-family:inherit;font-size:16.5px;color:var(--ink);background:#fff;outline:none}
-.input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+.input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(22,107,88,.14)}
 textarea.input{height:auto;padding:13px 16px;resize:vertical;line-height:1.55}
 select.input{appearance:none}
 .small-print{font-size:13px;color:var(--muted);text-align:center;line-height:1.6}
@@ -105,33 +105,33 @@ select.input{appearance:none}
 /* ===== AUTH (SH1/SH2) ===== */
 .auth-zone{min-height:640px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:44px 20px;background:
  radial-gradient(700px 380px at 85% -5%,rgba(56,189,248,.22),transparent 60%),
- radial-gradient(620px 420px at -10% 30%,rgba(37,99,235,.12),transparent 60%),var(--bg)}
+ radial-gradient(620px 420px at -10% 30%,rgba(22,107,88,.12),transparent 60%),var(--bg)}
 .auth-card{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:38px 40px;width:100%;max-width:480px}
 .auth-card .logo-c{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:24px}
 .auth-card .logo-mark{width:56px;height:56px;border-radius:16px;font-size:30px;margin-bottom:12px}
 .auth-card h1{font-size:26px;font-weight:800;color:var(--navy);text-align:center}
 .auth-card .sub{text-align:center;color:var(--slate);font-size:15.5px;margin:6px 0 26px}
 .phone-wrap{display:flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
-.phone-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+.phone-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(22,107,88,.14)}
 .phone-wrap .prefix{display:flex;align-items:center;gap:7px;padding:0 14px;background:var(--bg);border-right:1px solid var(--line);font-weight:700;color:var(--navy);font-size:16.5px}
 .phone-wrap input{flex:1;border:0;outline:none;height:54px;padding:0 14px;font-family:inherit;font-size:17px;letter-spacing:.4px;color:var(--ink)}
 .divider-or{display:flex;align-items:center;gap:14px;color:var(--muted);font-size:13px;margin:22px 0}
 .divider-or::before,.divider-or::after{content:"";flex:1;height:1px;background:var(--line)}
-.admin-variant{margin-top:26px;width:100%;max-width:480px;background:#fff;border:1.5px dashed #B9D2EE;border-radius:16px;padding:18px 20px}
+.admin-variant{margin-top:26px;width:100%;max-width:480px;background:#fff;border:1.5px dashed #A9CDBE;border-radius:16px;padding:18px 20px}
 .admin-variant h4{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
 .admin-variant p{font-size:14.5px;color:var(--slate)}
 /* OTP */
 .otp-row{display:flex;gap:11px;justify-content:center;margin:8px 0 6px}
 .otp-row input{width:52px;height:60px;text-align:center;font-family:inherit;font-size:24px;font-weight:700;color:var(--navy);border:1.5px solid var(--line);border-radius:13px;outline:none;background:#fff}
-.otp-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(37,99,235,.14)}
+.otp-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3.5px rgba(22,107,88,.14)}
 .alert{display:flex;gap:11px;border-radius:13px;padding:13px 16px;font-size:14.5px;margin:14px 0}
 .alert.red{background:var(--red-bg);color:#7F1D1D}
 .alert b{color:var(--red)}
 /* role cards */
 .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0 22px}
 .role-card{border:2px solid var(--line);border-radius:16px;padding:19px;text-align:left;background:#fff;transition:.15s;width:100%}
-.role-card:hover{border-color:#B9D2EE}
-.role-card.selected{border-color:var(--blue);background:#F4F9FF;box-shadow:0 0 0 3.5px rgba(37,99,235,.12)}
+.role-card:hover{border-color:#A9CDBE}
+.role-card.selected{border-color:var(--blue);background:#F4F9FF;box-shadow:0 0 0 3.5px rgba(22,107,88,.12)}
 .role-card .ric{font-size:27px;margin-bottom:9px}
 .role-card h3{font-size:16.5px;color:var(--navy);margin-bottom:4px}
 .role-card p{font-size:14px;color:var(--slate)}
@@ -140,7 +140,7 @@ select.input{appearance:none}
 /* ===== STEPPER (body card) ===== */
 .stepper{display:flex;gap:10px;margin-bottom:22px}
 .stepper .st{flex:1;display:flex;align-items:center;gap:11px;padding:14px 16px;border-radius:13px;background:#fff;border:1px solid var(--line)}
-.stepper .st .n{width:34px;height:34px;border-radius:50%;background:#EAF2FE;color:var(--blue);font-weight:800;display:grid;place-items:center;flex:0 0 34px;font-size:15px}
+.stepper .st .n{width:34px;height:34px;border-radius:50%;background:#E4F2EC;color:var(--blue);font-weight:800;display:grid;place-items:center;flex:0 0 34px;font-size:15px}
 .stepper .st.done .n{background:var(--teal);color:#fff}
 .stepper .st.now{background:var(--blue);border-color:var(--blue);color:#fff}
 .stepper .st.now .n{background:#fff;color:var(--blue)}
@@ -155,7 +155,7 @@ select.input{appearance:none}
 .step-summary .edit{margin-left:auto;font-weight:600;font-size:14.5px;white-space:nowrap}
 /* upload cards CP2 */
 .upload-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.upload{border:1.5px dashed #B9D2EE;border-radius:14px;padding:17px;text-align:center;background:#FBFDFF}
+.upload{border:1.5px dashed #A9CDBE;border-radius:14px;padding:17px;text-align:center;background:#FBFDFF}
 .upload .uic{font-size:29px}
 .upload h4{font-size:15px;color:var(--navy);margin:7px 0 3px}
 .upload p{font-size:13px;color:var(--muted);margin-bottom:9px}
@@ -171,13 +171,13 @@ select.input{appearance:none}
 .chip-select button.selected{background:var(--blue);border-color:var(--blue);color:#fff}
 .cols-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
 .cols-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.toggle{position:relative;width:58px;height:32px;border-radius:999px;background:#CBD8E5;border:0;flex:0 0 58px;transition:.2s}
+.toggle{position:relative;width:58px;height:32px;border-radius:999px;background:#C2D6CC;border:0;flex:0 0 58px;transition:.2s}
 .toggle::after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 .toggle.on{background:var(--teal)}
 .toggle.on::after{left:30px}
 .map-ph{height:215px;border-radius:14px;position:relative;overflow:hidden;background:
- repeating-linear-gradient(0deg,transparent,transparent 34px,rgba(37,99,235,.07) 34px,rgba(37,99,235,.07) 35px),
- repeating-linear-gradient(90deg,transparent,transparent 34px,rgba(37,99,235,.07) 34px,rgba(37,99,235,.07) 35px),
+ repeating-linear-gradient(0deg,transparent,transparent 34px,rgba(22,107,88,.07) 34px,rgba(22,107,88,.07) 35px),
+ repeating-linear-gradient(90deg,transparent,transparent 34px,rgba(22,107,88,.07) 34px,rgba(22,107,88,.07) 35px),
  linear-gradient(140deg,#E3F2E8,#DCEBFA)}
 .map-ph .pin{position:absolute;top:44%;left:50%;transform:translate(-50%,-100%);font-size:36px}
 .map-ph .pin-label{position:absolute;top:calc(44% + 8px);left:50%;transform:translateX(-50%);background:#fff;border-radius:9px;box-shadow:var(--shadow-sm);padding:5px 12px;font-size:13px;font-weight:600;color:var(--navy);white-space:nowrap}
@@ -190,7 +190,7 @@ select.input{appearance:none}
 .elder .field label{font-size:16px}
 .elder .btn-lg{height:60px;font-size:17.5px}
 .doc-row{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:#fff}
-.doc-row .dic{width:46px;height:46px;border-radius:12px;background:#EAF2FE;display:grid;place-items:center;font-size:22px;flex:0 0 46px}
+.doc-row .dic{width:46px;height:46px;border-radius:12px;background:#E4F2EC;display:grid;place-items:center;font-size:22px;flex:0 0 46px}
 .doc-row h4{color:var(--navy);font-size:16.5px}
 .doc-row p{font-size:14px;color:var(--slate)}
 .doc-row .st{margin-left:auto;text-align:right}
@@ -203,9 +203,9 @@ select.input{appearance:none}
 .check-item.locked{background:#F1F5F9;color:var(--muted)}
 .timeline-mini{display:flex;gap:0;margin-top:14px}
 .timeline-mini div{flex:1;text-align:center;position:relative;padding-top:20px;font-size:14px;color:var(--slate)}
-.timeline-mini div::before{content:"";position:absolute;top:5px;left:50%;transform:translateX(-50%);width:12px;height:12px;border-radius:50%;background:#CBD8E5}
+.timeline-mini div::before{content:"";position:absolute;top:5px;left:50%;transform:translateX(-50%);width:12px;height:12px;border-radius:50%;background:#C2D6CC}
 .timeline-mini div.done::before{background:var(--teal)}
-.timeline-mini div::after{content:"";position:absolute;top:10px;left:calc(-50% + 8px);right:calc(50% + 8px);height:2px;background:#E1EBF5}
+.timeline-mini div::after{content:"";position:absolute;top:10px;left:calc(-50% + 8px);right:calc(50% + 8px);height:2px;background:#DCEBE3}
 .timeline-mini div:first-child::after{display:none}
 
 /* ===== TOOLBAR + NOTIFICATIONS (SH5) ===== */
@@ -213,14 +213,14 @@ select.input{appearance:none}
 .toolbar button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 17px;font-size:14.5px;font-weight:600;color:var(--slate)}
 .toolbar button.active{background:var(--blue);border-color:var(--blue);color:#fff}
 .toolbar button .cnt{background:rgba(255,255,255,.25);border-radius:8px;padding:0 6px;margin-left:5px;font-size:12.5px}
-.toolbar button:not(.active) .cnt{background:#EAF2FE;color:var(--blue-dark)}
+.toolbar button:not(.active) .cnt{background:#E4F2EC;color:var(--blue-dark)}
 .notif-cols{display:grid;grid-template-columns:1.9fr 1fr;gap:22px;align-items:start}
 .group-label{display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 12px}
 .group-label b{color:var(--navy);font-size:16px}
 .group-label span{color:var(--muted);font-size:13.5px}
 .notif{display:flex;gap:14px;background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px 19px;margin-bottom:13px;position:relative}
-.notif.unread{border-color:#B9D2EE;background:#FBFDFF}
-.notif .nic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:0 0 44px;background:#EAF2FE}
+.notif.unread{border-color:#A9CDBE;background:#FBFDFF}
+.notif .nic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:0 0 44px;background:#E4F2EC}
 .notif .nic.red{background:var(--red-bg)}
 .notif .nic.amber{background:var(--amber-bg)}
 .notif .nic.teal{background:var(--green-bg)}
@@ -230,7 +230,7 @@ select.input{appearance:none}
 .notif .udot{position:absolute;top:16px;right:16px;width:9px;height:9px;border-radius:50%;background:var(--blue)}
 .notif .acts{display:flex;gap:9px;margin-top:11px}
 .btn-sm{height:38px;padding:0 17px;font-size:14px;border-radius:10px}
-.variant-note{border:1.5px dashed #B9D2EE;border-radius:15px;padding:18px;background:#FBFDFF}
+.variant-note{border:1.5px dashed #A9CDBE;border-radius:15px;padding:18px;background:#FBFDFF}
 .variant-note h4{font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .variant-note p{font-size:14.5px;color:var(--slate);margin-bottom:9px}
 .variant-note b{color:var(--navy)}
@@ -275,9 +275,9 @@ select.input{appearance:none}
 .addr-pick{display:inline-flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-weight:600;color:var(--navy);font-size:14.5px}
 .search-big{display:flex;align-items:center;gap:11px;background:#fff;border:1.5px solid var(--line);border-radius:15px;padding:0 18px;height:58px;box-shadow:var(--shadow-sm);margin:18px 0}
 .search-big input{flex:1;border:0;outline:none;font-family:inherit;font-size:16.5px;color:var(--ink)}
-.carousel{border-radius:20px;background:linear-gradient(120deg,var(--blue),#1E40AF 75%);color:#fff;padding:30px 32px;position:relative;overflow:hidden;margin-bottom:20px}
+.carousel{border-radius:20px;background:linear-gradient(120deg,var(--blue),#0C4636 75%);color:#fff;padding:30px 32px;position:relative;overflow:hidden;margin-bottom:20px}
 .carousel h2{font-size:25px;font-weight:800;line-height:1.3;max-width:520px}
-.carousel p{color:#CFE2FF;margin-top:7px;max-width:480px;font-size:15.5px}
+.carousel p{color:#CDEAE0;margin-top:7px;max-width:480px;font-size:15.5px}
 .carousel .dots{position:absolute;bottom:16px;left:32px;display:flex;gap:7px}
 .carousel .dots span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4)}
 .carousel .dots span.on{background:#fff;width:22px;border-radius:5px}
@@ -288,8 +288,8 @@ select.input{appearance:none}
 .btile h3{color:var(--navy);font-size:16.5px;margin-bottom:4px}
 .btile p{color:var(--slate);font-size:14px}
 .btile .bic{font-size:25px;margin-bottom:9px;display:block}
-.btile.hero-t{grid-column:span 2;background:linear-gradient(135deg,var(--blue),#1E40AF);color:#fff;border:0}
-.btile.hero-t h3{color:#fff}.btile.hero-t p{color:#CFE2FF}
+.btile.hero-t{grid-column:span 2;background:linear-gradient(135deg,var(--blue),#0C4636);color:#fff;border:0}
+.btile.hero-t h3{color:#fff}.btile.hero-t p{color:#CDEAE0}
 .nurse-scroll{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
 .nurse-card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:19px;box-shadow:var(--shadow-sm)}
 .nurse-card h3{color:var(--navy);font-size:16.5px}
@@ -299,28 +299,28 @@ select.input{appearance:none}
 .seg-tabs button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 17px;font-weight:600;font-size:14.5px;color:var(--slate)}
 .seg-tabs button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 .svc-item{display:flex;gap:14px;background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px 18px;margin-bottom:12px;align-items:center}
-.svc-item .sic{width:46px;height:46px;border-radius:12px;background:#EAF2FE;display:grid;place-items:center;font-size:22px;flex:0 0 46px}
+.svc-item .sic{width:46px;height:46px;border-radius:12px;background:#E4F2EC;display:grid;place-items:center;font-size:22px;flex:0 0 46px}
 .svc-item h4{color:var(--navy);font-size:16px}
 .svc-item p{font-size:13.5px;color:var(--slate)}
 .svc-item .pr{margin-left:auto;text-align:right}
 .svc-item .pr b{color:var(--navy);font-size:16.5px;display:block}
 .dist-bar{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--slate);margin:5px 0}
-.dist-bar .track{flex:1;height:8px;border-radius:5px;background:#EAF0F6;overflow:hidden}
+.dist-bar .track{flex:1;height:8px;border-radius:5px;background:#E6EFEA;overflow:hidden}
 .dist-bar .fill{height:100%;background:#F59E0B;border-radius:5px}
 .mini-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;text-align:center;font-size:13.5px}
 .mini-cal .d{padding:9px 2px;border-radius:10px;background:var(--bg);color:var(--slate)}
 .mini-cal .d b{display:block;color:var(--navy);font-size:14.5px}
-.mini-cal .d.free{background:#EAF2FE}
+.mini-cal .d.free{background:#E4F2EC}
 .mini-cal .d.book{outline:2px solid var(--blue);background:#fff}
 .sticky-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:15px 38px;display:flex;gap:12px;align-items:center;margin:26px -38px -40px}
 .qr-box{width:196px;height:196px;border-radius:14px;border:2px solid var(--navy);margin:0 auto;position:relative;background:
- repeating-conic-gradient(#0F2540 0% 25%, #fff 0% 50%) 0 0/26px 26px}
+ repeating-conic-gradient(#12211C 0% 25%, #fff 0% 50%) 0 0/26px 26px}
 .qr-box::after{content:"+";position:absolute;inset:0;margin:auto;width:52px;height:52px;background:var(--blue);color:#fff;border-radius:12px;display:grid;place-items:center;font-size:30px;font-weight:900;border:5px solid #fff}
 .count-pill{display:inline-flex;gap:8px;align-items:center;background:var(--red-bg);color:var(--red);font-weight:700;border-radius:999px;padding:8px 17px;font-size:15px}
 .tl{position:relative;padding-left:26px;display:flex;flex-direction:column;gap:17px}
 .tl::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2.5px;background:var(--line)}
 .tl div{position:relative}
-.tl div::before{content:"";position:absolute;left:-25.5px;top:4px;width:11px;height:11px;border-radius:50%;background:#CBD8E5;border:2.5px solid #fff;box-shadow:0 0 0 2px #CBD8E5}
+.tl div::before{content:"";position:absolute;left:-25.5px;top:4px;width:11px;height:11px;border-radius:50%;background:#C2D6CC;border:2.5px solid #fff;box-shadow:0 0 0 2px #C2D6CC}
 .tl div.done::before{background:var(--teal);box-shadow:0 0 0 2px var(--teal)}
 .tl div.now::before{background:var(--blue);box-shadow:0 0 0 2px var(--blue)}
 .tl b{color:var(--navy);font-size:15.5px}
@@ -328,15 +328,15 @@ select.input{appearance:none}
 .tl .tt{font-size:12.5px;font-weight:700;color:var(--blue);letter-spacing:.05em}
 .phone-frame{max-width:430px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);padding:24px 22px 28px}
 .big-timer{font-size:37px;font-weight:900;color:var(--navy);letter-spacing:.5px}
-.progress{height:11px;border-radius:6px;background:#EAF0F6;overflow:hidden}
+.progress{height:11px;border-radius:6px;background:#E6EFEA;overflow:hidden}
 .progress i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--sky));border-radius:6px}
-.star-input{display:flex;gap:7px;font-size:39px;color:#D7E3F0;cursor:pointer}
+.star-input{display:flex;gap:7px;font-size:39px;color:#D3E5DC;cursor:pointer}
 .star-input .on{color:#F59E0B}
 .tag-chips{display:flex;gap:8px;flex-wrap:wrap}
 .tag-chips button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 15px;font-size:14px;font-weight:600;color:var(--slate)}
-.tag-chips button.selected{background:#EAF2FE;border-color:var(--blue);color:var(--blue-dark)}
+.tag-chips button.selected{background:#E4F2EC;border-color:var(--blue);color:var(--blue-dark)}
 .tx-row{display:flex;gap:13px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 18px;margin-bottom:11px}
-.tx-row .tic{width:42px;height:42px;border-radius:11px;background:#EAF2FE;display:grid;place-items:center;font-size:19px;flex:0 0 42px}
+.tx-row .tic{width:42px;height:42px;border-radius:11px;background:#E4F2EC;display:grid;place-items:center;font-size:19px;flex:0 0 42px}
 .tx-row h4{font-size:15.5px;color:var(--navy)}
 .tx-row p{font-size:13.5px;color:var(--slate)}
 .tx-row .amt{margin-left:auto;font-weight:800;color:var(--navy);white-space:nowrap}
@@ -364,7 +364,7 @@ details.faq-d p{color:var(--slate);font-size:14.5px;margin-top:8px}
 <div class="meta-bar" id="p1"><span class="code">P1</span><h2>Trang chủ khách</h2><span>Navbar Patient (active: Trang chủ) · carousel + bento chỉ ở màn này</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links"><a href="#p1" class="active">Trang chủ</a><a href="#p2">Dịch vụ</a><a href="#p7">Đơn của tôi</a><a href="#">Tin nhắn</a><a href="#p13">Tài khoản</a></nav>
     <div class="nav-right">
       <button class="bell">🔔<span class="dot">2</span></button>
@@ -442,7 +442,7 @@ details.faq-d p{color:var(--slate);font-size:14.5px;margin-top:8px}
 <div class="meta-bar" id="p2"><span class="code">P2</span><h2>Danh mục dịch vụ &amp; chi tiết dịch vụ</h2><span>Hai trạng thái liên kết · dịch vụ cấm không hiển thị trong danh mục</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links"><a href="#p1">Trang chủ</a><a href="#p2" class="active">Dịch vụ</a><a href="#p7">Đơn của tôi</a><a href="#">Tin nhắn</a><a href="#p13">Tài khoản</a></nav>
     <div class="nav-right"><button class="bell">🔔<span class="dot">2</span></button><span class="avatar">AN</span></div>
   </div>
@@ -461,7 +461,7 @@ details.faq-d p{color:var(--slate);font-size:14.5px;margin-top:8px}
       <div>
         <div class="page-head" style="padding-bottom:14px"><div><h1 style="font-size:21px">Chi tiết dịch vụ</h1></div></div>
         <div class="card" style="padding:24px">
-          <div style="display:flex;gap:14px;align-items:center"><span class="sic" style="width:58px;height:58px;font-size:28px;border-radius:15px;background:#EAF2FE;display:grid;place-items:center">🩹</span>
+          <div style="display:flex;gap:14px;align-items:center"><span class="sic" style="width:58px;height:58px;font-size:28px;border-radius:15px;background:#E4F2EC;display:grid;place-items:center">🩹</span>
             <div><h3 style="color:var(--navy);font-size:19px">Thay băng &amp; chăm sóc vết thương</h3><span class="chip" style="margin-top:5px">Nhóm 2 · Xâm lấn có điều kiện</span></div></div>
           <p style="color:var(--slate);font-size:15px;margin:14px 0">Thay băng, rửa và chăm sóc vết thương hở phức tạp, vết mổ hậu phẫu tại nhà — thực hiện đúng quy trình vô khuẩn, ghi chép tình trạng vết thương vào nhật ký ca để gia đình theo dõi.</p>
           <div class="alert" style="background:#FFFBEB;color:#713F12;margin:0 0 14px"><span>📜</span><span><b>Yêu cầu:</b> Điều dưỡng Cấp 2 có GPHN hợp lệ · Cần tải ảnh y lệnh/đơn thuốc khi đặt — điều dưỡng đối chiếu bản gốc khi tới nơi.</span></div>
@@ -489,7 +489,7 @@ details.faq-d p{color:var(--slate);font-size:14.5px;margin-top:8px}
 <div class="meta-bar" id="p3"><span class="code">P3</span><h2>Tìm &amp; chọn điều dưỡng</h2><span>Bản đồ thu nhỏ + danh sách · bộ lọc theo cấp bậc/dịch vụ/khoảng cách</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links"><a href="#p1">Trang chủ</a><a href="#p2" class="active">Dịch vụ</a><a href="#p7">Đơn của tôi</a><a href="#">Tin nhắn</a><a href="#p13">Tài khoản</a></nav>
     <div class="nav-right"><button class="bell">🔔<span class="dot">2</span></button><span class="avatar">AN</span></div>
   </div>
@@ -530,7 +530,7 @@ details.faq-d p{color:var(--slate);font-size:14.5px;margin-top:8px}
 <div class="meta-bar" id="p4"><span class="code">P4</span><h2>Hồ sơ điều dưỡng &amp; đặt trực tiếp</h2><span>TrustScore KHÔNG hiển thị cho khách · nhắn tin khóa tới khi có đơn được xác nhận</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links"><a href="#p1">Trang chủ</a><a href="#p2" class="active">Dịch vụ</a><a href="#p7">Đơn của tôi</a><a href="#">Tin nhắn</a><a href="#p13">Tài khoản</a></nav>
     <div class="nav-right"><button class="bell">🔔<span class="dot">2</span></button><span class="avatar">AN</span></div>
   </div>
@@ -595,7 +595,7 @@ details.faq-d p{color:var(--slate);font-size:14.5px;margin-top:8px}
 <div class="meta-bar" id="p5"><span class="code">P5</span><h2>Tạo đơn đặt lịch — luồng 4 bước</h2><span>Trạng thái chính: Bước 3 (Y lệnh) · Bước 1–2–4 thu gọn ở cột phải</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links"><a href="#p1">Trang chủ</a><a href="#p2" class="active">Dịch vụ</a><a href="#p7">Đơn của tôi</a><a href="#">Tin nhắn</a><a href="#p13">Tài khoản</a></nav>
     <div class="nav-right"><button class="bell">🔔<span class="dot">2</span></button><span class="avatar">AN</span></div>
   </div>
@@ -642,7 +642,7 @@ details.faq-d p{color:var(--slate);font-size:14.5px;margin-top:8px}
           <p style="font-size:14.5px;color:var(--slate);margin-top:5px">Theo thủ thuật lẻ · <b>Hôm nay 29/10, 14:30</b> · tại nhà — 25 Quang Trung, Hải Châu.</p>
           <a href="#" style="font-size:14px;font-weight:600">Chỉnh sửa</a>
         </div>
-        <div class="card" style="padding:18px;border-color:#B9D2EE">
+        <div class="card" style="padding:18px;border-color:#A9CDBE">
           <b style="color:var(--navy)">Bước 4 · Giá &amp; thanh toán (xem trước)</b>
           <div style="font-size:14.5px;color:var(--slate);margin-top:9px;display:flex;flex-direction:column;gap:6px">
             <div style="display:flex;justify-content:space-between"><span>Giá dịch vụ</span><b style="color:var(--navy)">500.000đ</b></div>
@@ -664,7 +664,7 @@ details.faq-d p{color:var(--slate);font-size:14.5px;margin-top:8px}
 <div class="meta-bar" id="p6"><span class="code">P6</span><h2>Thanh toán chuyển khoản &amp; trạng thái chờ</h2><span>Đếm ngược 15 phút · VietQR · 2 biến thể: đã thanh toán / hết hạn</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links"><a href="#p1">Trang chủ</a><a href="#p2">Dịch vụ</a><a href="#p7" class="active">Đơn của tôi</a><a href="#">Tin nhắn</a><a href="#p13">Tài khoản</a></nav>
     <div class="nav-right"><button class="bell">🔔<span class="dot">2</span></button><span class="avatar">AN</span></div>
   </div>
@@ -714,7 +714,7 @@ details.faq-d p{color:var(--slate);font-size:14.5px;margin-top:8px}
 <div class="meta-bar" id="p7"><span class="code">P7</span><h2>Đơn của tôi</h2><span>Thẻ đơn với chip 3 trục: thực hiện · thanh toán · khiếu nại</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links"><a href="#p1">Trang chủ</a><a href="#p2">Dịch vụ</a><a href="#p7" class="active">Đơn của tôi</a><a href="#">Tin nhắn</a><a href="#p13">Tài khoản</a></nav>
     <div class="nav-right">
       <button class="bell">🔔<span class="dot">2</span></button>
@@ -777,7 +777,7 @@ details.faq-d p{color:var(--slate);font-size:14.5px;margin-top:8px}
 <div class="meta-bar" id="p8"><span class="code">P8</span><h2>Chi tiết đơn (góc khách)</h2><span>Trạng thái chính: ĐÃ XÁC NHẬN · kèm dải biến thể Đang diễn ra &amp; Gia hạn</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links"><a href="#p1">Trang chủ</a><a href="#p2">Dịch vụ</a><a href="#p7" class="active">Đơn của tôi</a><a href="#">Tin nhắn</a><a href="#p13">Tài khoản</a></nav>
     <div class="nav-right"><button class="bell">🔔<span class="dot">2</span></button><span class="avatar">AN</span></div>
   </div>
@@ -891,7 +891,7 @@ details.faq-d p{color:var(--slate);font-size:14.5px;margin-top:8px}
 <div class="meta-bar" id="p10"><span class="code">P10</span><h2>Đánh giá điều dưỡng</h2><span>Đánh giá ẩn hai chiều · kèm biến thể đã gửi &amp; đã hiện</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links"><a href="#p1">Trang chủ</a><a href="#p2">Dịch vụ</a><a href="#p7" class="active">Đơn của tôi</a><a href="#">Tin nhắn</a><a href="#p13">Tài khoản</a></nav>
     <div class="nav-right"><button class="bell">🔔<span class="dot">2</span></button><span class="avatar">AN</span></div>
   </div>
@@ -905,7 +905,7 @@ details.faq-d p{color:var(--slate);font-size:14.5px;margin-top:8px}
           <div class="tag-chips"><button type="button" class="selected">Đúng giờ</button><button type="button" class="selected">Nhẹ nhàng, tận tâm</button><button type="button">Kỹ thuật tốt</button><button type="button">Giao tiếp rõ ràng</button><button type="button">Đến muộn</button><button type="button">Chưa hài lòng</button></div>
         </div>
         <div class="field"><label>Nhận xét thêm</label><textarea class="input" rows="3" placeholder="Chia sẻ trải nghiệm của gia đình bạn…">Cô Mai chăm sóc mẹ tôi rất chu đáo, thay băng đúng giờ và dặn dò kỹ.</textarea></div>
-        <div class="alert" style="background:#EAF2FE;color:#1E3A5F;margin:0 0 16px"><span>🔒</span><span><b>Đánh giá ẩn hai chiều:</b> đánh giá của bạn chỉ hiển thị khi điều dưỡng cũng đã gửi đánh giá, hoặc sau 7 ngày — để cả hai phía đều trung thực.</span></div>
+        <div class="alert" style="background:#E4F2EC;color:#173F34;margin:0 0 16px"><span>🔒</span><span><b>Đánh giá ẩn hai chiều:</b> đánh giá của bạn chỉ hiển thị khi điều dưỡng cũng đã gửi đánh giá, hoặc sau 7 ngày — để cả hai phía đều trung thực.</span></div>
         <button class="btn btn-primary btn-block btn-lg" type="submit">Gửi đánh giá</button>
       </form>
       <div style="display:flex;flex-direction:column;gap:14px">
@@ -927,7 +927,7 @@ details.faq-d p{color:var(--slate);font-size:14.5px;margin-top:8px}
 <div class="meta-bar" id="p11"><span class="code">P11</span><h2>Khiếu nại &amp; theo dõi phân xử</h2><span>Hai trạng thái: tạo khiếu nại · chi tiết &amp; kết quả</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links"><a href="#p1">Trang chủ</a><a href="#p2">Dịch vụ</a><a href="#p7" class="active">Đơn của tôi</a><a href="#">Tin nhắn</a><a href="#p13">Tài khoản</a></nav>
     <div class="nav-right"><button class="bell">🔔<span class="dot">2</span></button><span class="avatar">AN</span></div>
   </div>
@@ -981,13 +981,13 @@ details.faq-d p{color:var(--slate);font-size:14.5px;margin-top:8px}
 <div class="meta-bar" id="p12"><span class="code">P12</span><h2>Ví khách — thanh toán, hoàn tiền &amp; voucher</h2><span>Lịch sử tiền theo trạng thái · voucher xin lỗi từ phạt no-show</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links"><a href="#p1">Trang chủ</a><a href="#p2">Dịch vụ</a><a href="#p7">Đơn của tôi</a><a href="#">Tin nhắn</a><a href="#p13" class="active">Tài khoản</a></nav>
     <div class="nav-right"><button class="bell">🔔<span class="dot">2</span></button><span class="avatar">AN</span></div>
   </div>
   <div class="screen-body"><div class="page">
     <div class="page-head"><div><h1>Thanh toán của tôi</h1><p>Mọi khoản trả trước, hoàn tiền và voucher</p></div></div>
-    <div class="card" style="padding:22px;margin-bottom:20px;background:linear-gradient(120deg,#EFF6FF,#fff)">
+    <div class="card" style="padding:22px;margin-bottom:20px;background:linear-gradient(120deg,#EDF7F1,#fff)">
       <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
         <span style="font-size:34px">🎟️</span>
         <div style="flex:1"><b style="color:var(--navy);font-size:17.5px">Voucher khả dụng: 1 · 50.000đ</b><div style="color:var(--slate);font-size:14.5px">Voucher xin lỗi (từ sự cố điều dưỡng không đến) · Áp dụng tự động cho đơn chuyển khoản tiếp theo</div></div>
@@ -1012,7 +1012,7 @@ details.faq-d p{color:var(--slate);font-size:14.5px;margin-top:8px}
 <div class="meta-bar" id="p13"><span class="code">P13</span><h2>Hồ sơ người bệnh của tôi</h2><span>Danh sách hồ sơ + form sửa · khối đồng ý dữ liệu &amp; vùng nguy hiểm</span></div>
 <div class="screen">
   <div class="navbar">
-    <span class="logo"><span class="logo-mark">+</span>HealthCareSystem</span>
+    <span class="logo"><span class="logo-mark"><svg width="19" height="19" viewBox="0 0 32 32" style="display:block"><path d="M5 14 L16 5 L27 14" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 20.5 Q16 25.5 23.5 20.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><rect x="14.9" y="12.6" width="2.2" height="7" fill="#fff"/><rect x="12.5" y="15" width="7" height="2.2" fill="#fff"/></svg></span>CareNest</span>
     <nav class="nav-links"><a href="#p1">Trang chủ</a><a href="#p2">Dịch vụ</a><a href="#p7">Đơn của tôi</a><a href="#">Tin nhắn</a><a href="#p13" class="active">Tài khoản</a></nav>
     <div class="nav-right">
       <button class="bell">🔔<span class="dot">2</span></button>
@@ -1035,7 +1035,7 @@ details.faq-d p{color:var(--slate);font-size:14.5px;margin-top:8px}
       <button class="btn btn-primary" type="button" style="height:48px">＋ Thêm hồ sơ</button></div>
     <div class="split-2" style="grid-template-columns:1fr 1.45fr">
       <div style="display:flex;flex-direction:column;gap:14px">
-        <div class="card" style="padding:20px;border-color:#B9D2EE">
+        <div class="card" style="padding:20px;border-color:#A9CDBE">
           <div style="display:flex;gap:12px;align-items:center"><span class="avatar lg">HO</span><div><b style="color:var(--navy);font-size:16.5px">Nguyễn Thị Hoa</b><div style="font-size:14px;color:var(--slate)">Mẹ · 78 tuổi · Hỗ trợ di chuyển</div></div></div>
           <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:11px"><span class="chip teal">Đã đồng ý xử lý dữ liệu · 12/10/2026</span><span class="chip grey">3 ca đã đặt</span></div>
           <button class="btn btn-primary btn-block" style="margin-top:13px;height:46px" type="button">Đang chỉnh sửa hồ sơ này</button>
@@ -1083,7 +1083,7 @@ details.faq-d p{color:var(--slate);font-size:14.5px;margin-top:8px}
 </div>
 
 <div class="board-foot">
-  Chuẩn áp dụng: NAV-0 (navbar Patient) · M0 (Be Vietnam Pro, #2563EB; bento + carousel chỉ ở P1) · Dữ liệu mẫu thống nhất với phần SH: An — bà Hoa (78 tuổi, Đà Nẵng) · ĐD. Mai (Cấp 2) · ĐD. Hà (Cấp 2) · Hùng (Cấp 1) · Đơn HC-2026-1042/1050/1057/1033/1039 · Nội dung theo SRS v2.0 Updated.
+  Chuẩn áp dụng: NAV-0 (navbar Patient) · M0 (Be Vietnam Pro, #166B58; bento + carousel chỉ ở P1) · Dữ liệu mẫu thống nhất với phần SH: An — bà Hoa (78 tuổi, Đà Nẵng) · ĐD. Mai (Cấp 2) · ĐD. Hà (Cấp 2) · Hùng (Cấp 1) · Đơn HC-2026-1042/1050/1057/1033/1039 · Nội dung theo SRS v2.0 Updated.
 </div>
 
 <script>
