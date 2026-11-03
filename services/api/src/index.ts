@@ -8,6 +8,7 @@ import 'dotenv/config';
 import { createApp } from './app';
 import { checkConnection, closePool } from './core/database';
 import { assertAllConfigKeysPresent } from './core/config';
+import { closeKeyValueStore } from './core/redis';
 import { describeError } from './core/errors';
 
 export async function bootstrap(): Promise<void> {
@@ -22,7 +23,7 @@ export async function bootstrap(): Promise<void> {
   const shutdown = (signal: string) => {
     console.log(`[Bootstrap] ${signal} received, shutting down…`);
     server.close(() => {
-      closePool()
+      Promise.all([closePool(), closeKeyValueStore()])
         .catch((err: Error) => console.error('[Bootstrap] Pool close error:', err.message))
         .finally(() => process.exit(0));
     });

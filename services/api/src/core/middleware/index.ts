@@ -101,6 +101,22 @@ export function requireNurseEligibility(requiredTier: NurseTier = NurseTier.TIER
   };
 }
 
+/**
+ * Wraps an async route handler so a rejected promise reaches errorHandler
+ * (Express 4 does not do this by itself — ADR-0003).
+ */
+export function asyncHandler(fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown>): RequestHandler {
+  return (req, res, next) => {
+    fn(req, res, next).catch(next);
+  };
+}
+
+/** Reads the raw bearer token (for logout); null when absent. */
+export function bearerToken(req: Request): string | null {
+  const header = req.headers.authorization;
+  return header && header.startsWith('Bearer ') ? header.slice('Bearer '.length).trim() : null;
+}
+
 /** Validates and REPLACES req.body with the parsed value (strict schemas drop nothing silently). */
 export function validateBody<S extends z.ZodTypeAny>(schema: S): RequestHandler {
   return (req, _res, next) => {
