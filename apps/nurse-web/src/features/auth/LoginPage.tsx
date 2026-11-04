@@ -85,8 +85,7 @@ export const LoginPage: React.FC = () => {
                         {loading ? 'Đang gửi mã…' : 'Nhận mã OTP →'}
                     </Button>
                 </form>
-                <div className="divider-or">hoặc</div>
-                <p style={{ textAlign: 'center', fontSize: '15.5px', color: 'var(--color-text-muted)', margin: 0 }}>
+                <p style={{ textAlign: 'center', fontSize: '15px', color: 'var(--color-text-muted, #5f7d75)', margin: '20px 0 0', lineHeight: 1.5 }}>
                     Chưa có tài khoản? Chỉ cần nhập số điện thoại và nhận OTP — hệ thống sẽ hướng dẫn bạn
                     đăng ký hồ sơ điều dưỡng ngay sau đó.
                 </p>
@@ -110,12 +109,12 @@ export const LoginPage: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td>0901111111</td><td>Chưa có hồ sơ → đi đăng ký (wizard)</td></tr>
-                            <tr><td>0902222222</td><td>Trần Thị Mai — ACTIVE, Tier 2, TrustScore 92</td></tr>
-                            <tr><td>0903333333</td><td>Phạm Thu Hà — đang chờ duyệt</td></tr>
-                            <tr><td>0906666666</td><td>Đỗ Văn Bình — chờ duyệt, GPHN bị từ chối</td></tr>
-                            <tr><td>0904444444</td><td>Nguyễn Văn An — bị tạm khoá (SUSPENDED)</td></tr>
-                            <tr><td>0905555555</td><td>Lê Thị Hoa — ACTIVE Tier 1, GPHN đã hết hạn</td></tr>
+                            <tr><td><strong>0901 111 111</strong></td><td>Chưa có hồ sơ → đi đăng ký (wizard)</td></tr>
+                            <tr><td><strong>0902 222 222</strong></td><td>Trần Thị Mai — ACTIVE, Tier 2, TrustScore 92</td></tr>
+                            <tr><td><strong>0903 333 333</strong></td><td>Phạm Thu Hà — đang chờ duyệt</td></tr>
+                            <tr><td><strong>0906 666 666</strong></td><td>Đỗ Văn Bình — chờ duyệt, GPHN bị từ chối</td></tr>
+                            <tr><td><strong>0904 444 444</strong></td><td>Nguyễn Văn An — bị tạm khoá (SUSPENDED)</td></tr>
+                            <tr><td><strong>0905 555 555</strong></td><td>Lê Thị Hoa — ACTIVE Tier 1, GPHN đã hết hạn</td></tr>
                         </tbody>
                     </table>
                 </div>

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Alert, Button } from '../../components';
 import { ArrowLeft } from 'lucide-react';
 import { formatPhoneInput, normalizeVnPhone } from '../../lib/phone';
@@ -12,12 +12,10 @@ import { buildPending, loadPending, savePending } from './otp-pending';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 
-/** SH1 — Đăng nhập / đăng ký bằng số điện thoại. */
+/** SH1 — Đăng nhập / đăng ký bằng số điện thoại (hợp nhất 1 luồng). */
 export function LoginPhonePage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams] = useSearchParams();
-  const isRegister = searchParams.get('mode') === 'register';
 
   // Quay lại từ SH2 ("Đổi số") thì điền sẵn số cũ
   const [phone, setPhone] = useState(() => {
@@ -99,12 +97,8 @@ export function LoginPhonePage() {
       </div>
       <BrandMark />
       <div className="auth-badge">BỆNH NHÂN & GIA ĐÌNH</div>
-      <h1 className="auth-title">{isRegister ? 'Đăng ký tài khoản' : 'Đăng nhập khách hàng'}</h1>
-      <p className="auth-sub">
-        {isRegister
-          ? 'Nhập số điện thoại — tài khoản được tạo sau khi xác thực OTP'
-          : 'Nhập số điện thoại để nhận mã OTP'}
-      </p>
+      <h1 className="auth-title">Đăng nhập / Đăng ký</h1>
+      <p className="auth-sub">Nhập số điện thoại để nhận mã OTP</p>
 
       <form onSubmit={handleSubmit} noValidate>
         <div className="field">
@@ -140,18 +134,12 @@ export function LoginPhonePage() {
         </Button>
       </form>
 
-      <div className="divider-or">hoặc</div>
-      <p className="auth-switch">
-        {isRegister ? (
-          <>Đã có tài khoản? <Link to="/login">Đăng nhập</Link></>
-        ) : (
-          <>Chưa có tài khoản? <Link to="/login?mode=register">Đăng ký ngay</Link></>
-        )}
+      <p style={{ textAlign: 'center', fontSize: '15px', color: 'var(--muted, #5f7d75)', margin: '20px 0 0', lineHeight: 1.5 }}>
+        Chưa có tài khoản? Chỉ cần nhập số điện thoại và nhận OTP — hệ thống sẽ tự động hướng dẫn bạn tạo hồ sơ chăm sóc ngay sau đó.
       </p>
 
       <p className="small-print">
-        Bằng việc tiếp tục, bạn đồng ý với{' '}
-        <a href="/dieu-khoan" target="_blank" rel="noreferrer">Điều khoản sử dụng</a> và chấp thuận việc
+        Bằng việc tiếp tục, bạn đồng ý với Điều khoản sử dụng và chấp thuận việc
         xử lý dữ liệu cá nhân theo <b>Nghị định 13/2023/NĐ-CP</b>.
       </p>
     </AuthLayout>
