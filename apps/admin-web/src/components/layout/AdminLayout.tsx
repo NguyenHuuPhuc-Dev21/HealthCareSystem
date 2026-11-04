@@ -156,7 +156,7 @@ export function AdminLayout({ fullName, badges = {}, onSignOut, children }: Admi
         </div>
       </aside>
 
-      <main className="main-content">
+      <main className="admin-main main-content">
         {children}
       </main>
     </div>
