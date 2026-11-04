@@ -8,6 +8,9 @@ import type {
   ConsentStateRow,
   MedicalRecordRow,
   OwnedProfileConsentRow,
+  PrivacyRequestRow,
+  PrivacyRequestStatusValue,
+  PrivacyRequestTypeValue,
   RecordAccessFactsRow,
   RecordAccessGrantRow,
 } from "./privacy-consent.types";
@@ -130,6 +133,144 @@ export async function markConsentWithdrawn(
 ): Promise<void> {
   await db.query(
     "UPDATE patient_profiles SET data_consent_accepted = FALSE, consent_withdrawn_at = $2 WHERE id = $1",
+    [profileId, at],
+  );
+}
+
+// ---- Data-subject requests -----------------------------------------------------
+
+const PRIVACY_REQUEST_COLUMNS =
+  "id, customer_id, patient_profile_id, request_type, status, processed_by, processed_at, created_at";
+
+export async function hasPendingPrivacyRequest(
+  db: Queryable,
+  profileId: string,
+): Promise<boolean> {
+  const { rows } = await db.query<{ id: string }>(
+    "SELECT id FROM privacy_requests WHERE patient_profile_id = $1 AND status = 'PENDING' LIMIT 1",
+    [profileId],
+  );
+  return rows.length > 0;
+}
+
+export async function insertPrivacyRequest(
+  db: Queryable,
+  req: {
+    customerId: string;
+    profileId: string;
+    requestType: PrivacyRequestTypeValue;
+  },
+): Promise<PrivacyRequestRow> {
+  const { rows } = await db.query<PrivacyRequestRow>(
+    `INSERT INTO privacy_requests (customer_id, patient_profile_id, request_type)
+     VALUES ($1, $2, $3)
+     RETURNING ${PRIVACY_REQUEST_COLUMNS}`,
+    [req.customerId, req.profileId, req.requestType],
+  );
+  return rows[0];
+}
+
+export async function listPrivacyRequestsOfCustomer(
+  db: Queryable,
+  customerId: string,
+): Promise<PrivacyRequestRow[]> {
+  const { rows } = await db.query<PrivacyRequestRow>(
+    `SELECT ${PRIVACY_REQUEST_COLUMNS} FROM privacy_requests
+      WHERE customer_id = $1
+      ORDER BY created_at DESC, id`,
+    [customerId],
+  );
+  return rows;
+}
+
+/** Admin list, oldest first; status = null means every status. total = rows matching the filter. */
+export async function listPrivacyRequests(
+  db: Queryable,
+  filter: {
+    status: PrivacyRequestStatusValue | null;
+    limit: number;
+    offset: number;
+  },
+): Promise<{ rows: PrivacyRequestRow[]; total: number }> {
+  const where =
+    "WHERE ($1::privacy_request_status_enum IS NULL OR status = $1::privacy_request_status_enum)";
+  const count = await db.query<{ n: string | number }>(
+    `SELECT count(*) AS n FROM privacy_requests ${where}`,
+    [filter.status],
+  );
+  const { rows } = await db.query<PrivacyRequestRow>(
+    `SELECT ${PRIVACY_REQUEST_COLUMNS} FROM privacy_requests ${where}
+      ORDER BY created_at ASC, id
+      LIMIT $2 OFFSET $3`,
+    [filter.status, filter.limit, filter.offset],
+  );
+  return { rows, total: Number(count.rows[0].n) };
+}
+
+/** Locks the request for the rest of the transaction (no double processing). */
+export async function lockPrivacyRequest(
+  db: Queryable,
+  requestId: string,
+): Promise<PrivacyRequestRow | null> {
+  const { rows } = await db.query<PrivacyRequestRow>(
+    `SELECT ${PRIVACY_REQUEST_COLUMNS} FROM privacy_requests WHERE id = $1 FOR UPDATE`,
+    [requestId],
+  );
+  return rows[0] ?? null;
+}
+
+export async function markPrivacyRequestProcessed(
+  db: Queryable,
+  requestId: string,
+  status: "DONE" | "REJECTED",
+  adminId: string,
+  at: Date,
+): Promise<void> {
+  await db.query(
+    "UPDATE privacy_requests SET status = $2, processed_by = $3, processed_at = $4 WHERE id = $1",
+    [requestId, status, adminId, at],
+  );
+}
+
+/** True when any booking of the profile has an OPEN / UNDER_REVIEW dispute (NFR-PRIV-01). */
+export async function profileHasOpenDispute(
+  db: Queryable,
+  profileId: string,
+): Promise<boolean> {
+  const { rows } = await db.query<{ id: string }>(
+    `SELECT d.id
+       FROM disputes d
+       JOIN bookings b ON b.id = d.booking_id
+      WHERE b.patient_profile_id = $1 AND d.status IN ('OPEN', 'UNDER_REVIEW')
+      LIMIT 1`,
+    [profileId],
+  );
+  return rows.length > 0;
+}
+
+/**
+ * Anonymizes the profile (contract §4): personal and medical fields cleared, deleted_at set.
+ * Bookings, ledger and audit rows keep pointing at the row (financial/legal records).
+ * Also used by the retention sweep.
+ */
+export async function anonymizeProfile(
+  db: Queryable,
+  profileId: string,
+  at: Date,
+): Promise<void> {
+  await db.query(
+    `UPDATE patient_profiles
+        SET full_name = 'Đã ẩn danh',
+            dob = NULL,
+            medical_history = NULL,
+            address_text = NULL,
+            lat = NULL,
+            lng = NULL,
+            weight_kg = NULL,
+            consent_ip = NULL,
+            consent_device_id = NULL,
+            deleted_at = $2
+      WHERE id = $1`,
     [profileId, at],
   );
 }

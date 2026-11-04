@@ -10,6 +10,11 @@
  *    that shows medical data to a nurse.
  *  - PrivacyConsentService.getMedicalRecord(): GET /nurse/bookings/:bookingId/medical-record,
  *    audit-logged as VIEW_MEDICAL_RECORD on EVERY view (NFR-SEC-01.6).
+ *  - PrivacyConsentService.grantRecordAccess(): POST /admin/bookings/:bookingId/record-access-grants,
+ *    audit-logged as GRANT_RECORD_ACCESS (contract §3).
+ *  - PrivacyConsentService.withdrawConsent(): POST /patient-profiles/:profileId/consent/withdraw (contract §4).
+ *  - Data-subject requests (contract §4): createPrivacyRequest / listMyPrivacyRequests for the PATIENT,
+ *    listPrivacyRequests / decidePrivacyRequest for the ADMIN (DONE = anonymize + audit DELETE_PATIENT_DATA).
  */
 import {
   AuditAction,
@@ -32,13 +37,21 @@ import {
 import * as storage from "../../core/storage";
 import { checkGrantExpiry, decideRecordAccess } from "./privacy-consent.policy";
 import {
+  anonymizeProfile,
   findBookingNurse,
   findConsentState,
   findRecordAccessFacts,
+  hasPendingPrivacyRequest,
+  insertPrivacyRequest,
   insertRecordAccessGrant,
+  listPrivacyRequests,
+  listPrivacyRequestsOfCustomer,
   loadMedicalRecord,
   lockOwnedProfileConsent,
+  lockPrivacyRequest,
   markConsentWithdrawn,
+  markPrivacyRequestProcessed,
+  profileHasOpenDispute,
 } from "./privacy-consent.repo";
 import type {
   ConsentColumns,
@@ -47,6 +60,11 @@ import type {
   GrantRecordAccessInput,
   MedicalRecordRow,
   MedicalRecordView,
+  PrivacyRequestPage,
+  PrivacyRequestRow,
+  PrivacyRequestStatusValue,
+  PrivacyRequestTypeValue,
+  PrivacyRequestView,
   RecordAccessDecision,
   RecordAccessGrantView,
 } from "./privacy-consent.types";
@@ -206,6 +224,20 @@ function toDateOnly(value: Date | string | null): string | null {
 
 function toNumberOrNull(value: string | number | null): number | null {
   return value === null ? null : Number(value);
+}
+
+function toPrivacyRequestView(row: PrivacyRequestRow): PrivacyRequestView {
+  return {
+    requestId: row.id,
+    customerId: row.customer_id,
+    patientProfileId: row.patient_profile_id,
+    requestType: row.request_type,
+    status: row.status,
+    createdAt: new Date(row.created_at).toISOString(),
+    processedAt: row.processed_at
+      ? new Date(row.processed_at).toISOString()
+      : null,
+  };
 }
 
 export interface PrivacyConsentDeps {
@@ -389,6 +421,126 @@ export class PrivacyConsentService {
       }
       await markConsentWithdrawn(client, profileId, now);
       return { consent: "WITHDRAWN" as const, withdrawnAt: now.toISOString() };
+    });
+  }
+
+  /**
+   * POST /privacy-requests (contract §4). The profile row is locked, so two requests at once
+   * cannot both pass the "already pending" check.
+   *  - not the owner / deleted / missing / not a UUID → 403 FORBIDDEN
+   *  - a PENDING request already exists for the profile → 409 REQUEST_ALREADY_PENDING
+   */
+  async createPrivacyRequest(
+    customerId: string,
+    profileId: string,
+    requestType: PrivacyRequestTypeValue,
+  ): Promise<{ requestId: string; status: "PENDING" }> {
+    if (!UUID_RE.test(profileId))
+      throw forbidden("FORBIDDEN", "You do not own this patient profile");
+    return this.deps.withTx(async (client) => {
+      const profile = await lockOwnedProfileConsent(
+        client,
+        profileId,
+        customerId,
+      );
+      if (!profile)
+        throw forbidden("FORBIDDEN", "You do not own this patient profile");
+      if (await hasPendingPrivacyRequest(client, profileId)) {
+        throw conflict(
+          "REQUEST_ALREADY_PENDING",
+          "A request for this profile is already pending",
+        );
+      }
+      const row = await insertPrivacyRequest(client, {
+        customerId,
+        profileId,
+        requestType,
+      });
+      return { requestId: row.id, status: "PENDING" as const };
+    });
+  }
+
+  /** GET /privacy-requests — the caller's own requests, newest first. */
+  async listMyPrivacyRequests(
+    customerId: string,
+  ): Promise<PrivacyRequestView[]> {
+    const rows = await this.deps.withTx((client) =>
+      listPrivacyRequestsOfCustomer(client, customerId),
+    );
+    return rows.map(toPrivacyRequestView);
+  }
+
+  /** GET /admin/privacy-requests — oldest first (work queue). */
+  async listPrivacyRequests(filter: {
+    status: PrivacyRequestStatusValue | null;
+    limit: number;
+    offset: number;
+  }): Promise<PrivacyRequestPage> {
+    const { rows, total } = await this.deps.withTx((client) =>
+      listPrivacyRequests(client, filter),
+    );
+    return {
+      items: rows.map(toPrivacyRequestView),
+      total,
+      limit: filter.limit,
+      offset: filter.offset,
+    };
+  }
+
+  /**
+   * PATCH /admin/privacy-requests/:requestId (contract §4). All in ONE transaction:
+   * DONE → anonymize the profile + audit DELETE_PATIENT_DATA + mark the request DONE.
+   * REJECTED → mark the request REJECTED (no data change).
+   *  - unknown request / not a UUID         → 404 REQUEST_NOT_FOUND
+   *  - request no longer PENDING            → 409 REQUEST_NOT_PENDING
+   *  - DONE while a dispute is OPEN/UNDER_REVIEW on a booking of the profile → 409 PROFILE_UNDER_DISPUTE
+   */
+  async decidePrivacyRequest(
+    adminId: string,
+    requestId: string,
+    decision: "DONE" | "REJECTED",
+    note: string | null,
+    ip: string | null,
+  ): Promise<{ requestId: string; status: "DONE" | "REJECTED" }> {
+    if (!UUID_RE.test(requestId))
+      throw notFound("REQUEST_NOT_FOUND", "Privacy request not found");
+    const now = (this.deps.now ?? (() => new Date()))();
+
+    return this.deps.withTx(async (client) => {
+      const request = await lockPrivacyRequest(client, requestId);
+      if (!request)
+        throw notFound("REQUEST_NOT_FOUND", "Privacy request not found");
+      if (request.status !== "PENDING") {
+        throw conflict(
+          "REQUEST_NOT_PENDING",
+          "This privacy request has already been processed",
+        );
+      }
+      if (decision === "DONE") {
+        if (await profileHasOpenDispute(client, request.patient_profile_id)) {
+          throw conflict(
+            "PROFILE_UNDER_DISPUTE",
+            "The profile has an open dispute; its data must be kept until it is resolved",
+          );
+        }
+        await anonymizeProfile(client, request.patient_profile_id, now);
+        await writeAuditLog(client, {
+          actorId: adminId,
+          action: AuditAction.DELETE_PATIENT_DATA,
+          targetTable: "patient_profiles",
+          targetId: request.patient_profile_id,
+          newValue: { requestId, requestType: request.request_type, note },
+          ipAddress: ip ?? undefined,
+        });
+      }
+      await markPrivacyRequestProcessed(
+        client,
+        requestId,
+        decision,
+        adminId,
+        now,
+      );
+      return { requestId, status: decision };
     });
   }
 }

@@ -145,14 +145,18 @@ Auth: `PATIENT` (owner of the profile).
 ### `GET /privacy-requests`
 
 Auth: `PATIENT`. The caller's own requests, newest first.
+**200** `{ "success": true, "data": [ { "requestId", "customerId", "patientProfileId", "requestType", "status", "createdAt", "processedAt" } ] }`
 
 ### `GET /admin/privacy-requests?status=PENDING&limit=20&offset=0`
 
-Auth: `ADMIN`.
+Auth: `ADMIN`. Oldest first (work queue). `status` optional; `limit` 1–100 (default 20); `offset` ≥ 0 (default 0).
+**200** `{ "success": true, "data": { "items": [ …same item shape… ], "total": 42, "limit": 20, "offset": 0 } }`
+**Errors:** `400 VALIDATION_ERROR`
 
 ### `PATCH /admin/privacy-requests/:requestId`
 
 Auth: `ADMIN`. **Body** `{ "decision": "DONE" | "REJECTED", "note": "…" }`
+`note` is optional (≤ 500 chars). `privacy_requests` has no note column: the note is kept in the `DELETE_PATIENT_DATA` audit row (`new_value.note`) when the decision is `DONE`.
 
 - `DONE` → in ONE transaction: anonymize the profile (`full_name` → `"Đã ẩn danh"`; `dob`, `medical_history`,
   `address_text`, `lat`, `lng`, `weight_kg`, `consent_ip`, `consent_device_id` → NULL; `deleted_at = now()`),

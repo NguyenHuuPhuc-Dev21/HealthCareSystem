@@ -151,3 +151,38 @@ export interface ConsentWithdrawalView {
   consent: "WITHDRAWN";
   withdrawnAt: string;
 }
+
+// ---- Data-subject requests (US-HP-03, NFR-PRIV-01) -----------------------------
+
+export type PrivacyRequestTypeValue = "DELETE" | "ANONYMIZE";
+export type PrivacyRequestStatusValue = "PENDING" | "DONE" | "REJECTED";
+
+/** Row shape of the privacy_requests queries. */
+export type PrivacyRequestRow = {
+  id: string;
+  customer_id: string;
+  patient_profile_id: string;
+  request_type: PrivacyRequestTypeValue;
+  status: PrivacyRequestStatusValue;
+  processed_by: string | null;
+  processed_at: Date | null;
+  created_at: Date;
+};
+
+/** One request as returned by GET /privacy-requests and GET /admin/privacy-requests. */
+export interface PrivacyRequestView {
+  requestId: string;
+  customerId: string;
+  patientProfileId: string;
+  requestType: PrivacyRequestTypeValue;
+  status: PrivacyRequestStatusValue;
+  createdAt: string;
+  processedAt: string | null;
+}
+
+export interface PrivacyRequestPage {
+  items: PrivacyRequestView[];
+  total: number;
+  limit: number;
+  offset: number;
+}
