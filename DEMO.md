@@ -12,7 +12,9 @@ Toàn bộ hệ thống chạy trên máy local: hạ tầng bằng Docker, back
 | Admin console | http://localhost:5174 | Đăng nhập OTP + 2FA bắt buộc |
 | Nurse web | http://localhost:5175 | Đăng nhập OTP, onboarding, văn bằng |
 | API | http://localhost:3000/api/v1 | Kiểm tra sống: `GET /api/v1/health` |
-| MinIO console | http://localhost:9001 | Xem file hồ sơ đã tải lên (user/pass trong `services/api/.env`) |
+| MinIO console | http://l
+
+ocalhost:9001 | Xem file hồ sơ đã tải lên (user/pass trong `services/api/.env`) |
 | Postgres / Redis | localhost:5432 / 6379 | Chạy trong Docker |
 
 ## 2. Chạy lần đầu
