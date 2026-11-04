@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Alert, Button } from '../../components';
+import { ArrowLeft } from 'lucide-react';
 import { formatPhoneInput, normalizeVnPhone } from '../../lib/phone';
 import { requestOtp } from './auth.api';
 import { getAuthErrorMessage } from './auth.messages';
@@ -20,6 +21,7 @@ export function AdminLoginPage() {
   const [error, setError] = useState<AuthMessage | null>(null);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const landingUrl = import.meta.env.VITE_LANDING_URL ?? 'http://localhost:5177';
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -44,6 +46,12 @@ export function AdminLoginPage() {
 
   return (
     <AuthLayout>
+      <div className="auth-back-row">
+        <a href={landingUrl} className="auth-back-btn" title="Quay lại trang chủ CareNest">
+          <ArrowLeft size={16} aria-hidden="true" />
+          <span>Quay lại trang chủ</span>
+        </a>
+      </div>
       <BrandMark />
       <div className="auth-badge">ADMIN CONSOLE</div>
       <h1 className="auth-title">Đăng nhập quản trị</h1>

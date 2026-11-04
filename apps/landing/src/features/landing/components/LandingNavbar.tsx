@@ -27,7 +27,7 @@ export default function LandingNavbar() {
 
     return (
         <header className={scrolled ? 'nav scrolled' : 'nav'} id="topnav">
-            <div className="wrap nav-in">
+            <div className="nav-in">
                 <Logo />
                 <nav className="nav-links">
                     {NAV_LINKS.map((link) => (

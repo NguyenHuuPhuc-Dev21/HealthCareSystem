@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components';
 import { requestOtp, USE_MOCK } from './auth.api';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, ArrowLeft } from 'lucide-react';
 
 /** Logo CareNest: ô gạch teal + glyph nhà/trái tim y tế trắng (theo board SH). */
 export const CareNestLogo: React.FC = () => (
@@ -26,6 +26,7 @@ export const LoginPage: React.FC = () => {
     const [phone, setPhone] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const landingUrl = import.meta.env.VITE_LANDING_URL ?? 'http://localhost:5177';
 
     const phoneValid = /^0\d{9}$/.test(phone.replace(/\s/g, ''));
 
@@ -48,6 +49,12 @@ export const LoginPage: React.FC = () => {
     return (
         <div className="auth-zone">
             <div className="auth-card">
+                <div className="auth-back-row">
+                    <a href={landingUrl} className="auth-back-btn" title="Quay lại trang chủ CareNest">
+                        <ArrowLeft size={16} aria-hidden="true" />
+                        <span>Quay lại trang chủ</span>
+                    </a>
+                </div>
                 <CareNestLogo />
                 <h1>Đăng nhập</h1>
                 <p className="sub">Nhập số điện thoại để nhận mã OTP</p>
