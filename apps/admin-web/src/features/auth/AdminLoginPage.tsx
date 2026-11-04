@@ -82,7 +82,9 @@ export function AdminLoginPage() {
         </a>
       </div>
       <BrandMark />
-      <div className="auth-badge">ADMIN CONSOLE</div>
+      <div className="auth-badge-wrap">
+        <span className="auth-badge">ADMIN CONSOLE</span>
+      </div>
       <h1 className="auth-title">Đăng nhập quản trị</h1>
       <p className="auth-sub">Nhập số điện thoại để nhận mã OTP</p>
 

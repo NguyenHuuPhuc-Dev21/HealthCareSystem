@@ -536,11 +536,17 @@ button:disabled,
 }
 
 
+.auth-badge-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: -6px 0 18px;
+}
+
 .auth-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin: -6px auto 16px;
   padding: 4px 14px;
   border-radius: 999px;
   font-size: 11.5px;

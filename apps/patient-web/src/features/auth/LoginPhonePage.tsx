@@ -96,7 +96,9 @@ export function LoginPhonePage() {
         </a>
       </div>
       <BrandMark />
-      <div className="auth-badge">BỆNH NHÂN & GIA ĐÌNH</div>
+      <div className="auth-badge-wrap">
+        <span className="auth-badge">BỆNH NHÂN & GIA ĐÌNH</span>
+      </div>
       <h1 className="auth-title">Đăng nhập / Đăng ký</h1>
       <p className="auth-sub">Nhập số điện thoại để nhận mã OTP</p>
 
