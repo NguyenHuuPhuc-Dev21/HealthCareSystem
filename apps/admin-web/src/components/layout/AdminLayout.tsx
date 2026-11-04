@@ -7,8 +7,6 @@ import {
   LayoutDashboard,
   Lock,
   LogOut,
-  PanelLeftClose,
-  PanelLeftOpen,
   Scale,
   ScrollText,
   Settings,
@@ -22,7 +20,7 @@ import {
  * Sidebar Admin Console (M0) — đúng 10 mục, thứ tự đã khoá trong thiết kế A1–A10.
  * Mục chưa có màn hình: `to: null` → hiển thị mờ.
  * Icon: Lucide (nét, đơn sắc) — không dùng emoji. Sidebar thu gọn được;
- * trạng thái nhớ trong localStorage.
+ * bấm vào logo CareNest để thu gọn / mở rộng; trạng thái nhớ trong localStorage.
  */
 const NAV: Array<{ Icon: ComponentType<{ size?: number | string }>; label: string; to: string | null; badgeKey?: 'nurseQueue' }> = [
   { Icon: LayoutDashboard, label: 'Tổng quan', to: null },
@@ -89,17 +87,19 @@ export function AdminLayout({ fullName, badges = {}, onSignOut, children }: Admi
     <div className={`admin-shell${collapsed ? ' admin-shell--collapsed' : ''}`}>
       <aside className="sidebar" aria-label="Điều hướng Admin">
         <div className="sidebar__brand">
-          <span className="sidebar__logo"><LogoMark /><span className="sidebar__brand-name">CareNest</span></span>
-          <small>ADMIN CONSOLE</small>
           <button
             type="button"
-            className="sidebar__toggle"
+            className="sidebar__brand-btn"
             onClick={toggleCollapsed}
             aria-expanded={!collapsed}
-            aria-label={collapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn thanh điều hướng'}
-            title={collapsed ? 'Mở rộng' : 'Thu gọn'}
+            aria-label={collapsed ? 'Bấm vào logo để mở rộng thanh điều hướng' : 'Bấm vào logo để thu gọn thanh điều hướng'}
+            title={collapsed ? 'Bấm để mở rộng' : 'Bấm để thu gọn'}
           >
-            {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+            <LogoMark />
+            <span className="sidebar__brand-text">
+              <span className="sidebar__brand-name">CareNest</span>
+              <small>ADMIN CONSOLE</small>
+            </span>
           </button>
         </div>
 
@@ -122,34 +122,43 @@ export function AdminLayout({ fullName, badges = {}, onSignOut, children }: Admi
             }
             const active = pathname.startsWith(item.to);
             return (
-              <Link key={item.label} to={item.to} className={`sidebar__item${active ? ' active' : ''}`} aria-current={active ? 'page' : undefined} title={collapsed ? item.label : undefined}>
+              <Link
+                key={item.label}
+                to={item.to}
+                className={`sidebar__item${active ? ' is-active' : ''}`}
+                aria-current={active ? 'page' : undefined}
+                title={collapsed ? item.label : undefined}
+              >
                 {content}
               </Link>
             );
           })}
         </nav>
 
-        <div className="sidebar__user">
-          <span className="avatar" aria-hidden="true">{initialsOf(fullName)}</span>
-          <div className="sidebar__user-text">
-            <b>{fullName || 'Admin vận hành'}</b>
-            <span className="sidebar__2fa"><Lock size={12} aria-hidden="true" /> Đã bật xác thực 2 lớp (2FA)</span>
-            <button type="button" className="link-button sidebar__signout" onClick={onSignOut}>
-              <LogOut size={14} aria-hidden="true" /> Đăng xuất
-            </button>
+        <div className="sidebar__footer">
+          <div className="sidebar__user" title={collapsed ? fullName ?? 'Admin' : undefined}>
+            <span className="avatar" aria-hidden="true">{initialsOf(fullName)}</span>
+            <div className="sidebar__user-text">
+              <b>{fullName || 'Admin vận hành'}</b>
+              <small><Lock size={12} aria-hidden="true" /> Đã bật xác thực 2 lớp (2FA)</small>
+            </div>
           </div>
           <button
             type="button"
-            className="sidebar__signout-icon"
+            className="sidebar__logout"
             onClick={onSignOut}
+            title={collapsed ? 'Đăng xuất' : undefined}
             aria-label="Đăng xuất"
-            title="Đăng xuất"
           >
-            <LogOut size={18} />
+            <LogOut size={16} aria-hidden="true" />
+            <span className="sidebar__logout-text">Đăng xuất</span>
           </button>
         </div>
       </aside>
-      <main className="admin-main">{children}</main>
+
+      <main className="main-content">
+        {children}
+      </main>
     </div>
   );
 }

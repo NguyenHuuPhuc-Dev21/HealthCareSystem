@@ -74,3 +74,4 @@ vai trò của mình.
   (hàng đợi thật chỉ gồm hồ sơ đang chờ) — ở chế độ API thật tab này trả danh sách trống.
 - Admin chọn Tier ở màn thẩm định: backend tự suy Tier từ GPHN được duyệt
   (GPHN hợp lệ → Tier 2), không nhận Tier do FE gửi.
+

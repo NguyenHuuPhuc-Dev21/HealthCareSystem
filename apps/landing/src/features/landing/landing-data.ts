@@ -9,6 +9,7 @@
 // đặt VITE_PATIENT_WEB_URL / VITE_NURSE_WEB_URL trong .env của landing — không sửa code.
 const PATIENT_WEB_URL = import.meta.env.VITE_PATIENT_WEB_URL ?? 'http://localhost:5173';
 const NURSE_WEB_URL = import.meta.env.VITE_NURSE_WEB_URL ?? 'http://localhost:5175';
+const ADMIN_WEB_URL = import.meta.env.VITE_ADMIN_WEB_URL ?? 'http://localhost:5174';
 
 export const CTA_LINKS = {
     primaryBooking: '#dat-ca', // section CTA cuối trang — đích của các nút "Đặt điều dưỡng ngay"
@@ -16,6 +17,7 @@ export const CTA_LINKS = {
     faq: '#faq',
     patientApp: PATIENT_WEB_URL, // cổng bệnh nhân/gia đình (patient-web)
     nurseApp: `${NURSE_WEB_URL}/login`, // cổng điều dưỡng — vào thẳng màn đăng nhập
+    adminApp: `${ADMIN_WEB_URL}/login`, // cổng quản trị viên (admin-web)
 };
 
 export const NAV_LINKS = [

@@ -1998,17 +1998,21 @@ a.sidebar__item:hover {
 /* Icon trong ô tìm kiếm hàng đợi + đoạn trạng thái giấy tờ (thay ký tự 🔍/✓) */
 .toolbar__search-wrap {
   position: relative;
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  flex: 1 1 360px;
+  min-width: 280px;
+  max-width: 520px;
 }
 .toolbar__search-icon {
   position: absolute;
-  left: 11px;
+  left: 12px;
   color: var(--muted);
   pointer-events: none;
 }
 .toolbar__search-wrap .toolbar__search {
-  padding-left: 34px;
+  width: 100%;
+  padding-left: 38px;
 }
 .doc-seg svg {
   vertical-align: -2px;
@@ -2020,28 +2024,48 @@ a.sidebar__item:hover {
   vertical-align: -2px;
 }
 
-/* ===== Sidebar thu gọn (toggle trong AdminLayout) + icon Lucide ===== */
+/* ===== Sidebar thu gọn (click Logo để toggle) + icon Lucide ===== */
 .sidebar__brand {
   position: relative;
+  padding: 2px 4px 18px;
 }
-.sidebar__toggle {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: inline-flex;
+.sidebar__brand-btn {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  background: #fff;
-  color: var(--slate);
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 6px 8px;
+  border-radius: 8px;
   cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease;
 }
-.sidebar__toggle:hover {
-  background: var(--bg);
+.sidebar__brand-btn:hover {
+  background-color: rgba(20, 63, 52, 0.06);
+}
+.sidebar__brand-btn:focus-visible {
+  outline: 2px solid var(--teal, #1b6b57);
+  outline-offset: 2px;
+}
+.sidebar__brand-text {
+  display: flex;
+  flex-direction: column;
+}
+.sidebar__brand-name {
+  font-weight: 800;
   color: var(--navy);
+  font-size: 18px;
+  line-height: 1.2;
+}
+.sidebar__brand-text small {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  line-height: 1;
 }
 .sidebar__icon {
   display: inline-flex;
@@ -2091,9 +2115,13 @@ a.sidebar__item:hover {
 .admin-shell--collapsed .sidebar__user-text {
   display: none;
 }
-.admin-shell--collapsed .sidebar__toggle {
-  position: static;
-  margin-left: 6px;
+.admin-shell--collapsed .sidebar__brand-btn {
+  width: auto;
+  padding: 6px;
+  justify-content: center;
+}
+.admin-shell--collapsed .sidebar__brand-text {
+  display: none;
 }
 .admin-shell--collapsed .sidebar__item {
   justify-content: center;

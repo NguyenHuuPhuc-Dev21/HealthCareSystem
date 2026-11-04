@@ -1303,18 +1303,106 @@ footer a:hover {
     }
 }
 
-/* Link "Đăng nhập" trên navbar landing — trỏ sang patient-web */
-.nav-login {
-    font-weight: 600;
-    color: var(--navy, #143f34);
-    text-decoration: none;
+/* Dropdown Đăng nhập trên navbar landing */
+.nav-login-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
     margin-right: 14px;
 }
-.nav-login:hover {
-    text-decoration: underline;
+.nav-login-btn {
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--navy, #143f34);
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+.nav-login-btn:hover {
+    background-color: rgba(20, 63, 52, 0.06);
+    color: var(--teal, #1b6b57);
+}
+.nav-login-arrow {
+    font-size: 11px;
+    transition: transform 0.2s ease;
+}
+.nav-login-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 270px;
+    background: #ffffff;
+    border: 1px solid rgba(20, 63, 52, 0.12);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 1000;
+    animation: fadeInDropdown 0.15s ease-out;
+}
+@keyframes fadeInDropdown {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.nav-login-item {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--navy, #143f34);
+    transition: background-color 0.15s ease;
+}
+.nav-login-item:hover {
+    background-color: rgba(20, 63, 52, 0.05);
+}
+.nav-login-role {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy, #143f34);
+}
+.nav-login-item small {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 2px;
+}
+.nav-login-divider {
+    height: 1px;
+    background-color: rgba(20, 63, 52, 0.08);
+    margin: 4px 6px;
+}
+.mobile-login-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(20, 63, 52, 0.1);
+}
+.mobile-login-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #94a3b8;
+    margin-bottom: 4px;
 }
 @media (max-width: 720px) {
-    .nav-login {
+    .nav-login-wrap {
         display: none;
     }
 }
