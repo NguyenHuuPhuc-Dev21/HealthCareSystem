@@ -13,6 +13,8 @@ import { createCredentialReviewRouter } from './modules/credential-review/creden
 import { getCredentialReviewService } from './modules/credential-review/credential-review.service';
 import { createNurseOnboardingRouter } from './modules/nurse-onboarding/nurse-onboarding.routes';
 import { getNurseOnboardingService } from './modules/nurse-onboarding/nurse-onboarding.service';
+import { createPrivacyConsentRouter } from './modules/privacy-consent/privacy-consent.routes';
+import { getPrivacyConsentService } from './modules/privacy-consent/privacy-consent.service';
 
 function buildApiRouter(): Router {
   const api = Router();
@@ -33,6 +35,7 @@ function buildApiRouter(): Router {
   api.use('/auth', createAccountsOtpRouter(auth)); // BE-1 · Phase 1 · accounts-otp
   api.use(createNurseOnboardingRouter(getNurseOnboardingService())); // BE-1 · Phase 1 · nurse-onboarding
   api.use(createCredentialReviewRouter(getCredentialReviewService())); // BE-1 · Phase 1 · credential-review
+  api.use(createPrivacyConsentRouter(getPrivacyConsentService())); // BE-3 · Phase 1 · privacy-consent
 
   return api;
 }
