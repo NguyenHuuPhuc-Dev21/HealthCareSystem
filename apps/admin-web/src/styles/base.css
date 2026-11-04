@@ -1363,12 +1363,19 @@ button {
  * ADMIN CONSOLE (M0) — sidebar, bảng hàng đợi A2, thẩm định A3, lightbox
  * =================================================================== */
 .auth-badge {
-  text-align: center;
-  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: -10px auto 14px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  color: var(--muted);
-  margin: -14px 0 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue, #166b58);
+  background: rgba(22, 107, 88, 0.08);
+  border: 1px solid rgba(22, 107, 88, 0.2);
 }
 .auth-steps {
   margin-top: 16px;
@@ -2292,4 +2299,44 @@ a.sidebar__item:hover {
 
 .admin-shell--collapsed .sidebar__logout-text {
   display: none !important;
+}
+
+
+.mock-card {
+  margin-top: 26px;
+  width: 100%;
+  max-width: 480px;
+  box-sizing: border-box;
+}
+
+.mock-card h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+
+.mock-card p {
+  font-size: 14.5px;
+  color: var(--slate);
+  margin-bottom: 14px;
+}
+
+.mock-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.mock-table td,
+.mock-table th {
+  border: 1px solid var(--line, #e2e8f0);
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.mock-table th {
+  background: #f8fafc;
+  color: var(--navy);
+  font-weight: 600;
 }

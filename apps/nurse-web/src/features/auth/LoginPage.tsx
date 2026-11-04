@@ -56,7 +56,8 @@ export const LoginPage: React.FC = () => {
                     </a>
                 </div>
                 <CareNestLogo />
-                <h1>Đăng nhập</h1>
+                <div className="auth-badge">CỔNG ĐIỀU DƯỠNG</div>
+                <h1 className="auth-title">Đăng nhập điều dưỡng</h1>
                 <p className="sub">Nhập số điện thoại để nhận mã OTP</p>
                 <form onSubmit={handleSubmit}>
                     <div className="field">

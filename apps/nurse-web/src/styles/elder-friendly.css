@@ -534,3 +534,20 @@ button:disabled,
   border-color: rgba(27, 107, 87, 0.25);
   transform: translateX(-3px);
 }
+
+
+.auth-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: -6px auto 16px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-primary, #166b58);
+  background: rgba(22, 107, 88, 0.08);
+  border: 1px solid rgba(22, 107, 88, 0.2);
+}

@@ -10,6 +10,8 @@ import type { AuthMessage } from './auth.messages';
 import { AuthLayout, BrandMark } from './components/AuthLayout';
 import { buildPending, loadPending, savePending } from './otp-pending';
 
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
+
 /** SH1 — Đăng nhập / đăng ký bằng số điện thoại. */
 export function LoginPhonePage() {
   const navigate = useNavigate();
@@ -52,8 +54,43 @@ export function LoginPhonePage() {
     navigate('/login/otp', { state: location.state });
   };
 
+  const mockCard = USE_MOCK ? (
+    <div className="auth-card mock-card">
+      <h2>Dữ liệu mẫu (chỉ hiện khi bật mock)</h2>
+      <p>
+        Mã OTP cho mọi số: <strong>123456</strong>. Dùng các số sau để thử từng trạng thái:
+      </p>
+      <table className="mock-table">
+        <thead>
+          <tr>
+            <th>Số điện thoại</th>
+            <th>Trạng thái tài khoản</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>0905 123 456</strong></td>
+            <td>Nguyễn Văn An — Khách hàng đã eKYC, có sẵn 2 hồ sơ người thân</td>
+          </tr>
+          <tr>
+            <td><strong>0905 111 222</strong></td>
+            <td>Khách hàng cũ — chưa hoàn tất eKYC CCCD</td>
+          </tr>
+          <tr>
+            <td><strong>Số bất kỳ khác</strong></td>
+            <td>Người dùng mới → chuyển hướng chọn vai trò và tạo hồ sơ</td>
+          </tr>
+          <tr>
+            <td><strong>0909 888 777</strong></td>
+            <td>Tài khoản điều dưỡng (bị từ chối ở cổng khách hàng)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  ) : undefined;
+
   return (
-    <AuthLayout>
+    <AuthLayout secondary={mockCard}>
       <div className="auth-back-row">
         <a href={landingUrl} className="auth-back-btn" title="Quay lại trang chủ CareNest">
           <ArrowLeft size={16} aria-hidden="true" />
@@ -61,7 +98,8 @@ export function LoginPhonePage() {
         </a>
       </div>
       <BrandMark />
-      <h1 className="auth-title">{isRegister ? 'Đăng ký tài khoản' : 'Đăng nhập'}</h1>
+      <div className="auth-badge">BỆNH NHÂN & GIA ĐÌNH</div>
+      <h1 className="auth-title">{isRegister ? 'Đăng ký tài khoản' : 'Đăng nhập khách hàng'}</h1>
       <p className="auth-sub">
         {isRegister
           ? 'Nhập số điện thoại — tài khoản được tạo sau khi xác thực OTP'
@@ -113,7 +151,6 @@ export function LoginPhonePage() {
 
       <p className="small-print">
         Bằng việc tiếp tục, bạn đồng ý với{' '}
-        {/* TODO: thay bằng route trang Điều khoản khi có */}
         <a href="/dieu-khoan" target="_blank" rel="noreferrer">Điều khoản sử dụng</a> và chấp thuận việc
         xử lý dữ liệu cá nhân theo <b>Nghị định 13/2023/NĐ-CP</b>.
       </p>
