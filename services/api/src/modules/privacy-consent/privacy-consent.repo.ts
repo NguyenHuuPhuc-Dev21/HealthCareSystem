@@ -274,3 +274,57 @@ export async function anonymizeProfile(
     [profileId, at],
   );
 }
+
+// ---- Retention sweep (NFR-PRIV-02) ---------------------------------------------
+
+/**
+ * Shared WHERE for the retention sweep: a live profile whose most recent check-out is older than
+ * ($1 now − $2 months), with no booking still in progress or upcoming, and no OPEN / UNDER_REVIEW
+ * dispute (NFR-PRIV-01). Profiles that never had a check-out are never swept.
+ */
+const RETENTION_ELIGIBLE = `
+      p.deleted_at IS NULL
+  AND (SELECT max(sl.checkout_time)
+         FROM bookings b JOIN shift_logs sl ON sl.booking_id = b.id
+        WHERE b.patient_profile_id = p.id) < $1::timestamptz - make_interval(months => $2::int)
+  AND NOT EXISTS (SELECT 1 FROM bookings b
+                   WHERE b.patient_profile_id = p.id
+                     AND b.execution_status NOT IN ('COMPLETED', 'CANCELLED', 'EXPIRED'))
+  AND NOT EXISTS (SELECT 1 FROM disputes d JOIN bookings b ON b.id = d.booking_id
+                   WHERE b.patient_profile_id = p.id AND d.status IN ('OPEN', 'UNDER_REVIEW'))`;
+
+/** Up to `limit` profile ids due for anonymization (read-only; re-checked under lock). */
+export async function findRetentionCandidates(
+  db: Queryable,
+  now: Date,
+  retentionMonths: number,
+  limit: number,
+): Promise<string[]> {
+  const { rows } = await db.query<{ id: string }>(
+    `SELECT p.id FROM patient_profiles p WHERE ${RETENTION_ELIGIBLE} ORDER BY p.id LIMIT $3`,
+    [now, retentionMonths, limit],
+  );
+  return rows.map((r) => r.id);
+}
+
+/**
+ * Locks the profile if it is STILL eligible (another worker, a new booking or a new dispute may have
+ * changed it since findRetentionCandidates). Returns its last check-out, or null = skip.
+ */
+export async function lockRetentionCandidate(
+  db: Queryable,
+  profileId: string,
+  now: Date,
+  retentionMonths: number,
+): Promise<{ last_checkout: Date } | null> {
+  const { rows } = await db.query<{ last_checkout: Date }>(
+    `SELECT (SELECT max(sl.checkout_time)
+               FROM bookings b JOIN shift_logs sl ON sl.booking_id = b.id
+              WHERE b.patient_profile_id = p.id) AS last_checkout
+       FROM patient_profiles p
+      WHERE p.id = $3 AND ${RETENTION_ELIGIBLE}
+      FOR UPDATE OF p`,
+    [now, retentionMonths, profileId],
+  );
+  return rows[0] ?? null;
+}
