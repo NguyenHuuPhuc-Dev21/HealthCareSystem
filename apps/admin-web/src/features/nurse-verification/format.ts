@@ -1,4 +1,4 @@
-import type { GphnState, NurseTier, QueueItem } from './nurse-verification.types';
+import type { NurseTier, QueueItem } from './nurse-verification.types';
 import { TIER_LABEL } from './nurse-verification.types';
 
 /** "30/10 · 08:12" theo giờ Việt Nam. */
@@ -43,20 +43,22 @@ export function ageTone(hours: number): 'normal' | 'warn' | 'late' {
   return 'normal';
 }
 
-const GPHN_TEXT: Record<GphnState, string> = {
-  NONE: 'GPHN —',
-  VALID: 'GPHN ✓',
-  EXPIRED: 'GPHN ✓ (hết hạn)',
-  NEW_SUBMITTED: 'GPHN mới ✓',
-};
+export interface DocumentSegment {
+  label: string;
+  ok: boolean;
+}
 
-export function documentsText(d: QueueItem['documents']): string {
+/** Các giấy tờ đã nộp dạng đoạn có trạng thái — giao diện tự vẽ icon Check/Minus, không dùng ký tự ✓. */
+export function documentsSegments(d: QueueItem['documents']): DocumentSegment[] {
   return [
-    `CCCD ${d.cccd ? '✓' : '—'}`,
-    `Bằng ${d.degree ? '✓' : '—'}`,
-    GPHN_TEXT[d.gphn],
-    `Hưu trí ${d.retirement ? '✓' : '—'}`,
-  ].join(' · ');
+    { label: 'CCCD', ok: d.cccd },
+    { label: 'Bằng', ok: d.degree },
+    {
+      label: d.gphn === 'NEW_SUBMITTED' ? 'GPHN mới' : d.gphn === 'EXPIRED' ? 'GPHN (hết hạn)' : 'GPHN',
+      ok: d.gphn !== 'NONE',
+    },
+    { label: 'Hưu trí', ok: d.retirement },
+  ];
 }
 
 /** "Gợi ý: Cấp 2" hoặc "Giữ Cấp 2" (hồ sơ gia hạn, cấp không đổi). */

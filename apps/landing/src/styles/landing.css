@@ -1302,3 +1302,19 @@ footer a:hover {
         padding: 40px 24px
     }
 }
+
+/* Link "Đăng nhập" trên navbar landing — trỏ sang patient-web */
+.nav-login {
+    font-weight: 600;
+    color: var(--navy, #143f34);
+    text-decoration: none;
+    margin-right: 14px;
+}
+.nav-login:hover {
+    text-decoration: underline;
+}
+@media (max-width: 720px) {
+    .nav-login {
+        display: none;
+    }
+}

@@ -19,6 +19,7 @@
     "dev:api": "npm run dev --workspace=services/api",
     "dev:worker": "npm run worker --workspace=services/api",
     "dev:admin": "npm run dev --workspace=apps/admin-web",
+    "dev:landing": "npm run dev --workspace=apps/landing",
     "dev:patient": "npm run dev --workspace=apps/patient-web",
     "dev:nurse-web": "npm run dev --workspace=apps/nurse-web",
     "dev:nurse-app": "npm run start --workspace=apps/nurse-app",

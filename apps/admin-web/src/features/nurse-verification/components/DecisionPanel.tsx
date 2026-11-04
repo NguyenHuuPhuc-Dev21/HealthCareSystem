@@ -1,3 +1,4 @@
+import { Check, Lock, Medal } from 'lucide-react';
 import { useState } from 'react';
 import { Alert, Button, ConfirmDialog } from '../../../components';
 import type { NurseReviewDetail, NurseTier, VerifyNurseRequest } from '../nurse-verification.types';
@@ -28,7 +29,7 @@ export function DecisionPanel({ detail, submitting, error, onSubmit }: DecisionP
   const [confirm, setConfirm] = useState<'approve' | 'reject' | null>(null);
   const [lastAction, setLastAction] = useState<'approve' | 'reject' | null>(null);
 
-  const approveLabel = isRenewal ? '✓ Duyệt GPHN gia hạn' : `✓ Duyệt & gán ${TIER_LABEL[tier]}`;
+  const approveLabel = isRenewal ? 'Duyệt GPHN gia hạn' : `Duyệt & gán ${TIER_LABEL[tier]}`;
 
   const askReject = () => {
     if (!reason.trim()) {
@@ -73,7 +74,7 @@ export function DecisionPanel({ detail, submitting, error, onSubmit }: DecisionP
                   onChange={() => setTier(opt.tier)}
                 />
                 <span>
-                  <b>{opt.title}{selected && ' ✓'}</b>
+                  <b>{opt.title}{selected && <> <Check size={14} /></>}</b>
                   <small>
                     {disabled ? 'Không chọn được: hồ sơ chưa có GPHN còn hiệu lực.' : opt.description}
                   </small>
@@ -86,7 +87,7 @@ export function DecisionPanel({ detail, submitting, error, onSubmit }: DecisionP
 
       {detail.retirement_submitted && (
         <p className="decision__note">
-          🏅 Hồ sơ có <b>Quyết định nghỉ hưu</b> — chỉ dùng để gắn huy hiệu “Nhân viên y tế hưu trí”,{' '}
+          <Medal size={15} /> Hồ sơ có <b>Quyết định nghỉ hưu</b> — chỉ dùng để gắn huy hiệu “Nhân viên y tế hưu trí”,{' '}
           <b>KHÔNG</b> dùng để mở dịch vụ xâm lấn. Dịch vụ xâm lấn chỉ mở bằng GPHN còn hạn.
         </p>
       )}
@@ -113,7 +114,7 @@ export function DecisionPanel({ detail, submitting, error, onSubmit }: DecisionP
 
       <div className="decision__actions">
         <Button type="button" size="lg" onClick={() => setConfirm('approve')} disabled={submitting && lastAction !== 'approve'} loading={submitting && lastAction === 'approve'}>
-          {approveLabel}
+          <Check size={17} style={{ verticalAlign: -3, marginRight: 6 }} aria-hidden="true" />{approveLabel}
         </Button>
         <Button type="button" size="lg" variant="secondary" className="btn-danger-outline" onClick={askReject} disabled={submitting && lastAction !== 'reject'} loading={submitting && lastAction === 'reject'}>
           Từ chối hồ sơ
@@ -121,7 +122,7 @@ export function DecisionPanel({ detail, submitting, error, onSubmit }: DecisionP
       </div>
 
       <p className="audit-note">
-        🔒 Quyết định được ghi vào nhật ký kiểm toán (người duyệt — reviewed_by, thời điểm và cấp được gán). Điều dưỡng
+        <Lock size={13} /> Quyết định được ghi vào nhật ký kiểm toán (người duyệt — reviewed_by, thời điểm và cấp được gán). Điều dưỡng
         chỉ nhận ca sau khi nạp đủ ký quỹ theo cấu hình hệ thống.
       </p>
 

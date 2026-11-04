@@ -53,7 +53,7 @@ export function AdminLoginPage() {
         <div className="field">
           <label htmlFor="login-phone">Số điện thoại di động</label>
           <div className={`phone-wrap${error ? ' is-invalid' : ''}`}>
-            <span className="phone-wrap__prefix" aria-hidden="true">🇻🇳 +84</span>
+            <span className="phone-wrap__prefix" aria-hidden="true">VN +84</span>
             <input
               id="login-phone"
               ref={inputRef}
@@ -80,7 +80,7 @@ export function AdminLoginPage() {
       </form>
 
       <div className="admin-note">
-        🔒 Sau bước OTP, tài khoản Admin <b>bắt buộc xác thực thêm lớp thứ hai</b>. Mọi phiên đăng nhập đều được ghi
+        Sau bước OTP, tài khoản Admin <b>bắt buộc xác thực thêm lớp thứ hai</b>. Mọi phiên đăng nhập đều được ghi
         nhật ký (địa chỉ IP, thiết bị) phục vụ kiểm toán.
       </div>
     </AuthLayout>
