@@ -4,9 +4,12 @@
  */
 import type { Queryable } from "../../core/database";
 import type {
+  BookingNurseRow,
   ConsentStateRow,
   MedicalRecordRow,
+  OwnedProfileConsentRow,
   RecordAccessFactsRow,
+  RecordAccessGrantRow,
 } from "./privacy-consent.types";
 
 export async function findConsentState(
@@ -62,4 +65,71 @@ export async function loadMedicalRecord(
     [bookingId],
   );
   return rows[0] ?? null;
+}
+
+/** The booking's assigned nurse (Admin re-grant check). */
+export async function findBookingNurse(
+  db: Queryable,
+  bookingId: string,
+): Promise<BookingNurseRow | null> {
+  const { rows } = await db.query<BookingNurseRow>(
+    "SELECT id, nurse_id FROM bookings WHERE id = $1",
+    [bookingId],
+  );
+  return rows[0] ?? null;
+}
+
+export async function insertRecordAccessGrant(
+  db: Queryable,
+  grant: {
+    bookingId: string;
+    nurseId: string;
+    grantedBy: string;
+    reason: string;
+    expiresAt: Date;
+  },
+): Promise<RecordAccessGrantRow> {
+  const { rows } = await db.query<RecordAccessGrantRow>(
+    `INSERT INTO record_access_grants (booking_id, nurse_id, granted_by, reason, expires_at)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING id, expires_at`,
+    [
+      grant.bookingId,
+      grant.nurseId,
+      grant.grantedBy,
+      grant.reason,
+      grant.expiresAt,
+    ],
+  );
+  return rows[0];
+}
+
+/**
+ * The caller's own, not-deleted profile, locked for the rest of the transaction
+ * (two withdraw requests at once cannot both succeed). null = not the owner / deleted / missing.
+ */
+export async function lockOwnedProfileConsent(
+  db: Queryable,
+  profileId: string,
+  customerId: string,
+): Promise<OwnedProfileConsentRow | null> {
+  const { rows } = await db.query<OwnedProfileConsentRow>(
+    `SELECT id, data_consent_accepted
+       FROM patient_profiles
+      WHERE id = $1 AND customer_id = $2 AND deleted_at IS NULL
+      FOR UPDATE`,
+    [profileId, customerId],
+  );
+  return rows[0] ?? null;
+}
+
+export async function markConsentWithdrawn(
+  db: Queryable,
+  profileId: string,
+  at: Date,
+): Promise<void> {
+  await db.query(
+    "UPDATE patient_profiles SET data_consent_accepted = FALSE, consent_withdrawn_at = $2 WHERE id = $1",
+    [profileId, at],
+  );
 }

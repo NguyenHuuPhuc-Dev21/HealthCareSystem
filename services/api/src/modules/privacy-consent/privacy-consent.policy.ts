@@ -74,3 +74,21 @@ export function decideRecordAccess(
   );
   return { allowed: true, ...best };
 }
+
+/**
+ * Admin re-grant expiry check (contract §3): expiresAt must be in the future and at most
+ * RECORD_ACCESS_GRANT_MAX_HOURS from now (exactly the maximum is allowed).
+ * Returns null when valid, otherwise the problem.
+ */
+export type GrantExpiryProblem = "NOT_IN_FUTURE" | "EXCEEDS_MAX_HOURS";
+
+export function checkGrantExpiry(
+  expiresAt: Date,
+  now: Date,
+  maxHours: number,
+): GrantExpiryProblem | null {
+  if (expiresAt.getTime() <= now.getTime()) return "NOT_IN_FUTURE";
+  if (expiresAt.getTime() > now.getTime() + maxHours * HOUR_MS)
+    return "EXCEEDS_MAX_HOURS";
+  return null;
+}

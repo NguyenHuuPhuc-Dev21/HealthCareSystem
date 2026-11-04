@@ -117,3 +117,37 @@ export interface MedicalRecordView {
     imageUrlExpiresInSeconds: number;
   } | null;
 }
+
+// ---- Admin re-grant (FR-PRIV-01 §3, US-HP-28) ----------------------------------
+
+export interface GrantRecordAccessInput {
+  nurseId: string;
+  reason: string;
+  expiresAt: Date;
+}
+
+/** Row shape of findBookingNurse. */
+export type BookingNurseRow = { id: string; nurse_id: string | null };
+
+/** Row shape of insertRecordAccessGrant. */
+export type RecordAccessGrantRow = { id: string; expires_at: Date };
+
+/** Response body of POST /admin/bookings/:bookingId/record-access-grants (contract §3). */
+export interface RecordAccessGrantView {
+  grantId: string;
+  expiresAt: string;
+}
+
+// ---- Consent withdrawal (US-HP-03) ---------------------------------------------
+
+/** Row shape of lockOwnedProfileConsent. */
+export type OwnedProfileConsentRow = {
+  id: string;
+  data_consent_accepted: boolean;
+};
+
+/** Response body of POST /patient-profiles/:profileId/consent/withdraw (contract §4). */
+export interface ConsentWithdrawalView {
+  consent: "WITHDRAWN";
+  withdrawnAt: string;
+}

@@ -22,20 +22,33 @@ import {
   type DbClient,
   type Queryable,
 } from "../../core/database";
-import { AppError, badRequest, forbidden, notFound } from "../../core/errors";
-import * as storage from "../../core/storage";
-import { decideRecordAccess } from "./privacy-consent.policy";
 import {
+  AppError,
+  badRequest,
+  conflict,
+  forbidden,
+  notFound,
+} from "../../core/errors";
+import * as storage from "../../core/storage";
+import { checkGrantExpiry, decideRecordAccess } from "./privacy-consent.policy";
+import {
+  findBookingNurse,
   findConsentState,
   findRecordAccessFacts,
+  insertRecordAccessGrant,
   loadMedicalRecord,
+  lockOwnedProfileConsent,
+  markConsentWithdrawn,
 } from "./privacy-consent.repo";
 import type {
   ConsentColumns,
   ConsentInput,
+  ConsentWithdrawalView,
+  GrantRecordAccessInput,
   MedicalRecordRow,
   MedicalRecordView,
   RecordAccessDecision,
+  RecordAccessGrantView,
 } from "./privacy-consent.types";
 
 const UUID_RE =
@@ -202,6 +215,8 @@ export interface PrivacyConsentDeps {
   downloadUrl(key: string): Promise<string>;
   /** system_configs.RECORD_ACCESS_EXPIRY_HOURS */
   recordAccessExpiryHours(): Promise<number>;
+  /** system_configs.RECORD_ACCESS_GRANT_MAX_HOURS (defaults to reading core/config). */
+  recordAccessGrantMaxHours?(): Promise<number>;
   now?: () => Date;
 }
 
@@ -276,6 +291,106 @@ export class PrivacyConsentService {
       prescription,
     };
   }
+
+  /**
+   * POST /admin/bookings/:bookingId/record-access-grants (contract §3).
+   * Grant row + GRANT_RECORD_ACCESS audit row commit together (one transaction).
+   *  - expiresAt not in the future / beyond RECORD_ACCESS_GRANT_MAX_HOURS → 400 VALIDATION_ERROR
+   *  - unknown booking                                                   → 404 BOOKING_NOT_FOUND
+   *  - nurseId is not the booking's nurse                                → 409 NURSE_NOT_ON_BOOKING
+   */
+  async grantRecordAccess(
+    adminId: string,
+    bookingId: string,
+    input: GrantRecordAccessInput,
+    ip: string | null,
+  ): Promise<RecordAccessGrantView> {
+    const now = (this.deps.now ?? (() => new Date()))();
+    const maxHours = await (
+      this.deps.recordAccessGrantMaxHours ??
+      (() => getConfigNumber("RECORD_ACCESS_GRANT_MAX_HOURS"))
+    )();
+    const problem = checkGrantExpiry(input.expiresAt, now, maxHours);
+    if (problem) {
+      throw badRequest(
+        "VALIDATION_ERROR",
+        `expiresAt must be in the future and at most ${maxHours} hours from now`,
+        {
+          field: "expiresAt",
+          reason: problem,
+          maxHours,
+        },
+      );
+    }
+    if (!UUID_RE.test(bookingId))
+      throw notFound("BOOKING_NOT_FOUND", "Booking not found");
+
+    return this.deps.withTx(async (client) => {
+      const booking = await findBookingNurse(client, bookingId);
+      if (!booking) throw notFound("BOOKING_NOT_FOUND", "Booking not found");
+      if (booking.nurse_id === null || booking.nurse_id !== input.nurseId) {
+        throw conflict(
+          "NURSE_NOT_ON_BOOKING",
+          "nurseId is not the nurse assigned to this booking",
+        );
+      }
+      const grant = await insertRecordAccessGrant(client, {
+        bookingId,
+        nurseId: input.nurseId,
+        grantedBy: adminId,
+        reason: input.reason,
+        expiresAt: input.expiresAt,
+      });
+      const expiresAt = new Date(grant.expires_at).toISOString();
+      await writeAuditLog(client, {
+        actorId: adminId,
+        action: AuditAction.GRANT_RECORD_ACCESS,
+        targetTable: "record_access_grants",
+        targetId: grant.id,
+        newValue: {
+          bookingId,
+          nurseId: input.nurseId,
+          reason: input.reason,
+          expiresAt,
+        },
+        ipAddress: ip ?? undefined,
+      });
+      return { grantId: grant.id, expiresAt };
+    });
+  }
+
+  /**
+   * POST /patient-profiles/:profileId/consent/withdraw (contract §4, US-HP-03).
+   * From the moment this commits, assertConsentActive and assertRecordAccess deny.
+   *  - not the owner / deleted / missing / not a UUID → 403 FORBIDDEN
+   *  - consent already withdrawn                      → 409 CONSENT_ALREADY_WITHDRAWN
+   */
+  async withdrawConsent(
+    customerId: string,
+    profileId: string,
+  ): Promise<ConsentWithdrawalView> {
+    if (!UUID_RE.test(profileId))
+      throw forbidden("FORBIDDEN", "You do not own this patient profile");
+    const now = (this.deps.now ?? (() => new Date()))();
+
+    return this.deps.withTx(async (client) => {
+      const profile = await lockOwnedProfileConsent(
+        client,
+        profileId,
+        customerId,
+      );
+      if (!profile)
+        throw forbidden("FORBIDDEN", "You do not own this patient profile");
+      if (profile.data_consent_accepted !== true) {
+        throw conflict(
+          "CONSENT_ALREADY_WITHDRAWN",
+          "Consent for this profile is already withdrawn",
+        );
+      }
+      await markConsentWithdrawn(client, profileId, now);
+      return { consent: "WITHDRAWN" as const, withdrawnAt: now.toISOString() };
+    });
+  }
 }
 
 // ---- wiring ----------------------------------------------------------------
@@ -289,6 +404,8 @@ export function getPrivacyConsentService(): PrivacyConsentService {
       downloadUrl: async (key) => (await storage.createDownloadUrl(key)).url,
       recordAccessExpiryHours: () =>
         getConfigNumber("RECORD_ACCESS_EXPIRY_HOURS"),
+      recordAccessGrantMaxHours: () =>
+        getConfigNumber("RECORD_ACCESS_GRANT_MAX_HOURS"),
     });
   }
   return singleton;
