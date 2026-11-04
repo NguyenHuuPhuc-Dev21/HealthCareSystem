@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { jobs } from './core/jobs';
+import { registerPrivacyConsentJobs } from './modules/privacy-consent/privacy-consent.jobs';
 
 async function main() {
   // Phase 1+: các module đăng ký handler tại đây, vd: registerTierLifecycleJobs(jobs)
@@ -7,6 +8,8 @@ async function main() {
     await jobs.checkBacklog();
   });
   await jobs.scheduleRecurring('core.backlog-check', { every: 60_000 }, 'core.backlog-check');
+
+  await registerPrivacyConsentJobs(jobs); // BE-3 · Phase 1 · privacy.retention-sweep (daily 03:00)
 
   jobs.startWorker();
   console.log('[Worker] Shared job queue worker started');
