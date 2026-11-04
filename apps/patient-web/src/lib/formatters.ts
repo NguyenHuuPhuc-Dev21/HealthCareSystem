@@ -21,3 +21,11 @@ export function formatDateTime(isoString: string): string {
   }).format(new Date(isoString));
 }
 
+export function formatDate(isoString: string): string {
+  return new Intl.DateTimeFormat('vi-VN', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date(isoString));
+}
