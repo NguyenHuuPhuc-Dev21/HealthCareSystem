@@ -13,7 +13,7 @@ import type { MockHandler } from './mock-fetch';
 
 const VALID_OTP = '123456';
 const EXPIRED_OTP = '111111';
-const VALID_2FA = '246810';
+const VALID_2FA_CODES = ['123456', '246810'];
 const MAX_ATTEMPTS = 5;
 
 const users: Record<string, AuthUser> = {
@@ -84,7 +84,7 @@ export const authHandlers: Record<string, MockHandler> = {
   'POST /api/v1/auth/verify-2fa': (body: { challengeToken?: string; code?: string }) => {
     const challenge = challenges[body?.challengeToken ?? ''];
     if (!challenge) return fail(400, 'CHALLENGE_INVALID', 'Sign-in step expired');
-    if (body?.code !== VALID_2FA) {
+    if (!VALID_2FA_CODES.includes(body?.code ?? '')) {
       challenge.attempts -= 1;
       if (challenge.attempts <= 0) {
         delete challenges[body!.challengeToken!];

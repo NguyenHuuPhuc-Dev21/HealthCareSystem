@@ -82,6 +82,11 @@ export function AdminTwoFactorPage() {
         Mở ứng dụng xác thực đã liên kết với tài khoản <b className="text-navy">{maskPhone(challenge.phone)}</b> và
         nhập mã {CODE_LENGTH} chữ số đang hiển thị.
       </p>
+      {import.meta.env.VITE_USE_MOCK === 'true' && (
+        <Alert tone="info" title="Mã 2FA thử nghiệm:">
+          Nhập mã <b>123456</b> hoặc <b>246810</b> để đăng nhập vào Admin Console.
+        </Alert>
+      )}
 
       {!enrolled && !setupInfo && (
         <Alert title="Tài khoản chưa cài xác thực 2 lớp.">
