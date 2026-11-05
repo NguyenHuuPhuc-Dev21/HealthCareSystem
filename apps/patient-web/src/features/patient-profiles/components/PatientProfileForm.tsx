@@ -1,25 +1,28 @@
 import { useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import { Button } from '../../../components';
-import { Check, MapPin } from 'lucide-react';
+import { Accessibility, Bed, Check, Footprints, Home, Hospital, MapPin } from 'lucide-react';
 import {
   LOCATION_OPTIONS,
   MOBILITY_OPTIONS,
   RELATIONSHIP_OPTIONS,
 } from '../patient-profiles.types';
-import type { PatientProfileDraft } from '../patient-profiles.types';
+import type { MobilityStatus, PatientProfileDraft } from '../patient-profiles.types';
 import { ageFromBirthYear, validateDraft } from '../validation';
 import type { DraftErrors } from '../validation';
 
 interface PatientProfileFormProps {
   value: PatientProfileDraft;
   onChange: (next: PatientProfileDraft) => void;
-  /** Gọi khi form hợp lệ và người dùng bấm "Lưu & tiếp tục" */
+  /** Gọi khi form hợp lệ và người dùng bấm submit */
   onContinue: () => void;
+  onCancel?: () => void;
+  cancelLabel?: string;
   submitLabel?: string;
   title?: ReactNode;
   subtitle?: ReactNode;
   submitting?: boolean;
+  isModal?: boolean;
   /** Nội dung chèn ngay trước nút submit (vd. khối đồng ý ở P13) */
   beforeActions?: ReactNode;
   /** Nội dung sau nút submit (vd. vùng nguy hiểm ở P13) */
@@ -28,15 +31,29 @@ interface PatientProfileFormProps {
 
 type GeoState = 'idle' | 'locating' | 'error';
 
+function renderMobilityIcon(status: MobilityStatus) {
+  switch (status) {
+    case 'NORMAL':
+      return <Footprints size={20} className="choice-icon" />;
+    case 'PARTIAL':
+      return <Accessibility size={20} className="choice-icon" />;
+    case 'BEDRIDDEN':
+      return <Bed size={20} className="choice-icon" />;
+  }
+}
+
 /** SH3 · Bước 2 — Hồ sơ người được chăm sóc. Dữ liệu chỉ nằm ở client cho tới Bước 3. */
 export function PatientProfileForm({
   value,
   onChange,
   onContinue,
-  submitLabel = 'Lưu & tiếp tục sang Bước 3 →',
+  onCancel,
+  cancelLabel = 'Hủy',
+  submitLabel = 'Lưu & tiếp tục sang Bước 3',
   title = 'Bước 2 · Hồ sơ người được chăm sóc',
   subtitle = 'Thông tin này chỉ hiển thị cho điều dưỡng được phân ca và đội ngũ vận hành khi cần hỗ trợ.',
   submitting = false,
+  isModal = false,
   beforeActions,
   footer,
 }: PatientProfileFormProps) {
@@ -82,9 +99,14 @@ export function PatientProfileForm({
     errors[key] ? <div className="field-error" role="alert">{errors[key]}</div> : null;
 
   return (
-    <form className="card step-card" onSubmit={handleSubmit} noValidate aria-labelledby="pp-title">
-      <h3 id="pp-title" className="step-card__title">{title}</h3>
-      {subtitle && <p className="step-card__sub">{subtitle}</p>}
+    <form
+      className={`step-card${isModal ? ' step-card--modal' : ' card'}`}
+      onSubmit={handleSubmit}
+      noValidate
+      aria-labelledby={title ? 'pp-title' : undefined}
+    >
+      {!isModal && title && <h3 id="pp-title" className="step-card__title">{title}</h3>}
+      {!isModal && subtitle && <p className="step-card__sub">{subtitle}</p>}
 
       {/* Mối quan hệ */}
       <div className="field" id="pp-relationship">
@@ -168,7 +190,11 @@ export function PatientProfileForm({
                 className={`choice${selected ? ' selected' : ''}`}
                 onClick={() => set('mobility_status', opt.value)}
               >
-                <h4>{opt.icon} {opt.title}{selected && <Check size={14} style={{ marginLeft: 6, display: 'inline-block', verticalAlign: 'middle' }} />}</h4>
+                <h4>
+                  <span className="choice-icon-wrap">{renderMobilityIcon(opt.value)}</span>
+                  <span>{opt.title}</span>
+                  {selected && <Check size={14} style={{ marginLeft: 6, display: 'inline-block', verticalAlign: 'middle' }} />}
+                </h4>
                 <p>{opt.description}</p>
               </button>
             );
@@ -210,12 +236,13 @@ export function PatientProfileForm({
         />
       </div>
 
-      {/* Nơi chăm sóc — SRS: patient_profiles.location_type; thiết kế SH3 chưa vẽ trường này */}
+      {/* Nơi chăm sóc */}
       <div className="field" id="pp-location_type">
         <span className="field-label">Nơi chăm sóc <span className="req">*</span></span>
         <div className="chip-select" role="radiogroup" aria-label="Nơi chăm sóc">
           {LOCATION_OPTIONS.map((opt) => {
             const selected = value.location_type === opt.value;
+            const Icon = opt.value === 'HOSPITAL' ? Hospital : Home;
             return (
               <button
                 key={opt.value}
@@ -225,6 +252,7 @@ export function PatientProfileForm({
                 className={selected ? 'selected' : undefined}
                 onClick={() => set('location_type', opt.value)}
               >
+                <Icon size={16} style={{ marginRight: 6, display: 'inline-block', verticalAlign: 'middle' }} />
                 {opt.label}
               </button>
             );
@@ -269,6 +297,11 @@ export function PatientProfileForm({
       {beforeActions}
 
       <div className="step-card__actions">
+        {onCancel && (
+          <Button type="button" variant="secondary" size="lg" onClick={onCancel} disabled={submitting}>
+            {cancelLabel}
+          </Button>
+        )}
         <Button type="submit" size="lg" loading={submitting}>{submitLabel}</Button>
       </div>
 
