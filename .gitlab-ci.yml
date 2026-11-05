@@ -78,3 +78,27 @@ secret-scan:
   script:
     # Chỉ đỏ khi phát hiện secret còn hiệu lực (verified).
     - trufflehog git file://. --results=verified --fail --no-update
+
+# ---------------------------------------------------------------------
+# Guard: phat hien commit di thang len main (khong qua merge request).
+# Lop chan that la Branch rules (Settings > Repository); job nay chi la
+# chuong bao dong neu khoa server bi go nham. Merge commit co 2 commit
+# cha, commit push thang chi co 1. Yeu cau Merge method = Merge commit.
+# ---------------------------------------------------------------------
+guard-no-direct-push-main:
+  stage: check
+  image: alpine/git:latest
+  cache: []
+  before_script: []
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "main"'
+  script:
+    - |
+      parents=$(git cat-file -p "$CI_COMMIT_SHA" | grep -c '^parent ' || true)
+      if [ "$parents" -lt 2 ]; then
+        echo "CANH BAO: commit $CI_COMMIT_SHA len thang nhanh main ma khong qua Merge Request."
+        echo "Kiem tra lai Branch rules cua nhanh main (Settings > Repository):"
+        echo "Allowed to push and merge phai dang la 'No one'."
+        exit 1
+      fi
+      echo "OK: commit tren main la merge commit (di qua Merge Request)."
