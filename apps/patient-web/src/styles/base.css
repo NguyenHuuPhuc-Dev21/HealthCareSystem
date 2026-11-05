@@ -1330,8 +1330,11 @@ button {
 .avatar--lg {
   width: 46px;
   height: 46px;
+  min-width: 46px;
+  min-height: 46px;
+  aspect-ratio: 1 / 1;
   font-size: 16px;
-  flex-basis: 46px;
+  flex: 0 0 46px;
 }
 
 .avatar-menu {
@@ -1822,15 +1825,19 @@ button {
 .avatar--xl {
   width: 64px;
   height: 64px;
+  min-width: 64px;
+  min-height: 64px;
+  max-width: 64px;
+  max-height: 64px;
+  flex: 0 0 64px;
+  aspect-ratio: 1 / 1;
   font-size: 22px;
   font-weight: 700;
   border-radius: 50%;
   background: #e2f0ea;
   color: #176544;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  display: grid;
+  place-items: center;
 }
 
 .profile-detail__names {
