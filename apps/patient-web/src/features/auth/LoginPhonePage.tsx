@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Alert, Button } from '../../components';
+import { ArrowLeft } from 'lucide-react';
 import { formatPhoneInput, normalizeVnPhone } from '../../lib/phone';
 import { requestOtp } from './auth.api';
 import { getAuthErrorMessage } from './auth.messages';
@@ -9,12 +10,12 @@ import type { AuthMessage } from './auth.messages';
 import { AuthLayout, BrandMark } from './components/AuthLayout';
 import { buildPending, loadPending, savePending } from './otp-pending';
 
-/** SH1 — Đăng nhập / đăng ký bằng số điện thoại. */
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
+
+/** SH1 — Đăng nhập / đăng ký bằng số điện thoại (hợp nhất 1 luồng). */
 export function LoginPhonePage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams] = useSearchParams();
-  const isRegister = searchParams.get('mode') === 'register';
 
   // Quay lại từ SH2 ("Đổi số") thì điền sẵn số cũ
   const [phone, setPhone] = useState(() => {
@@ -24,6 +25,7 @@ export function LoginPhonePage() {
   const [error, setError] = useState<AuthMessage | null>(null);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const landingUrl = import.meta.env.VITE_LANDING_URL ?? 'http://localhost:5177';
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -50,21 +52,61 @@ export function LoginPhonePage() {
     navigate('/login/otp', { state: location.state });
   };
 
-  return (
-    <AuthLayout>
-      <BrandMark />
-      <h1 className="auth-title">{isRegister ? 'Đăng ký tài khoản' : 'Đăng nhập'}</h1>
-      <p className="auth-sub">
-        {isRegister
-          ? 'Nhập số điện thoại — tài khoản được tạo sau khi xác thực OTP'
-          : 'Nhập số điện thoại để nhận mã OTP'}
+  const mockCard = USE_MOCK ? (
+    <div className="auth-card mock-card">
+      <h2>Dữ liệu mẫu (chỉ hiện khi bật mock)</h2>
+      <p>
+        Mã OTP cho mọi số: <strong>123456</strong>. Dùng các số sau để thử từng trạng thái:
       </p>
+      <table className="mock-table">
+        <thead>
+          <tr>
+            <th>Số điện thoại</th>
+            <th>Trạng thái tài khoản</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>0905 123 456</strong></td>
+            <td>Nguyễn Văn An — Khách hàng đã eKYC, có sẵn 2 hồ sơ người thân</td>
+          </tr>
+          <tr>
+            <td><strong>0905 111 222</strong></td>
+            <td>Khách hàng cũ — chưa hoàn tất eKYC CCCD</td>
+          </tr>
+          <tr>
+            <td><strong>Số bất kỳ khác</strong></td>
+            <td>Người dùng mới → chuyển hướng chọn vai trò và tạo hồ sơ</td>
+          </tr>
+          <tr>
+            <td><strong>0909 888 777</strong></td>
+            <td>Tài khoản điều dưỡng (bị từ chối ở cổng khách hàng)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  ) : undefined;
+
+  return (
+    <AuthLayout secondary={mockCard}>
+      <div className="auth-back-row">
+        <a href={landingUrl} className="auth-back-btn" title="Quay lại trang chủ CareNest">
+          <ArrowLeft size={16} aria-hidden="true" />
+          <span>Quay lại trang chủ</span>
+        </a>
+      </div>
+      <BrandMark />
+      <div className="auth-badge-wrap">
+        <span className="auth-badge">BỆNH NHÂN & GIA ĐÌNH</span>
+      </div>
+      <h1 className="auth-title">Đăng nhập / Đăng ký</h1>
+      <p className="auth-sub">Nhập số điện thoại để nhận mã OTP</p>
 
       <form onSubmit={handleSubmit} noValidate>
         <div className="field">
           <label htmlFor="login-phone">Số điện thoại di động</label>
           <div className={`phone-wrap${error ? ' is-invalid' : ''}`}>
-            <span className="phone-wrap__prefix" aria-hidden="true">🇻🇳 +84</span>
+            <span className="phone-wrap__prefix" aria-hidden="true">VN +84</span>
             <input
               id="login-phone"
               ref={inputRef}
@@ -94,19 +136,12 @@ export function LoginPhonePage() {
         </Button>
       </form>
 
-      <div className="divider-or">hoặc</div>
-      <p className="auth-switch">
-        {isRegister ? (
-          <>Đã có tài khoản? <Link to="/login">Đăng nhập</Link></>
-        ) : (
-          <>Chưa có tài khoản? <Link to="/login?mode=register">Đăng ký ngay</Link></>
-        )}
+      <p style={{ textAlign: 'center', fontSize: '15px', color: 'var(--muted, #5f7d75)', margin: '20px 0 0', lineHeight: 1.5 }}>
+        Chưa có tài khoản? Chỉ cần nhập số điện thoại và nhận OTP — hệ thống sẽ tự động hướng dẫn bạn tạo hồ sơ chăm sóc ngay sau đó.
       </p>
 
       <p className="small-print">
-        Bằng việc tiếp tục, bạn đồng ý với{' '}
-        {/* TODO: thay bằng route trang Điều khoản khi có */}
-        <a href="/dieu-khoan" target="_blank" rel="noreferrer">Điều khoản sử dụng</a> và chấp thuận việc
+        Bằng việc tiếp tục, bạn đồng ý với Điều khoản sử dụng và chấp thuận việc
         xử lý dữ liệu cá nhân theo <b>Nghị định 13/2023/NĐ-CP</b>.
       </p>
     </AuthLayout>

@@ -1,3 +1,4 @@
+import { Eye } from 'lucide-react';
 import { Button } from '../../../components';
 import { initialsOf } from '../../../components/layout/SetupLayout';
 import { formatDate } from '../../../lib/formatters';
@@ -17,7 +18,7 @@ export function describeProfile(p: Pick<PatientProfileDto, 'relationship' | 'bir
   return [relation, age, mobility].filter(Boolean).join(' · ');
 }
 
-/** Thẻ hồ sơ ở cột trái P13. */
+/** Thẻ hồ sơ ở cột trái P13. Nhấn vào để xem chi tiết bên phải. */
 export function ProfileCard({ profile, selected, onSelect }: ProfileCardProps) {
   const consentChip = profile.deletion_requested_at ? (
     <span className="chip red">Đã yêu cầu xoá dữ liệu</span>
@@ -30,7 +31,18 @@ export function ProfileCard({ profile, selected, onSelect }: ProfileCardProps) {
   );
 
   return (
-    <article className={`card profile-card${selected ? ' profile-card--selected' : ''}`}>
+    <article
+      className={`card profile-card${selected ? ' profile-card--selected' : ''}`}
+      onClick={onSelect}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
+    >
       <div className="profile-card__head">
         <span className="avatar avatar--lg" aria-hidden="true">{initialsOf(profile.full_name)}</span>
         <div>
@@ -47,10 +59,14 @@ export function ProfileCard({ profile, selected, onSelect }: ProfileCardProps) {
         block
         variant={selected ? 'primary' : 'secondary'}
         className="profile-card__btn"
-        onClick={onSelect}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelect();
+        }}
         aria-pressed={selected}
       >
-        {selected ? 'Đang chỉnh sửa hồ sơ này' : 'Chỉnh sửa'}
+        <Eye size={15} style={{ marginRight: 6, display: 'inline-block', verticalAlign: 'middle' }} />
+        {selected ? 'Đang xem hồ sơ' : 'Xem chi tiết'}
       </Button>
     </article>
   );

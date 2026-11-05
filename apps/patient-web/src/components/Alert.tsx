@@ -1,4 +1,6 @@
 import React from 'react';
+import type { ReactNode } from 'react';
+import { AlertTriangle, CheckCircle2, Info } from 'lucide-react';
 
 export interface AlertProps {
   tone?: 'error' | 'info' | 'success';
@@ -6,10 +8,10 @@ export interface AlertProps {
   children?: React.ReactNode;
 }
 
-const ICON: Record<NonNullable<AlertProps['tone']>, string> = {
-  error: '⚠️',
-  info: 'ⓘ',
-  success: '✓',
+const ICON: Record<NonNullable<AlertProps['tone']>, ReactNode> = {
+  error: <AlertTriangle size={17} />,
+  info: <Info size={17} />,
+  success: <CheckCircle2 size={17} />,
 };
 
 export const Alert: React.FC<AlertProps> = ({ tone = 'error', title, children }) => (

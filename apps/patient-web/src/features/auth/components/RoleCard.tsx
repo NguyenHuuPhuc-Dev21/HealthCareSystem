@@ -1,5 +1,7 @@
+import type { ReactNode } from 'react';
+
 interface RoleCardProps {
-  icon: string;
+  icon: ReactNode;
   title: string;
   description: string;
   nextLabel: string;

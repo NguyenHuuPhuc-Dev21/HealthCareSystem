@@ -30,7 +30,6 @@ interface NurseItem {
   avatar: string;
   tier: string;
   rating: string;
-  stars: string;
   completedShifts: number;
   distance: string;
   gphn: string | null;
@@ -48,7 +47,6 @@ const NURSES: NurseItem[] = [
     avatar: 'TM',
     tier: 'Cấp 2',
     rating: '4.9',
-    stars: '★★★★★',
     completedShifts: 128,
     distance: '1,2 km',
     gphn: '00976/GPHN-ĐN',
@@ -64,7 +62,6 @@ const NURSES: NurseItem[] = [
     avatar: 'HA',
     tier: 'Cấp 2',
     rating: '4.8',
-    stars: '★★★★★',
     completedShifts: 95,
     distance: '2,6 km',
     gphn: '01284/GPHN-ĐN',
@@ -80,7 +77,6 @@ const NURSES: NurseItem[] = [
     avatar: 'NH',
     tier: 'Cấp 1 · Chăm sóc cơ bản',
     rating: '4.7',
-    stars: '★★★★☆',
     completedShifts: 42,
     distance: '3,1 km',
     gphn: null,
@@ -204,11 +200,6 @@ export function HomePage() {
   return (
     <PatientLayout fullName={user?.full_name} phone={user?.phone} onSignOut={signOut}>
       {flash && <Alert tone="success">{flash}</Alert>}
-<<<<<<< Updated upstream
-      <div className="page-head">
-        <h1>Xin chào 👋</h1>
-        <p>Trang chủ (P1) sẽ làm ở Phase 2–3. Hiện bạn có thể quản lý hồ sơ người được chăm sóc.</p>
-=======
 
       {/* 1. Phần lời chào & chọn địa chỉ (P1 .greet) */}
       <div className="greet">
@@ -230,7 +221,6 @@ export function HomePage() {
           <span>Giao ca tại: {selectedLocation}</span>
           <ChevronDown size={14} style={{ color: 'var(--muted)' }} />
         </button>
->>>>>>> Stashed changes
       </div>
 
       {/* Cảnh báo eKYC CCCD theo quy chuẩn SRS v2.0 */}

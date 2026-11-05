@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Button } from '../../../components';
+import { Camera } from 'lucide-react';
 
 interface CameraCaptureProps {
   onCapture: (file: File) => void;
@@ -89,7 +90,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
         <div className="modal-actions">
           <Button variant="secondary" type="button" onClick={onCancel}>Huỷ</Button>
           {!error && (
-            <Button type="button" onClick={handleCapture} disabled={!ready}>📸 Chụp ảnh</Button>
+            <Button type="button" onClick={handleCapture} disabled={!ready}><Camera size={16} style={{ marginRight: 6 }} /> Chụp ảnh</Button>
           )}
         </div>
       </div>

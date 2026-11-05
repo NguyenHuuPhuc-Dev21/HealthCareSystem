@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Alert, Button } from '../../components';
+import { Home, Stethoscope } from 'lucide-react';
 import { maskPhone } from '../../lib/phone';
 import { requestOtp, verifyOtp } from './auth.api';
 import { getAuthErrorMessage } from './auth.messages';
@@ -122,6 +123,11 @@ export function VerifyOtpPage() {
         Mã {OTP_LENGTH} chữ số đã gửi tới <b className="text-navy">{maskPhone(pending.phone)}</b> ·{' '}
         <Link to="/login" className="link-strong">Đổi số</Link>
       </p>
+      {import.meta.env.VITE_USE_MOCK === 'true' && (
+        <Alert tone="info" title="Mã OTP thử nghiệm:">
+          Nhập mã <b>123456</b> để xác thực.
+        </Alert>
+      )}
 
       <form onSubmit={handleSubmit} noValidate>
         <OtpInput
@@ -155,7 +161,7 @@ export function VerifyOtpPage() {
             </div>
             <div className="role-grid">
               <RoleCard
-                icon="🏠"
+                icon={<Home size={28} />}
                 title="Tôi cần thuê điều dưỡng"
                 description="Đặt chăm sóc cho bản thân hoặc người thân, tại nhà hoặc tại bệnh viện."
                 nextLabel="Tiếp tục: Xác thực CCCD & hồ sơ"
@@ -163,7 +169,7 @@ export function VerifyOtpPage() {
                 onSelect={() => setRole('PATIENT')}
               />
               <RoleCard
-                icon="🩺"
+                icon={<Stethoscope size={28} />}
                 title="Tôi là điều dưỡng / bác sĩ"
                 description="Nhận ca chăm sóc tại nhà theo lịch rảnh của bạn, thu nhập minh bạch."
                 nextLabel="Tiếp tục: Nộp hồ sơ thẩm định"

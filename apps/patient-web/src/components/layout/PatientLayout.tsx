@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { Bell, CreditCard, LogOut, MessageSquare, ShieldCheck, Stethoscope, User } from 'lucide-react';
 import { maskPhone } from '../../lib/phone';
 import { initialsOf, LogoMark } from './SetupLayout';
 
@@ -16,13 +17,13 @@ const NAV_ITEMS: Array<{ label: string; to: string | null; match?: string[] }> =
   { label: 'Tài khoản', to: '/patient-profiles', match: ['/patient-profiles'] },
 ];
 
-const MENU_ITEMS: Array<{ icon: string; label: string; to: string | null }> = [
-  { icon: '👤', label: 'Hồ sơ cá nhân', to: null },
-  { icon: '🩺', label: 'Hồ sơ người được chăm sóc', to: '/patient-profiles' },
-  { icon: '💳', label: 'Thanh toán của tôi', to: null },
-  { icon: '🔔', label: 'Thông báo', to: null },
-  { icon: '🔒', label: 'Quyền riêng tư & dữ liệu', to: null },
-  { icon: '💬', label: 'Hỗ trợ', to: null },
+const MENU_ITEMS: Array<{ icon: ReactNode; label: string; to: string | null }> = [
+  { icon: <User size={16} />, label: 'Hồ sơ cá nhân', to: null },
+  { icon: <Stethoscope size={16} />, label: 'Hồ sơ người được chăm sóc', to: '/patient-profiles' },
+  { icon: <CreditCard size={16} />, label: 'Thanh toán của tôi', to: null },
+  { icon: <Bell size={16} />, label: 'Thông báo', to: null },
+  { icon: <ShieldCheck size={16} />, label: 'Quyền riêng tư & dữ liệu', to: null },
+  { icon: <MessageSquare size={16} />, label: 'Hỗ trợ', to: null },
 ];
 
 interface PatientLayoutProps {
@@ -77,7 +78,7 @@ export function PatientLayout({ fullName, phone, onSignOut, children }: PatientL
 
         <div className="navbar__right" ref={menuRef}>
           {/* TODO: số thông báo chưa đọc — làm ở Phase 6 (notifications) */}
-          <button type="button" className="bell" aria-label="Thông báo" disabled title="Đang phát triển">🔔</button>
+          <button type="button" className="bell" aria-label="Thông báo" disabled title="Đang phát triển"><Bell size={18} /></button>
           <button
             type="button"
             className="userblock"
@@ -112,7 +113,7 @@ export function PatientLayout({ fullName, phone, onSignOut, children }: PatientL
               )}
               <div className="avatar-menu__divider" />
               <button type="button" role="menuitem" className="avatar-menu__logout" onClick={onSignOut}>
-                <span className="mi" aria-hidden="true">↩️</span>Đăng xuất
+                <span className="mi" aria-hidden="true" style={{ display: 'inline-flex', alignItems: 'center', marginRight: 6 }}><LogOut size={16} /></span>Đăng xuất
               </button>
             </div>
           )}

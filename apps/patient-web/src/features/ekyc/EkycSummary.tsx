@@ -1,9 +1,11 @@
+import type { ReactNode } from 'react';
+import { Camera, Check, CreditCard } from 'lucide-react';
 import type { CustomerKyc, KycDocType } from './ekyc.types';
 
-const DOCS: Array<{ type: KycDocType; icon: string; title: string }> = [
-  { type: 'CCCD_FRONT', icon: '🪪', title: 'CCCD mặt trước' },
-  { type: 'CCCD_BACK', icon: '🪪', title: 'CCCD mặt sau' },
-  { type: 'SELFIE', icon: '🤳', title: 'Ảnh chân dung trực tiếp' },
+const DOCS: Array<{ type: KycDocType; icon: ReactNode; title: string }> = [
+  { type: 'CCCD_FRONT', icon: <CreditCard size={28} />, title: 'CCCD mặt trước' },
+  { type: 'CCCD_BACK', icon: <CreditCard size={28} />, title: 'CCCD mặt sau' },
+  { type: 'SELFIE', icon: <Camera size={28} />, title: 'Ảnh chân dung trực tiếp' },
 ];
 
 interface EkycSummaryProps {
@@ -20,7 +22,7 @@ export function EkycSummary({ kyc, onEdit }: EkycSummaryProps) {
   return (
     <>
       <div className="card step-summary">
-        <span className="step-summary__n" aria-hidden="true">✓</span>
+        <span className="step-summary__n" aria-hidden="true"><Check size={16} /></span>
         <div>
           <h3>
             Bước 1 · Xác thực CCCD{' '}

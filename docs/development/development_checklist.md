@@ -10,18 +10,18 @@
 ## 0. General Preparation (One-time, prior to Phase 0)
 
 - [ ] Fill in real engineer names for the 5 roles: FE-1 = ………… · FE-2 = ………… · BE-1 = ………… · BE-2 = ………… · BE-3 = …………
-- [ ] All 5 engineers have read and understood SRS v2.0 Updated (§4 FRs, §5 configs & SLA, §7 PostgreSQL schema, §8 API catalog).
-- [ ] Agree on fixed operational ownership:
+- [x] All 5 engineers have read and understood SRS v2.0 Updated (§4 FRs, §5 configs & SLA, §7 PostgreSQL schema, §8 API catalog).
+- [x] Agree on fixed operational ownership:
   - **FE-1:** Patient Web + Admin Web
   - **FE-2:** Nurse Web Portal + Nurse Mobile App
   - **BE-1:** Infrastructure, Core Platform, Identity & Auth
   - **BE-2:** Scheduling, Bookings, Matching & Shift Execution
   - **BE-3:** Payments, Wallets, Disputes, Notifications & Post-Shift
-- [ ] Agree: Zero hardcoding — all business numbers must be loaded dynamically from `system_configs` (§5.1): platform commission 15%, nurse deposit 300,000 VND, night shift surcharge +20%, Lunar New Year (Tết) surcharge +300%, national holiday surcharge +200%, heavy-care patient surcharge +15%, payment hold timeout 15 min, settlement cooling window 24h, check-in radius ≤ 200 m, ICU travel support 50,000 VND, no-show penalty 50,000 VND.
-- [ ] Agree: All monetary movements proceed strictly through the append-only `wallet_transactions` ledger with unique `idempotency_key`, `balance_before`, and `balance_after`. The nurse deposit is reserved **exclusively** for SLA penalties; it is **never** debited for cash-job commission.
-- [ ] Agree: `nurse_profiles.profile_status` is the single source of truth for shift eligibility; tier gating is strictly enforced on the backend (returning **HTTP 403**).
-- [ ] Agree: All temporal business deadlines must be registered with the shared job queue engine; spontaneous in-process `setTimeout` calls are strictly forbidden.
-- [ ] Agree: Frontend surfaces never compute pricing, deadlines, or shift acceptance eligibility — all decisions and values are authoritative responses from the backend.
+- [x] Agree: Zero hardcoding — all business numbers must be loaded dynamically from `system_configs` (§5.1): platform commission 15%, nurse deposit 300,000 VND, night shift surcharge +20%, Lunar New Year (Tết) surcharge +300%, national holiday surcharge +200%, heavy-care patient surcharge +15%, payment hold timeout 15 min, settlement cooling window 24h, check-in radius ≤ 200 m, ICU travel support 50,000 VND, no-show penalty 50,000 VND.
+- [x] Agree: All monetary movements proceed strictly through the append-only `wallet_transactions` ledger with unique `idempotency_key`, `balance_before`, and `balance_after`. The nurse deposit is reserved **exclusively** for SLA penalties; it is **never** debited for cash-job commission.
+- [x] Agree: `nurse_profiles.profile_status` is the single source of truth for shift eligibility; tier gating is strictly enforced on the backend (returning **HTTP 403**).
+- [x] Agree: All temporal business deadlines must be registered with the shared job queue engine; spontaneous in-process `setTimeout` calls are strictly forbidden.
+- [x] Agree: Frontend surfaces never compute pricing, deadlines, or shift acceptance eligibility — all decisions and values are authoritative responses from the backend.
 - [ ] Fill in target milestone calendar: Phase 0 …… → Phase 1 …… → Phase 2 …… → Phase 3 …… → Phase 4 …… → Phase 5 …… → Phase 6 …… → Phase 7 …… → Phase 8 ……
 
 ---
@@ -29,41 +29,41 @@
 ## Phase 0 — Shared Infrastructure Foundation
 
 ### FE-1 (Patient Web + Admin Web)
-- [ ] Scaffold `apps/patient-web`: project setup, client routing, base layout.
-- [ ] Scaffold `apps/admin-web`: project setup, client routing, base layout.
-- [ ] Unified API client library: base URL `/api/v1`, Bearer token attachment, standardized error handling for HTTP 400/401/403.
-- [ ] Shared design system UI component library: buttons, form inputs, data tables, status badges.
+- [x] Scaffold `apps/patient-web`: project setup, client routing, base layout.
+- [x] Scaffold `apps/admin-web`: project setup, client routing, base layout.
+- [x] Unified API client library: base URL `/api/v1`, Bearer token attachment, standardized error handling for HTTP 400/401/403.
+- [x] Shared design system UI component library: buttons, form inputs, data tables, status badges.
 
 ### FE-2 (Nurse Web + Nurse Mobile App)
-- [ ] Scaffold `apps/nurse-web`: project setup, client routing, base layout.
-- [ ] Scaffold `apps/nurse-app`: React Native / mobile setup, navigation, base layout.
-- [ ] Elder-Friendly design token system: typography 16–18pt (Mobile) / 18–20px (Web), oversized touch targets $\ge 48 \times 48\text{ dp}$, WCAG 2.1 AA contrast ($\ge 4.5:1$).
-- [ ] Unified API client library adhering to the standard agreed with FE-1.
+- [x] Scaffold `apps/nurse-web`: project setup, client routing, base layout.
+- [x] Scaffold `apps/nurse-app`: React Native / mobile setup, navigation, base layout.
+- [x] Elder-Friendly design token system: typography 16–18pt (Mobile) / 18–20px (Web), oversized touch targets $\ge 48 \times 48\text{ dp}$, WCAG 2.1 AA contrast ($\ge 4.5:1$).
+- [x] Unified API client library adhering to the standard agreed with FE-1.
 - [ ] Smoke test mobile build deployment on a physical legacy Android device.
 
 ### BE-1 (Platform & Infrastructure — Phase Lead)
-- [ ] `core/database`: PostgreSQL connection pool setup (ADR-0002 SQL-first).
-- [ ] `core/config`: Dynamic `system_configs` cache-backed reader (zero hardcoded values).
-- [ ] `core/storage`: Private S3/MinIO bucket integration with 10-minute Presigned URL generator.
-- [ ] Sequential SQL migrations provisioning the 16 core tables (§7).
-- [ ] Seed data scripts: `system_configs` parameters (§5.1) + service catalog (§4.2).
-- [ ] `packages/shared`: Shared status enums (3-axis booking states, profile lifecycle, wallet transaction types, config keys).
+- [x] `core/database`: PostgreSQL connection pool setup (ADR-0002 SQL-first).
+- [x] `core/config`: Dynamic `system_configs` cache-backed reader (zero hardcoded values).
+- [x] `core/storage`: Private S3/MinIO bucket integration with 10-minute Presigned URL generator.
+- [x] Sequential SQL migrations provisioning the 16 core tables (§7).
+- [x] Seed data scripts: `system_configs` parameters (§5.1) + service catalog (§4.2).
+- [x] `packages/shared`: Shared status enums (3-axis booking states, profile lifecycle, wallet transaction types, config keys).
 
 ### BE-2
-- [ ] `core/jobs`: Shared job queue engine with idempotency locks, dead-letter queue (DLQ), and backlog alerts.
-- [ ] Docker Compose orchestration: PostgreSQL 16 + Redis (in collaboration with BE-1).
+- [x] `core/jobs`: Shared job queue engine with idempotency locks, dead-letter queue (DLQ), and backlog alerts.
+- [x] Docker Compose orchestration: PostgreSQL 16 + Redis (in collaboration with BE-1).
 
 ### BE-3
-- [ ] `core/notifications`: Unified notification interface (FCM push + in-app + WebSocket) with deterministic mock for local testing.
-- [ ] Urgent alert dispatcher with `priority = high` + 60-second unacknowledged delivery watcher.
-- [ ] `core/audit`: Append-only `audit_logs` service (mutation/deletion locked at both application and database layers).
-- [ ] CI pipeline green on empty PR: unit test runner + PostgreSQL migration/constraint tests + secret scanner.
+- [x] `core/notifications`: Unified notification interface (FCM push + in-app + WebSocket) with deterministic mock for local testing.
+- [x] Urgent alert dispatcher with `priority = high` + 60-second unacknowledged delivery watcher.
+- [x] `core/audit`: Append-only `audit_logs` service (mutation/deletion locked at both application and database layers).
+- [x] CI pipeline green on empty PR: unit test runner + PostgreSQL migration/constraint tests + secret scanner.
 
 ### Phase 0 Exit Criteria
-- [ ] Docker Compose successfully provisions and health-checks PostgreSQL and Redis.
-- [ ] SQL migrations and seed datasets apply cleanly onto an empty database.
-- [ ] `packages/shared` exports all required §2.2 / §2.3 domain enums.
-- [ ] Automated CI pipeline passes cleanly on main branches.
+- [x] Docker Compose successfully provisions and health-checks PostgreSQL and Redis.
+- [x] SQL migrations and seed datasets apply cleanly onto an empty database.
+- [x] `packages/shared` exports all required §2.2 / §2.3 domain enums.
+- [x] Automated CI pipeline passes cleanly on main branches.
 
 ---
 
@@ -73,17 +73,17 @@
 - [ ] Patient Web — Phone + OTP SMS authentication flow (`features/auth`).
 - [ ] Patient Web — Patient profile creation + mandatory Decree-13 sensitive health data consent checkbox (`features/patient-profiles`).
 - [ ] Patient Web — Customer CCCD identity document upload for eKYC.
-- [ ] Admin Web — Nurse verification queue: review uploaded credentials, approve/reject, assign professional Tier (`features/nurse-verification`).
+- [x] Admin Web — Nurse verification queue: review uploaded credentials, approve/reject, assign professional Tier (`features/nurse-verification`).
 
 ### FE-2
-- [ ] Nurse Web + Mobile App — Phone + OTP SMS authentication flow.
-- [ ] Nurse Web + Mobile App — eKYC onboarding wizard (`features/onboarding`): CCCD both sides, live portrait selfie, medical/nursing degree, GPHN (number, expiration date, clinical scope), retirement decision.
-- [ ] Nurse Web + Mobile App — Credentials management screen + upload newly renewed GPHN upon expiration (`features/credentials`).
-- [ ] Clear profile status display across all screens: Pending Verification / Active / Suspended / Banned.
+- [x] Nurse Web + Mobile App — Phone + OTP SMS authentication flow.
+- [x] Nurse Web + Mobile App — eKYC onboarding wizard (`features/onboarding`): CCCD both sides, live portrait selfie, medical/nursing degree, GPHN (number, expiration date, clinical scope), retirement decision.
+- [x] Nurse Web + Mobile App — Credentials management screen + upload newly renewed GPHN upon expiration (`features/credentials`).
+- [x] Clear profile status display across all screens: Pending Verification / Active / Suspended / Banned.
 
 ### BE-1 (Phase Lead)
-- [ ] `accounts-otp`: `POST /api/v1/auth/request-otp` (rate-limited issuance, zero OTP material logged).
-- [ ] `accounts-otp`: `POST /api/v1/auth/verify-otp` (session token issued only upon valid code; Admin accounts require mandatory 2FA).
+- [x] `accounts-otp`: `POST /api/v1/auth/request-otp` (rate-limited issuance, zero OTP material logged).
+- [x] `accounts-otp`: `POST /api/v1/auth/verify-otp` (session token issued only upon valid code; Admin accounts require mandatory 2FA).
 - [ ] `nurse-onboarding` (FR-AUTH-01): `POST /api/v1/auth/nurse-onboarding` — profile initialized to `PENDING_VERIFICATION`, files stored in private storage.
 - [ ] `credential-review` (FR-AUTH-02): `PATCH /api/v1/admin/nurses/:id/verify` — records `reviewed_by`, assigns Tier (valid degree without GPHN → Tier 1; valid in-scope GPHN → Tier 2; retirement decision alone never yields Tier 2).
 - [ ] `credential-review`: Admin approval of newly submitted GPHN via `PUT /api/v1/nurse/credentials/gphn` automatically restores Tier 2.
@@ -97,7 +97,7 @@
 - [ ] `privacy-consent` (FR-PRIV-01): Consent event capture recording timestamp + client IP + device metadata.
 - [ ] `privacy-consent`: Medical record access authorization policy — restricted to assigned nurse, valid from `CONFIRMED` until check-out +12h; time-boxed Admin temporary re-grant with audit log.
 - [ ] `privacy-consent`: 24-month medical data retention enforcement; account deletion/anonymization request handler.
-- [ ] Support BE-1: 10-minute Presigned URL minting pipeline for sensitive identity and credential documents.
+- [x] Support BE-1: 10-minute Presigned URL minting pipeline for sensitive identity and credential documents.
 
 ### Phase 1 Exit Criteria
 - [ ] A nurse completes full onboarding: registration → Admin credential review → Tier assignment on staging.

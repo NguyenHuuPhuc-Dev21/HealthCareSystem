@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Alert, Button } from '../../components';
+import { Camera, CreditCard } from 'lucide-react';
 import { getErrorMessage } from '../../lib/errors';
 import { submitMyKyc } from './ekyc.api';
 import type { CustomerKyc, KycDocType } from './ekyc.types';
@@ -48,7 +49,7 @@ export function EkycStep({ rejectionReason, onSubmitted, onCancelEdit }: EkycSte
 
       <div className="upload-grid">
         <DocumentUploadTile
-          icon="🪪"
+          icon={<CreditCard size={32} />}
           title="CCCD mặt trước"
           emptyHint="Ảnh rõ nét, đủ 4 góc"
           source="file"
@@ -57,7 +58,7 @@ export function EkycStep({ rejectionReason, onSubmitted, onCancelEdit }: EkycSte
           disabled={submitting}
         />
         <DocumentUploadTile
-          icon="🪪"
+          icon={<CreditCard size={32} />}
           title="CCCD mặt sau"
           emptyHint="Ảnh rõ nét, đủ 4 góc"
           source="file"
@@ -66,7 +67,7 @@ export function EkycStep({ rejectionReason, onSubmitted, onCancelEdit }: EkycSte
           disabled={submitting}
         />
         <DocumentUploadTile
-          icon="🤳"
+          icon={<Camera size={32} />}
           title="Ảnh chân dung trực tiếp"
           emptyHint="Chụp bằng camera trong ứng dụng"
           source="camera"

@@ -14,7 +14,7 @@ export default function FinalCta() {
                         <a className="btn btn-white" href={CTA_LINKS.patientApp}>
                             Đặt điều dưỡng ngay →
                         </a>
-                        <a className="btn btn-outline-w" href={CTA_LINKS.nurseSection}>
+                        <a className="btn btn-outline-w" href={CTA_LINKS.nurseApp}>
                             Đăng ký làm điều dưỡng
                         </a>
                     </div>

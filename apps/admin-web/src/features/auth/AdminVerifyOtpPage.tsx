@@ -21,6 +21,7 @@ export function AdminVerifyOtpPage() {
   const location = useLocation();
   const [pending, setPending] = useState(loadPending);
   const [otp, setOtp] = useState('');
+  const devOtp = sessionStorage.getItem('dev_otp');
   const [error, setError] = useState<AuthMessage | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [locked, setLocked] = useState(false);
@@ -93,6 +94,12 @@ export function AdminVerifyOtpPage() {
         <OtpInput value={otp} onChange={setOtp} disabled={locked || submitting} invalid={!!error && !locked} autoFocus />
         {error && <Alert title={error.title}>{error.detail}</Alert>}
         {notice && !error && <Alert tone="success">{notice}</Alert>}
+        {devOtp && !error && (
+          <Alert tone="info">
+            Môi trường dev: mã OTP của lần gửi này là <b>{devOtp}</b> (BE trả kèm vì chưa có nhà
+            cung cấp SMS — không bao giờ có ở production).
+          </Alert>
+        )}
         <p className="resend-line">
           {resendIn > 0 ? (
             <>Gửi lại mã sau <b className="text-navy">{formatMmSs(resendIn)}</b></>

@@ -1,4 +1,6 @@
 import { useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import { Camera, Upload } from 'lucide-react';
 import { useObjectUrl } from '../../../lib/useObjectUrl';
 import { CameraCapture } from './CameraCapture';
 
@@ -6,7 +8,7 @@ const ACCEPTED_TYPES = ['image/jpeg', 'image/png'];
 const MAX_FILE_MB = 10; // giới hạn kỹ thuật phía client, backend vẫn kiểm tra lại
 
 interface DocumentUploadTileProps {
-  icon: string;
+  icon: ReactNode;
   title: string;
   emptyHint: string;
   /** file: chọn ảnh từ máy · camera: bắt buộc chụp trực tiếp */
@@ -57,7 +59,7 @@ export function DocumentUploadTile({ icon, title, emptyHint, source, file, onCha
       {error && <p className="upload__error" role="alert">{error}</p>}
 
       <button type="button" className={file ? 'link-button' : 'btn btn-secondary btn-sm'} onClick={pick} disabled={disabled}>
-        {file ? (source === 'camera' ? 'Chụp lại' : 'Chọn ảnh khác') : source === 'camera' ? '📷 Mở camera' : '⬆ Tải ảnh lên'}
+        {file ? (source === 'camera' ? 'Chụp lại' : 'Chọn ảnh khác') : source === 'camera' ? <><Camera size={14} style={{ marginRight: 4 }} /> Mở camera</> : <><Upload size={14} style={{ marginRight: 4 }} /> Tải ảnh lên</>}
       </button>
 
       {source === 'file' && (
