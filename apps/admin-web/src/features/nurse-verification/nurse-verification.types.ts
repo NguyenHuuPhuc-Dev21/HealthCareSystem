@@ -1,3 +1,5 @@
+import type { ComponentType } from 'react';
+import { Camera, CreditCard, GraduationCap, Medal, ScrollText } from 'lucide-react';
 /**
  * Duyệt hồ sơ điều dưỡng & gán Tier (FR-AUTH-01, FR-AUTH-02, CT-01) — màn A2 + A3.
  *
@@ -113,11 +115,14 @@ export const TIER_LABEL: Record<NurseTier, string> = {
   TIER_2_SPECIALIST: 'Cấp 2',
 };
 
-export const DOC_META: Record<CredentialDocType, { icon: string; label: string }> = {
-  CCCD_FRONT: { icon: '🪪', label: 'CCCD trước' },
-  CCCD_BACK: { icon: '🪪', label: 'CCCD sau' },
-  DEGREE: { icon: '🎓', label: 'Bằng tốt nghiệp' },
-  GPHN: { icon: '📜', label: 'GPHN' },
-  SELFIE: { icon: '🤳', label: 'Ảnh chân dung trực tiếp' },
-  RETIREMENT_DECISION: { icon: '🏅', label: 'Quyết định nghỉ hưu' },
+export const DOC_META: Record<
+  CredentialDocType,
+  { icon: ComponentType<{ size?: number | string }>; label: string }
+> = {
+  CCCD_FRONT: { icon: CreditCard, label: 'CCCD trước' },
+  CCCD_BACK: { icon: CreditCard, label: 'CCCD sau' },
+  DEGREE: { icon: GraduationCap, label: 'Bằng tốt nghiệp' },
+  GPHN: { icon: ScrollText, label: 'GPHN' },
+  SELFIE: { icon: Camera, label: 'Ảnh chân dung trực tiếp' },
+  RETIREMENT_DECISION: { icon: Medal, label: 'Quyết định nghỉ hưu' },
 };

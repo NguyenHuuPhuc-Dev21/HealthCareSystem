@@ -12,6 +12,7 @@ import { DecisionPanel } from './components/DecisionPanel';
 import { DocumentViewer } from './components/DocumentViewer';
 import { formatPlainDate } from './format';
 import { useQueueSummary } from './useQueueSummary';
+import { CreditCard, GraduationCap, Medal } from 'lucide-react';
 
 type Load = { state: 'loading' } | { state: 'error'; message: string } | { state: 'ready'; data: NurseReviewDetail };
 
@@ -23,7 +24,7 @@ const STATUS_CHIP: Record<ReviewStatus, { cls: string; text: string }> = {
 
 const CRED_CHIP: Record<ReviewStatus, { cls: string; text: string }> = {
   PENDING: { cls: 'grey', text: 'Chờ đối chiếu' },
-  APPROVED: { cls: 'teal', text: '✓ Đã duyệt' },
+  APPROVED: { cls: 'teal', text: 'Đã duyệt' },
   REJECTED: { cls: 'red', text: 'Không đạt' },
 };
 
@@ -138,7 +139,7 @@ export function NurseReviewPage() {
                 <dt>Hiệu lực</dt>
                 <dd>
                   {d.gphn.is_valid ? (
-                    <span className="chip teal">✓ Còn hạn{d.gphn.days_remaining !== null ? ` ${d.gphn.days_remaining} ngày` : ''}</span>
+                    <span className="chip teal">Còn hạn{d.gphn.days_remaining !== null ? ` ${d.gphn.days_remaining} ngày` : ''}</span>
                   ) : (
                     <span className="chip red">Đã hết hạn</span>
                   )}
@@ -151,7 +152,7 @@ export function NurseReviewPage() {
                   {d.gphn.identity_match === null ? (
                     <span className="chip grey">Admin tự đối chiếu</span>
                   ) : d.gphn.identity_match ? (
-                    <span className="chip teal">✓ Khớp họ tên & ngày sinh</span>
+                    <span className="chip teal">Khớp họ tên & ngày sinh</span>
                   ) : (
                     <span className="chip red">Không khớp — kiểm tra kỹ</span>
                   )}
@@ -167,7 +168,7 @@ export function NurseReviewPage() {
       {/* 3 thẻ giấy tờ còn lại */}
       <div className="doc-cards">
         <div className="card doc-card">
-          <span className="doc-card__icon" aria-hidden="true">🪪</span>
+          <span className="doc-card__icon" aria-hidden="true"><CreditCard size={20} /></span>
           <div>
             <b>CCCD (2 mặt)</b>
             <p>{d.cccd_number_masked ?? '—'}</p>
@@ -175,7 +176,7 @@ export function NurseReviewPage() {
           </div>
         </div>
         <div className="card doc-card">
-          <span className="doc-card__icon" aria-hidden="true">🎓</span>
+          <span className="doc-card__icon" aria-hidden="true"><GraduationCap size={20} /></span>
           <div>
             <b>Bằng tốt nghiệp</b>
             <p>{d.degree ? [d.degree.title, d.degree.year].filter(Boolean).join(' · ') : 'Không nộp'}</p>
@@ -183,7 +184,7 @@ export function NurseReviewPage() {
           </div>
         </div>
         <div className="card doc-card">
-          <span className="doc-card__icon" aria-hidden="true">🏅</span>
+          <span className="doc-card__icon" aria-hidden="true"><Medal size={20} /></span>
           <div>
             <b>Quyết định nghỉ hưu</b>
             <p>{d.retirement_submitted ? 'Đã nộp' : 'Không nộp'}</p>
@@ -202,9 +203,9 @@ export function NurseReviewPage() {
           <h3 className="decision__title">Kết quả thẩm định</h3>
           <p>
             {d.review_status === 'APPROVED' ? (
-              <>✓ Đã duyệt{d.assigned_tier && <> · gán <b>{TIER_LABEL[d.assigned_tier]}</b></>}</>
+              <>Đã duyệt{d.assigned_tier && <> · gán <b>{TIER_LABEL[d.assigned_tier]}</b></>}</>
             ) : (
-              <>✕ Đã từ chối{d.rejection_reason && <> — lý do: “{d.rejection_reason}”</>}</>
+              <>Đã từ chối{d.rejection_reason && <> — lý do: “{d.rejection_reason}”</>}</>
             )}
           </p>
           <p className="muted">

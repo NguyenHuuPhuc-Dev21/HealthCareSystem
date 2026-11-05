@@ -3,7 +3,8 @@ import type { FormEvent } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Alert, Button } from '../../components';
 import { maskPhone } from '../../lib/phone';
-import { verify2fa } from './auth.api';
+import { setup2fa, verify2fa } from './auth.api';
+import type { TwoFaSetupResult } from './auth.api';
 import { getAuthErrorMessage } from './auth.messages';
 import type { AuthMessage } from './auth.messages';
 import { AuthErrorCode } from './auth.types';
@@ -26,6 +27,24 @@ export function AdminTwoFactorPage() {
   const [expired, setExpired] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const secondsLeft = useCountdown(challenge?.expiresAt ?? 0);
+
+  // Lần đầu (BE trả enrolled=false ở verify-otp): phải setup TOTP trước khi verify được.
+  const [enrolled] = useState(() => sessionStorage.getItem('admin_2fa_enrolled') !== '0');
+  const [setupInfo, setSetupInfo] = useState<TwoFaSetupResult | null>(null);
+  const [setupLoading, setSetupLoading] = useState(false);
+
+  const handleSetup = async () => {
+    if (!challenge) return;
+    setSetupLoading(true);
+    setError(null);
+    const res = await setup2fa(challenge.token);
+    setSetupLoading(false);
+    if (!res.success) {
+      setError(getAuthErrorMessage(res.error));
+      return;
+    }
+    setSetupInfo(res.data);
+  };
 
   if (!challenge) return <Navigate to="/login" replace />;
   const isExpired = expired || secondsLeft === 0;
@@ -63,7 +82,32 @@ export function AdminTwoFactorPage() {
         Mở ứng dụng xác thực đã liên kết với tài khoản <b className="text-navy">{maskPhone(challenge.phone)}</b> và
         nhập mã {CODE_LENGTH} chữ số đang hiển thị.
       </p>
+      {import.meta.env.VITE_USE_MOCK === 'true' && (
+        <Alert tone="info" title="Mã 2FA thử nghiệm:">
+          Nhập mã <b>123456</b> hoặc <b>246810</b> để đăng nhập vào Admin Console.
+        </Alert>
+      )}
 
+      {!enrolled && !setupInfo && (
+        <Alert title="Tài khoản chưa cài xác thực 2 lớp.">
+          Bấm nút bên dưới để lấy mã cài đặt, thêm vào ứng dụng xác thực (Google Authenticator,
+          Microsoft Authenticator…), rồi nhập mã 6 số ở đây.
+          <div style={{ marginTop: 10 }}>
+            <Button type="button" onClick={handleSetup} loading={setupLoading}>
+              {setupLoading ? 'Đang lấy mã…' : 'Lấy mã cài đặt 2FA'}
+            </Button>
+          </div>
+        </Alert>
+      )}
+      {setupInfo && (
+        <Alert title="Quét hoặc nhập mã này vào ứng dụng xác thực:">
+          <div>
+            Mã bí mật: <b className="text-navy">{setupInfo.secret}</b>
+          </div>
+          <div style={{ wordBreak: 'break-all', fontSize: 12, marginTop: 4 }}>{setupInfo.otpauthUrl}</div>
+          <div style={{ marginTop: 6 }}>Sau khi thêm xong, nhập mã 6 số đang hiển thị trong ứng dụng.</div>
+        </Alert>
+      )}
       <form onSubmit={handleSubmit} noValidate>
         <OtpInput value={code} onChange={setCode} disabled={isExpired || submitting} invalid={!!error} autoFocus />
         {isExpired && !error && (

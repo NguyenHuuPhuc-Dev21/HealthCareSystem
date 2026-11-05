@@ -11,9 +11,9 @@
 - [ ] Thống nhất phân vai cố định: FE-1 = Patient Web + Admin Web · FE-2 = Nurse Web + Nurse App · BE-1 = nền tảng/định danh · BE-2 = đặt ca/ca trực · BE-3 = tiền/sau ca
 - [ ] Thống nhất: mọi số nghiệp vụ lấy từ `system_configs` (§5.1), không hardcode (hoa hồng 15%, ký quỹ 300.000đ, đêm +20%, Tết +300%, lễ +200%, nặng +15%, timeout 15 phút, quyết toán +24h, check-in ≤ 200 m, ICU 50.000đ, no-show 50.000đ)
 - [ ] Thống nhất: tiền chỉ đi qua sổ cái `wallet_transactions` (append-only, có `idempotency_key`); ký quỹ chỉ trừ phạt SLA, không thu hoa hồng
-- [ ] Thống nhất: `nurse_profiles.profile_status` là nguồn sự thật quyền nhận ca; chặn tier ở backend (HTTP 403)
-- [ ] Thống nhất: mọi hẹn giờ qua job queue dùng chung, cấm `setTimeout` tự phát
-- [ ] Thống nhất: FE không tự tính giá/hạn chót/điều kiện nhận ca — tất cả lấy từ BE
+- [x] Thống nhất: `nurse_profiles.profile_status` là nguồn sự thật quyền nhận ca; chặn tier ở backend (HTTP 403)
+- [x] Thống nhất: mọi hẹn giờ qua job queue dùng chung, cấm `setTimeout` tự phát
+- [x] Thống nhất: FE không tự tính giá/hạn chót/điều kiện nhận ca — tất cả lấy từ BE
 - [ ] Điền lịch dự kiến: GĐ0 …… → GĐ1 …… → GĐ2 …… → GĐ3 …… → GĐ4 …… → GĐ5 …… → GĐ6 …… → GĐ7 …… → GĐ8 ……
 
 ---
@@ -21,41 +21,41 @@
 ## Giai đoạn 0 — Nền tảng dùng chung
 
 ### FE-1 (Patient Web + Admin Web)
-- [ ] Dựng khung `apps/patient-web`: routing, layout chính
-- [ ] Dựng khung `apps/admin-web`: routing, layout chính
-- [ ] Thư viện gọi API dùng chung: base URL `/api/v1`, gắn token, xử lý lỗi 400/401/403 thống nhất
-- [ ] Bộ component dùng chung theo design system: nút, form, bảng, badge trạng thái
+- [x] Dựng khung `apps/patient-web`: routing, layout chính
+- [x] Dựng khung `apps/admin-web`: routing, layout chính
+- [x] Thư viện gọi API dùng chung: base URL `/api/v1`, gắn token, xử lý lỗi 400/401/403 thống nhất
+- [x] Bộ component dùng chung theo design system: nút, form, bảng, badge trạng thái
 
 ### FE-2 (Nurse Web + Nurse App)
-- [ ] Dựng khung `apps/nurse-web`: routing, layout
-- [ ] Dựng khung `apps/nurse-app`: routing, layout
-- [ ] Bộ token Elder-Friendly: chữ 16–18pt (app) / 18–20px (web), vùng chạm ≥ 48×48dp, tương phản WCAG 2.1 AA
-- [ ] Thư viện gọi API dùng chung theo chuẩn đã thống nhất với FE-1
+- [x] Dựng khung `apps/nurse-web`: routing, layout
+- [x] Dựng khung `apps/nurse-app`: routing, layout
+- [x] Bộ token Elder-Friendly: chữ 16–18pt (app) / 18–20px (web), vùng chạm ≥ 48×48dp, tương phản WCAG 2.1 AA
+- [x] Thư viện gọi API dùng chung theo chuẩn đã thống nhất với FE-1
 - [ ] Cài thử app lên máy Android đời cũ
 
 ### BE-1 (Nền tảng — chủ trì giai đoạn)
-- [ ] `core/database`: kết nối PostgreSQL
-- [ ] `core/config`: đọc `system_configs` có cache, không hardcode
-- [ ] `core/storage`: bucket private, presigned URL hiệu lực 10 phút
-- [ ] Migrations khung 16 bảng dữ liệu (§7)
-- [ ] Seeds: `system_configs` (§5.1) + danh mục dịch vụ (§4.2)
-- [ ] `packages/shared`: enum 3 trục trạng thái booking, vòng đời hồ sơ, loại giao dịch ví, khóa cấu hình
+- [x] `core/database`: kết nối PostgreSQL
+- [x] `core/config`: đọc `system_configs` có cache, không hardcode
+- [x] `core/storage`: bucket private, presigned URL hiệu lực 10 phút
+- [x] Migrations khung 16 bảng dữ liệu (§7)
+- [x] Seeds: `system_configs` (§5.1) + danh mục dịch vụ (§4.2)
+- [x] `packages/shared`: enum 3 trục trạng thái booking, vòng đời hồ sơ, loại giao dịch ví, khóa cấu hình
 
 ### BE-2
-- [ ] `core/jobs`: engine hàng đợi có khóa idempotency, dead-letter queue, cảnh báo tồn đọng
-- [ ] Docker Compose: PostgreSQL + Redis (cùng BE-1)
+- [x] `core/jobs`: engine hàng đợi có khóa idempotency, dead-letter queue, cảnh báo tồn đọng
+- [x] Docker Compose: PostgreSQL + Redis (cùng BE-1)
 
 ### BE-3
-- [ ] `core/notifications`: interface FCM push + in-app + WebSocket, có bản mock để test
-- [ ] Cảnh báo khẩn `priority = high` + watcher 60 giây chưa xác nhận
-- [ ] `core/audit`: ghi `audit_logs` append-only (khóa sửa/xóa ở cả tầng DB và ứng dụng)
-- [ ] CI xanh trên PR rỗng: unit test + migration/constraint test + quét secret
+- [x] `core/notifications`: interface FCM push + in-app + WebSocket, có bản mock để test
+- [x] Cảnh báo khẩn `priority = high` + watcher 60 giây chưa xác nhận
+- [x] `core/audit`: ghi `audit_logs` append-only (khóa sửa/xóa ở cả tầng DB và ứng dụng)
+- [x] CI xanh trên PR rỗng: unit test + migration/constraint test + quét secret
 
 ### Cổng ra Giai đoạn 0
-- [ ] Docker Compose dựng được PostgreSQL + Redis
-- [ ] Migrations + seeds áp sạch từ database rỗng
-- [ ] `packages/shared` xuất đủ enum §2.2/§2.3
-- [ ] CI xanh
+- [x] Docker Compose dựng được PostgreSQL + Redis
+- [x] Migrations + seeds áp sạch từ database rỗng
+- [x] `packages/shared` xuất đủ enum §2.2/§2.3
+- [x] CI xanh
 
 ---
 
@@ -65,17 +65,17 @@
 - [ ] Patient Web — đăng nhập SĐT + OTP (`features/auth`)
 - [ ] Patient Web — hồ sơ người bệnh + tích chọn consent xử lý dữ liệu (`features/patient-profiles`)
 - [ ] Patient Web — tải CCCD khách để eKYC
-- [ ] Admin Web — hàng đợi duyệt hồ sơ điều dưỡng: xem giấy tờ, duyệt/từ chối, gán tier (`features/nurse-verification`)
+- [x] Admin Web — hàng đợi duyệt hồ sơ điều dưỡng: xem giấy tờ, duyệt/từ chối, gán tier (`features/nurse-verification`)
 
 ### FE-2
-- [ ] Nurse Web + App — đăng nhập SĐT + OTP
-- [ ] Nurse Web + App — wizard đăng ký eKYC (`features/onboarding`): CCCD 2 mặt, ảnh chân dung chụp trực tiếp, bằng tốt nghiệp, GPHN (số, ngày hết hạn, phạm vi), quyết định nghỉ hưu
-- [ ] Nurse Web + App — màn hình văn bằng + tải GPHN mới khi hết hạn (`features/credentials`)
-- [ ] Hiển thị trạng thái hồ sơ: chờ duyệt / đang hoạt động / tạm khóa / khóa vĩnh viễn
+- [x] Nurse Web + App — đăng nhập SĐT + OTP
+- [x] Nurse Web + App — wizard đăng ký eKYC (`features/onboarding`): CCCD 2 mặt, ảnh chân dung chụp trực tiếp, bằng tốt nghiệp, GPHN (số, ngày hết hạn, phạm vi), quyết định nghỉ hưu
+- [x] Nurse Web + App — màn hình văn bằng + tải GPHN mới khi hết hạn (`features/credentials`)
+- [x] Hiển thị trạng thái hồ sơ: chờ duyệt / đang hoạt động / tạm khóa / khóa vĩnh viễn
 
 ### BE-1 (chủ trì giai đoạn)
-- [ ] `accounts-otp`: `POST /api/v1/auth/request-otp` (giới hạn tần suất, không log mã OTP)
-- [ ] `accounts-otp`: `POST /api/v1/auth/verify-otp` (chỉ cấp phiên khi mã đúng; Admin bắt buộc thêm 2FA)
+- [x] `accounts-otp`: `POST /api/v1/auth/request-otp` (giới hạn tần suất, không log mã OTP)
+- [x] `accounts-otp`: `POST /api/v1/auth/verify-otp` (chỉ cấp phiên khi mã đúng; Admin bắt buộc thêm 2FA)
 - [ ] `nurse-onboarding` (FR-AUTH-01): `POST /api/v1/auth/nurse-onboarding` — hồ sơ vào `PENDING_VERIFICATION`, giấy tờ lưu private storage
 - [ ] `credential-review` (FR-AUTH-02): `PATCH /api/v1/admin/nurses/:id/verify` — ghi `reviewed_by`, gán tier (có bằng không GPHN → Tier 1; GPHN còn hạn đúng phạm vi → Tier 2; quyết định nghỉ hưu một mình không lên Tier 2)
 - [ ] `credential-review`: duyệt GPHN mới qua `PUT /api/v1/nurse/credentials/gphn` → tự nâng lại Tier 2
@@ -89,7 +89,7 @@
 - [ ] `privacy-consent` (FR-PRIV-01): ghi consent kèm timestamp + IP/thiết bị
 - [ ] `privacy-consent`: cửa sổ xem bệnh án — chỉ điều dưỡng được gán, từ CONFIRMED đến check-out +12h; Admin cấp lại có thời hạn + ghi audit
 - [ ] `privacy-consent`: lưu trữ 24 tháng; xử lý yêu cầu xóa/ẩn danh dữ liệu
-- [ ] Hỗ trợ BE-1: luồng presigned URL cho giấy tờ tùy thân
+- [x] Hỗ trợ BE-1: luồng presigned URL cho giấy tờ tùy thân
 
 ### Cổng ra Giai đoạn 1
 - [ ] Điều dưỡng đi hết luồng: đăng ký → Admin duyệt → gán tier (trên staging)

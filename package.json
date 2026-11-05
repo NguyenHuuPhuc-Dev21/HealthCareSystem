@@ -19,13 +19,16 @@
     "dev:api": "npm run dev --workspace=services/api",
     "dev:worker": "npm run worker --workspace=services/api",
     "dev:admin": "npm run dev --workspace=apps/admin-web",
+    "dev:landing": "npm run dev --workspace=apps/landing",
     "dev:patient": "npm run dev --workspace=apps/patient-web",
     "dev:nurse-web": "npm run dev --workspace=apps/nurse-web",
     "dev:nurse-app": "npm run start --workspace=apps/nurse-app",
     "docker:up": "docker compose -f infra/docker/docker-compose.yml up -d",
-    "docker:down": "docker compose -f infra/docker/docker-compose.yml down"
+    "docker:down": "docker compose -f infra/docker/docker-compose.yml down",
+    "dev:all": "concurrently \"npm run dev:api\" \"npm run dev:admin\" \"npm run dev:patient\" \"npm run dev:nurse-web\""
   },
   "devDependencies": {
+    "concurrently": "^10.0.6",
     "typescript": "^5.4.5"
   },
   "engines": {

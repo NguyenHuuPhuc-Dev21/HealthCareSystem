@@ -20,7 +20,7 @@ export default function Hero() {
                         <a className="btn btn-primary" href={CTA_LINKS.primaryBooking}>
                             Đặt điều dưỡng ngay →
                         </a>
-                        <a className="btn btn-ghost" href={CTA_LINKS.nurseSection}>
+                        <a className="btn btn-ghost" href={CTA_LINKS.nurseApp}>
                             Tôi là điều dưỡng — tìm việc làm
                         </a>
                     </div>

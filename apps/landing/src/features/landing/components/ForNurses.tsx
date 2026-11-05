@@ -26,7 +26,7 @@ export default function ForNurses() {
                         ))}
                     </div>
                     <div style={{ marginTop: 30, display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-                        <a className="btn btn-white" href={CTA_LINKS.primaryBooking}>
+                        <a className="btn btn-white" href={CTA_LINKS.nurseApp}>
                             Đăng ký làm điều dưỡng →
                         </a>
                         <a className="btn btn-outline-w" href={CTA_LINKS.faq}>

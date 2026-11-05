@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Check, Minus, Search } from 'lucide-react';
 import { Alert, Button } from '../../components';
 import { AdminLayout } from '../../components/layout/AdminLayout';
 import { getErrorMessage } from '../../lib/errors';
@@ -7,7 +8,7 @@ import { useAuth } from '../auth';
 import { getVerificationQueue } from './nurse-verification.api';
 import type { QueueItem, QueueQuery, QueueTab } from './nurse-verification.types';
 import { TIER_LABEL } from './nurse-verification.types';
-import { ageTone, documentsText, formatAge, formatShortDateTime, suggestionLabel } from './format';
+import { ageTone, documentsSegments, formatAge, formatShortDateTime, suggestionLabel } from './format';
 import { useQueueSummary } from './useQueueSummary';
 
 const TABS: Array<{ key: QueueTab; label: string }> = [
@@ -84,14 +85,17 @@ export function VerificationQueuePage() {
       </div>
 
       <div className="toolbar">
-        <input
-          className="input toolbar__search"
-          type="search"
-          placeholder="🔍 Tìm theo tên, số điện thoại…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          aria-label="Tìm hồ sơ"
-        />
+        <div className="toolbar__search-wrap">
+          <Search size={16} className="toolbar__search-icon" aria-hidden="true" />
+          <input
+            className="input toolbar__search"
+            type="search"
+            placeholder="Tìm theo tên, số điện thoại…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            aria-label="Tìm hồ sơ"
+          />
+        </div>
         <select className="input toolbar__select" value={submitted} onChange={(e) => setSubmitted(e.target.value as typeof submitted)} aria-label="Lọc thời điểm nộp">
           <option value="ALL">Nộp: mọi thời gian</option>
           <option value="TODAY">Nộp: hôm nay</option>
@@ -115,7 +119,7 @@ export function VerificationQueuePage() {
         )}
         {load.state === 'ready' && load.items.length === 0 && (
           <div className="table-empty">
-            {debounced || submitted !== 'ALL' || docs !== 'ALL' ? 'Không có hồ sơ khớp bộ lọc.' : 'Không còn hồ sơ nào trong mục này. 🎉'}
+            {debounced || submitted !== 'ALL' || docs !== 'ALL' ? 'Không có hồ sơ khớp bộ lọc.' : 'Không còn hồ sơ nào trong mục này.'}
           </div>
         )}
         {load.state === 'ready' && load.items.length > 0 && (
@@ -157,7 +161,15 @@ export function VerificationQueuePage() {
                       </span>
                     </td>
                     <td className="nowrap">{formatShortDateTime(item.submitted_at)}</td>
-                    <td className="cell-docs">{documentsText(item.documents)}</td>
+                    <td className="cell-docs">
+                      {documentsSegments(item.documents).map((seg, sIdx, arr) => (
+                        <span key={seg.label} className="doc-seg">
+                          {seg.ok ? <Check size={13} className="text-navy" aria-hidden="true" /> : <Minus size={13} className="text-muted" aria-hidden="true" />}
+                          {' '}{seg.label}
+                          {sIdx < arr.length - 1 && ' · '}
+                        </span>
+                      ))}
+                    </td>
                     {processed ? (
                       <>
                         <td>
