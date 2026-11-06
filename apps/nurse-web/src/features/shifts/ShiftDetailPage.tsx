@@ -35,43 +35,10 @@ export const ShiftDetailPage: React.FC = () => {
       const res = await getJobById(id);
       if (res.success && res.data) {
         setJob(res.data);
+        setError(null);
       } else {
-        // Fallback: create mock display for demo shift codes if not found in active jobs
-        setJob({
-          id: id,
-          code: id.startsWith('HC-') ? id : `HC-2026-${id.slice(-4)}`,
-          serviceName: 'Thay băng vết mổ hậu phẫu',
-          serviceType: 'procedure',
-          requiredTier: 'TIER_2_SPECIALIST',
-          isInvasive: true,
-          hasPrescription: true,
-          prescriptionFileName: 'ylenh_thaybang_1042.jpg',
-          prescriptionPrescribedDate: '26/10/2026',
-          prescriptionExpiryDays: 7,
-          date: 'Hôm nay',
-          startTime: '14:30',
-          endTime: '15:30',
-          district: 'Hải Châu',
-          distanceKm: 1.2,
-          patientName: 'Bà Nguyễn Thị Hoa',
-          patientAge: 78,
-          patientWeight: 52,
-          mobilityStatus: 'Hỗ trợ di chuyển',
-          medicalCondition: 'Sau phẫu thuật thay khớp háng phải (3 tháng)',
-          medicalHistory: 'Tăng huyết áp · Đái tháo đường type 2',
-          allergies: 'Penicillin (mề đay, khó thở nhẹ)',
-          contagionRisk: 'Không có',
-          fullAddress: 'Số 25 Quang Trung, Hải Châu 1, Hải Châu, Đà Nẵng',
-          customerName: 'Anh Nguyễn Văn An',
-          customerPhoneMasked: '0905 ••• 123',
-          note: 'Vết mổ tiến triển tốt, cần thay băng vô khuẩn theo đúng y lệnh.',
-          baseAmount: 500000,
-          totalAmount: 500000,
-          paymentMethod: 'BANK_TRANSFER',
-          paymentStatus: 'ESCROW_HELD',
-          matchingMode: 'JOB_BOARD',
-          status: 'CONFIRMED',
-        });
+        setJob(null);
+        setError(res.message || 'Không tìm thấy ca làm việc. Ca có thể đã bị hủy hoặc không còn khả dụng.');
       }
       setLoading(false);
     }
@@ -128,7 +95,9 @@ export const ShiftDetailPage: React.FC = () => {
     );
   }
 
-  const netEarnings = Math.round(job.totalAmount * 0.85);
+  const netEarnings = job.netAmount ?? Math.round(job.totalAmount * 0.85);
+  const penaltyPercent = job.cancellationPenaltyPercent ?? 20;
+  const penaltyAmount = Math.round(job.totalAmount * (penaltyPercent / 100));
 
   return (
     <div className="screen-body elder">
@@ -411,16 +380,16 @@ export const ShiftDetailPage: React.FC = () => {
                 <span>Giá dịch vụ cơ bản</span>
                 <b>{job.baseAmount.toLocaleString('vi-VN')}đ</b>
               </div>
-              {job.urgentBonus && job.urgentBonus > 0 && (
+              {(job.urgentBonus ?? 0) > 0 && (
                 <div className="pay-line">
                   <span style={{ color: 'var(--red)' }}>Thưởng nóng ca gấp</span>
-                  <b style={{ color: 'var(--red)' }}>+{job.urgentBonus.toLocaleString('vi-VN')}đ</b>
+                  <b style={{ color: 'var(--red)' }}>+{job.urgentBonus?.toLocaleString('vi-VN')}đ</b>
                 </div>
               )}
-              {job.nightSurcharge && job.nightSurcharge > 0 && (
+              {(job.nightSurcharge ?? 0) > 0 && (
                 <div className="pay-line">
                   <span>Phụ phí ca đêm</span>
-                  <b>+{job.nightSurcharge.toLocaleString('vi-VN')}đ</b>
+                  <b>+{job.nightSurcharge?.toLocaleString('vi-VN')}đ</b>
                 </div>
               )}
               <div className="pay-line">
@@ -428,7 +397,7 @@ export const ShiftDetailPage: React.FC = () => {
                 <b>{job.paymentStatus === 'ESCROW_HELD' ? 'Chuyển khoản · Đã tạm giữ' : 'Tiền mặt'}</b>
               </div>
               <div className="pay-line total">
-                <span>Bạn nhận sau quyết toán (85%)</span>
+                <span>Bạn nhận sau quyết toán</span>
                 <span style={{ color: 'var(--teal)' }}>{netEarnings.toLocaleString('vi-VN')}đ</span>
               </div>
               <p style={{ fontSize: 14, color: 'var(--muted)', marginTop: 9, marginBottom: 0 }}>
@@ -442,7 +411,7 @@ export const ShiftDetailPage: React.FC = () => {
               <p style={{ color: 'var(--slate)', fontSize: 15, margin: 0 }}>
                 Hủy bây giờ (trước giờ hẹn trên 12 giờ): <b style={{ color: 'var(--navy)' }}>−5 điểm TrustScore</b>, không phạt tiền.
                 <br />
-                Hủy trong vòng 12 giờ trước ca: <b style={{ color: 'var(--navy)' }}>−20 điểm TrustScore, trừ 20% giá trị ca ({Math.round(job.totalAmount * 0.2).toLocaleString('vi-VN')}đ) từ ký quỹ</b> — khoản phạt chuyển thành thưởng nóng cho điều dưỡng thay thế.
+                Hủy trong vòng 12 giờ trước ca: <b style={{ color: 'var(--navy)' }}>−20 điểm TrustScore, trừ {penaltyPercent}% giá trị ca ({penaltyAmount.toLocaleString('vi-VN')}đ) từ ký quỹ</b> — khoản phạt chuyển thành thưởng nóng cho điều dưỡng thay thế.
               </p>
               <button
                 className="btn btn-secondary"

@@ -9,14 +9,21 @@ function delay<T>(data: T, ms = 300): Promise<T> {
     return new Promise((resolve) => setTimeout(() => resolve(data), ms));
 }
 
+function toLocalIsoDate(d: Date): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
 function getTomorrowDate(): string {
     const d = new Date();
     d.setDate(d.getDate() + 1);
-    return d.toISOString().slice(0, 10);
+    return toLocalIsoDate(d);
 }
 
 function getTodayDate(): string {
-    return new Date().toISOString().slice(0, 10);
+    return toLocalIsoDate(new Date());
 }
 
 function getInitialJobs(): JobItem[] {
@@ -56,6 +63,8 @@ function getInitialJobs(): JobItem[] {
             note: 'Vết mổ thay khớp gối ngày thứ 5, dịch thấm băng ít, người nhà hỗ trợ chu đáo.',
             baseAmount: 250000,
             totalAmount: 250000,
+            netAmount: 212500,
+            cancellationPenaltyPercent: 20,
             paymentMethod: 'BANK_TRANSFER',
             paymentStatus: 'ESCROW_HELD',
             matchingMode: 'JOB_BOARD',
@@ -95,6 +104,8 @@ function getInitialJobs(): JobItem[] {
             nightSurcharge: 100000,
             urgentBonus: 100000,
             totalAmount: 680000,
+            netAmount: 578000,
+            cancellationPenaltyPercent: 20,
             durationHours: 10,
             paymentMethod: 'BANK_TRANSFER',
             paymentStatus: 'ESCROW_HELD',
@@ -195,6 +206,8 @@ function getInitialRadar(): RadarJob {
         note: 'Bệnh nhân chảy dịch băng vết mổ, cần thay băng vô khuẩn gấp tại nhà.',
         baseAmount: 250000,
         totalAmount: 250000,
+        netAmount: 212500,
+        cancellationPenaltyPercent: 20,
         paymentMethod: 'BANK_TRANSFER',
         paymentStatus: 'ESCROW_HELD',
         matchingMode: 'RADAR_DISPATCH',
@@ -434,7 +447,59 @@ export async function mockFetchJobById(jobId: string): Promise<JobItem | null> {
     const jobs = loadStoredJobs();
     const found = jobs.find((j) => j.id === jobId || j.code === jobId);
     if (found) return delay(found, 100);
+
     const radar = loadStoredRadar();
     if (radar && (radar.id === jobId || radar.code === jobId)) return delay(radar, 100);
+
+    // Look up from confirmed bookings saved in AVAIL_KEY
+    try {
+        const rawAvail = localStorage.getItem(AVAIL_KEY);
+        if (rawAvail) {
+            const parsed = JSON.parse(rawAvail);
+            const bookings = parsed.confirmedBookings || [];
+            const matched = bookings.find((b: { id: string; code: string; serviceName: string; date: string; startTime: string; endTime: string }) => b.id === jobId || b.code === jobId);
+            if (matched) {
+                const fullJob: JobItem = {
+                    id: matched.id,
+                    code: matched.code,
+                    serviceName: matched.serviceName,
+                    serviceType: 'procedure',
+                    requiredTier: 'TIER_2_SPECIALIST',
+                    isInvasive: true,
+                    hasPrescription: true,
+                    prescriptionFileName: `ylenh_${matched.code.toLowerCase().replace(/[^a-z0-9]/g, '_')}.jpg`,
+                    prescriptionPrescribedDate: matched.date,
+                    prescriptionExpiryDays: 7,
+                    date: matched.date,
+                    startTime: matched.startTime,
+                    endTime: matched.endTime,
+                    district: 'Hải Châu',
+                    distanceKm: 1.2,
+                    patientName: 'Bà Nguyễn Thị Hoa',
+                    patientAge: 78,
+                    patientWeight: 52,
+                    mobilityStatus: 'Hỗ trợ di chuyển',
+                    medicalCondition: 'Hậu phẫu thay khớp háng phải, theo dõi vết mổ',
+                    medicalHistory: 'Tăng huyết áp · Đái tháo đường type 2',
+                    allergies: 'Penicillin (mề đay, khó thở nhẹ)',
+                    contagionRisk: 'Không có',
+                    fullAddress: 'Số 25 Quang Trung, Hải Châu 1, Hải Châu, Đà Nẵng',
+                    customerName: 'Anh Nguyễn Văn An',
+                    customerPhoneMasked: '0905 ••• 123',
+                    note: 'Bệnh nhân sau phẫu thuật cần hỗ trợ thay băng vô khuẩn tại chỗ.',
+                    baseAmount: 500000,
+                    totalAmount: 500000,
+                    netAmount: 425000,
+                    cancellationPenaltyPercent: 20,
+                    paymentMethod: 'BANK_TRANSFER',
+                    paymentStatus: 'ESCROW_HELD',
+                    matchingMode: 'JOB_BOARD',
+                    status: 'CONFIRMED',
+                };
+                return delay(fullJob, 100);
+            }
+        }
+    } catch {}
+
     return delay(null, 100);
 }

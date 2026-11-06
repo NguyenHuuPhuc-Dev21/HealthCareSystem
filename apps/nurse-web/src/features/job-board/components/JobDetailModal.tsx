@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Clock,
@@ -31,8 +31,21 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
   const [check2, setCheck2] = useState(false);
   const [reportedMismatch, setReportedMismatch] = useState(false);
 
-  // BR-11: Nurse receives 85% after platform commission (15%)
-  const netEarnings = Math.round(job.totalAmount * 0.85);
+  // Close on Escape key for Elder-friendly / accessibility
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  // BR-11: Nurse receives net amount from backend (or fallback 85% after 15% platform commission)
+  const netEarnings = job.netAmount ?? Math.round(job.totalAmount * 0.85);
+  const penaltyPercent = job.cancellationPenaltyPercent ?? 20;
+  const penaltyAmount = Math.round(job.totalAmount * (penaltyPercent / 100));
 
   const getInitials = (name: string) => {
     const parts = name.trim().split(' ');
@@ -43,7 +56,13 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
   };
 
   return (
-    <div className="job-detail-overlay" role="dialog" aria-modal="true" onClick={onClose}>
+    <div
+      className="job-detail-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="job-detail-dialog-title"
+      onClick={onClose}
+    >
       <div
         className="job-detail-dialog elder"
         onClick={(e) => e.stopPropagation()}
@@ -80,7 +99,7 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
               )}
             </div>
 
-            <h2 style={{ color: 'var(--navy)', fontSize: 24, margin: '4px 0 6px 0', fontWeight: 800 }}>
+            <h2 id="job-detail-dialog-title" style={{ color: 'var(--navy)', fontSize: 24, margin: '4px 0 6px 0', fontWeight: 800 }}>
               {job.serviceName}
             </h2>
 
@@ -239,7 +258,7 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
                 <div className="pin-label">Nhà {job.patientName}</div>
               </div>
 
-              <div style={{ gap: 12, alignItems: 'center', borderTop: '1px solid var(--line)', marginTop: 14, paddingTop: 14 }}>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', borderTop: '1px solid var(--line)', marginTop: 14, paddingTop: 14 }}>
                 <div className="avatar" style={{ background: '#E2E8F0', color: 'var(--navy)' }}>
                   {job.customerName ? getInitials(job.customerName) : 'KH'}
                 </div>
@@ -272,18 +291,18 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
                 <span>Giá dịch vụ cơ bản</span>
                 <b>{job.baseAmount.toLocaleString('vi-VN')}đ</b>
               </div>
-              {job.urgentBonus && job.urgentBonus > 0 && (
+              {(job.urgentBonus ?? 0) > 0 && (
                 <div className="pay-line">
                   <span style={{ color: 'var(--red)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                     <Zap size={14} /> Thưởng nóng
                   </span>
-                  <b style={{ color: 'var(--red)' }}>+{job.urgentBonus.toLocaleString('vi-VN')}đ</b>
+                  <b style={{ color: 'var(--red)' }}>+{job.urgentBonus?.toLocaleString('vi-VN')}đ</b>
                 </div>
               )}
-              {job.nightSurcharge && job.nightSurcharge > 0 && (
+              {(job.nightSurcharge ?? 0) > 0 && (
                 <div className="pay-line">
-                  <span>Phụ phí ca đêm (+20%)</span>
-                  <b>+{job.nightSurcharge.toLocaleString('vi-VN')}đ</b>
+                  <span>Phụ phí ca đêm</span>
+                  <b>+{job.nightSurcharge?.toLocaleString('vi-VN')}đ</b>
                 </div>
               )}
               <div className="pay-line">
@@ -291,7 +310,7 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
                 <b>{job.paymentStatus === 'ESCROW_HELD' ? 'Chuyển khoản · Đã tạm giữ' : 'Tiền mặt'}</b>
               </div>
               <div className="pay-line total">
-                <span>Bạn thực nhận sau quyết toán (85%)</span>
+                <span>Bạn thực nhận sau quyết toán</span>
                 <span style={{ color: 'var(--teal)', fontSize: 20 }}>{netEarnings.toLocaleString('vi-VN')}đ</span>
               </div>
               <p style={{ fontSize: 13.5, color: 'var(--muted)', margin: '8px 0 0 0' }}>
@@ -306,7 +325,7 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
               </h4>
               <p style={{ color: 'var(--slate)', fontSize: 14, margin: 0, lineHeight: 1.45 }}>
                 • Hủy trước ca &gt; 12 giờ: <strong>−5 điểm TrustScore</strong>, không phạt tiền.<br />
-                • Hủy gấp trong vòng 12 giờ: <strong>−20 điểm TrustScore</strong> và <strong>phạt 20% giá trị ca</strong> trích từ ví ký quỹ để bù thưởng nóng cho điều dưỡng thay thế.
+                • Hủy gấp trong vòng 12 giờ: <strong>−20 điểm TrustScore</strong> và <strong>phạt {penaltyPercent}% giá trị ca ({penaltyAmount.toLocaleString('vi-VN')}đ)</strong> trích từ ví ký quỹ để bù thưởng nóng cho điều dưỡng thay thế.
               </p>
             </div>
           </div>

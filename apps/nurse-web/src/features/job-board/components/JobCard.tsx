@@ -39,10 +39,10 @@ export const JobCard: React.FC<JobCardProps> = ({
             </span>
           )}
 
-          {job.urgentBonus && job.urgentBonus > 0 && (
+          {(job.urgentBonus ?? 0) > 0 && (
             <span className="chip red">
               <Zap size={13} style={{ marginRight: 3, verticalAlign: 'middle' }} />
-              Thưởng nóng +{job.urgentBonus.toLocaleString('vi-VN')}đ
+              Thưởng nóng +{job.urgentBonus?.toLocaleString('vi-VN')}đ
             </span>
           )}
 
@@ -119,7 +119,7 @@ export const JobCard: React.FC<JobCardProps> = ({
 
       <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: 120 }}>
         <span className="pay">{job.totalAmount.toLocaleString('vi-VN')}đ</span>
-        {job.urgentBonus && job.urgentBonus > 0 && (
+        {(job.urgentBonus ?? 0) > 0 && (
           <small style={{ color: 'var(--red)', fontSize: 13, fontWeight: 600, marginTop: 2 }}>
             Đã gồm thưởng nóng
           </small>

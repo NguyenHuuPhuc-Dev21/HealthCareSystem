@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Radio, MapPin, Clock, CreditCard, Zap, Check, X } from 'lucide-react';
 import { RadarJob } from '../job-board.types';
 
@@ -18,32 +18,48 @@ export const RadarModal: React.FC<RadarModalProps> = ({
   const initialSeconds = radarJob.expiresInSeconds ?? 45;
   const [secondsLeft, setSecondsLeft] = useState<number>(initialSeconds);
   const totalSeconds = initialSeconds || 45;
+  const dismissedRef = useRef(false);
+
+  const triggerDismiss = useCallback(() => {
+    if (dismissedRef.current) return;
+    dismissedRef.current = true;
+    onDismiss(radarJob.id);
+  }, [onDismiss, radarJob.id]);
+
+  // Support Escape to close for Elder-Friendly / A11y
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        triggerDismiss();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [triggerDismiss]);
 
   useEffect(() => {
     if (secondsLeft <= 0) {
-      onDismiss(radarJob.id);
+      triggerDismiss();
       return;
     }
 
     const interval = setInterval(() => {
-      setSecondsLeft((prev: number) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          onDismiss(radarJob.id);
-          return 0;
-        }
-        return prev - 1;
-      });
+      setSecondsLeft((prev: number) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [secondsLeft, onDismiss, radarJob.id]);
+  }, [secondsLeft, triggerDismiss]);
 
   const percentage = Math.max(0, (secondsLeft / totalSeconds) * 100);
   const ringGradient = `conic-gradient(var(--red) 0% ${percentage}%, #DCEBE3 ${percentage}% 100%)`;
 
   return (
-    <div className="radar-modal-overlay" role="dialog" aria-modal="true">
+    <div
+      className="radar-modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="radar-modal-title"
+    >
       <div className="phone-frame">
         <div className="phone-inner">
           {/* Radar Animation Area */}
@@ -84,7 +100,7 @@ export const RadarModal: React.FC<RadarModalProps> = ({
                 {radarJob.hasPrescription && (
                   <span className="chip teal">Có y lệnh</span>
                 )}
-                {radarJob.urgentBonus && radarJob.urgentBonus > 0 && (
+                {(radarJob.urgentBonus ?? 0) > 0 && (
                   <span className="chip red">
                     <Zap size={13} style={{ marginRight: 3, verticalAlign: 'middle' }} />
                     Ca gấp
@@ -92,7 +108,10 @@ export const RadarModal: React.FC<RadarModalProps> = ({
                 )}
               </div>
 
-              <h2 style={{ color: 'var(--navy)', fontSize: 22, marginTop: 10, marginBottom: 4, fontWeight: 800 }}>
+              <h2
+                id="radar-modal-title"
+                style={{ color: 'var(--navy)', fontSize: 22, marginTop: 10, marginBottom: 4, fontWeight: 800 }}
+              >
                 {radarJob.serviceName}
               </h2>
 
@@ -100,11 +119,11 @@ export const RadarModal: React.FC<RadarModalProps> = ({
                 {radarJob.totalAmount.toLocaleString('vi-VN')}đ
               </div>
 
-              {radarJob.urgentBonus && radarJob.urgentBonus > 0 && (
+              {(radarJob.urgentBonus ?? 0) > 0 && (
                 <div style={{ marginTop: 4 }}>
                   <span className="chip red" style={{ fontSize: 13, padding: '3px 8px', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                     <Zap size={13} />
-                    Thưởng nóng +{radarJob.urgentBonus.toLocaleString('vi-VN')}đ
+                    Thưởng nóng +{radarJob.urgentBonus?.toLocaleString('vi-VN')}đ
                   </span>
                 </div>
               )}
@@ -172,7 +191,7 @@ export const RadarModal: React.FC<RadarModalProps> = ({
                   justifyContent: 'center',
                   gap: 6,
                 }}
-                onClick={() => onDismiss(radarJob.id)}
+                onClick={triggerDismiss}
                 disabled={isProcessing}
               >
                 <X size={18} />

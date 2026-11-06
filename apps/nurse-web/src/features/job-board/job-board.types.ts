@@ -36,6 +36,8 @@ export interface JobItem {
     urgentBonus?: number; // Thưởng nóng (nếu có)
     nightSurcharge?: number; // Phụ phí đêm
     durationHours?: number; // Thời lượng tính theo giờ
+    netAmount?: number; // Thu nhập thực nhận sau quyết toán do backend tính (BR-11)
+    cancellationPenaltyPercent?: number; // % phạt hủy ca theo SLA (§5.2)
     paymentMethod: 'BANK_TRANSFER' | 'CASH';
     paymentStatus: 'ESCROW_HELD' | 'UNPAID';
     matchingMode: 'JOB_BOARD' | 'RADAR_DISPATCH';

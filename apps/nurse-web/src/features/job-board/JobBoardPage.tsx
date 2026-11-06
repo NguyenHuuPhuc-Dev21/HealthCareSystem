@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   UserCheck,
   Zap,
+  Wallet,
 } from 'lucide-react';
 import { JobItem, DirectInvitation, RadarJob, JobBoardFilter } from './job-board.types';
 import {
@@ -31,7 +32,7 @@ export const JobBoardPage: React.FC = () => {
   const [selectedJobForDetail, setSelectedJobForDetail] = useState<JobItem | null>(null);
   const [directInvite, setDirectInvite] = useState<DirectInvitation | null>(null);
   const [radarJob, setRadarJob] = useState<RadarJob | null>(null);
-  const [depositAmount] = useState<number>(300000);
+  const [depositAmount, setDepositAmount] = useState<number>(300000);
   const [userTier, setUserTier] = useState<1 | 2>(2);
   const [loading, setLoading] = useState<boolean>(true);
   const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -181,6 +182,18 @@ export const JobBoardPage: React.FC = () => {
               Góc nhìn: {userTier === 2 ? 'Cấp 2 (Hiện tại)' : 'Cấp 1 (Demo khóa xâm lấn)'}
             </button>
 
+            {/* Deposit Balance Switcher for Testing BR-14 Shortfall */}
+            <button
+              className="btn btn-secondary btn-sm"
+              type="button"
+              style={{ fontSize: 14, height: 40 }}
+              onClick={() => setDepositAmount((prev) => (prev >= 300000 ? 150000 : 300000))}
+              title="Chuyển đổi số dư ký quỹ để kiểm thử quy chế BR-14"
+            >
+              <Wallet size={16} style={{ marginRight: 6 }} />
+              Ký quỹ: {depositAmount >= 300000 ? '300.000đ (Đủ)' : '150.000đ (Thiếu BR-14)'}
+            </button>
+
             {/* Radar Simulation Trigger */}
             <button
               className="btn btn-primary btn-sm"
@@ -241,9 +254,17 @@ export const JobBoardPage: React.FC = () => {
                 Theo quy chế BR-14, bạn cần bổ sung ký quỹ để có thể nhận ca chăm sóc.
               </p>
             </div>
-            <a href="/wallet" className="btn btn-secondary btn-sm" style={{ whiteSpace: 'nowrap' }}>
-              Nạp ký quỹ ngay
-            </a>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              style={{ whiteSpace: 'nowrap' }}
+              onClick={() => {
+                setDepositAmount(300000);
+                showToast('success', 'Đã nạp bổ sung ký quỹ thành công! Số dư hiện tại: 300.000đ');
+              }}
+            >
+              Nạp ký quỹ ngay (+150k)
+            </button>
           </div>
         )}
 
