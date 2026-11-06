@@ -17,3 +17,13 @@ export function formatDateTime(isoString: string): string {
   }).format(new Date(isoString));
 }
 
+export function maskPhone(phone?: string | null): string {
+  if (!phone) return '';
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length >= 10) {
+    return `${digits.slice(0, 4)} ••• ${digits.slice(-3)}`;
+  }
+  return phone;
+}
+
+

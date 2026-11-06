@@ -106,9 +106,9 @@
 - [ ] Patient Web — thẻ hồ sơ điều dưỡng: điểm đánh giá, kinh nghiệm, huy hiệu nhân viên y tế đã nghỉ hưu
 
 ### FE-2
-- [ ] Nurse Web + App — lịch rảnh: khai khung giờ lặp lại hằng tuần
-- [ ] Nurse Web + App — đăng ký ngày nghỉ (ngoại lệ)
-- [ ] Nurse Web + App — hiển thị ca đã CONFIRMED/IN_PROGRESS trên cùng lịch
+- [x] Nurse Web + App — lịch rảnh: khai khung giờ lặp lại hằng tuần
+- [x] Nurse Web + App — đăng ký ngày nghỉ (ngoại lệ)
+- [x] Nurse Web + App — hiển thị ca đã CONFIRMED/IN_PROGRESS trên cùng lịch
 
 ### BE-1
 - [ ] Duy trì `rating_avg` trên hồ sơ điều dưỡng từ các đánh giá đã hiển thị
@@ -142,10 +142,10 @@
 - [ ] Patient Web — danh sách đơn của tôi, hiển thị trạng thái 3 trục dễ hiểu
 
 ### FE-2
-- [ ] Nurse Web + App — Bảng việc làm (Job Board) cho ca đặt trước
-- [ ] Nurse Web + App — thông báo ca Radar (ca gấp) kèm đếm ngược, nút Nhận / Từ chối
-- [ ] Nurse Web + App — phản hồi lời mời trực tiếp trong 15 phút
-- [ ] Nurse Web + App — cảnh báo rõ khi không đủ điều kiện nhận ca (thiếu ký quỹ / sai tier / trùng lịch)
+- [x] Nurse Web + App — Bảng việc làm (Job Board) cho ca đặt trước
+- [x] Nurse Web + App — thông báo ca Radar (ca gấp) kèm đếm ngược, nút Nhận / Từ chối
+- [x] Nurse Web + App — phản hồi lời mời trực tiếp trong 15 phút
+- [x] Nurse Web + App — cảnh báo rõ khi không đủ điều kiện nhận ca (thiếu ký quỹ / sai tier / trùng lịch)
 
 ### BE-1
 - [ ] `prescription-gate` (FR-BOOK-02) lớp 1: dịch vụ xâm lấn bắt buộc ảnh y lệnh, ngày cấp ≤ 7 ngày — thiếu trả HTTP 400

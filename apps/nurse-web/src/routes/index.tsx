@@ -7,7 +7,11 @@ import { LockedPage } from '../features/auth/LockedPage';
 import { OnboardingWizard } from '../features/onboarding/OnboardingWizard';
 import { PendingPage } from '../features/onboarding/PendingPage';
 import { CredentialsPage } from '../features/credentials/CredentialsPage';
+import { AvailabilityPage } from '../features/availabilities/AvailabilityPage';
+import { JobBoardPage } from '../features/job-board/JobBoardPage';
+import { ShiftDetailPage } from '../features/shifts/ShiftDetailPage';
 import { NurseHomePage } from '../features/home/NurseHomePage';
+import { NurseLayout } from '../components/layout/NurseLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 
 /** Thanh SETUP của NAV-0: chỉ logo + chip trạng thái, dùng cho SH3/SH4. */
@@ -71,7 +75,9 @@ export const AppRoutes: React.FC = () => {
             path="/"
             element={
               <ProtectedRoute zone="active">
-                <NurseHomePage />
+                <NurseLayout>
+                  <NurseHomePage />
+                </NurseLayout>
               </ProtectedRoute>
             }
           />
@@ -79,7 +85,49 @@ export const AppRoutes: React.FC = () => {
             path="/credentials"
             element={
               <ProtectedRoute zone="active">
-                <CredentialsPage />
+                <NurseLayout>
+                  <CredentialsPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/jobs"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <JobBoardPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/jobs/:id"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <ShiftDetailPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/shifts/:id"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <ShiftDetailPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/schedule"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <AvailabilityPage />
+                </NurseLayout>
               </ProtectedRoute>
             }
           />
