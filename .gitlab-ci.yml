@@ -88,8 +88,8 @@ secret-scan:
 guard-no-direct-push-main:
   stage: check
   image: 
-   name: alpine/git:latest
-   entrypoint: [""]
+    name: alpine/git:latest
+    entrypoint: [""]
   cache: []
   before_script: []
   rules:
