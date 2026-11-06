@@ -7,6 +7,7 @@ import { LockedPage } from '../features/auth/LockedPage';
 import { OnboardingWizard } from '../features/onboarding/OnboardingWizard';
 import { PendingPage } from '../features/onboarding/PendingPage';
 import { CredentialsPage } from '../features/credentials/CredentialsPage';
+import { AvailabilityPage } from '../features/availabilities/AvailabilityPage';
 import { NurseHomePage } from '../features/home/NurseHomePage';
 import { ProtectedRoute } from './ProtectedRoute';
 
@@ -80,6 +81,14 @@ export const AppRoutes: React.FC = () => {
             element={
               <ProtectedRoute zone="active">
                 <CredentialsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/schedule"
+            element={
+              <ProtectedRoute zone="active">
+                <AvailabilityPage />
               </ProtectedRoute>
             }
           />

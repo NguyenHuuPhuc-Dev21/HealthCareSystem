@@ -34,6 +34,9 @@ export const NurseHomePage: React.FC = () => {
                     <Link to="/credentials">
                         <Button type="button">Xem văn bằng & GPHN</Button>
                     </Link>
+                    <Link to="/schedule">
+                        <Button type="button">Lịch rảnh & ngày nghỉ</Button>
+                    </Link>
                     <Button
                         type="button"
                         variant="secondary"
@@ -46,8 +49,8 @@ export const NurseHomePage: React.FC = () => {
                     </Button>
                 </div>
                 <div className="alert-info">
-                    Giai đoạn 1 dừng ở đây: hồ sơ đã được duyệt và có tier. Lịch rảnh tuần là việc của Giai
-                    đoạn 2, Bảng việc làm/Radar là Giai đoạn 3.
+                    Giai đoạn 2: hãy mở Lịch rảnh & ngày nghỉ để khai khung giờ làm việc — hệ thống chỉ
+                    ghép ca trong khung giờ bạn đã mở.
                 </div>
             </div>
         </div>

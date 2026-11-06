@@ -508,12 +508,14 @@ button:disabled,
   max-width: 480px;
   box-sizing: border-box;
 }
+
 .auth-back-row {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   margin-bottom: 20px;
 }
+
 .auth-back-btn {
   display: inline-flex;
   align-items: center;
@@ -528,6 +530,7 @@ button:disabled,
   border: 1px solid rgba(20, 63, 52, 0.08);
   transition: all 0.2s ease;
 }
+
 .auth-back-btn:hover {
   color: var(--color-primary, #1b6b57);
   background: rgba(27, 107, 87, 0.12);
@@ -556,4 +559,253 @@ button:disabled,
   color: var(--color-primary, #166b58);
   background: rgba(22, 107, 88, 0.08);
   border: 1px solid rgba(22, 107, 88, 0.2);
+}
+
+/* ---------- Lịch rảnh & ngày nghỉ (N13, Giai đoạn 2) ---------- */
+.page-subtitle {
+  color: var(--color-text-muted);
+  margin-top: -8px;
+  margin-bottom: 20px;
+}
+
+.avail-day {
+  display: flex;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.avail-day__label {
+  flex: 0 0 92px;
+  font-weight: 700;
+  color: var(--color-navy);
+  padding-top: 8px;
+}
+
+.avail-day__body {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.avail-empty {
+  color: var(--color-text-muted);
+  padding-top: 8px;
+}
+
+.avail-chip-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.avail-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-primary);
+  color: var(--color-navy);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 600;
+}
+
+.avail-chip--locked {
+  background: #f1f5f9;
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.avail-chip__x {
+  display: inline-flex;
+  border: none;
+  background: transparent;
+  color: var(--color-danger);
+  cursor: pointer;
+  padding: 2px;
+}
+
+.avail-chip__note {
+  font-size: 14px;
+  color: var(--color-warning);
+}
+
+.avail-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--touch-target-min);
+  border: 1px dashed var(--color-primary);
+  background: #fff;
+  color: var(--color-primary);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.avail-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  width: 100%;
+  background: var(--color-surface);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.avail-add__field {
+  margin-bottom: 0;
+  min-width: 150px;
+}
+
+.avail-add__field input[type='time'] {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: var(--touch-target-min);
+  padding: 12px 14px;
+  font-size: var(--font-size-base);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.avail-add__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.avail-cal__nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.avail-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.avail-cal {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  max-width: 560px;
+}
+
+.avail-cal__head {
+  text-align: center;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  padding: 6px 0;
+}
+
+.avail-cal__day {
+  position: relative;
+  min-height: var(--touch-target-min);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: #fff;
+  font-size: var(--font-size-base);
+  cursor: pointer;
+}
+
+.avail-cal__day.is-off {
+  background: #fdecec;
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+  font-weight: 700;
+}
+
+.avail-cal__day.is-open {
+  background: #e7f6ee;
+  border-color: var(--color-success);
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+.avail-cal__day.is-today {
+  outline: 2px solid var(--color-accent);
+}
+
+.avail-cal__day.is-selected {
+  outline: 3px solid var(--color-primary);
+}
+
+.avail-cal__dot {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-warning);
+}
+
+.avail-cal__dot--inline {
+  position: static;
+  display: inline-block;
+  transform: none;
+}
+
+.avail-legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin: 14px 0;
+  color: var(--color-text-muted);
+}
+
+.avail-legend__sw {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: #fff;
+  vertical-align: -2px;
+}
+
+.avail-legend__sw--off {
+  background: #fdecec;
+  border-color: var(--color-danger);
+}
+
+.avail-legend__sw--open {
+  background: #e7f6ee;
+  border-color: var(--color-success);
+}
+
+.avail-panel {
+  border-top: 1px solid var(--color-border);
+  padding-top: 14px;
+  margin-top: 6px;
+}
+
+.avail-bookings {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+.avail-bookings li {
+  margin-bottom: 6px;
+}
+
+.avail-savebar {
+  position: sticky;
+  bottom: 12px;
 }
