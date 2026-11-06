@@ -715,6 +715,13 @@ export const AvailabilityPage: React.FC = () => {
                                                     <Tag size={13} style={{ color: 'var(--blue)' }} />
                                                     <span>Đơn <strong>{b.code}</strong></span>
                                                 </span>
+                                                <Link
+                                                    to={`/shifts/${b.code || b.id}`}
+                                                    className="btn btn-secondary btn-sm"
+                                                    style={{ height: '32px', fontSize: '13px', padding: '0 10px', marginLeft: 'auto' }}
+                                                >
+                                                    Xem chi tiết →
+                                                </Link>
                                             </div>
                                         </div>
                                     ))}

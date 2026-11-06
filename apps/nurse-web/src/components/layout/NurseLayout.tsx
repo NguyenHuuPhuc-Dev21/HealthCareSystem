@@ -64,7 +64,7 @@ export function initialsOf(fullName?: string | null): string {
 
 const NAV_TABS = [
   { label: 'Trang chủ', path: '/', isReady: true },
-  { label: 'Việc làm', path: '/jobs', isReady: false, tip: 'Sắp ra mắt ở Giai đoạn 3 (Radar & Job Board)' },
+  { label: 'Việc làm', path: '/jobs', isReady: true },
   { label: 'Ca của tôi', path: '/shifts', isReady: false, tip: 'Sắp ra mắt ở Giai đoạn 4 (Ca trực)' },
   { label: 'Ví', path: '/wallet', isReady: false, tip: 'Sắp ra mắt ở Giai đoạn 5 (Ví & Thu nhập)' },
   { label: 'Lịch rảnh', path: '/schedule', isReady: true },

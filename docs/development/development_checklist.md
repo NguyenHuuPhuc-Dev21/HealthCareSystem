@@ -114,9 +114,9 @@
 - [ ] Patient Web — Nurse profile summary card: TrustScore, rating average, verified experience, and retired staff honor badge.
 
 ### FE-2
-- [ ] Nurse Web + Mobile App — Availability calendar: configure recurring weekly working time slots.
-- [ ] Nurse Web + Mobile App — Register time-off exceptions (single-day or date-range blockouts).
-- [ ] Nurse Web + Mobile App — Visual calendar overlay displaying confirmed and in-progress shifts.
+- [x] Nurse Web + Mobile App — Availability calendar: configure recurring weekly working time slots.
+- [x] Nurse Web + Mobile App — Register time-off exceptions (single-day or date-range blockouts).
+- [x] Nurse Web + Mobile App — Visual calendar overlay displaying confirmed and in-progress shifts.
 
 ### BE-1
 - [ ] Maintain cached `rating_avg` on nurse profiles aggregated from visible completed reviews only.
@@ -150,10 +150,10 @@
 - [ ] Patient Web — My Bookings dashboard presenting independent 3-axis status badges (`execution`, `payment`, `dispute`).
 
 ### FE-2
-- [ ] Nurse Web + Mobile App — Job Board interface for advance bookings (> 6 hours).
-- [ ] Nurse Web + Mobile App — Real-time Radar Dispatch modal for urgent bookings (≤ 6 hours) with countdown timer and Accept/Decline actions.
-- [ ] Nurse Web + Mobile App — Direct booking invitation notification with 15-minute decision window.
-- [ ] Nurse Web + Mobile App — Explicit gating warnings when ineligible to accept (deposit shortfall / wrong Tier / schedule conflict).
+- [x] Nurse Web + Mobile App — Job Board interface for advance bookings (> 6 hours).
+- [x] Nurse Web + Mobile App — Real-time Radar Dispatch modal for urgent bookings (≤ 6 hours) with countdown timer and Accept/Decline actions.
+- [x] Nurse Web + Mobile App — Direct booking invitation notification with 15-minute decision window.
+- [x] Nurse Web + Mobile App — Explicit gating warnings when ineligible to accept (deposit shortfall / wrong Tier / schedule conflict).
 
 ### BE-1
 - [ ] `prescription-gate` (FR-BOOK-02) Layer 1: Invasive services strictly require prescription image and issue date $\le 7$ days; rejects with HTTP 400 if missing.
