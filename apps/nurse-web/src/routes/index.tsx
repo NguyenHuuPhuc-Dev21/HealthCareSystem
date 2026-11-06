@@ -9,6 +9,7 @@ import { PendingPage } from '../features/onboarding/PendingPage';
 import { CredentialsPage } from '../features/credentials/CredentialsPage';
 import { AvailabilityPage } from '../features/availabilities/AvailabilityPage';
 import { NurseHomePage } from '../features/home/NurseHomePage';
+import { NurseLayout } from '../components/layout/NurseLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 
 /** Thanh SETUP của NAV-0: chỉ logo + chip trạng thái, dùng cho SH3/SH4. */
@@ -72,7 +73,9 @@ export const AppRoutes: React.FC = () => {
             path="/"
             element={
               <ProtectedRoute zone="active">
-                <NurseHomePage />
+                <NurseLayout>
+                  <NurseHomePage />
+                </NurseLayout>
               </ProtectedRoute>
             }
           />
@@ -80,7 +83,9 @@ export const AppRoutes: React.FC = () => {
             path="/credentials"
             element={
               <ProtectedRoute zone="active">
-                <CredentialsPage />
+                <NurseLayout>
+                  <CredentialsPage />
+                </NurseLayout>
               </ProtectedRoute>
             }
           />
@@ -88,7 +93,9 @@ export const AppRoutes: React.FC = () => {
             path="/schedule"
             element={
               <ProtectedRoute zone="active">
-                <AvailabilityPage />
+                <NurseLayout>
+                  <AvailabilityPage />
+                </NurseLayout>
               </ProtectedRoute>
             }
           />
