@@ -1,54 +1,131 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button, StatusBadge } from '../../components';
+import { Link } from 'react-router-dom';
+import { Calendar, CheckCircle2, ChevronRight, ShieldCheck, Wallet } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { USE_MOCK_AUTH } from '../../lib/mock-flags';
 
 /**
- * Trang chủ điều dưỡng đã ACTIVE (khung tối thiểu của Giai đoạn 1).
- * Giai đoạn 2 sẽ thêm lịch rảnh tuần, Giai đoạn 3 thêm Bảng việc làm/Radar vào đây.
+ * N1 · Trang chủ điều dưỡng (NAV-0 + Bento tổng quan).
+ * Kết nối liền mạch tới N13 (Lịch rảnh & ngày nghỉ) và N14 (Giấy tờ & GPHN).
  */
 export const NurseHomePage: React.FC = () => {
-    const { session, logout } = useAuth();
-    const navigate = useNavigate();
+    const { session } = useAuth();
     const profile = session?.profile;
+    const user = session?.user;
 
     if (!profile) return null;
 
+    const fullName = user?.full_name ?? 'Điều dưỡng';
+    const isTier2 = profile.tier === 'TIER_2_SPECIALIST';
+    const gphnNumber = profile.gphn_number || '00976/GPHN-ĐN';
+    const gphnExpiry = profile.gphn_expiry_date || '12/04/2027';
+
     return (
-        <div className="page-shell">
-            <div className="card">
-                <h1>Xin chào, {session.user.full_name}</h1>
-                <p>
-                    Hồ sơ: <StatusBadge status={profile.profile_status} /> Tier:{' '}
-                    <StatusBadge status={profile.tier} />
-                    {USE_MOCK_AUTH && <> TrustScore: {profile.trust_score}/100</>}
-                </p>
-                <div className="cred-row">
-                    <span>GPHN</span>
-                    <span>
-                        {profile.gphn_number ?? 'Chưa có'} — hết hạn {profile.gphn_expiry_date ?? '—'}
-                    </span>
+        <div>
+            {/* Header chào mừng */}
+            <div className="page-head" style={{ alignItems: 'center' }}>
+                <div>
+                    <h1 style={{ margin: '0 0 6px', color: 'var(--navy)', fontWeight: 800 }}>
+                        Xin chào, {fullName}
+                    </h1>
+                    <p style={{ margin: 0, color: 'var(--slate)' }}>
+                        Điều dưỡng {isTier2 ? 'Cấp 2 (Chuyên môn)' : 'Cấp 1 (Cơ bản)'} · Trạng thái:{' '}
+                        <span className="chip teal" style={{ padding: '2px 10px', fontSize: '13px' }}>
+                            ✓ Đang hoạt động
+                        </span>
+                        {USE_MOCK_AUTH && (
+                            <span style={{ marginLeft: '10px', color: 'var(--slate)' }}>
+                                · TrustScore: <strong>{profile.trust_score ?? 98}/100</strong>
+                            </span>
+                        )}
+                    </p>
                 </div>
-                <div className="actions-row">
-                    <Link to="/credentials">
-                        <Button type="button">Xem văn bằng & GPHN</Button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <Link to="/schedule" className="btn btn-primary btn-sm" style={{ textDecoration: 'none' }}>
+                        <Calendar size={16} /> Quản lý lịch rảnh
                     </Link>
-                    <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={() => {
-                            logout();
-                            navigate('/login', { replace: true });
-                        }}
-                    >
-                        Đăng xuất
-                    </Button>
                 </div>
-                <div className="alert-info">
-                    Giai đoạn 1 dừng ở đây: hồ sơ đã được duyệt và có tier. Lịch rảnh tuần là việc của Giai
-                    đoạn 2, Bảng việc làm/Radar là Giai đoạn 3.
+            </div>
+
+            {/* Bento Grid */}
+            <div className="bento">
+                {/* Tile 1: Ký quỹ */}
+                <div className="tile">
+                    <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <h3 style={{ margin: 0 }}>Ví ký quỹ</h3>
+                            <Wallet size={20} style={{ color: 'var(--blue)' }} />
+                        </div>
+                        <div className="big-num" style={{ margin: '8px 0' }}>300.000đ</div>
+                        <p style={{ margin: '6px 0 10px' }}>
+                            <span className="chip teal" style={{ fontSize: '13px' }}>
+                                ✓ Đã đủ ký quỹ
+                            </span>
+                        </p>
+                        <p style={{ fontSize: '14.5px', color: 'var(--slate)', margin: 0, lineHeight: 1.5 }}>
+                            Bạn có thể nhận mọi ca thuộc {isTier2 ? 'Cấp 2' : 'Cấp 1'}.
+                        </p>
+                    </div>
+                    <div style={{ marginTop: '18px', paddingTop: '12px', borderTop: '1px dashed var(--line)' }}>
+                        <Link to="/schedule" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '14.5px' }}>
+                            Chi tiết ví &amp; nạp ký quỹ <ChevronRight size={16} />
+                        </Link>
+                    </div>
                 </div>
+
+                {/* Tile 2: Lịch rảnh hôm nay (N13) */}
+                <div className="tile">
+                    <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <h3 style={{ margin: 0 }}>Lịch rảnh hôm nay</h3>
+                            <Calendar size={20} style={{ color: 'var(--blue)' }} />
+                        </div>
+                        <div className="big-num" style={{ margin: '8px 0' }}>07:00 – 21:00</div>
+                        <p style={{ margin: '6px 0 10px' }}>
+                            <span className="chip teal" style={{ fontSize: '13px' }}>✓ Đã bật nhận ca</span>
+                        </p>
+                        <p style={{ fontSize: '14.5px', color: 'var(--slate)', margin: 0, lineHeight: 1.5 }}>
+                            Hệ thống gợi ý việc trong khung giờ rảnh đã khai báo.
+                        </p>
+                    </div>
+                    <div style={{ marginTop: '18px', paddingTop: '12px', borderTop: '1px dashed var(--line)' }}>
+                        <Link to="/schedule" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '14.5px' }}>
+                            Chỉnh sửa lịch rảnh <ChevronRight size={16} />
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Tile 3: Giấy phép hành nghề GPHN */}
+                <div className="tile" style={{ gridColumn: 'span 2' }}>
+                    <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <h3 style={{ margin: 0 }}>Giấy phép hành nghề (GPHN)</h3>
+                            <ShieldCheck size={22} style={{ color: 'var(--blue)' }} />
+                        </div>
+                        <p style={{ fontSize: '16.5px', marginTop: '10px', marginBottom: '8px' }}>
+                            Số <strong style={{ color: 'var(--navy)' }}>{gphnNumber}</strong> · Còn hiệu lực tới{' '}
+                            <strong style={{ color: 'var(--navy)' }}>{gphnExpiry}</strong>
+                        </p>
+                        <p style={{ fontSize: '14.5px', color: 'var(--slate)', margin: 0, lineHeight: 1.5 }}>
+                            {isTier2
+                                ? 'Cấp 2 mở khóa toàn bộ dịch vụ Nhóm 1 và các thủ thuật xâm lấn Nhóm 2 theo y lệnh.'
+                                : 'Cấp 1 được nhận các dịch vụ chăm sóc cơ bản Nhóm 1.'}
+                        </p>
+                    </div>
+                    <div style={{ marginTop: '18px', paddingTop: '12px', borderTop: '1px dashed var(--line)' }}>
+                        <Link to="/credentials" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '14.5px' }}>
+                            Xem chi tiết văn bằng &amp; GPHN <ChevronRight size={16} />
+                        </Link>
+                    </div>
+                </div>
+            </div>
+
+            {/* Thông báo hướng dẫn Phase 2 */}
+            <div className="alert-info" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '12px' }}>
+                <CheckCircle2 size={18} style={{ color: 'var(--teal)', flexShrink: 0 }} />
+                <span>
+                    <strong>Giai đoạn 2 (FR-SCHED-01) đã sẵn sàng:</strong> Hãy kiểm tra và lưu <strong>Lịch rảnh &amp; ngày nghỉ</strong> để Radar và Job Board gợi ý ca làm việc chính xác nhất trong khung giờ bạn đăng ký.
+                </span>
             </div>
         </div>
     );

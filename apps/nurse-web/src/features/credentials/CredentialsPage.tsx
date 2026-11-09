@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { DocType, VerificationStatus } from '@healthcare-system/shared';
 import type { NurseCredential } from '@healthcare-system/shared';
 import { Button, StatusBadge } from '../../components';
@@ -121,9 +123,18 @@ export const CredentialsPage: React.FC = () => {
     };
 
     return (
-        <div className="page-shell">
+        <div>
+            <div className="page-head">
+                <div>
+                    <h1>Văn bằng &amp; GPHN của tôi</h1>
+                    <p>Quản lý chứng chỉ hành nghề và các giấy tờ đã được thẩm định</p>
+                </div>
+                <Link to="/" className="btn btn-secondary btn-sm" style={{ textDecoration: 'none' }}>
+                    <ArrowLeft size={16} /> Về trang chủ
+                </Link>
+            </div>
             <div className="card">
-                <h1>Văn bằng & GPHN của tôi</h1>
+                <h2>Hồ sơ chuyên môn</h2>
                 <p>
                     {session?.user.full_name} — Tier hiện tại: <StatusBadge status={profile.tier} />
                 </p>

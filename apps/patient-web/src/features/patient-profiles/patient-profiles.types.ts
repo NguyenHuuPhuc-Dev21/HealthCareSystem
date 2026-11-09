@@ -98,12 +98,11 @@ export const RELATIONSHIP_OPTIONS: Array<{ value: Relationship; label: string }>
   { value: 'OTHER', label: 'Khác' },
 ];
 
-export const MOBILITY_OPTIONS: Array<{ value: MobilityStatus; icon: string; title: string; description: string }> = [
-  { value: 'NORMAL', icon: '🚶', title: 'Tự đi lại', description: 'Tự sinh hoạt, đi lại bình thường, không cần hỗ trợ.' },
-  { value: 'PARTIAL', icon: '🧑‍🦯', title: 'Hỗ trợ di chuyển', description: 'Cần người dìu, dùng gậy hoặc khung tập đi. Nguy cơ té ngã nhẹ.' },
+export const MOBILITY_OPTIONS: Array<{ value: MobilityStatus; title: string; description: string }> = [
+  { value: 'NORMAL', title: 'Tự đi lại', description: 'Tự sinh hoạt, đi lại bình thường, không cần hỗ trợ.' },
+  { value: 'PARTIAL', title: 'Hỗ trợ di chuyển', description: 'Cần người dìu, dùng gậy hoặc khung tập đi. Nguy cơ té ngã nhẹ.' },
   {
     value: 'BEDRIDDEN',
-    icon: '🛏️',
     title: 'Nằm tại giường',
     // Không ghi số % ở FE — mức phụ phí lấy từ system_configs và hiển thị ở bước đặt lịch
     description: 'Không thể rời giường. Cần xoay trở chống loét tỳ đè (có áp dụng phụ phí bệnh nhân nặng).',
@@ -111,6 +110,6 @@ export const MOBILITY_OPTIONS: Array<{ value: MobilityStatus; icon: string; titl
 ];
 
 export const LOCATION_OPTIONS: Array<{ value: LocationType; label: string }> = [
-  { value: 'HOME', label: '🏠 Tại nhà riêng' },
-  { value: 'HOSPITAL', label: '🏥 Tại bệnh viện' },
+  { value: 'HOME', label: 'Tại nhà riêng' },
+  { value: 'HOSPITAL', label: 'Tại bệnh viện' },
 ];

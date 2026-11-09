@@ -18,6 +18,7 @@ npm run build          # tsc + vite build — chạy trước khi tạo PR
 | 0909 888 777 | Tài khoản điều dưỡng → báo "không dùng cho trang Khách hàng" |
 | 0905 000 000 | Bị giới hạn gửi OTP (429) |
 | Số khác | Người dùng mới → hiện chọn vai trò → /onboarding |
+| 0901 000 001 | admin (Mã 2 lớp: 246810) |
 
 Mã OTP: `123456` đúng · `111111` hết hạn · mã khác sai (sai 5 lần thì bị khoá, phải gửi lại mã).
 
