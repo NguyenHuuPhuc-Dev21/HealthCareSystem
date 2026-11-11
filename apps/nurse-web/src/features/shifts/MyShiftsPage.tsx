@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, Calendar, Clock, MapPin, ShieldAlert } from 'lucide-react';
+import { Activity, AlertTriangle, Calendar, Clock, MapPin, ShieldAlert } from 'lucide-react';
 import { ExecutionStatus, DEFAULT_PLATFORM_COMMISSION_RATE } from '@healthcare-system/shared';
 import { getMyShifts } from './shift.api';
 import { ShiftExecutionState } from './shift.types';
@@ -23,19 +23,37 @@ function statusMeta(status: ExecutionStatus): { label: string; tone: 'jade' | 'o
 export const MyShiftsPage: React.FC = () => {
   const [shifts, setShifts] = useState<ShiftExecutionState[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchShifts = useCallback(() => {
     let alive = true;
-    getMyShifts().then((res) => {
-      if (alive && res.success) {
-        setShifts(res.data);
-      }
-      if (alive) setLoading(false);
-    });
+    setLoading(true);
+    setLoadError(null);
+    getMyShifts()
+      .then((res) => {
+        if (!alive) return;
+        if (res.success) {
+          setShifts(res.data);
+        } else {
+          setLoadError(res.message || 'Không thể tải danh sách ca trực. Vui lòng thử lại.');
+        }
+      })
+      .catch(() => {
+        if (alive) {
+          setLoadError('Lỗi kết nối máy chủ. Không thể tải danh sách ca trực của bạn.');
+        }
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
     return () => {
       alive = false;
     };
   }, []);
+
+  useEffect(() => {
+    return fetchShifts();
+  }, [fetchShifts]);
 
   return (
     <div>
@@ -52,6 +70,19 @@ export const MyShiftsPage: React.FC = () => {
       {loading ? (
         <div className="ledger-panel" style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--ink-secondary)' }}>
           Đang tải danh sách ca trực của bạn...
+        </div>
+      ) : loadError ? (
+        <div className="ledger-panel" role="alert" style={{ textAlign: 'center', padding: '40px 24px', borderColor: '#FECACA', background: '#FFFDFD' }}>
+          <AlertTriangle size={32} color="var(--alert-crimson)" style={{ margin: '0 auto 10px' }} />
+          <h2 className="font-display" style={{ margin: '0 0 8px', fontSize: 20, color: 'var(--ink-primary)' }}>
+            Không thể tải danh sách ca trực
+          </h2>
+          <p className="prose-limit" style={{ margin: '0 auto 18px', color: 'var(--ink-secondary)' }}>
+            {loadError}
+          </p>
+          <button type="button" className="btn btn-primary" onClick={fetchShifts}>
+            Thử lại
+          </button>
         </div>
       ) : shifts.length === 0 ? (
         <div className="ledger-panel" style={{ textAlign: 'center', padding: '48px 24px' }}>

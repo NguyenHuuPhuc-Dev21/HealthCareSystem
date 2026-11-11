@@ -10,6 +10,7 @@ interface HandoverCheckoutTabProps {
   assessmentCompleted: boolean;
   completedActivitiesCount: number;
   totalActivitiesCount: number;
+  submitting?: boolean;
   onSubmitCheckOut: (payload: {
     finalHr: string;
     finalBp: string;
@@ -21,6 +22,7 @@ export const HandoverCheckoutTab: React.FC<HandoverCheckoutTabProps> = ({
   assessmentCompleted,
   completedActivitiesCount,
   totalActivitiesCount,
+  submitting = false,
   onSubmitCheckOut,
 }) => {
   const [finalHr, setFinalHr] = useState('75');
@@ -39,6 +41,13 @@ export const HandoverCheckoutTab: React.FC<HandoverCheckoutTabProps> = ({
     }
     if (!finalHr.trim() || !finalBp.trim()) {
       Alert.alert('Thiếu sinh tồn cuối ca', 'Cần ghi nhận Mạch và Huyết áp trước khi bàn giao.');
+      return;
+    }
+    if (!Number(finalHr.trim()) || !/^\d{2,3}\s*\/\s*\d{2,3}$/.test(finalBp.trim())) {
+      Alert.alert(
+        'Định dạng sinh tồn chưa hợp lệ',
+        'Vui lòng nhập Mạch là số và Huyết áp theo dạng 120/80.'
+      );
       return;
     }
     if (handoverNote.trim().length < 10) {
@@ -110,8 +119,14 @@ export const HandoverCheckoutTab: React.FC<HandoverCheckoutTabProps> = ({
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.checkoutBtn} onPress={handleComplete}>
-          <Text style={styles.checkoutBtnText}>Lưu báo cáo và kết thúc ca</Text>
+        <TouchableOpacity
+          style={[styles.checkoutBtn, submitting && { opacity: 0.65 }]}
+          disabled={submitting}
+          onPress={handleComplete}
+        >
+          <Text style={styles.checkoutBtnText}>
+            {submitting ? 'Đang gửi báo cáo...' : 'Lưu báo cáo và kết thúc ca'}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

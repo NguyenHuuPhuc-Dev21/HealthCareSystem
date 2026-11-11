@@ -55,21 +55,26 @@ export const InitialAssessmentModal: React.FC<InitialAssessmentModalProps> = ({
     };
 
     setIsSubmitting(true);
-    const res = await submitInitialAssessment({
-      bookingId: shift.bookingId,
-      actualMobility: mobility,
-      mentalStatus,
-      isConditionMatched: !hasMismatch,
-      mismatchReason: hasMismatch ? mismatchReason : undefined,
-      requestedAction: hasMismatch ? requestedAction : undefined,
-      initialVitals,
-    });
-    setIsSubmitting(false);
+    try {
+      const res = await submitInitialAssessment({
+        bookingId: shift.bookingId,
+        actualMobility: mobility,
+        mentalStatus,
+        isConditionMatched: !hasMismatch,
+        mismatchReason: hasMismatch ? mismatchReason : undefined,
+        requestedAction: hasMismatch ? requestedAction : undefined,
+        initialVitals,
+      });
 
-    if (res.success && res.data) {
-      onSuccess(res.data);
-    } else {
-      setErrorMessage(res.message || 'Lưu đánh giá ban đầu thất bại.');
+      if (res.success && res.data) {
+        onSuccess(res.data);
+      } else {
+        setErrorMessage(res.message || 'Lưu đánh giá ban đầu thất bại.');
+      }
+    } catch {
+      setErrorMessage('Lỗi kết nối máy chủ. Không thể lưu đánh giá ban đầu.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

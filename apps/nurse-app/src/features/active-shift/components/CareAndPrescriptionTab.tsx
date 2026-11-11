@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Alert } from 'react-native';
 import { tokens } from '../../../styles/tokens';
+import { IS_DEV } from '../../../lib/hardware-providers';
 import { DEFAULT_TRAVEL_SUPPORT_VND } from '@healthcare-system/shared';
 
 export interface CareActivityItem {
@@ -12,8 +13,10 @@ export interface CareActivityItem {
 interface CareAndPrescriptionTabProps {
   activities: CareActivityItem[];
   isInvasive: boolean;
+  rejecting?: boolean;
+  onCaptureEvidencePhoto?: () => Promise<string | null>;
   onToggleActivity: (id: string) => void;
-  onPrescriptionRejected: (reason: string) => void;
+  onPrescriptionRejected: (payload: { reason: string; evidencePhotoUri: string }) => void;
 }
 
 const REJECTION_REASONS = [
@@ -26,6 +29,8 @@ const REJECTION_REASONS = [
 export const CareAndPrescriptionTab: React.FC<CareAndPrescriptionTabProps> = ({
   activities,
   isInvasive,
+  rejecting = false,
+  onCaptureEvidencePhoto,
   onToggleActivity,
   onPrescriptionRejected,
 }) => {
@@ -36,11 +41,32 @@ export const CareAndPrescriptionTab: React.FC<CareAndPrescriptionTabProps> = ({
 
   const completedCount = activities.filter((a) => a.completed).length;
 
-  const handleCaptureEvidence = () => {
-    setEvidencePhotoUri(
-      'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80'
+  const handleCaptureEvidence = async () => {
+    if (onCaptureEvidencePhoto) {
+      try {
+        const uri = await onCaptureEvidencePhoto();
+        if (uri) {
+          setEvidencePhotoUri(uri);
+          Alert.alert('Đã chụp ảnh bằng chứng', 'Ảnh thuốc / đơn thuốc đã được lưu đính kèm hồ sơ đối chiếu.');
+        }
+      } catch {
+        Alert.alert('Lỗi camera', 'Không thể mở camera thiết bị. Vui lòng kiểm tra quyền truy cập camera.');
+      }
+      return;
+    }
+
+    if (IS_DEV) {
+      setEvidencePhotoUri(
+        'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80'
+      );
+      Alert.alert('[DEV] Ảnh bằng chứng mẫu', 'Chỉ dùng ảnh mẫu trong môi trường phát triển.');
+      return;
+    }
+
+    Alert.alert(
+      'Chưa hỗ trợ camera phần cứng',
+      'Ứng dụng cần kết nối camera trực tiếp (onCaptureEvidencePhoto) để chụp ảnh bằng chứng y lệnh.'
     );
-    Alert.alert('Đã chụp ảnh bằng chứng', 'Ảnh thuốc / đơn thuốc đã được lưu đính kèm hồ sơ đối chiếu.');
   };
 
   const handleConfirmReject = () => {
@@ -56,7 +82,11 @@ export const CareAndPrescriptionTab: React.FC<CareAndPrescriptionTabProps> = ({
         {
           text: 'Xác nhận dừng ca',
           style: 'destructive',
-          onPress: () => onPrescriptionRejected(`${selectedReason}${notes ? ` (${notes})` : ''}`),
+          onPress: () =>
+            onPrescriptionRejected({
+              reason: `${selectedReason}${notes ? ` (${notes})` : ''}`,
+              evidencePhotoUri,
+            }),
         },
       ]
     );
@@ -151,12 +181,19 @@ export const CareAndPrescriptionTab: React.FC<CareAndPrescriptionTabProps> = ({
               <View style={styles.formActions}>
                 <TouchableOpacity
                   style={styles.cancelFormBtn}
+                  disabled={rejecting}
                   onPress={() => setShowRejectionPanel(false)}
                 >
                   <Text style={styles.cancelFormText}>Đóng lại</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.confirmRejectBtn} onPress={handleConfirmReject}>
-                  <Text style={styles.confirmRejectText}>Gửi báo cáo hủy ca</Text>
+                <TouchableOpacity
+                  style={[styles.confirmRejectBtn, rejecting && { opacity: 0.65 }]}
+                  disabled={rejecting}
+                  onPress={handleConfirmReject}
+                >
+                  <Text style={styles.confirmRejectText}>
+                    {rejecting ? 'Đang gửi...' : 'Gửi báo cáo hủy ca'}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>

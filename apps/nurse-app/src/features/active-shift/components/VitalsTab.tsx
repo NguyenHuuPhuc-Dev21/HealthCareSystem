@@ -15,7 +15,7 @@ export interface VitalEntry {
 
 interface VitalsTabProps {
   vitalsList: VitalEntry[];
-  onAddVitals: (entry: VitalEntry) => void;
+  onAddVitals: (entry: VitalEntry) => Promise<boolean>;
 }
 
 export const VitalsTab: React.FC<VitalsTabProps> = ({ vitalsList, onAddVitals }) => {
@@ -24,8 +24,9 @@ export const VitalsTab: React.FC<VitalsTabProps> = ({ vitalsList, onAddVitals })
   const [dia, setDia] = useState('80');
   const [temp, setTemp] = useState('36.8');
   const [spo2, setSpo2] = useState('98');
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const nHr = Number(hr);
     const nSys = Number(sys);
     const nDia = Number(dia);
@@ -54,15 +55,21 @@ export const VitalsTab: React.FC<VitalsTabProps> = ({ vitalsList, onAddVitals })
       spo2: nSpo2,
     };
 
-    onAddVitals(entry);
+    setSaving(true);
+    try {
+      const saved = await onAddVitals(entry);
+      if (!saved) return;
 
-    if (warnings.length > 0) {
-      Alert.alert(
-        'Cảnh báo chỉ số vượt ngưỡng',
-        `${warnings.join(' · ')}. Hãy theo dõi sát người bệnh hoặc bấm nút SOS 115 nếu diễn biến xấu.`
-      );
-    } else {
-      Alert.alert('Đã lưu sinh tồn', 'Chỉ số sinh tồn đã được đồng bộ cho gia đình người bệnh.');
+      if (warnings.length > 0) {
+        Alert.alert(
+          'Cảnh báo chỉ số vượt ngưỡng',
+          `${warnings.join(' · ')}. Hãy theo dõi sát người bệnh hoặc bấm nút SOS 115 nếu diễn biến xấu.`
+        );
+      } else {
+        Alert.alert('Đã lưu sinh tồn', 'Chỉ số sinh tồn đã được đồng bộ lên hệ thống cho gia đình người bệnh.');
+      }
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -99,12 +106,15 @@ export const VitalsTab: React.FC<VitalsTabProps> = ({ vitalsList, onAddVitals })
         </View>
 
         <TouchableOpacity
-          style={styles.saveBtn}
+          style={[styles.saveBtn, saving && { opacity: 0.65 }]}
+          disabled={saving}
           onPress={handleSave}
           accessibilityRole="button"
           accessibilityLabel="Lưu chỉ số sinh tồn và đồng bộ"
         >
-          <Text style={styles.saveBtnText}>Lưu chỉ số và đồng bộ</Text>
+          <Text style={styles.saveBtnText}>
+            {saving ? 'Đang gửi chỉ số...' : 'Lưu chỉ số và đồng bộ'}
+          </Text>
         </TouchableOpacity>
       </View>
 

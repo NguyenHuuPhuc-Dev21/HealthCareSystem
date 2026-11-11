@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Clock, Check, X } from 'lucide-react';
+import { DEFAULT_TRAVEL_BUFFER_MINUTES } from '@healthcare-system/shared';
 import { respondToExtension } from '../shift.api';
 
 interface ShiftExtensionBannerProps {
@@ -24,17 +25,22 @@ export const ShiftExtensionBanner: React.FC<ShiftExtensionBannerProps> = ({
   const handleAction = async (approved: boolean) => {
     setIsSubmitting(true);
     setErrorMessage(null);
-    const res = await respondToExtension({
-      bookingId,
-      extensionId: pendingExtension.id,
-      approved,
-    });
-    setIsSubmitting(false);
+    try {
+      const res = await respondToExtension({
+        bookingId,
+        extensionId: pendingExtension.id,
+        approved,
+      });
 
-    if (res.success) {
-      onResponded(approved);
-    } else {
-      setErrorMessage(res.message || 'Không thể xử lý yêu cầu lúc này.');
+      if (res.success) {
+        onResponded(approved);
+      } else {
+        setErrorMessage(res.message || 'Không thể xử lý yêu cầu lúc này.');
+      }
+    } catch {
+      setErrorMessage('Lỗi kết nối máy chủ. Không thể gửi phản hồi gia hạn.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -59,11 +65,11 @@ export const ShiftExtensionBanner: React.FC<ShiftExtensionBannerProps> = ({
       </div>
 
       <p style={{ margin: '0 0 12px 0', fontSize: 13.5, color: '#78350F' }}>
-        Người nhà bệnh nhân mong muốn bạn hỗ trợ thêm {pendingExtension.extraHours} giờ. Hãy kiểm tra lịch trình cá nhân để đảm bảo đủ đệm di chuyển 60 phút cho ca tiếp theo.
+        Người nhà bệnh nhân mong muốn bạn hỗ trợ thêm {pendingExtension.extraHours} giờ. Hãy kiểm tra lịch trình cá nhân để đảm bảo đủ đệm di chuyển {DEFAULT_TRAVEL_BUFFER_MINUTES} phút cho ca tiếp theo.
       </p>
 
       {errorMessage && (
-        <div style={{ fontSize: 13, color: 'var(--red)', marginBottom: 8 }}>
+        <div role="alert" style={{ fontSize: 13, color: 'var(--red)', marginBottom: 8 }}>
           {errorMessage}
         </div>
       )}

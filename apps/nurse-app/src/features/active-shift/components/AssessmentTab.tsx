@@ -7,6 +7,7 @@ interface AssessmentTabProps {
   completed: boolean;
   mobility: string;
   mismatchReported: boolean;
+  saving?: boolean;
   onSaveAssessment: (params: {
     mobility: string;
     hasMismatch: boolean;
@@ -25,6 +26,7 @@ export const AssessmentTab: React.FC<AssessmentTabProps> = ({
   completed,
   mobility,
   mismatchReported,
+  saving = false,
   onSaveAssessment,
 }) => {
   const [selectedMobility, setSelectedMobility] = useState(mobility || 'PARTIAL');
@@ -157,11 +159,15 @@ export const AssessmentTab: React.FC<AssessmentTabProps> = ({
           style={[
             styles.saveBtn,
             hasMismatch && mismatchAction === 'STOP_NO_PENALTY' && { backgroundColor: tokens.colors.alertCrimson },
+            saving && { opacity: 0.65 },
           ]}
+          disabled={saving}
           onPress={handleSave}
         >
           <Text style={styles.saveBtnText}>
-            {hasMismatch && mismatchAction === 'STOP_NO_PENALTY'
+            {saving
+              ? 'Đang gửi lên hệ thống...'
+              : hasMismatch && mismatchAction === 'STOP_NO_PENALTY'
               ? 'Xác nhận dừng ca do sai lệch'
               : completed
               ? 'Cập nhật đánh giá 30 phút'

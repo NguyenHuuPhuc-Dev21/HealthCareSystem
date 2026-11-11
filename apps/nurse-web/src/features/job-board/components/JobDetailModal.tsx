@@ -15,6 +15,8 @@ import { JobItem } from '../job-board.types';
 import {
   DEFAULT_PLATFORM_COMMISSION_RATE,
   DEFAULT_CANCELLATION_PENALTY_RATE,
+  DEFAULT_RECORD_ACCESS_EXPIRY_HOURS,
+  DEFAULT_SETTLEMENT_COOLING_HOURS,
 } from '@healthcare-system/shared';
 import { Modal, ModalCloseButton } from '../../../components';
 import { InvalidPrescriptionModal } from '../../shifts/components/InvalidPrescriptionModal';
@@ -166,7 +168,7 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
               <div style={{ marginTop: 14 }}>
                 <span className="chip amber" style={{ fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
                   <Lock size={13} />
-                  Bảo mật y tế: Chỉ xem được tới 12 giờ sau khi kết thúc ca
+                  Bảo mật y tế: Chỉ xem được tới {DEFAULT_RECORD_ACCESS_EXPIRY_HOURS} giờ sau khi kết thúc ca
                 </span>
               </div>
             </div>
@@ -317,7 +319,7 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
                 <span style={{ color: 'var(--teal)', fontSize: 20 }}>{netEarnings.toLocaleString('vi-VN')}đ</span>
               </div>
               <p style={{ fontSize: 13.5, color: 'var(--muted)', margin: '8px 0 0 0' }}>
-                Tiền tự động quyết toán vào Ví điều dưỡng sau 24 giờ kể từ khi hoàn tất ca, hoặc ngay khi khách hàng bấm xác nhận.
+                Tiền tự động quyết toán vào Ví điều dưỡng sau {DEFAULT_SETTLEMENT_COOLING_HOURS} giờ kể từ khi hoàn tất ca, hoặc ngay khi khách hàng bấm xác nhận.
               </p>
             </div>
 

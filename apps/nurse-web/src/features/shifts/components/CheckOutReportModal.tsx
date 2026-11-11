@@ -55,19 +55,24 @@ export const CheckOutReportModal: React.FC<CheckOutReportModalProps> = ({
     };
 
     setIsSubmitting(true);
-    const res = await submitCheckOut({
-      bookingId: shift.bookingId,
-      checkoutTime: new Date().toISOString(),
-      finalVitals,
-      completedActivityIds: completedActivities.map((a) => a.id),
-      handoverNote,
-    });
-    setIsSubmitting(false);
+    try {
+      const res = await submitCheckOut({
+        bookingId: shift.bookingId,
+        checkoutTime: new Date().toISOString(),
+        finalVitals,
+        completedActivityIds: completedActivities.map((a) => a.id),
+        handoverNote,
+      });
 
-    if (res.success && res.data) {
-      onSuccess(res.data);
-    } else {
-      setErrorMessage(res.message || 'Check-out thất bại.');
+      if (res.success && res.data) {
+        onSuccess(res.data);
+      } else {
+        setErrorMessage(res.message || 'Check-out thất bại.');
+      }
+    } catch {
+      setErrorMessage('Lỗi kết nối máy chủ. Vui lòng thử nộp báo cáo bàn giao lại.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

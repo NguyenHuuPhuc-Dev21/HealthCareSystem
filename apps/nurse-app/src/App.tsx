@@ -1,9 +1,25 @@
-import React, { useState } from 'react';
-import { SafeAreaView, Text, View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  SafeAreaView,
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
 import { tokens } from './styles/tokens';
 import { ShiftBriefingScreen } from './features/shift-briefing/ShiftBriefingScreen';
 import { CheckInScreen } from './features/check-in/CheckInScreen';
 import { ActiveShiftScreen } from './features/active-shift/ActiveShiftScreen';
+import { getMyShifts, MobileShiftSummary } from './features/active-shift/active-shift.api';
+import {
+  createCameraProvider,
+  createLocationProvider,
+  DeviceGeoCoords,
+  getHardwareCapabilityStatus,
+  IS_DEV,
+} from './lib/hardware-providers';
 import {
   CHECKIN_MAX_RADIUS_METERS,
   DEFAULT_SETTLEMENT_COOLING_HOURS,
@@ -13,41 +29,93 @@ import {
 
 type AppView = 'HOME' | 'BRIEFING' | 'CHECKIN' | 'ACTIVE_SHIFT' | 'COMPLETED' | 'CANCELLED_SAFE';
 
-export default function App() {
+interface NurseAppProps {
+  initialShift?: MobileShiftSummary;
+  onRequestCurrentPosition?: () => Promise<DeviceGeoCoords>;
+  onCaptureLivePhoto?: () => Promise<string | null>;
+}
+
+const DEV_SAMPLE_SHIFT: MobileShiftSummary = {
+  bookingId: 'job-1',
+  bookingCode: 'BK-20261102-001',
+  patientName: 'Bà Nguyễn Thị Mai',
+  patientAge: 78,
+  patientAddress: 'Số 25 Quang Trung, Hải Châu, Đà Nẵng',
+  patientLatitude: 16.0718,
+  patientLongitude: 108.2205,
+  serviceName: 'Chăm sóc vết loét độ 3 và thay băng',
+  timeRange: '08:00 – 12:00 hôm nay',
+  mobilityNote: 'Nằm tại giường, cần hỗ trợ xoay trở nhẹ nhàng',
+  allergies: 'Dị ứng kháng sinh nhóm Penicillin',
+  isInvasive: true,
+  prescriptionSummary:
+    'Đơn thuốc ngày 26/10/2026: Dung dịch sát khuẩn vết loét Povidone Iodine 10%, gạc vô khuẩn và băng ép chuyên dụng.',
+};
+
+export default function App({
+  initialShift,
+  onRequestCurrentPosition,
+  onCaptureLivePhoto,
+}: NurseAppProps = {}) {
   const [currentView, setCurrentView] = useState<AppView>('HOME');
   const [outcomeNote, setOutcomeNote] = useState<string | undefined>();
+  const [activeShift, setActiveShift] = useState<MobileShiftSummary | null>(
+    initialShift ?? (IS_DEV ? DEV_SAMPLE_SHIFT : null)
+  );
+  const [loadingShift, setLoadingShift] = useState<boolean>(!initialShift);
+  const [shiftLoadError, setShiftLoadError] = useState<string | null>(null);
 
-  const sampleShift = {
-    bookingId: 'job-1',
-    bookingCode: 'BK-20261102-001',
-    patientName: 'Bà Nguyễn Thị Mai',
-    patientAge: 78,
-    patientAddress: 'Số 25 Quang Trung, Hải Châu, Đà Nẵng',
-    patientLatitude: 16.0718,
-    patientLongitude: 108.2205,
-    serviceName: 'Chăm sóc vết loét độ 3 và thay băng',
-    timeRange: '08:00 – 12:00 hôm nay',
-    mobilityNote: 'Nằm tại giường, cần hỗ trợ xoay trở nhẹ nhàng',
-    allergies: 'Dị ứng kháng sinh nhóm Penicillin',
-    isInvasive: true,
-    prescriptionSummary:
-      'Đơn thuốc ngày 26/10/2026: Dung dịch sát khuẩn vết loét Povidone Iodine 10%, gạc vô khuẩn và băng ép chuyên dụng.',
-  };
+  const locationProvider = useMemo(
+    () => createLocationProvider(onRequestCurrentPosition),
+    [onRequestCurrentPosition]
+  );
+  const cameraProvider = useMemo(
+    () => createCameraProvider(onCaptureLivePhoto),
+    [onCaptureLivePhoto]
+  );
+  const hardwareStatus = useMemo(
+    () => getHardwareCapabilityStatus({ onRequestCurrentPosition, onCaptureLivePhoto }),
+    [onRequestCurrentPosition, onCaptureLivePhoto]
+  );
 
-  if (currentView === 'BRIEFING') {
+  const loadAssignedShift = useCallback(async () => {
+    if (initialShift) return;
+    setLoadingShift(true);
+    setShiftLoadError(null);
+    try {
+      const res = await getMyShifts();
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        setActiveShift(res.data[0]);
+      } else if (!res.success && !IS_DEV) {
+        setShiftLoadError(res.error?.message || 'Không thể tải danh sách ca trực hôm nay.');
+      }
+    } catch {
+      if (!IS_DEV) {
+        setShiftLoadError('Lỗi kết nối máy chủ. Vui lòng kiểm tra mạng và thử lại.');
+      }
+    } finally {
+      setLoadingShift(false);
+    }
+  }, [initialShift]);
+
+  useEffect(() => {
+    void loadAssignedShift();
+  }, [loadAssignedShift]);
+
+  if (currentView === 'BRIEFING' && activeShift) {
     return (
       <SafeAreaView style={styles.container}>
         <ShiftBriefingScreen
-          bookingCode={sampleShift.bookingCode}
-          serviceName={sampleShift.serviceName}
-          timeRange={sampleShift.timeRange}
-          patientName={sampleShift.patientName}
-          patientAge={sampleShift.patientAge}
-          patientAddress={sampleShift.patientAddress}
-          mobilityNote={sampleShift.mobilityNote}
-          allergies={sampleShift.allergies}
-          isInvasive={sampleShift.isInvasive}
-          prescriptionSummary={sampleShift.prescriptionSummary}
+          bookingCode={activeShift.bookingCode}
+          serviceName={activeShift.serviceName}
+          timeRange={activeShift.timeRange}
+          patientName={activeShift.patientName}
+          patientAge={activeShift.patientAge}
+          patientAddress={activeShift.patientAddress}
+          mobilityNote={activeShift.mobilityNote || 'Chưa có ghi chú vận động'}
+          allergies={activeShift.allergies || 'Chưa ghi nhận dị ứng'}
+          isInvasive={activeShift.isInvasive}
+          prescriptionSummary={activeShift.prescriptionSummary}
           onProceedToCheckIn={() => setCurrentView('CHECKIN')}
           onBack={() => setCurrentView('HOME')}
         />
@@ -55,15 +123,17 @@ export default function App() {
     );
   }
 
-  if (currentView === 'CHECKIN') {
+  if (currentView === 'CHECKIN' && activeShift) {
     return (
       <SafeAreaView style={styles.container}>
         <CheckInScreen
-          bookingId={sampleShift.bookingId}
-          bookingCode={sampleShift.bookingCode}
-          patientAddress={sampleShift.patientAddress}
-          patientLatitude={sampleShift.patientLatitude}
-          patientLongitude={sampleShift.patientLongitude}
+          bookingId={activeShift.bookingId}
+          bookingCode={activeShift.bookingCode}
+          patientAddress={activeShift.patientAddress}
+          patientLatitude={activeShift.patientLatitude}
+          patientLongitude={activeShift.patientLongitude}
+          onRequestCurrentPosition={locationProvider}
+          onCaptureLivePhoto={cameraProvider}
           onCheckInSuccess={() => setCurrentView('ACTIVE_SHIFT')}
           onCancel={() => setCurrentView('BRIEFING')}
         />
@@ -71,19 +141,21 @@ export default function App() {
     );
   }
 
-  if (currentView === 'ACTIVE_SHIFT') {
+  if (currentView === 'ACTIVE_SHIFT' && activeShift) {
     return (
       <SafeAreaView style={styles.container}>
         <ActiveShiftScreen
-          bookingId={sampleShift.bookingId}
-          bookingCode={sampleShift.bookingCode}
-          patientName={sampleShift.patientName}
-          patientAge={sampleShift.patientAge}
-          patientAddress={sampleShift.patientAddress}
-          patientLatitude={sampleShift.patientLatitude}
-          patientLongitude={sampleShift.patientLongitude}
-          serviceName={sampleShift.serviceName}
-          isInvasive={sampleShift.isInvasive}
+          bookingId={activeShift.bookingId}
+          bookingCode={activeShift.bookingCode}
+          patientName={activeShift.patientName}
+          patientAge={activeShift.patientAge}
+          patientAddress={activeShift.patientAddress}
+          patientLatitude={activeShift.patientLatitude}
+          patientLongitude={activeShift.patientLongitude}
+          serviceName={activeShift.serviceName}
+          isInvasive={activeShift.isInvasive}
+          onRequestCurrentPosition={locationProvider}
+          onCaptureLivePhoto={cameraProvider}
           onShiftCompleted={(outcome) => {
             setOutcomeNote(outcome?.note);
             if (outcome?.type === 'CANCELLED_SAFE') {
@@ -154,41 +226,89 @@ export default function App() {
           </Text>
         </View>
 
+        {/* Cảnh báo thiếu mô-đun phần cứng ở bản non-DEV */}
+        {!IS_DEV && !hardwareStatus.isReadyForRelease && (
+          <View style={styles.hardwareWarnBox}>
+            <Text style={styles.hardwareWarnText}>
+              {!hardwareStatus.hasCameraProvider && !hardwareStatus.hasLocationProvider
+                ? 'Thiếu kết nối Camera và GPS phần cứng cho thao tác điểm danh thực tế.'
+                : !hardwareStatus.hasCameraProvider
+                ? 'Thiếu kết nối Camera phần cứng để chụp ảnh selfie điểm danh.'
+                : 'Thiếu kết nối cảm biến GPS thiết bị.'}
+            </Text>
+          </View>
+        )}
+
         {/* Ca trực trọng tâm hôm nay */}
-        <View style={styles.anchorCard}>
-          <View style={styles.badgeRow}>
-            <View style={styles.statusPill}>
-              <Text style={styles.statusPillText}>Đã xác nhận</Text>
+        {loadingShift && !activeShift ? (
+          <View style={styles.ledgerCard}>
+            <ActivityIndicator color={tokens.colors.brandJade} />
+            <Text style={[styles.stepText, { textAlign: 'center', marginTop: 8 }]}>
+              Đang tải ca trực hôm nay...
+            </Text>
+          </View>
+        ) : shiftLoadError ? (
+          <View style={styles.ledgerCard}>
+            <Text style={[styles.ledgerTitle, { color: tokens.colors.alertCrimson }]}>
+              Không thể tải lịch trực
+            </Text>
+            <Text style={styles.stepText}>{shiftLoadError}</Text>
+            <TouchableOpacity
+              style={[styles.actionBtn, { marginTop: 12 }]}
+              onPress={() => void loadAssignedShift()}
+            >
+              <Text style={styles.actionBtnText}>Thử lại</Text>
+            </TouchableOpacity>
+          </View>
+        ) : !activeShift ? (
+          <View style={styles.ledgerCard}>
+            <Text style={styles.ledgerTitle}>Hôm nay bạn chưa có ca trực nào</Text>
+            <Text style={styles.stepText}>
+              Vui lòng nhận ca trên Bảng việc làm để bắt đầu thực hiện chăm sóc tại nhà.
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.anchorCard}>
+            <View style={styles.badgeRow}>
+              <View style={styles.statusPill}>
+                <Text style={styles.statusPillText}>
+                  {IS_DEV ? '[DEV] Đã xác nhận' : 'Đã xác nhận'}
+                </Text>
+              </View>
+              <Text style={styles.timeText}>{activeShift.timeRange}</Text>
             </View>
-            <Text style={styles.timeText}>{sampleShift.timeRange}</Text>
+
+            <Text style={styles.serviceName}>{activeShift.serviceName}</Text>
+            <Text style={styles.patientInfo}>
+              Người bệnh: {activeShift.patientName} ({activeShift.patientAge} tuổi)
+            </Text>
+            <Text style={styles.addressInfo}>{activeShift.patientAddress}</Text>
+
+            <View style={styles.cardActions}>
+              <TouchableOpacity
+                style={styles.briefingBtn}
+                onPress={() => setCurrentView('BRIEFING')}
+                accessibilityRole="button"
+                accessibilityLabel="Xem hồ sơ ca trực"
+              >
+                <Text style={styles.briefingBtnText}>Xem hồ sơ ca</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.checkInBtn,
+                  !IS_DEV && !hardwareStatus.isReadyForRelease && { opacity: 0.55 },
+                ]}
+                disabled={!IS_DEV && !hardwareStatus.isReadyForRelease}
+                onPress={() => setCurrentView('CHECKIN')}
+                accessibilityRole="button"
+                accessibilityLabel="Điểm danh vào ca"
+              >
+                <Text style={styles.checkInBtnText}>Điểm danh vào ca</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-
-          <Text style={styles.serviceName}>{sampleShift.serviceName}</Text>
-          <Text style={styles.patientInfo}>
-            Người bệnh: {sampleShift.patientName} ({sampleShift.patientAge} tuổi)
-          </Text>
-          <Text style={styles.addressInfo}>{sampleShift.patientAddress}</Text>
-
-          <View style={styles.cardActions}>
-            <TouchableOpacity
-              style={styles.briefingBtn}
-              onPress={() => setCurrentView('BRIEFING')}
-              accessibilityRole="button"
-              accessibilityLabel="Xem hồ sơ ca trực"
-            >
-              <Text style={styles.briefingBtnText}>Xem hồ sơ ca</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.checkInBtn}
-              onPress={() => setCurrentView('CHECKIN')}
-              accessibilityRole="button"
-              accessibilityLabel="Điểm danh vào ca"
-            >
-              <Text style={styles.checkInBtnText}>Điểm danh vào ca</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        )}
 
         {/* Danh mục quy trình hỗ trợ tại hiện trường */}
         <View style={styles.ledgerCard}>
@@ -377,5 +497,19 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
+  },
+  hardwareWarnBox: {
+    backgroundColor: tokens.colors.alertCrimsonSoft,
+    borderWidth: 1,
+    borderColor: '#FCA5A5',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 14,
+  },
+  hardwareWarnText: {
+    fontSize: 13.5,
+    fontWeight: '600',
+    color: tokens.colors.alertCrimson,
+    lineHeight: 19,
   },
 });

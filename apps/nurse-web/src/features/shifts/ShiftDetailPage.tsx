@@ -25,6 +25,8 @@ import {
   DEFAULT_PLATFORM_COMMISSION_RATE,
   DEFAULT_MIN_NURSE_DEPOSIT_VND,
   DEFAULT_CANCELLATION_PENALTY_RATE,
+  DEFAULT_RECORD_ACCESS_EXPIRY_HOURS,
+  DEFAULT_SETTLEMENT_COOLING_HOURS,
 } from '@healthcare-system/shared';
 
 export const ShiftDetailPage: React.FC = () => {
@@ -351,7 +353,7 @@ export const ShiftDetailPage: React.FC = () => {
               <p style={{ marginTop: 14, marginBottom: 0 }}>
                 <span className="chip amber" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                   <Lock size={13} />
-                  Xem được tới 12 giờ sau khi kết thúc ca
+                  Xem được tới {DEFAULT_RECORD_ACCESS_EXPIRY_HOURS} giờ sau khi kết thúc ca
                 </span>
               </p>
             </div>
@@ -517,7 +519,7 @@ export const ShiftDetailPage: React.FC = () => {
                 <span style={{ color: 'var(--teal)' }}>{netEarnings.toLocaleString('vi-VN')}đ</span>
               </div>
               <p style={{ fontSize: 14, color: 'var(--muted)', marginTop: 9, marginBottom: 0 }}>
-                Quyết toán sau khi kết thúc ca 24 giờ nếu không có khiếu nại, hoặc sớm hơn khi khách xác nhận.
+                Quyết toán sau khi kết thúc ca {DEFAULT_SETTLEMENT_COOLING_HOURS} giờ nếu không có khiếu nại, hoặc sớm hơn khi khách xác nhận.
               </p>
             </div>
 
