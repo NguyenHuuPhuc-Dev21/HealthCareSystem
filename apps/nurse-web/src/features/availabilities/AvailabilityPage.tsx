@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { getAvailabilities, updateAvailabilities } from './availabilities.api';
 import { lockedWindows } from './availabilities.mock';
+import { DEFAULT_TRAVEL_BUFFER_MINUTES } from '@healthcare-system/shared';
 import type {
     ConfirmedBooking,
     DateAvailability,
@@ -453,7 +454,7 @@ export const AvailabilityPage: React.FC = () => {
                     })}
 
                     <p className="avail-notice">
-                        Hệ thống tự cộng thêm 60 phút đệm di chuyển giữa hai ca và tự chặn ca trùng giờ — bạn không thể bị xếp hai ca chồng nhau.
+                        Hệ thống tự cộng thêm {DEFAULT_TRAVEL_BUFFER_MINUTES} phút đệm di chuyển giữa hai ca và tự chặn ca trùng giờ — bạn không thể bị xếp hai ca chồng nhau.
                     </p>
                 </div>
 

@@ -10,6 +10,7 @@ import { CredentialsPage } from '../features/credentials/CredentialsPage';
 import { AvailabilityPage } from '../features/availabilities/AvailabilityPage';
 import { JobBoardPage } from '../features/job-board/JobBoardPage';
 import { ShiftDetailPage } from '../features/shifts/ShiftDetailPage';
+import { ShiftExecutionPage } from '../features/shifts/ShiftExecutionPage';
 import { NurseHomePage } from '../features/home/NurseHomePage';
 import { NurseLayout } from '../components/layout/NurseLayout';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -117,6 +118,16 @@ export const AppRoutes: React.FC = () => {
               <ProtectedRoute zone="active">
                 <NurseLayout>
                   <ShiftDetailPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/shifts/:id/execute"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <ShiftExecutionPage />
                 </NurseLayout>
               </ProtectedRoute>
             }

@@ -1,4 +1,5 @@
 import type { ClaimJobResult, DirectInvitation, JobItem, RadarJob } from './job-board.types';
+import { DEFAULT_MIN_NURSE_DEPOSIT_VND } from '@healthcare-system/shared';
 
 const STORAGE_KEY = 'carenest_mock_job_board_v1';
 const RADAR_KEY = 'carenest_mock_radar_job_v1';
@@ -312,7 +313,7 @@ export async function mockFetchRadarJob(): Promise<RadarJob | null> {
 export async function mockAcceptJob(
     jobId: string,
     nurseTier: string,
-    depositBalance = 300000,
+    depositBalance = DEFAULT_MIN_NURSE_DEPOSIT_VND,
 ): Promise<ClaimJobResult> {
     const jobs = loadStoredJobs();
     const target = jobs.find((j) => j.id === jobId);
@@ -326,10 +327,10 @@ export async function mockAcceptJob(
     }
 
     // 1. Kiểm tra ký quỹ
-    if (depositBalance < 300000) {
+    if (depositBalance < DEFAULT_MIN_NURSE_DEPOSIT_VND) {
         return delay({
             success: false,
-            message: 'Số dư ví ký quỹ của bạn không đủ tối thiểu 300.000đ để nhận ca.',
+            message: `Số dư ví ký quỹ của bạn không đủ tối thiểu ${DEFAULT_MIN_NURSE_DEPOSIT_VND.toLocaleString('vi-VN')}đ để nhận ca.`,
             errorCode: 'DEPOSIT_SHORTFALL',
         });
     }
@@ -362,7 +363,7 @@ export async function mockDeclineDirectInvite(_bookingId: string): Promise<{ suc
 export async function mockAcceptDirectInvite(
     bookingId: string,
     _nurseTier: string,
-    depositBalance = 300000,
+    depositBalance = DEFAULT_MIN_NURSE_DEPOSIT_VND,
 ): Promise<ClaimJobResult> {
     const invite = loadStoredInvite();
     if (!invite || invite.bookingId !== bookingId) {
@@ -373,10 +374,10 @@ export async function mockAcceptDirectInvite(
         });
     }
 
-    if (depositBalance < 300000) {
+    if (depositBalance < DEFAULT_MIN_NURSE_DEPOSIT_VND) {
         return delay({
             success: false,
-            message: 'Số dư ví ký quỹ của bạn không đủ tối thiểu 300.000đ để nhận ca.',
+            message: `Số dư ví ký quỹ của bạn không đủ tối thiểu ${DEFAULT_MIN_NURSE_DEPOSIT_VND.toLocaleString('vi-VN')}đ để nhận ca.`,
             errorCode: 'DEPOSIT_SHORTFALL',
         });
     }
@@ -406,7 +407,7 @@ export async function mockDismissRadar(): Promise<{ success: boolean }> {
 export async function mockAcceptRadar(
     jobId: string,
     nurseTier: string,
-    depositBalance = 300000,
+    depositBalance = DEFAULT_MIN_NURSE_DEPOSIT_VND,
 ): Promise<ClaimJobResult> {
     const radar = loadStoredRadar();
     if (!radar || radar.id !== jobId) {
@@ -417,10 +418,10 @@ export async function mockAcceptRadar(
         });
     }
 
-    if (depositBalance < 300000) {
+    if (depositBalance < DEFAULT_MIN_NURSE_DEPOSIT_VND) {
         return delay({
             success: false,
-            message: 'Số dư ký quỹ không đủ tối thiểu 300.000đ.',
+            message: `Số dư ký quỹ không đủ tối thiểu ${DEFAULT_MIN_NURSE_DEPOSIT_VND.toLocaleString('vi-VN')}đ.`,
             errorCode: 'DEPOSIT_SHORTFALL',
         });
     }

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Calendar, CheckCircle2, ChevronRight, ShieldCheck, Wallet } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { USE_MOCK_AUTH } from '../../lib/mock-flags';
+import { DEFAULT_MIN_NURSE_DEPOSIT_VND } from '@healthcare-system/shared';
 
 /**
  * N1 · Trang chủ điều dưỡng (NAV-0 + Bento tổng quan).
@@ -17,8 +18,10 @@ export const NurseHomePage: React.FC = () => {
 
     const fullName = user?.full_name ?? 'Điều dưỡng';
     const isTier2 = profile.tier === 'TIER_2_SPECIALIST';
-    const gphnNumber = profile.gphn_number || '00976/GPHN-ĐN';
-    const gphnExpiry = profile.gphn_expiry_date || '12/04/2027';
+    const gphnNumber = profile.gphn_number || 'Chưa cập nhật';
+    const gphnExpiry = profile.gphn_expiry_date || 'Chưa xác định';
+    const depositBalance = (profile as any).deposit_balance ?? DEFAULT_MIN_NURSE_DEPOSIT_VND;
+    const isDepositSufficient = depositBalance >= DEFAULT_MIN_NURSE_DEPOSIT_VND;
 
     return (
         <div>
@@ -56,10 +59,12 @@ export const NurseHomePage: React.FC = () => {
                             <h3 style={{ margin: 0 }}>Ví ký quỹ</h3>
                             <Wallet size={20} style={{ color: 'var(--blue)' }} />
                         </div>
-                        <div className="big-num" style={{ margin: '8px 0' }}>300.000đ</div>
+                        <div className="big-num" style={{ margin: '8px 0' }}>
+                            {depositBalance.toLocaleString('vi-VN')}đ
+                        </div>
                         <p style={{ margin: '6px 0 10px' }}>
-                            <span className="chip teal" style={{ fontSize: '13px' }}>
-                                ✓ Đã đủ ký quỹ
+                            <span className={`chip ${isDepositSufficient ? 'teal' : 'amber'}`} style={{ fontSize: '13px' }}>
+                                {isDepositSufficient ? '✓ Đã đủ ký quỹ' : '⚠ Chưa đủ ký quỹ (BR-14)'}
                             </span>
                         </p>
                         <p style={{ fontSize: '14.5px', color: 'var(--slate)', margin: 0, lineHeight: 1.5 }}>

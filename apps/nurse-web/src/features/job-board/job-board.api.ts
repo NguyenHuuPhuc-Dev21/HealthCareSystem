@@ -1,5 +1,6 @@
 import { apiClient } from '../../lib/api-client';
 import { USE_MOCK_JOB_BOARD } from '../../lib/mock-flags';
+import { DEFAULT_MIN_NURSE_DEPOSIT_VND } from '@healthcare-system/shared';
 import {
     mockAcceptDirectInvite,
     mockAcceptJob,
@@ -55,7 +56,7 @@ export async function getRadarJob(): Promise<{ success: boolean; data: RadarJob 
 export async function acceptJob(
     bookingId: string,
     nurseTier: string,
-    depositBalance = 300000,
+    depositBalance = DEFAULT_MIN_NURSE_DEPOSIT_VND,
 ): Promise<ClaimJobResult> {
     if (USE_MOCK_JOB_BOARD) {
         return mockAcceptJob(bookingId, nurseTier, depositBalance);
@@ -76,7 +77,7 @@ export async function acceptJob(
 export async function acceptDirectInvite(
     bookingId: string,
     nurseTier: string,
-    depositBalance = 300000,
+    depositBalance = DEFAULT_MIN_NURSE_DEPOSIT_VND,
 ): Promise<ClaimJobResult> {
     if (USE_MOCK_JOB_BOARD) {
         return mockAcceptDirectInvite(bookingId, nurseTier, depositBalance);
@@ -102,7 +103,7 @@ export async function declineDirectInvite(bookingId: string): Promise<{ success:
 export async function acceptRadarJob(
     jobId: string,
     nurseTier: string,
-    depositBalance = 300000,
+    depositBalance = DEFAULT_MIN_NURSE_DEPOSIT_VND,
 ): Promise<ClaimJobResult> {
     if (USE_MOCK_JOB_BOARD) {
         return mockAcceptRadar(jobId, nurseTier, depositBalance);

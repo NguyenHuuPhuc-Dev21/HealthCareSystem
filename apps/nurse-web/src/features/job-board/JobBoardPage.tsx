@@ -25,14 +25,18 @@ import { JobCard } from './components/JobCard';
 import { DirectInviteCard } from './components/DirectInviteCard';
 import { RadarModal } from './components/RadarModal';
 import { JobDetailModal } from './components/JobDetailModal';
+import { useAuth } from '../auth/AuthContext';
+import { DEFAULT_MIN_NURSE_DEPOSIT_VND } from '@healthcare-system/shared';
 
 export const JobBoardPage: React.FC = () => {
+  const { session } = useAuth();
+  const initialDeposit = (session?.profile as any)?.deposit_balance ?? DEFAULT_MIN_NURSE_DEPOSIT_VND;
   const [filter, setFilter] = useState<JobBoardFilter>('all');
   const [jobs, setJobs] = useState<JobItem[]>([]);
   const [selectedJobForDetail, setSelectedJobForDetail] = useState<JobItem | null>(null);
   const [directInvite, setDirectInvite] = useState<DirectInvitation | null>(null);
   const [radarJob, setRadarJob] = useState<RadarJob | null>(null);
-  const [depositAmount, setDepositAmount] = useState<number>(300000);
+  const [depositAmount, setDepositAmount] = useState<number>(initialDeposit);
   const [userTier, setUserTier] = useState<1 | 2>(2);
   const [loading, setLoading] = useState<boolean>(true);
   const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -154,7 +158,7 @@ export const JobBoardPage: React.FC = () => {
     showToast('success', 'Đã bỏ qua ca Radar. Ca sẽ chuyển đến điều dưỡng tiếp theo.');
   };
 
-  const isDepositSufficient = depositAmount >= 300000;
+  const isDepositSufficient = depositAmount >= DEFAULT_MIN_NURSE_DEPOSIT_VND;
 
   return (
     <div className="screen-body elder">
@@ -187,11 +191,19 @@ export const JobBoardPage: React.FC = () => {
               className="btn btn-secondary btn-sm"
               type="button"
               style={{ fontSize: 14, height: 40 }}
-              onClick={() => setDepositAmount((prev) => (prev >= 300000 ? 150000 : 300000))}
+              onClick={() =>
+                setDepositAmount((prev) =>
+                  prev >= DEFAULT_MIN_NURSE_DEPOSIT_VND
+                    ? Math.round(DEFAULT_MIN_NURSE_DEPOSIT_VND / 2)
+                    : DEFAULT_MIN_NURSE_DEPOSIT_VND
+                )
+              }
               title="Chuyển đổi số dư ký quỹ để kiểm thử quy chế BR-14"
             >
               <Wallet size={16} style={{ marginRight: 6 }} />
-              Ký quỹ: {depositAmount >= 300000 ? '300.000đ (Đủ)' : '150.000đ (Thiếu BR-14)'}
+              Ký quỹ: {depositAmount >= DEFAULT_MIN_NURSE_DEPOSIT_VND
+                ? `${DEFAULT_MIN_NURSE_DEPOSIT_VND.toLocaleString('vi-VN')}đ (Đủ)`
+                : `${Math.round(DEFAULT_MIN_NURSE_DEPOSIT_VND / 2).toLocaleString('vi-VN')}đ (Thiếu BR-14)`}
             </button>
 
             {/* Radar Simulation Trigger */}
@@ -248,7 +260,7 @@ export const JobBoardPage: React.FC = () => {
             <AlertTriangle size={24} color="#D97706" />
             <div style={{ flex: 1 }}>
               <strong style={{ color: '#92400E', fontSize: 16 }}>
-                Số dư ký quỹ hiện tại: {depositAmount.toLocaleString('vi-VN')}đ (Yêu cầu tối thiểu 300.000đ)
+                Số dư ký quỹ hiện tại: {depositAmount.toLocaleString('vi-VN')}đ (Yêu cầu tối thiểu {DEFAULT_MIN_NURSE_DEPOSIT_VND.toLocaleString('vi-VN')}đ)
               </strong>
               <p style={{ margin: '4px 0 0 0', fontSize: 14.5, color: '#78350F' }}>
                 Theo quy chế BR-14, bạn cần bổ sung ký quỹ để có thể nhận ca chăm sóc.
@@ -259,11 +271,14 @@ export const JobBoardPage: React.FC = () => {
               className="btn btn-secondary btn-sm"
               style={{ whiteSpace: 'nowrap' }}
               onClick={() => {
-                setDepositAmount(300000);
-                showToast('success', 'Đã nạp bổ sung ký quỹ thành công! Số dư hiện tại: 300.000đ');
+                setDepositAmount(DEFAULT_MIN_NURSE_DEPOSIT_VND);
+                showToast(
+                  'success',
+                  `Đã nạp bổ sung ký quỹ thành công! Số dư hiện tại: ${DEFAULT_MIN_NURSE_DEPOSIT_VND.toLocaleString('vi-VN')}đ`
+                );
               }}
             >
-              Nạp ký quỹ ngay (+150k)
+              Nạp ký quỹ ngay
             </button>
           </div>
         )}

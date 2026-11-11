@@ -13,6 +13,10 @@ import {
   Zap,
 } from 'lucide-react';
 import { JobItem } from '../job-board.types';
+import {
+  DEFAULT_PLATFORM_COMMISSION_RATE,
+  DEFAULT_CANCELLATION_PENALTY_RATE,
+} from '@healthcare-system/shared';
 
 interface JobDetailModalProps {
   job: JobItem;
@@ -42,9 +46,11 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  // BR-11: Nurse receives net amount from backend (or fallback 85% after 15% platform commission)
-  const netEarnings = job.netAmount ?? Math.round(job.totalAmount * 0.85);
-  const penaltyPercent = job.cancellationPenaltyPercent ?? 20;
+  // BR-11: Nurse receives net amount from backend snapshot, fallback to config rate
+  const netEarnings =
+    job.netAmount ?? Math.round(job.totalAmount * (1 - DEFAULT_PLATFORM_COMMISSION_RATE));
+  const penaltyPercent =
+    job.cancellationPenaltyPercent ?? Math.round(DEFAULT_CANCELLATION_PENALTY_RATE * 100);
   const penaltyAmount = Math.round(job.totalAmount * (penaltyPercent / 100));
 
   const getInitials = (name: string) => {

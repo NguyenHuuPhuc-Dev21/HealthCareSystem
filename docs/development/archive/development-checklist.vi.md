@@ -184,13 +184,13 @@
 - [ ] Patient Web — nhận cảnh báo SOS từ ca của người nhà
 
 ### FE-2 (chủ trì phía FE)
-- [ ] Nurse App — check-in: GPS + chụp selfie trực tiếp, chặn chọn ảnh từ thư viện
-- [ ] Nurse App — báo cáo tình trạng đầu ca trong 30 phút + báo sai lệch tình trạng so với khai báo
-- [ ] Nurse App — ghi nhật ký ca: chỉ số sinh tồn, hoạt động chăm sóc
-- [ ] Nurse App — duyệt / từ chối gia hạn ca
-- [ ] Nurse App — từ chối ca do y lệnh sai, kèm ảnh bằng chứng
-- [ ] Nurse App — nút SOS: mở trình gọi 115 ngay tại máy, không chờ mạng
-- [ ] Nurse App + Web — check-out + nộp báo cáo ca tối thiểu
+- [x] Nurse App — check-in: GPS + chụp selfie trực tiếp, chặn chọn ảnh từ thư viện
+- [x] Nurse App — báo cáo tình trạng đầu ca trong 30 phút + báo sai lệch tình trạng so với khai báo
+- [x] Nurse App — ghi nhật ký ca: chỉ số sinh tồn, hoạt động chăm sóc
+- [x] Nurse App — duyệt / từ chối gia hạn ca
+- [x] Nurse App — từ chối ca do y lệnh sai, kèm ảnh bằng chứng
+- [x] Nurse App — nút SOS: mở trình gọi 115 ngay tại máy, không chờ mạng
+- [x] Nurse App + Web — check-out + nộp báo cáo ca tối thiểu
 
 ### BE-1
 - [ ] `shift-extend` (FR-SHIFT-03): `POST /api/v1/bookings/:id/extend` — block 1 giờ, kiểm tra ca kế tiếp của điều dưỡng, cần điều dưỡng đồng ý

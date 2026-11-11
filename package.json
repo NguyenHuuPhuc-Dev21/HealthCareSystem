@@ -28,6 +28,8 @@
     "dev:all": "concurrently \"npm run dev:api\" \"npm run dev:admin\" \"npm run dev:patient\" \"npm run dev:nurse-web\""
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "@types/node": "^26.6.6",
     "concurrently": "^10.0.6",
     "typescript": "^5.4.5"
   },

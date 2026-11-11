@@ -14,10 +14,23 @@ import {
 } from 'lucide-react';
 import { getJobById, acceptJob } from '../job-board/job-board.api';
 import { JobItem } from '../job-board/job-board.types';
+import { CheckInModal } from './components/CheckInModal';
+import { getShiftExecutionState } from './shift.api';
+import { ShiftExecutionState } from './shift.types';
+import { useAuth } from '../auth/AuthContext';
+import {
+  DEFAULT_PLATFORM_COMMISSION_RATE,
+  DEFAULT_MIN_NURSE_DEPOSIT_VND,
+  DEFAULT_CANCELLATION_PENALTY_RATE,
+} from '@healthcare-system/shared';
 
 export const ShiftDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { session } = useAuth();
+
+  const nurseTier = session?.profile?.tier || 'TIER_1_BASIC';
+  const nurseDeposit = (session?.profile as any)?.deposit_balance ?? DEFAULT_MIN_NURSE_DEPOSIT_VND;
 
   const [job, setJob] = useState<JobItem | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,6 +40,20 @@ export const ShiftDetailPage: React.FC = () => {
   const [reportedMismatch, setReportedMismatch] = useState(false);
   const [isAccepting, setIsAccepting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showCheckInModal, setShowCheckInModal] = useState(false);
+  const [shiftExecState, setShiftExecState] = useState<ShiftExecutionState | null>(null);
+
+  useEffect(() => {
+    async function loadExecState() {
+      if (id) {
+        const res = await getShiftExecutionState(id);
+        if (res.success && res.data) {
+          setShiftExecState(res.data);
+        }
+      }
+    }
+    loadExecState();
+  }, [id]);
 
   useEffect(() => {
     async function fetchDetail() {
@@ -48,7 +75,7 @@ export const ShiftDetailPage: React.FC = () => {
   const handleAccept = async () => {
     if (!job) return;
     setIsAccepting(true);
-    const result = await acceptJob(job.id, 'TIER_2_SPECIALIST', 300000);
+    const result = await acceptJob(job.id, nurseTier, nurseDeposit);
     setIsAccepting(false);
     if (result.success) {
       setToastMessage(result.message ?? 'Đã nhận ca thành công!');
@@ -95,8 +122,10 @@ export const ShiftDetailPage: React.FC = () => {
     );
   }
 
-  const netEarnings = job.netAmount ?? Math.round(job.totalAmount * 0.85);
-  const penaltyPercent = job.cancellationPenaltyPercent ?? 20;
+  const netEarnings =
+    job.netAmount ?? Math.round(job.totalAmount * (1 - DEFAULT_PLATFORM_COMMISSION_RATE));
+  const penaltyPercent =
+    job.cancellationPenaltyPercent ?? Math.round(DEFAULT_CANCELLATION_PENALTY_RATE * 100);
   const penaltyAmount = Math.round(job.totalAmount * (penaltyPercent / 100));
 
   return (
@@ -170,7 +199,9 @@ export const ShiftDetailPage: React.FC = () => {
               ) : (
                 <span className="chip teal">Không xâm lấn</span>
               )}
-              {job.status === 'CONFIRMED' ? (
+              {job.status === 'IN_PROGRESS' || shiftExecState?.executionStatus === 'IN_PROGRESS' ? (
+                <span className="chip teal" style={{ fontWeight: 700 }}>● Đang diễn ra</span>
+              ) : job.status === 'CONFIRMED' ? (
                 <span className="chip teal">Đã xác nhận</span>
               ) : (
                 <span className="chip" style={{ background: '#FEF3C7', color: '#92400E' }}>Đang mở nhận</span>
@@ -179,12 +210,21 @@ export const ShiftDetailPage: React.FC = () => {
           </div>
 
           <div>
-            {job.status === 'CONFIRMED' ? (
+            {job.status === 'IN_PROGRESS' || shiftExecState?.executionStatus === 'IN_PROGRESS' ? (
+              <button
+                className="btn btn-primary btn-lg"
+                type="button"
+                style={{ fontSize: 17, height: 52, background: 'var(--teal)' }}
+                onClick={() => navigate(`/shifts/${job.id}/execute`)}
+              >
+                Vào phòng ca trực đang diễn ra →
+              </button>
+            ) : job.status === 'CONFIRMED' ? (
               <button
                 className="btn btn-primary btn-lg"
                 type="button"
                 style={{ fontSize: 17, height: 52 }}
-                onClick={() => alert(`Chuẩn bị mở Check-in GPS trong bán kính 200m cho đơn ${job.code}`)}
+                onClick={() => setShowCheckInModal(true)}
               >
                 Check-in khi tới nơi →
               </button>
@@ -424,6 +464,20 @@ export const ShiftDetailPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Check-In Modal (Dual check-in: GPS + Camera live capture) */}
+        {showCheckInModal && shiftExecState && (
+          <CheckInModal
+            shift={shiftExecState}
+            onSuccess={(updated) => {
+              setShowCheckInModal(false);
+              setShiftExecState(updated);
+              setJob({ ...job, status: 'IN_PROGRESS' });
+              navigate(`/shifts/${job.id}/execute`);
+            }}
+            onClose={() => setShowCheckInModal(false)}
+          />
+        )}
       </div>
     </div>
   );

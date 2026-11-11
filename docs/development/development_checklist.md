@@ -192,13 +192,13 @@
 - [ ] Patient Web — Real-time emergency SOS broadcast banner for active family bookings.
 
 ### FE-2 (Frontend Lead)
-- [ ] Nurse Mobile App — Dual check-in: mock location detection blocked, direct hardware camera selfie capture, photo gallery upload disabled.
-- [ ] Nurse Mobile App — Initial 30-minute patient assessment report + condition mismatch reporting flow.
-- [ ] Nurse Mobile App — Clinical care logging: vital signs chart, completed nursing activities, clinical notes.
-- [ ] Nurse Mobile App — Approve or decline patient-requested shift extensions.
-- [ ] Nurse Mobile App — On-site invalid prescription rejection flow with mandatory photo evidence.
-- [ ] Nurse Mobile App — Dedicated SOS emergency button: immediately opens device 115 emergency dialer with zero network latency.
-- [ ] Nurse Web + Mobile App — Check-out flow enforcing submission of mandatory minimal clinical care report.
+- [x] Nurse Mobile App — Dual check-in: mock location detection blocked, direct hardware camera selfie capture, photo gallery upload disabled.
+- [x] Nurse Mobile App — Initial 30-minute patient assessment report + condition mismatch reporting flow.
+- [x] Nurse Mobile App — Clinical care logging: vital signs chart, completed nursing activities, clinical notes.
+- [x] Nurse Mobile App — Approve or decline patient-requested shift extensions.
+- [x] Nurse Mobile App — On-site invalid prescription rejection flow with mandatory photo evidence.
+- [x] Nurse Mobile App — Dedicated SOS emergency button: immediately opens device 115 emergency dialer with zero network latency.
+- [x] Nurse Web + Mobile App — Check-out flow enforcing submission of mandatory minimal clinical care report.
 
 ### BE-1
 - [ ] `shift-extend` (FR-SHIFT-03): `POST /api/v1/bookings/:id/extend` — 1-hour increments, validates nurse schedule conflicts, requires nurse approval.
