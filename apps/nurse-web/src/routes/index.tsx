@@ -8,6 +8,10 @@ import { OnboardingWizard } from '../features/onboarding/OnboardingWizard';
 import { PendingPage } from '../features/onboarding/PendingPage';
 import { CredentialsPage } from '../features/credentials/CredentialsPage';
 import { AvailabilityPage } from '../features/availabilities/AvailabilityPage';
+import { JobBoardPage } from '../features/job-board/JobBoardPage';
+import { ShiftDetailPage } from '../features/shifts/ShiftDetailPage';
+import { ShiftExecutionPage } from '../features/shifts/ShiftExecutionPage';
+import { MyShiftsPage } from '../features/shifts/MyShiftsPage';
 import { NurseHomePage } from '../features/home/NurseHomePage';
 import { NurseLayout } from '../components/layout/NurseLayout';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -85,6 +89,56 @@ export const AppRoutes: React.FC = () => {
               <ProtectedRoute zone="active">
                 <NurseLayout>
                   <CredentialsPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/jobs"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <JobBoardPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/jobs/:id"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <ShiftDetailPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/shifts"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <MyShiftsPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/shifts/:id"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <ShiftDetailPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/shifts/:id/execute"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <ShiftExecutionPage />
                 </NurseLayout>
               </ProtectedRoute>
             }

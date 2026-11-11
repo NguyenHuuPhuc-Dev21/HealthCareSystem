@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { getAvailabilities, updateAvailabilities } from './availabilities.api';
 import { lockedWindows } from './availabilities.mock';
+import { DEFAULT_TRAVEL_BUFFER_MINUTES } from '@healthcare-system/shared';
 import type {
     ConfirmedBooking,
     DateAvailability,
@@ -453,7 +454,7 @@ export const AvailabilityPage: React.FC = () => {
                     })}
 
                     <p className="avail-notice">
-                        Hệ thống tự cộng thêm 60 phút đệm di chuyển giữa hai ca và tự chặn ca trùng giờ — bạn không thể bị xếp hai ca chồng nhau.
+                        Hệ thống tự cộng thêm {DEFAULT_TRAVEL_BUFFER_MINUTES} phút đệm di chuyển giữa hai ca và tự chặn ca trùng giờ — bạn không thể bị xếp hai ca chồng nhau.
                     </p>
                 </div>
 
@@ -613,12 +614,14 @@ export const AvailabilityPage: React.FC = () => {
                                     <div className="avail-custom-hours__row">
                                         <input
                                             type="time"
+                                            aria-label="Giờ bắt đầu mở rảnh riêng"
                                             value={openStart}
                                             onChange={(e) => setOpenStart(e.target.value)}
                                         />
                                         <span style={{ fontSize: '14px', color: 'var(--slate)' }}>đến</span>
                                         <input
                                             type="time"
+                                            aria-label="Giờ kết thúc mở rảnh riêng"
                                             value={openEnd}
                                             onChange={(e) => setOpenEnd(e.target.value)}
                                         />
@@ -715,6 +718,13 @@ export const AvailabilityPage: React.FC = () => {
                                                     <Tag size={13} style={{ color: 'var(--blue)' }} />
                                                     <span>Đơn <strong>{b.code}</strong></span>
                                                 </span>
+                                                <Link
+                                                    to={`/shifts/${b.code || b.id}`}
+                                                    className="btn btn-secondary btn-sm"
+                                                    style={{ fontSize: '14px', marginLeft: 'auto' }}
+                                                >
+                                                    Xem chi tiết
+                                                </Link>
                                             </div>
                                         </div>
                                     ))}
@@ -723,6 +733,27 @@ export const AvailabilityPage: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {/* Sticky Save Dock when unsaved edits exist */}
+            {dirty && (
+                <div className="sticky-save-bar" role="status">
+                    <div>
+                        <strong style={{ fontSize: 16 }}>Bạn có thay đổi lịch rảnh chưa lưu</strong>
+                        <div style={{ fontSize: 13.5, opacity: 0.85 }}>
+                            Lưu lại để hệ thống cập nhật gợi ý việc làm phù hợp khung giờ mới.
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        style={{ background: '#fff', color: 'var(--ink-primary)' }}
+                        disabled={saving}
+                        onClick={handleSave}
+                    >
+                        {saving ? 'Đang lưu...' : 'Lưu thay đổi ngay'}
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
