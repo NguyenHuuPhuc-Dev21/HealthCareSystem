@@ -47,18 +47,22 @@ export const InvalidPrescriptionModal: React.FC<InvalidPrescriptionModalProps> =
     }
 
     setIsSubmitting(true);
-    const res = await rejectInvalidPrescription({
-      bookingId,
-      reason: `${reason}: ${detailNote}`,
-      evidencePhotoBase64: evidencePhoto,
-      evidenceFileName: `evidence_invalid_order_${bookingCode.toLowerCase()}.jpg`,
-    });
-    setIsSubmitting(false);
-
-    if (res.success) {
-      onSuccess();
-    } else {
-      setErrorMessage(res.message || 'Gửi từ chối thất bại.');
+    try {
+      const res = await rejectInvalidPrescription({
+        bookingId,
+        reason: detailNote.trim() ? `${reason}: ${detailNote.trim()}` : reason,
+        evidencePhotoBase64: evidencePhoto,
+        evidenceFileName: `evidence_invalid_order_${bookingCode.toLowerCase()}.jpg`,
+      });
+      if (res.success) {
+        onSuccess();
+      } else {
+        setErrorMessage(res.message || 'Gửi từ chối thất bại.');
+      }
+    } catch {
+      setErrorMessage('Lỗi kết nối máy chủ khi gửi báo cáo y lệnh. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CheckSquare, Clock } from 'lucide-react';
 import { CareActivityItem } from '../shift.types';
 import { toggleCareActivity } from '../shift.api';
@@ -14,17 +14,35 @@ export const CareActivitiesChecklist: React.FC<CareActivitiesChecklistProps> = (
   activities,
   onActivityToggled,
 }) => {
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   const completedCount = activities.filter((a) => a.completed).length;
   const progressPercent = Math.round((completedCount / (activities.length || 1)) * 100);
 
   const handleToggle = async (activity: CareActivityItem) => {
-    const nextCompleted = !activity.completed;
+    const previousCompleted = activity.completed;
+    const nextCompleted = !previousCompleted;
+    setErrorMsg(null);
+    setPendingId(activity.id);
     onActivityToggled(activity.id, nextCompleted);
-    await toggleCareActivity({
-      bookingId,
-      activityId: activity.id,
-      completed: nextCompleted,
-    });
+
+    try {
+      const res = await toggleCareActivity({
+        bookingId,
+        activityId: activity.id,
+        completed: nextCompleted,
+      });
+      if (!res.success) {
+        onActivityToggled(activity.id, previousCompleted);
+        setErrorMsg('Không thể lưu trạng thái đầu việc lên hệ thống. Vui lòng thử lại.');
+      }
+    } catch {
+      onActivityToggled(activity.id, previousCompleted);
+      setErrorMsg('Lỗi kết nối mạng khi cập nhật đầu việc. Thay đổi đã được hoàn tác.');
+    } finally {
+      setPendingId(null);
+    }
   };
 
   return (
@@ -38,6 +56,12 @@ export const CareActivitiesChecklist: React.FC<CareActivitiesChecklistProps> = (
           {progressPercent}% hoàn thành
         </span>
       </div>
+
+      {errorMsg && (
+        <div role="alert" className="alert-error" style={{ marginTop: 0, marginBottom: 12, fontSize: 14 }}>
+          {errorMsg}
+        </div>
+      )}
 
       {/* Progress bar */}
       <div style={{ width: '100%', height: 6, background: '#E2E8F0', borderRadius: 99, marginBottom: 16, overflow: 'hidden' }}>
@@ -63,13 +87,15 @@ export const CareActivitiesChecklist: React.FC<CareActivitiesChecklistProps> = (
               borderRadius: 10,
               backgroundColor: item.completed ? '#F0FDF4' : '#F8FAFC',
               border: `1px solid ${item.completed ? '#86EFAC' : 'var(--line)'}`,
-              cursor: 'pointer',
+              cursor: pendingId === item.id ? 'wait' : 'pointer',
+              opacity: pendingId === item.id ? 0.75 : 1,
               transition: 'background-color 0.15s ease',
             }}
           >
             <input
               type="checkbox"
               checked={item.completed}
+              disabled={pendingId === item.id}
               onChange={() => handleToggle(item)}
               style={{ width: 18, height: 18, accentColor: 'var(--teal)', cursor: 'pointer' }}
             />

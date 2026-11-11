@@ -17,6 +17,7 @@ import {
   DEFAULT_CANCELLATION_PENALTY_RATE,
 } from '@healthcare-system/shared';
 import { Modal, ModalCloseButton } from '../../../components';
+import { InvalidPrescriptionModal } from '../../shifts/components/InvalidPrescriptionModal';
 
 interface JobDetailModalProps {
   job: JobItem;
@@ -34,6 +35,7 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
   const [check1, setCheck1] = useState(false);
   const [check2, setCheck2] = useState(false);
   const [reportedMismatch, setReportedMismatch] = useState(false);
+  const [showInvalidRxModal, setShowInvalidRxModal] = useState(false);
 
   // BR-11: Nurse receives net amount from backend snapshot, fallback to config rate
   const netEarnings =
@@ -49,6 +51,20 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
     }
     return name.slice(0, 2).toUpperCase();
   };
+
+  if (showInvalidRxModal) {
+    return (
+      <InvalidPrescriptionModal
+        bookingId={job.id}
+        bookingCode={job.code}
+        onSuccess={() => {
+          setShowInvalidRxModal(false);
+          setReportedMismatch(true);
+        }}
+        onClose={() => setShowInvalidRxModal(false)}
+      />
+    );
+  }
 
   return (
     <Modal
@@ -209,7 +225,7 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
                   className="btn btn-secondary btn-block"
                   type="button"
                   style={{ height: 46, color: 'var(--red)', borderColor: '#F3C2C2', marginTop: 12, fontSize: 14.5 }}
-                  onClick={() => setReportedMismatch(true)}
+                  onClick={() => setShowInvalidRxModal(true)}
                 >
                   <AlertTriangle size={16} style={{ marginRight: 6 }} />
                   Báo cáo y lệnh không khớp

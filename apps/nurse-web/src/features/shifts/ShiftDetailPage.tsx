@@ -15,9 +15,11 @@ import {
 import { getJobById, acceptJob } from '../job-board/job-board.api';
 import { JobItem } from '../job-board/job-board.types';
 import { CheckInModal } from './components/CheckInModal';
+import { InvalidPrescriptionModal } from './components/InvalidPrescriptionModal';
 import { getShiftExecutionState } from './shift.api';
 import { ShiftExecutionState } from './shift.types';
 import { useAuth } from '../auth/AuthContext';
+import { USE_MOCK_AUTH } from '../../lib/mock-flags';
 import { Modal, ModalCloseButton } from '../../components';
 import {
   DEFAULT_PLATFORM_COMMISSION_RATE,
@@ -31,7 +33,13 @@ export const ShiftDetailPage: React.FC = () => {
   const { session } = useAuth();
 
   const nurseTier = session?.profile?.tier || 'TIER_1_BASIC';
-  const nurseDeposit = (session?.profile as any)?.deposit_balance ?? DEFAULT_MIN_NURSE_DEPOSIT_VND;
+  const rawDeposit = (session?.profile as any)?.deposit_balance;
+  const nurseDeposit =
+    typeof rawDeposit === 'number'
+      ? rawDeposit
+      : USE_MOCK_AUTH
+      ? DEFAULT_MIN_NURSE_DEPOSIT_VND
+      : 0;
 
   const [job, setJob] = useState<JobItem | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,6 +47,7 @@ export const ShiftDetailPage: React.FC = () => {
   const [check1, setCheck1] = useState(false);
   const [check2, setCheck2] = useState(false);
   const [reportedMismatch, setReportedMismatch] = useState(false);
+  const [showInvalidRxModal, setShowInvalidRxModal] = useState(false);
   const [isAccepting, setIsAccepting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showCheckInModal, setShowCheckInModal] = useState(false);
@@ -394,14 +403,14 @@ export const ShiftDetailPage: React.FC = () => {
 
               {reportedMismatch ? (
                 <div style={{ marginTop: 12, padding: '10px 14px', borderRadius: 10, background: '#FEF2F2', color: 'var(--red)', fontSize: 14 }}>
-                  ✓ Đã gửi báo cáo y lệnh không khớp tới đội ngũ điều phối.
+                  ✓ Đã gửi báo cáo y lệnh không khớp tới đội ngũ điều phối và ghi nhận quyền miễn phạt.
                 </div>
               ) : (
                 <button
                   className="btn btn-secondary btn-block"
                   type="button"
                   style={{ height: 50, color: 'var(--red)', borderColor: '#F3C2C2', marginTop: 12 }}
-                  onClick={() => setReportedMismatch(true)}
+                  onClick={() => setShowInvalidRxModal(true)}
                 >
                   <AlertTriangle size={16} style={{ marginRight: 6 }} />
                   Báo cáo y lệnh không khớp
@@ -640,6 +649,20 @@ export const ShiftDetailPage: React.FC = () => {
               navigate(`/shifts/${job.id}/execute`);
             }}
             onClose={() => setShowCheckInModal(false)}
+          />
+        )}
+
+        {/* Invalid Prescription Report Modal (routes to rejectInvalidPrescription API) */}
+        {showInvalidRxModal && (
+          <InvalidPrescriptionModal
+            bookingId={job.id}
+            bookingCode={job.code}
+            onSuccess={() => {
+              setShowInvalidRxModal(false);
+              setReportedMismatch(true);
+              setToastMessage('Đã gửi báo cáo y lệnh không khớp và ghi nhận bảo vệ miễn phạt tới hệ thống.');
+            }}
+            onClose={() => setShowInvalidRxModal(false)}
           />
         )}
     </div>

@@ -21,3 +21,64 @@ export const DEFAULT_TRAVEL_BUFFER_MINUTES = 60;         // 60-minute travel buf
 export const DEFAULT_CANCELLATION_PENALTY_RATE = 0.20;   // 20% cancellation penalty within 12h (SRS §5.2)
 
 export const TIMEZONE_DISPLAY = 'Asia/Ho_Chi_Minh';    // Canonical timezone
+
+/**
+ * Ngưỡng cảnh báo sinh tồn dùng chung cho cả nurse-web và nurse-app
+ */
+export const VITAL_ALERT_THRESHOLDS = {
+  HEART_RATE_MIN: 60,
+  HEART_RATE_MAX: 100,
+  BP_SYSTOLIC_HIGH: 140,
+  BP_DIASTOLIC_HIGH: 90,
+  BP_SYSTOLIC_LOW: 90,
+  BP_DIASTOLIC_LOW: 60,
+  TEMPERATURE_HIGH: 38.0,
+  TEMPERATURE_LOW: 35.5,
+  SPO2_MIN: 95,
+} as const;
+
+export interface VitalSignsThresholdInput {
+  heartRate: number;
+  bloodPressureSystolic: number;
+  bloodPressureDiastolic: number;
+  temperature: number;
+  spo2: number;
+}
+
+export function getVitalSignsWarnings(input: VitalSignsThresholdInput): string[] {
+  const { heartRate, bloodPressureSystolic, bloodPressureDiastolic, temperature, spo2 } = input;
+  const warnings: string[] = [];
+
+  if (spo2 > 0 && spo2 < VITAL_ALERT_THRESHOLDS.SPO2_MIN) {
+    warnings.push(`SpO2 tụt thấp (${spo2}%)`);
+  }
+  if (
+    heartRate > 0 &&
+    (heartRate < VITAL_ALERT_THRESHOLDS.HEART_RATE_MIN ||
+      heartRate > VITAL_ALERT_THRESHOLDS.HEART_RATE_MAX)
+  ) {
+    warnings.push(
+      `Nhịp tim ${heartRate} bpm ngoài ngưỡng bình thường (${VITAL_ALERT_THRESHOLDS.HEART_RATE_MIN}–${VITAL_ALERT_THRESHOLDS.HEART_RATE_MAX})`
+    );
+  }
+  if (
+    bloodPressureSystolic >= VITAL_ALERT_THRESHOLDS.BP_SYSTOLIC_HIGH ||
+    bloodPressureDiastolic >= VITAL_ALERT_THRESHOLDS.BP_DIASTOLIC_HIGH
+  ) {
+    warnings.push(`Huyết áp cao (${bloodPressureSystolic}/${bloodPressureDiastolic} mmHg)`);
+  }
+  if (
+    (bloodPressureSystolic > 0 && bloodPressureSystolic < VITAL_ALERT_THRESHOLDS.BP_SYSTOLIC_LOW) ||
+    (bloodPressureDiastolic > 0 && bloodPressureDiastolic < VITAL_ALERT_THRESHOLDS.BP_DIASTOLIC_LOW)
+  ) {
+    warnings.push(`Huyết áp thấp (${bloodPressureSystolic}/${bloodPressureDiastolic} mmHg)`);
+  }
+  if (temperature >= VITAL_ALERT_THRESHOLDS.TEMPERATURE_HIGH) {
+    warnings.push(`Sốt cao (${temperature}°C)`);
+  }
+  if (temperature > 0 && temperature < VITAL_ALERT_THRESHOLDS.TEMPERATURE_LOW) {
+    warnings.push(`Hạ thân nhiệt (${temperature}°C)`);
+  }
+
+  return warnings;
+}

@@ -27,11 +27,20 @@ import { DirectInviteCard } from './components/DirectInviteCard';
 import { RadarModal } from './components/RadarModal';
 import { JobDetailModal } from './components/JobDetailModal';
 import { useAuth } from '../auth/AuthContext';
+import { USE_MOCK_AUTH, USE_MOCK_JOB_BOARD } from '../../lib/mock-flags';
 import { DEFAULT_MIN_NURSE_DEPOSIT_VND } from '@healthcare-system/shared';
+
+const SHOW_DEV_SANDBOX = import.meta.env.DEV && USE_MOCK_JOB_BOARD;
 
 export const JobBoardPage: React.FC = () => {
   const { session } = useAuth();
-  const initialDeposit = (session?.profile as any)?.deposit_balance ?? DEFAULT_MIN_NURSE_DEPOSIT_VND;
+  const rawDeposit = (session?.profile as any)?.deposit_balance;
+  const initialDeposit: number | null =
+    typeof rawDeposit === 'number'
+      ? rawDeposit
+      : USE_MOCK_AUTH || USE_MOCK_JOB_BOARD
+      ? DEFAULT_MIN_NURSE_DEPOSIT_VND
+      : null;
   const initialTier: 1 | 2 = session?.profile?.tier === 'TIER_1_BASIC' ? 1 : 2;
 
   const [filter, setFilter] = useState<JobBoardFilter>('all');
@@ -39,7 +48,7 @@ export const JobBoardPage: React.FC = () => {
   const [selectedJobForDetail, setSelectedJobForDetail] = useState<JobItem | null>(null);
   const [directInvite, setDirectInvite] = useState<DirectInvitation | null>(null);
   const [radarJob, setRadarJob] = useState<RadarJob | null>(null);
-  const [depositAmount, setDepositAmount] = useState<number>(initialDeposit);
+  const [depositAmount, setDepositAmount] = useState<number | null>(initialDeposit);
   const [userTier, setUserTier] = useState<1 | 2>(initialTier);
   const [loading, setLoading] = useState<boolean>(true);
   const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -96,7 +105,7 @@ export const JobBoardPage: React.FC = () => {
 
   const handleAcceptJob = async (jobId: string) => {
     setIsProcessing(true);
-    const result = await acceptJob(jobId, tierCode, depositAmount);
+    const result = await acceptJob(jobId, tierCode, depositAmount ?? 0);
     setIsProcessing(false);
     if (result.success) {
       showToast('success', result.message ?? 'Đã nhận ca thành công!');
@@ -108,7 +117,7 @@ export const JobBoardPage: React.FC = () => {
 
   const handleAcceptDirectInvite = async (bookingId: string) => {
     setIsProcessing(true);
-    const result = await acceptDirectInvite(bookingId, tierCode, depositAmount);
+    const result = await acceptDirectInvite(bookingId, tierCode, depositAmount ?? 0);
     setIsProcessing(false);
     if (result.success) {
       showToast('success', result.message ?? 'Đã chấp nhận lời mời thành công!');
@@ -143,7 +152,7 @@ export const JobBoardPage: React.FC = () => {
 
   const handleAcceptRadar = async (jobId: string) => {
     setIsProcessing(true);
-    const result = await acceptRadarJob(jobId, tierCode, depositAmount);
+    const result = await acceptRadarJob(jobId, tierCode, depositAmount ?? 0);
     setIsProcessing(false);
     setRadarJob(null);
     if (result.success) {
@@ -160,7 +169,7 @@ export const JobBoardPage: React.FC = () => {
     showToast('success', 'Đã bỏ qua ca khẩn cấp. Ca sẽ chuyển tới điều dưỡng khác.');
   };
 
-  const isDepositSufficient = depositAmount >= DEFAULT_MIN_NURSE_DEPOSIT_VND;
+  const isDepositSufficient = depositAmount !== null && depositAmount >= DEFAULT_MIN_NURSE_DEPOSIT_VND;
 
   return (
     <div>
@@ -200,7 +209,7 @@ export const JobBoardPage: React.FC = () => {
         </div>
       )}
 
-      {/* Cảnh báo thiếu ký quỹ (Ngôn ngữ tự nhiên, bỏ mã kỹ thuật) */}
+      {/* Cảnh báo thiếu hoặc chưa đồng bộ ký quỹ */}
       {!isDepositSufficient && (
         <div
           className="ledger-panel"
@@ -219,26 +228,47 @@ export const JobBoardPage: React.FC = () => {
             <AlertTriangle size={22} color="var(--accent-ochre)" style={{ marginTop: 2, flexShrink: 0 }} />
             <div>
               <strong style={{ color: 'var(--ink-primary)', fontSize: 16.5 }}>
-                Số dư ký quỹ hiện tại: <span className="tabular-nums">{depositAmount.toLocaleString('vi-VN')} đ</span>
+                {depositAmount === null ? (
+                  'Chưa đồng bộ được số dư ví ký quỹ'
+                ) : (
+                  <>
+                    Số dư ký quỹ hiện tại: <span className="tabular-nums">{depositAmount.toLocaleString('vi-VN')} đ</span>
+                  </>
+                )}
               </strong>
               <p style={{ margin: '4px 0 0', fontSize: 15, color: 'var(--ink-secondary)' }}>
                 Bạn cần duy trì ký quỹ tối thiểu <span className="tabular-nums">{DEFAULT_MIN_NURSE_DEPOSIT_VND.toLocaleString('vi-VN')} đ</span> để nhận ca chăm sóc mới.
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            onClick={() => {
-              setDepositAmount(DEFAULT_MIN_NURSE_DEPOSIT_VND);
-              showToast(
-                'success',
-                `Đã bổ sung ký quỹ thành công. Số dư hiện tại: ${DEFAULT_MIN_NURSE_DEPOSIT_VND.toLocaleString('vi-VN')} đ`
-              );
-            }}
-          >
-            Bổ sung ký quỹ ngay
-          </button>
+          {USE_MOCK_JOB_BOARD ? (
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={() => {
+                setDepositAmount(DEFAULT_MIN_NURSE_DEPOSIT_VND);
+                showToast(
+                  'success',
+                  `[Mô phỏng] Đã bổ sung ký quỹ. Số dư hiện tại: ${DEFAULT_MIN_NURSE_DEPOSIT_VND.toLocaleString('vi-VN')} đ`
+                );
+              }}
+            >
+              Mô phỏng bổ sung ký quỹ
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() =>
+                showToast(
+                  'error',
+                  'Cổng nạp ví ký quỹ trực tuyến sẽ mở ở Giai đoạn Ví & Thu nhập. Vui lòng liên hệ điều phối viên nếu cần nạp bổ sung.'
+                )
+              }
+            >
+              Hướng dẫn nạp ký quỹ
+            </button>
+          )}
         </div>
       )}
 
@@ -329,69 +359,71 @@ export const JobBoardPage: React.FC = () => {
         />
       )}
 
-      {/* Thanh công cụ kiểm thử thu gọn ở góc màn hình (không làm nhiễu UI thật) */}
-      <div className="dev-sandbox-dock">
-        {sandboxOpen && (
-          <div className="dev-sandbox-panel">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <strong style={{ fontSize: 14, color: 'var(--ink-primary)' }}>Công cụ mô phỏng kiểm thử</strong>
-              <button
-                type="button"
-                className="btn-close-sm"
-                onClick={() => setSandboxOpen(false)}
-                aria-label="Đóng công cụ mô phỏng"
-              >
-                <X size={16} />
-              </button>
+      {/* Thanh công cụ kiểm thử — chỉ hiển thị trong DEV + mock mode */}
+      {SHOW_DEV_SANDBOX && (
+        <div className="dev-sandbox-dock">
+          {sandboxOpen && (
+            <div className="dev-sandbox-panel">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                <strong style={{ fontSize: 14, color: 'var(--ink-primary)' }}>Công cụ mô phỏng kiểm thử</strong>
+                <button
+                  type="button"
+                  className="btn-close-sm"
+                  onClick={() => setSandboxOpen(false)}
+                  aria-label="Đóng công cụ mô phỏng"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  style={{ justifyContent: 'flex-start', fontSize: 13.5 }}
+                  onClick={() => setUserTier(userTier === 2 ? 1 : 2)}
+                >
+                  <UserCheck size={15} />
+                  Đổi góc nhìn: {userTier === 2 ? 'Cấp 2 (Đang bật)' : 'Cấp 1 (Khóa xâm lấn)'}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  style={{ justifyContent: 'flex-start', fontSize: 13.5 }}
+                  onClick={() =>
+                    setDepositAmount((prev) =>
+                      prev !== null && prev >= DEFAULT_MIN_NURSE_DEPOSIT_VND
+                        ? Math.round(DEFAULT_MIN_NURSE_DEPOSIT_VND / 2)
+                        : DEFAULT_MIN_NURSE_DEPOSIT_VND
+                    )
+                  }
+                >
+                  <Wallet size={15} />
+                  Ký quỹ: {depositAmount !== null && depositAmount >= DEFAULT_MIN_NURSE_DEPOSIT_VND ? 'Đủ chuẩn' : 'Giả lập thiếu'}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  style={{ justifyContent: 'flex-start', fontSize: 13.5 }}
+                  onClick={handleTriggerRadar}
+                >
+                  <Radio size={15} />
+                  Phát ca khẩn cấp qua Radar
+                </button>
+              </div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                style={{ justifyContent: 'flex-start', fontSize: 13.5 }}
-                onClick={() => setUserTier(userTier === 2 ? 1 : 2)}
-              >
-                <UserCheck size={15} />
-                Đổi góc nhìn: {userTier === 2 ? 'Cấp 2 (Đang bật)' : 'Cấp 1 (Khóa xâm lấn)'}
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                style={{ justifyContent: 'flex-start', fontSize: 13.5 }}
-                onClick={() =>
-                  setDepositAmount((prev) =>
-                    prev >= DEFAULT_MIN_NURSE_DEPOSIT_VND
-                      ? Math.round(DEFAULT_MIN_NURSE_DEPOSIT_VND / 2)
-                      : DEFAULT_MIN_NURSE_DEPOSIT_VND
-                  )
-                }
-              >
-                <Wallet size={15} />
-                Ký quỹ: {depositAmount >= DEFAULT_MIN_NURSE_DEPOSIT_VND ? 'Đủ chuẩn' : 'Giả lập thiếu'}
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                style={{ justifyContent: 'flex-start', fontSize: 13.5 }}
-                onClick={handleTriggerRadar}
-              >
-                <Radio size={15} />
-                Phát ca khẩn cấp qua Radar
-              </button>
-            </div>
-          </div>
-        )}
+          )}
 
-        <button
-          type="button"
-          className="btn btn-secondary btn-sm"
-          style={{ borderRadius: 999, boxShadow: '0 6px 18px rgba(16, 42, 36, 0.14)' }}
-          onClick={() => setSandboxOpen((v) => !v)}
-        >
-          <SlidersHorizontal size={15} />
-          Mô phỏng kiểm thử
-        </button>
-      </div>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            style={{ borderRadius: 999, boxShadow: '0 6px 18px rgba(16, 42, 36, 0.14)' }}
+            onClick={() => setSandboxOpen((v) => !v)}
+          >
+            <SlidersHorizontal size={15} />
+            Mô phỏng kiểm thử
+          </button>
+        </div>
+      )}
     </div>
   );
 };

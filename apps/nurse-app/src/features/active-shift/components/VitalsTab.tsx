@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { getVitalSignsWarnings } from '@healthcare-system/shared';
 import { tokens } from '../../../styles/tokens';
 
 export interface VitalEntry {
@@ -15,16 +16,6 @@ export interface VitalEntry {
 interface VitalsTabProps {
   vitalsList: VitalEntry[];
   onAddVitals: (entry: VitalEntry) => void;
-}
-
-function getVitalWarnings(hr: number, sys: number, dia: number, temp: number, spo2: number): string[] {
-  const warnings: string[] = [];
-  if (spo2 > 0 && spo2 < 95) warnings.push(`SpO2 thấp (${spo2}%)`);
-  if (hr > 0 && (hr < 60 || hr > 100)) warnings.push(`Mạch bất thường (${hr} l/phút)`);
-  if (sys >= 140 || dia >= 90) warnings.push(`Huyết áp cao (${sys}/${dia})`);
-  if (sys > 0 && sys < 90) warnings.push(`Huyết áp thấp (${sys}/${dia})`);
-  if (temp >= 38.0) warnings.push(`Sốt cao (${temp}°C)`);
-  return warnings;
 }
 
 export const VitalsTab: React.FC<VitalsTabProps> = ({ vitalsList, onAddVitals }) => {
@@ -46,7 +37,13 @@ export const VitalsTab: React.FC<VitalsTabProps> = ({ vitalsList, onAddVitals })
       return;
     }
 
-    const warnings = getVitalWarnings(nHr, nSys, nDia, nTemp, nSpo2);
+    const warnings = getVitalSignsWarnings({
+      heartRate: nHr,
+      bloodPressureSystolic: nSys,
+      bloodPressureDiastolic: nDia,
+      temperature: nTemp,
+      spo2: nSpo2,
+    });
     const entry: VitalEntry = {
       id: String(Date.now()),
       time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
@@ -118,7 +115,13 @@ export const VitalsTab: React.FC<VitalsTabProps> = ({ vitalsList, onAddVitals })
           <Text style={styles.emptyText}>Chưa có lần đo nào trong ca này.</Text>
         ) : (
           vitalsList.map((v, idx) => {
-            const warnings = getVitalWarnings(v.hr, v.sys, v.dia, v.temp, v.spo2);
+            const warnings = getVitalSignsWarnings({
+              heartRate: v.hr,
+              bloodPressureSystolic: v.sys,
+              bloodPressureDiastolic: v.dia,
+              temperature: v.temp,
+              spo2: v.spo2,
+            });
             const hasWarning = warnings.length > 0;
             return (
               <View

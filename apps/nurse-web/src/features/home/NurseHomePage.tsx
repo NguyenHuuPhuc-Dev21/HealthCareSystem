@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Activity, AlertTriangle, Briefcase, Calendar, Clock, MapPin, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
+import { USE_MOCK_AUTH } from '../../lib/mock-flags';
 import { DEFAULT_MIN_NURSE_DEPOSIT_VND, ExecutionStatus } from '@healthcare-system/shared';
 import { getMyShifts } from '../shifts/shift.api';
 import { ShiftExecutionState } from '../shifts/shift.types';
@@ -64,9 +65,21 @@ export const NurseHomePage: React.FC = () => {
   const isTier2 = profile.tier === 'TIER_2_SPECIALIST';
   const gphnNumber = profile.gphn_number || 'Chưa cập nhật';
   const gphnExpiry = profile.gphn_expiry_date || 'Chưa xác định';
-  const depositBalance = (profile as any).deposit_balance ?? DEFAULT_MIN_NURSE_DEPOSIT_VND;
-  const isDepositSufficient = depositBalance >= DEFAULT_MIN_NURSE_DEPOSIT_VND;
-  const trustScore = profile.trust_score ?? 98;
+  const rawDeposit = (profile as any).deposit_balance;
+  const depositBalance: number | null =
+    typeof rawDeposit === 'number'
+      ? rawDeposit
+      : USE_MOCK_AUTH
+      ? DEFAULT_MIN_NURSE_DEPOSIT_VND
+      : null;
+  const isDepositSufficient =
+    depositBalance !== null && depositBalance >= DEFAULT_MIN_NURSE_DEPOSIT_VND;
+  const trustScore: number | null =
+    typeof profile.trust_score === 'number'
+      ? profile.trust_score
+      : USE_MOCK_AUTH
+      ? 98
+      : null;
 
   // Ưu tiên ca đang thực hiện, sau đó tới ca đã xác nhận
   const primaryShift =
@@ -245,10 +258,24 @@ export const NurseHomePage: React.FC = () => {
           <div className="ledger-row">
             <div>
               <div className="ledger-row__label">Số dư ví ký quỹ</div>
-              <div className="ledger-row__value">{depositBalance.toLocaleString('vi-VN')} đ</div>
+              <div className="ledger-row__value">
+                {depositBalance !== null ? `${depositBalance.toLocaleString('vi-VN')} đ` : 'Chưa cập nhật'}
+              </div>
               <div style={{ marginTop: 6 }}>
-                <span className={`status-pill ${isDepositSufficient ? 'status-pill--jade' : 'status-pill--ochre'}`}>
-                  {isDepositSufficient ? 'Đủ chuẩn nhận ca' : 'Cần bổ sung ký quỹ'}
+                <span
+                  className={`status-pill ${
+                    depositBalance === null
+                      ? 'status-pill--neutral'
+                      : isDepositSufficient
+                      ? 'status-pill--jade'
+                      : 'status-pill--ochre'
+                  }`}
+                >
+                  {depositBalance === null
+                    ? 'Chưa đồng bộ số dư'
+                    : isDepositSufficient
+                    ? 'Đủ chuẩn nhận ca'
+                    : 'Cần bổ sung ký quỹ'}
                 </span>
               </div>
             </div>
@@ -287,7 +314,9 @@ export const NurseHomePage: React.FC = () => {
           <div className="ledger-row">
             <div>
               <div className="ledger-row__label">Điểm tin cậy nghề nghiệp</div>
-              <div className="ledger-row__value">{trustScore} / 100</div>
+              <div className="ledger-row__value">
+                {trustScore !== null ? `${trustScore} / 100` : 'Chưa có dữ liệu'}
+              </div>
               <div className="ledger-row__sub">
                 {isTier2
                   ? 'Đủ điều kiện thực hiện thủ thuật có y lệnh'

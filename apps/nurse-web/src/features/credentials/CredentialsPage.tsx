@@ -5,7 +5,7 @@ import { DocType, VerificationStatus } from '@healthcare-system/shared';
 import type { NurseCredential } from '@healthcare-system/shared';
 import { Button, StatusBadge } from '../../components';
 import { useAuth } from '../auth/AuthContext';
-import { USE_MOCK_CREDENTIALS } from '../../lib/mock-flags';
+import { USE_MOCK_AUTH, USE_MOCK_CREDENTIALS } from '../../lib/mock-flags';
 import { getMyCredentials, mockAdminApproveGphn, uploadRenewedGphn } from './credentials.api';
 
 const DOC_LABEL: Record<string, string> = {
@@ -71,7 +71,12 @@ export const CredentialsPage: React.FC = () => {
     (c) => c.doc_type === DocType.GPHN && c.verification_status === VerificationStatus.PENDING
   );
   const isTier2 = profile.tier === 'TIER_2_SPECIALIST';
-  const trustScore = profile.trust_score ?? 98;
+  const trustScore =
+    typeof profile.trust_score === 'number'
+      ? profile.trust_score
+      : USE_MOCK_AUTH
+      ? 98
+      : null;
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -239,8 +244,8 @@ export const CredentialsPage: React.FC = () => {
             <div style={{ width: '100%' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
                 <span className="ledger-row__label" style={{ margin: 0 }}>Điểm tin cậy nghề nghiệp</span>
-                <strong className="tabular-nums" style={{ fontSize: 18, color: 'var(--brand-jade)' }}>
-                  {trustScore} / 100
+                <strong className="tabular-nums" style={{ fontSize: 18, color: trustScore !== null ? 'var(--brand-jade)' : 'var(--ink-muted)' }}>
+                  {trustScore !== null ? `${trustScore} / 100` : 'Chưa có dữ liệu'}
                 </strong>
               </div>
               <div
@@ -253,7 +258,7 @@ export const CredentialsPage: React.FC = () => {
               >
                 <div
                   style={{
-                    width: `${Math.min(100, Math.max(0, trustScore))}%`,
+                    width: `${trustScore !== null ? Math.min(100, Math.max(0, trustScore)) : 0}%`,
                     height: '100%',
                     background: 'var(--brand-jade)',
                     borderRadius: 999,

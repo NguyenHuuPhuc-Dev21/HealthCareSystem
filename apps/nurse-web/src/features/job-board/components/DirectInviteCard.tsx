@@ -9,22 +9,49 @@ interface DirectInviteCardProps {
   isProcessing?: boolean;
 }
 
+function computeRemainingSeconds(expiresAt?: string, expiresInSeconds?: number): number {
+  if (expiresAt) {
+    const expiryMs = Date.parse(expiresAt);
+    if (!Number.isNaN(expiryMs)) {
+      return Math.max(0, Math.floor((expiryMs - Date.now()) / 1000));
+    }
+  }
+  return Math.max(0, expiresInSeconds ?? 0);
+}
+
 export const DirectInviteCard: React.FC<DirectInviteCardProps> = ({
   invite,
   onAccept,
   onDecline,
   isProcessing = false,
 }) => {
-  const initialSeconds = invite.expiresInSeconds ?? 900; // default 15 mins
-  const [secondsLeft, setSecondsLeft] = useState<number>(initialSeconds);
+  const [secondsLeft, setSecondsLeft] = useState<number>(() =>
+    computeRemainingSeconds(invite.expiresAt, invite.expiresInSeconds)
+  );
 
   useEffect(() => {
-    if (secondsLeft <= 0) return;
+    const syncRemaining = () => {
+      setSecondsLeft(computeRemainingSeconds(invite.expiresAt, invite.expiresInSeconds));
+    };
+    syncRemaining();
+
     const interval = setInterval(() => {
-      setSecondsLeft((prev: number) => (prev > 0 ? prev - 1 : 0));
+      if (invite.expiresAt && !Number.isNaN(Date.parse(invite.expiresAt))) {
+        const next = Math.max(0, Math.floor((Date.parse(invite.expiresAt) - Date.now()) / 1000));
+        setSecondsLeft(next);
+        if (next <= 0) clearInterval(interval);
+      } else {
+        setSecondsLeft((prev: number) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }
     }, 1000);
     return () => clearInterval(interval);
-  }, [secondsLeft]);
+  }, [invite.bookingId, invite.expiresAt, invite.expiresInSeconds]);
 
   const formatTimer = (totalSeconds: number) => {
     const mins = Math.floor(totalSeconds / 60);

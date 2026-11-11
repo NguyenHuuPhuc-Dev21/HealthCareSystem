@@ -1,9 +1,10 @@
-import React, { useId, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Camera, MapPin, AlertTriangle, RefreshCw } from 'lucide-react';
 import { ShiftExecutionState } from '../shift.types';
 import { submitCheckIn } from '../shift.api';
 import { haversineDistanceMeters, CHECKIN_MAX_RADIUS_METERS } from '@healthcare-system/shared';
 import { Modal, ModalCloseButton } from '../../../components';
+import { USE_MOCK_SHIFTS } from '../../../lib/mock-flags';
 
 interface CheckInModalProps {
   shift: ShiftExecutionState;
@@ -11,13 +12,16 @@ interface CheckInModalProps {
   onClose: () => void;
 }
 
+const ALLOW_GPS_SIMULATOR = USE_MOCK_SHIFTS && import.meta.env.DEV;
+
 export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, onClose }) => {
   const titleId = useId();
   const selfieInputId = useId();
 
-  // Mock dev GPS coordinates: near (35m) vs far (450m)
-  const [lat, setLat] = useState<number>(shift.patientLatitude + 0.0002);
-  const [lng, setLng] = useState<number>(shift.patientLongitude + 0.0002);
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
+  const [gpsStatus, setGpsStatus] = useState<string>('Đang đọc vị trí GPS từ trình duyệt...');
+  const [gpsLoading, setGpsLoading] = useState<boolean>(false);
   const [isMockLocation, setIsMockLocation] = useState<boolean>(false);
   const [selfieBase64, setSelfieBase64] = useState<string | null>(null);
   const [capturedAt, setCapturedAt] = useState<string>('');
@@ -26,10 +30,37 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const distance = Math.round(
-    haversineDistanceMeters(lat, lng, shift.patientLatitude, shift.patientLongitude)
-  );
-  const isWithinRadius = distance <= CHECKIN_MAX_RADIUS_METERS;
+  const requestRealGps = useCallback(() => {
+    if (!navigator.geolocation) {
+      setGpsStatus('Trình duyệt không hỗ trợ định vị GPS.');
+      return;
+    }
+    setGpsLoading(true);
+    setGpsStatus('Đang xác định vị trí GPS...');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLat(pos.coords.latitude);
+        setLng(pos.coords.longitude);
+        setGpsStatus('Đã đồng bộ tọa độ GPS thiết bị.');
+        setGpsLoading(false);
+      },
+      () => {
+        setGpsStatus('Chưa lấy được GPS (hãy cấp quyền vị trí cho trình duyệt và thử lại).');
+        setGpsLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
+
+  useEffect(() => {
+    requestRealGps();
+  }, [requestRealGps]);
+
+  const distance =
+    lat !== null && lng !== null
+      ? Math.round(haversineDistanceMeters(lat, lng, shift.patientLatitude, shift.patientLongitude))
+      : null;
+  const isWithinRadius = distance !== null && distance <= CHECKIN_MAX_RADIUS_METERS;
 
   const handleCapturePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -52,6 +83,11 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
       return;
     }
 
+    if (lat === null || lng === null || distance === null) {
+      setErrorMessage('Chưa có tọa độ GPS thiết bị. Vui lòng cấp quyền định vị và bấm Cập nhật GPS.');
+      return;
+    }
+
     // 2. Check Distance <= 200m
     if (!isWithinRadius) {
       setErrorMessage(`Bạn đang cách địa chỉ ca trực ${distance}m (> ${CHECKIN_MAX_RADIUS_METERS}m). Hãy di chuyển tới nơi trước khi check-in.`);
@@ -65,20 +101,24 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
     }
 
     setIsSubmitting(true);
-    const res = await submitCheckIn({
-      bookingId: shift.bookingId,
-      latitude: lat,
-      longitude: lng,
-      isMockLocation,
-      selfieImageBase64: selfieBase64,
-      timestamp: new Date().toISOString(),
-    });
-    setIsSubmitting(false);
-
-    if (res.success && res.data) {
-      onSuccess(res.data);
-    } else {
-      setErrorMessage(res.message || 'Check-in thất bại.');
+    try {
+      const res = await submitCheckIn({
+        bookingId: shift.bookingId,
+        latitude: lat,
+        longitude: lng,
+        isMockLocation,
+        selfieImageBase64: selfieBase64,
+        timestamp: new Date().toISOString(),
+      });
+      if (res.success && res.data) {
+        onSuccess(res.data);
+      } else {
+        setErrorMessage(res.message || 'Check-in thất bại.');
+      }
+    } catch {
+      setErrorMessage('Lỗi kết nối máy chủ khi điểm danh. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -99,6 +139,7 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
 
         {errorMessage && (
           <div
+            role="alert"
             style={{
               padding: '12px 16px',
               borderRadius: 10,
@@ -121,16 +162,20 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
           style={{
             padding: 16,
             borderRadius: 12,
-            backgroundColor: isWithinRadius ? '#F0FDF4' : '#FEF2F2',
-            border: `1.5px solid ${isWithinRadius ? '#86EFAC' : '#FCA5A5'}`,
+            backgroundColor: isWithinRadius && !isMockLocation ? '#F0FDF4' : '#FEF2F2',
+            border: `1.5px solid ${isWithinRadius && !isMockLocation ? '#86EFAC' : '#FCA5A5'}`,
             marginBottom: 16,
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <MapPin size={24} color={isWithinRadius ? 'var(--teal)' : 'var(--red)'} />
+            <MapPin size={24} color={isWithinRadius && !isMockLocation ? 'var(--teal)' : 'var(--red)'} />
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--navy)' }}>
-                {isWithinRadius
+                {isMockLocation
+                  ? '✕ Phát hiện định vị giả lập — Bị chặn điểm danh'
+                  : distance === null
+                  ? gpsStatus
+                  : isWithinRadius
                   ? `✓ Đang ở trong bán kính (${distance}m / ${CHECKIN_MAX_RADIUS_METERS}m)`
                   : `✕ Ngoài bán kính quy định (${distance}m > ${CHECKIN_MAX_RADIUS_METERS}m)`}
               </div>
@@ -140,40 +185,55 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
             </div>
           </div>
 
-          {/* Dev Test GPS Simulator Controls */}
-          <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px dashed #CBD5E1', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 12, color: 'var(--muted)', alignSelf: 'center' }}>[Dev GPS Test]:</span>
+          <div style={{ marginTop: 10 }}>
             <button
               type="button"
               className="btn btn-secondary btn-sm"
+              onClick={requestRealGps}
+              disabled={gpsLoading}
               style={{ fontSize: 13 }}
-              onClick={() => {
-                setLat(shift.patientLatitude + 0.0002);
-                setLng(shift.patientLongitude + 0.0002);
-              }}
             >
-              Ở tại chỗ (35m)
+              <RefreshCw size={14} aria-hidden="true" />
+              {gpsLoading ? 'Đang lấy GPS...' : 'Cập nhật GPS hiện tại'}
             </button>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              style={{ fontSize: 13 }}
-              onClick={() => {
-                setLat(shift.patientLatitude + 0.004);
-                setLng(shift.patientLongitude + 0.004);
-              }}
-            >
-              Ở xa (450m)
-            </button>
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--red)', cursor: 'pointer', marginLeft: 'auto', minHeight: 48 }}>
-              <input
-                type="checkbox"
-                checked={isMockLocation}
-                onChange={(e) => setIsMockLocation(e.target.checked)}
-              />
-              Giả lập Mock GPS
-            </label>
           </div>
+
+          {/* Dev Test GPS Simulator Controls — gated strictly to DEV + mock mode */}
+          {ALLOW_GPS_SIMULATOR && (
+            <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px dashed #CBD5E1', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 12, color: 'var(--muted)', alignSelf: 'center' }}>[Dev GPS Test]:</span>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                style={{ fontSize: 13 }}
+                onClick={() => {
+                  setLat(shift.patientLatitude + 0.0002);
+                  setLng(shift.patientLongitude + 0.0002);
+                }}
+              >
+                Ở tại chỗ (35m)
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                style={{ fontSize: 13 }}
+                onClick={() => {
+                  setLat(shift.patientLatitude + 0.004);
+                  setLng(shift.patientLongitude + 0.004);
+                }}
+              >
+                Ở xa (450m)
+              </button>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--red)', cursor: 'pointer', marginLeft: 'auto', minHeight: 48 }}>
+                <input
+                  type="checkbox"
+                  checked={isMockLocation}
+                  onChange={(e) => setIsMockLocation(e.target.checked)}
+                />
+                Giả lập Mock GPS
+              </label>
+            </div>
+          )}
         </div>
 
         {/* Section 2: Camera Live Selfie Capture */}
@@ -182,13 +242,13 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
             htmlFor={selfieInputId}
             style={{ display: 'block', fontWeight: 700, fontSize: 15, color: 'var(--navy)', marginBottom: 8 }}
           >
-            Chụp ảnh selfie trực tiếp tại chỗ (Camera phần cứng):
+            Chụp ảnh selfie trực tiếp tại chỗ (Camera thiết bị):
           </label>
           <p style={{ fontSize: 13.5, color: 'var(--slate)', margin: '0 0 10px 0' }}>
-            Hệ thống chặn tải ảnh từ thư viện. Ảnh sẽ được đóng dấu GPS + timestamp để gửi người nhà đối chiếu (BR-07 §2.1).
+            Trên điện thoại hệ thống ưu tiên mở camera trước trực tiếp. Ảnh sẽ được gắn dấu GPS + thời gian để gửi người nhà đối chiếu (BR-07 §2.1).
           </p>
 
-          {/* Hidden native camera capture input */}
+          {/* Hidden camera capture input */}
           <input
             id={selfieInputId}
             type="file"
@@ -225,7 +285,7 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
               >
                 <div className="tabular-nums">
                   <div style={{ fontWeight: 700 }}>CareNest Verified Presence</div>
-                  <div>GPS: {lat.toFixed(4)}, {lng.toFixed(4)} · {capturedAt}</div>
+                  <div>GPS: {lat !== null && lng !== null ? `${lat.toFixed(4)}, ${lng.toFixed(4)}` : 'Chờ GPS'} · {capturedAt}</div>
                 </div>
                 <button
                   type="button"

@@ -451,14 +451,14 @@ export async function mockRejectInvalidPrescription(
   await new Promise((r) => setTimeout(r, 300));
   const store = loadShiftStore();
   const shift = store[payload.bookingId];
-  if (!shift) return { success: false, message: 'Không tìm thấy ca trực.' };
-
-  shift.executionStatus = ExecutionStatus.CANCELLED;
-  saveShiftStore(store);
+  if (shift) {
+    shift.executionStatus = ExecutionStatus.CANCELLED;
+    saveShiftStore(store);
+  }
   return {
     success: true,
     message: `Đã hủy ca trực do y lệnh không hợp lệ (BR-15). Điều dưỡng không bị trừ TrustScore và được hưởng hỗ trợ di chuyển ${DEFAULT_TRAVEL_SUPPORT_VND.toLocaleString('vi-VN')}đ.`,
-    data: JSON.parse(JSON.stringify(shift)),
+    data: shift ? JSON.parse(JSON.stringify(shift)) : undefined,
   };
 }
 

@@ -10,15 +10,28 @@ interface RadarModalProps {
   isProcessing?: boolean;
 }
 
+function computeRemainingSeconds(expiresAt?: string, expiresInSeconds?: number): number {
+  if (expiresAt) {
+    const expiryMs = Date.parse(expiresAt);
+    if (!Number.isNaN(expiryMs)) {
+      return Math.max(0, Math.floor((expiryMs - Date.now()) / 1000));
+    }
+  }
+  return Math.max(0, expiresInSeconds ?? 45);
+}
+
 export const RadarModal: React.FC<RadarModalProps> = ({
   radarJob,
   onAccept,
   onDismiss,
   isProcessing = false,
 }) => {
-  const initialSeconds = radarJob.expiresInSeconds ?? 45;
-  const [secondsLeft, setSecondsLeft] = useState<number>(initialSeconds);
-  const totalSeconds = initialSeconds || 45;
+  const [secondsLeft, setSecondsLeft] = useState<number>(() =>
+    computeRemainingSeconds(radarJob.radarExpiresAt, radarJob.expiresInSeconds)
+  );
+  const totalSecondsRef = useRef<number>(
+    Math.max(1, computeRemainingSeconds(radarJob.radarExpiresAt, radarJob.expiresInSeconds))
+  );
   const dismissedRef = useRef(false);
   const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -31,19 +44,38 @@ export const RadarModal: React.FC<RadarModalProps> = ({
   useDialogA11y({ open: true, onClose: triggerDismiss, containerRef: dialogRef });
 
   useEffect(() => {
-    if (secondsLeft <= 0) {
+    const initial = computeRemainingSeconds(radarJob.radarExpiresAt, radarJob.expiresInSeconds);
+    totalSecondsRef.current = Math.max(1, initial);
+    setSecondsLeft(initial);
+    if (initial <= 0) {
       triggerDismiss();
       return;
     }
 
     const interval = setInterval(() => {
-      setSecondsLeft((prev: number) => (prev > 0 ? prev - 1 : 0));
+      if (radarJob.radarExpiresAt && !Number.isNaN(Date.parse(radarJob.radarExpiresAt))) {
+        const next = Math.max(0, Math.floor((Date.parse(radarJob.radarExpiresAt) - Date.now()) / 1000));
+        setSecondsLeft(next);
+        if (next <= 0) {
+          clearInterval(interval);
+          triggerDismiss();
+        }
+      } else {
+        setSecondsLeft((prev: number) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            triggerDismiss();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [secondsLeft, triggerDismiss]);
+  }, [radarJob.id, radarJob.radarExpiresAt, radarJob.expiresInSeconds, triggerDismiss]);
 
-  const percentage = Math.max(0, (secondsLeft / totalSeconds) * 100);
+  const percentage = Math.max(0, (secondsLeft / totalSecondsRef.current) * 100);
   const ringGradient = `conic-gradient(var(--red) 0% ${percentage}%, #DCEBE3 ${percentage}% 100%)`;
 
   return (

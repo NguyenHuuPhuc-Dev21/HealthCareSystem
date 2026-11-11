@@ -1,5 +1,6 @@
 import React, { useId, useState } from 'react';
 import { HeartPulse, Plus, AlertTriangle, Clock } from 'lucide-react';
+import { getVitalSignsWarnings, VITAL_ALERT_THRESHOLDS } from '@healthcare-system/shared';
 import { VitalSignRecord } from '../shift.types';
 import { addVitalSigns } from '../shift.api';
 
@@ -26,24 +27,21 @@ export const VitalSignsForm: React.FC<VitalSignsFormProps> = ({
   const [notes, setNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Clinical Alert Checker
-  const checkWarnings = (hr: number, sys: number, dia: number, temp: number, sp: number) => {
-    const warnings: string[] = [];
-    if (hr < 50 || hr > 120) warnings.push(`Nhịp tim ${hr} bpm ngoài ngưỡng bình thường (50-120)`);
-    if (sys >= 140 || dia >= 90) warnings.push(`Huyết áp cao (${sys}/${dia} mmHg)`);
-    if (sys < 90 || dia < 60) warnings.push(`Huyết áp thấp (${sys}/${dia} mmHg)`);
-    if (temp >= 38.5) warnings.push(`Sốt cao (${temp}°C)`);
-    if (temp < 35.5) warnings.push(`Hạ thân nhiệt (${temp}°C)`);
-    if (sp < 95) warnings.push(`SpO2 tụt thấp (${sp}%)`);
-    return warnings;
-  };
-
-  const currentWarnings = checkWarnings(heartRate, bpSystolic, bpDiastolic, temperature, spo2);
+  const currentWarnings = getVitalSignsWarnings({
+    heartRate,
+    bloodPressureSystolic: bpSystolic,
+    bloodPressureDiastolic: bpDiastolic,
+    temperature,
+    spo2,
+  });
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg(null);
     setIsSubmitting(true);
+
     const newRecord: VitalSignRecord = {
       timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
       heartRate,
@@ -56,15 +54,21 @@ export const VitalSignsForm: React.FC<VitalSignsFormProps> = ({
       notes: notes || undefined,
     };
 
-    const res = await addVitalSigns({ bookingId, vitals: newRecord });
-    setIsSubmitting(false);
-
-    if (res.success) {
-      onVitalsAdded(newRecord);
-      setShowAddForm(false);
-      setNotes('');
-      setFeedback('✓ Đã lưu chỉ số sinh tồn và đồng bộ thời gian thực');
-      setTimeout(() => setFeedback(null), 3000);
+    try {
+      const res = await addVitalSigns({ bookingId, vitals: newRecord });
+      if (res.success) {
+        onVitalsAdded(newRecord);
+        setShowAddForm(false);
+        setNotes('');
+        setFeedback('✓ Đã lưu chỉ số sinh tồn và đồng bộ thời gian thực');
+        setTimeout(() => setFeedback(null), 3000);
+      } else {
+        setErrorMsg(res.message || 'Không thể lưu chỉ số sinh tồn. Vui lòng thử lại.');
+      }
+    } catch {
+      setErrorMsg('Lỗi kết nối máy chủ khi lưu chỉ số sinh tồn. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -79,7 +83,10 @@ export const VitalSignsForm: React.FC<VitalSignsFormProps> = ({
           <button
             type="button"
             className="btn btn-primary btn-sm"
-            onClick={() => setShowAddForm(true)}
+            onClick={() => {
+              setErrorMsg(null);
+              setShowAddForm(true);
+            }}
             style={{ fontSize: 14 }}
           >
             <Plus size={16} style={{ marginRight: 4 }} /> Đo mới
@@ -88,8 +95,14 @@ export const VitalSignsForm: React.FC<VitalSignsFormProps> = ({
       </div>
 
       {feedback && (
-        <div style={{ padding: '8px 12px', background: '#DEF7EC', color: '#03543F', borderRadius: 8, fontSize: 14, marginBottom: 12 }}>
+        <div role="status" style={{ padding: '8px 12px', background: '#DEF7EC', color: '#03543F', borderRadius: 8, fontSize: 14, marginBottom: 12 }}>
           {feedback}
+        </div>
+      )}
+
+      {errorMsg && (
+        <div role="alert" className="alert-error" style={{ marginTop: 0, marginBottom: 12, fontSize: 14 }}>
+          {errorMsg}
         </div>
       )}
 
@@ -240,13 +253,13 @@ export const VitalSignsForm: React.FC<VitalSignsFormProps> = ({
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {vitalsList.map((item, index) => {
-            const warnings = checkWarnings(
-              item.heartRate,
-              item.bloodPressureSystolic,
-              item.bloodPressureDiastolic,
-              item.temperature,
-              item.spo2
-            );
+            const warnings = getVitalSignsWarnings({
+              heartRate: item.heartRate,
+              bloodPressureSystolic: item.bloodPressureSystolic,
+              bloodPressureDiastolic: item.bloodPressureDiastolic,
+              temperature: item.temperature,
+              spo2: item.spo2,
+            });
             const hasWarning = warnings.length > 0;
 
             return (
@@ -275,7 +288,7 @@ export const VitalSignsForm: React.FC<VitalSignsFormProps> = ({
                   <div>Mạch: <strong>{item.heartRate}</strong> bpm</div>
                   <div>HA: <strong>{item.bloodPressureSystolic}/{item.bloodPressureDiastolic}</strong> mmHg</div>
                   <div>Nhiệt độ: <strong>{item.temperature}</strong>°C</div>
-                  <div>SpO2: <strong style={{ color: item.spo2 < 95 ? 'var(--red)' : 'inherit' }}>{item.spo2}%</strong></div>
+                  <div>SpO2: <strong style={{ color: item.spo2 < VITAL_ALERT_THRESHOLDS.SPO2_MIN ? 'var(--red)' : 'inherit' }}>{item.spo2}%</strong></div>
                 </div>
 
                 {item.notes && (
