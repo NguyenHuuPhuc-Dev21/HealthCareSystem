@@ -1,29 +1,45 @@
 /**
  * Elder-Friendly Design Tokens for Nurse Mobile App (React Native)
- * SRS §6 NFR-UI-01: Font size 16pt–18pt, Touch target >= 48x48 dp, WCAG 2.1 AA
+ * Unified with CareNest Web Clinical Ledger & Warm Precision (DESIGN.md / SRS §6 NFR-UI-01)
  */
 export const tokens = {
   colors: {
-    primary: '#0d9488',
-    primaryDark: '#0f766e',
-    background: '#ffffff',
-    surface: '#f0fdfa',
-    textMain: '#0f172a',
-    textMuted: '#334155',
-    border: '#cbd5e1',
-    error: '#ef4444',
-    success: '#22c55e',
-    warning: '#f59e0b',
+    // 6 Core Semantic Tokens
+    canvas: '#F5F6F2',
+    paper: '#FFFFFF',
+    subtle: '#EDF0EB',
+    inkPrimary: '#102A24',
+    inkSecondary: '#4A635D',
+    inkMuted: '#6C827C',
+    brandJade: '#0F6E5B',
+    brandJadeDark: '#0B5546',
+    brandJadeSoft: '#E6F2EE',
+    borderHairline: '#D8E0DC',
+    accentOchre: '#B45309',
+    accentOchreSoft: '#FEF3C7',
+    alertCrimson: '#B91C1C',
+    alertCrimsonSoft: '#FEF2F2',
+
+    // Compatibility aliases
+    primary: '#0F6E5B',
+    primaryDark: '#0B5546',
+    background: '#F5F6F2',
+    surface: '#FFFFFF',
+    textMain: '#102A24',
+    textMuted: '#4A635D',
+    border: '#D8E0DC',
+    error: '#B91C1C',
+    success: '#15803D',
+    warning: '#B45309',
   },
   typography: {
-    fontSizeBase: 16,
-    fontSizeLarge: 18,
-    fontSizeTitle: 22,
-    lineHeightBase: 24,
+    fontSizeBase: 17,
+    fontSizeLarge: 19,
+    fontSizeTitle: 23,
+    lineHeightBase: 26,
   },
   spacing: {
     touchTargetMin: 48,
     paddingBase: 16,
   },
 };
-

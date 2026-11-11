@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useId, useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -18,6 +18,7 @@ import { CheckInModal } from './components/CheckInModal';
 import { getShiftExecutionState } from './shift.api';
 import { ShiftExecutionState } from './shift.types';
 import { useAuth } from '../auth/AuthContext';
+import { Modal, ModalCloseButton } from '../../components';
 import {
   DEFAULT_PLATFORM_COMMISSION_RATE,
   DEFAULT_MIN_NURSE_DEPOSIT_VND,
@@ -42,46 +43,102 @@ export const ShiftDetailPage: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showCheckInModal, setShowCheckInModal] = useState(false);
   const [shiftExecState, setShiftExecState] = useState<ShiftExecutionState | null>(null);
+  const [loadingCheckIn, setLoadingCheckIn] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState('Lý do sức khỏe / việc gia đình đột xuất');
+  const [cancelNote, setCancelNote] = useState('');
+  const [cancelNotice, setCancelNotice] = useState<string | null>(null);
+  const cancelModalTitleId = useId();
+  const cancelBaseId = useId();
 
   useEffect(() => {
+    let alive = true;
     async function loadExecState() {
-      if (id) {
+      if (!id) return;
+      try {
         const res = await getShiftExecutionState(id);
-        if (res.success && res.data) {
+        if (alive && res.success && res.data) {
           setShiftExecState(res.data);
         }
+      } catch {
+        // Handled lazily when nurse opens check-in
       }
     }
     loadExecState();
+    return () => {
+      alive = false;
+    };
   }, [id]);
 
   useEffect(() => {
+    let alive = true;
     async function fetchDetail() {
       if (!id) return;
       setLoading(true);
-      const res = await getJobById(id);
-      if (res.success && res.data) {
-        setJob(res.data);
-        setError(null);
-      } else {
-        setJob(null);
-        setError(res.message || 'Không tìm thấy ca làm việc. Ca có thể đã bị hủy hoặc không còn khả dụng.');
+      try {
+        const res = await getJobById(id);
+        if (!alive) return;
+        if (res.success && res.data) {
+          setJob(res.data);
+          setError(null);
+        } else {
+          setJob(null);
+          setError(res.message || 'Không tìm thấy ca làm việc. Ca có thể đã bị hủy hoặc không còn khả dụng.');
+        }
+      } catch {
+        if (alive) {
+          setJob(null);
+          setError('Không thể tải thông tin chi tiết ca trực. Vui lòng thử lại.');
+        }
+      } finally {
+        if (alive) setLoading(false);
       }
-      setLoading(false);
     }
     fetchDetail();
+    return () => {
+      alive = false;
+    };
   }, [id]);
+
+  const handleOpenCheckIn = async () => {
+    if (shiftExecState) {
+      setShowCheckInModal(true);
+      return;
+    }
+    if (!job) return;
+    setLoadingCheckIn(true);
+    setError(null);
+    try {
+      const res = await getShiftExecutionState(job.id);
+      if (res.success && res.data) {
+        setShiftExecState(res.data);
+        setShowCheckInModal(true);
+      } else {
+        setError(res.message || 'Chưa tải được trạng thái điểm danh của ca này. Vui lòng thử lại.');
+      }
+    } catch {
+      setError('Không thể kết nối máy chủ để mở điểm danh. Vui lòng thử lại.');
+    } finally {
+      setLoadingCheckIn(false);
+    }
+  };
 
   const handleAccept = async () => {
     if (!job) return;
     setIsAccepting(true);
-    const result = await acceptJob(job.id, nurseTier, nurseDeposit);
-    setIsAccepting(false);
-    if (result.success) {
-      setToastMessage(result.message ?? 'Đã nhận ca thành công!');
-      setJob({ ...job, status: 'CONFIRMED' });
-    } else {
-      setError(result.message ?? 'Không thể nhận ca lúc này.');
+    setError(null);
+    try {
+      const result = await acceptJob(job.id, nurseTier, nurseDeposit);
+      if (result.success) {
+        setToastMessage(result.message ?? 'Đã nhận ca thành công!');
+        setJob({ ...job, status: 'CONFIRMED' });
+      } else {
+        setError(result.message ?? 'Không thể nhận ca lúc này.');
+      }
+    } catch {
+      setError('Lỗi kết nối khi nhận ca. Vui lòng kiểm tra mạng và thử lại.');
+    } finally {
+      setIsAccepting(false);
     }
   };
 
@@ -95,25 +152,26 @@ export const ShiftDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="screen-body elder">
-        <div className="page" style={{ textAlign: 'center', padding: '60px 0' }}>
-          <p style={{ fontSize: 18, color: 'var(--slate)' }}>Đang tải thông tin chi tiết ca...</p>
-        </div>
+      <div style={{ textAlign: 'center', padding: '60px 0' }}>
+        <p style={{ fontSize: 18, color: 'var(--ink-secondary)' }}>Đang tải thông tin chi tiết ca trực...</p>
       </div>
     );
   }
 
   if (!job) {
     return (
-      <div className="screen-body elder">
-        <div className="page">
-          <button className="btn btn-secondary btn-sm" onClick={() => navigate(-1)} style={{ marginBottom: 16 }}>
-            <ArrowLeft size={16} style={{ marginRight: 6 }} /> Quay lại
-          </button>
-          <div className="card" style={{ padding: 30, textAlign: 'center' }}>
-            <h3 style={{ color: 'var(--navy)' }}>Không tìm thấy thông tin ca làm việc</h3>
-            <p style={{ color: 'var(--slate)' }}>Ca này có thể đã được giao hoặc không còn tồn tại trên hệ thống.</p>
-            <Link to="/jobs" className="btn btn-primary" style={{ marginTop: 14 }}>
+      <div>
+        <Link to="/shifts" className="btn btn-secondary btn-sm" style={{ marginBottom: 16 }}>
+          <ArrowLeft size={16} aria-hidden="true" /> Về danh sách ca của tôi
+        </Link>
+        <div className="ledger-panel" style={{ padding: 30, textAlign: 'center' }}>
+          <h3 style={{ color: 'var(--ink-primary)' }}>Không tìm thấy thông tin ca làm việc</h3>
+          <p style={{ color: 'var(--ink-secondary)' }}>Ca này có thể đã được giao hoặc không còn tồn tại trên hệ thống.</p>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginTop: 14 }}>
+            <Link to="/shifts" className="btn btn-secondary">
+              Về Ca của tôi
+            </Link>
+            <Link to="/jobs" className="btn btn-primary">
               Về Bảng việc làm
             </Link>
           </div>
@@ -127,22 +185,22 @@ export const ShiftDetailPage: React.FC = () => {
   const penaltyPercent =
     job.cancellationPenaltyPercent ?? Math.round(DEFAULT_CANCELLATION_PENALTY_RATE * 100);
   const penaltyAmount = Math.round(job.totalAmount * (penaltyPercent / 100));
+  const backPath = job.status === 'MATCHING' ? '/jobs' : '/shifts';
+  const backLabel = job.status === 'MATCHING' ? 'Quay lại Bảng việc làm' : 'Về danh sách ca của tôi';
 
   return (
-    <div className="screen-body elder">
-      <div className="page">
-        {/* Navigation Breadcrumb */}
-        <div style={{ marginBottom: 14 }}>
-          <button
-            className="btn btn-secondary btn-sm"
-            type="button"
-            onClick={() => navigate(-1)}
-            style={{ fontSize: 14 }}
-          >
-            <ArrowLeft size={16} style={{ marginRight: 6 }} />
-            Quay lại danh sách
-          </button>
-        </div>
+    <div>
+      {/* Navigation Breadcrumb */}
+      <div style={{ marginBottom: 14 }}>
+        <Link
+          to={backPath}
+          className="btn btn-secondary btn-sm"
+          style={{ fontSize: 14 }}
+        >
+          <ArrowLeft size={16} aria-hidden="true" />
+          {backLabel}
+        </Link>
+      </div>
 
         {/* Toast Feedback */}
         {toastMessage && (
@@ -214,29 +272,30 @@ export const ShiftDetailPage: React.FC = () => {
               <button
                 className="btn btn-primary btn-lg"
                 type="button"
-                style={{ fontSize: 17, height: 52, background: 'var(--teal)' }}
+                style={{ fontSize: 17, height: 52 }}
                 onClick={() => navigate(`/shifts/${job.id}/execute`)}
               >
-                Vào phòng ca trực đang diễn ra →
+                Mở bảng điều hành ca trực
               </button>
             ) : job.status === 'CONFIRMED' ? (
               <button
                 className="btn btn-primary btn-lg"
                 type="button"
-                style={{ fontSize: 17, height: 52 }}
-                onClick={() => setShowCheckInModal(true)}
+                style={{ fontSize: 17, minHeight: 52 }}
+                disabled={loadingCheckIn}
+                onClick={handleOpenCheckIn}
               >
-                Check-in khi tới nơi →
+                {loadingCheckIn ? 'Đang mở điểm danh...' : 'Điểm danh khi tới nơi'}
               </button>
             ) : (
               <button
-                className="btn btn-primary btn-lg"
+                className="btn btn-primary btn-lg tabular-nums"
                 type="button"
                 style={{ fontSize: 17, height: 52, minWidth: 180 }}
                 onClick={handleAccept}
                 disabled={isAccepting}
               >
-                {isAccepting ? 'Đang nhận...' : `Nhận ca · ${job.totalAmount.toLocaleString('vi-VN')}đ`}
+                {isAccepting ? 'Đang nhận...' : `Nhận ca (${job.totalAmount.toLocaleString('vi-VN')} đ)`}
               </button>
             )}
           </div>
@@ -380,33 +439,41 @@ export const ShiftDetailPage: React.FC = () => {
                 <div className="pin-label">Nhà bệnh nhân {job.patientName}</div>
               </div>
 
-              <button
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                  job.fullAddress || job.district
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="btn btn-secondary btn-block"
-                type="button"
-                style={{ height: 48, marginTop: 14 }}
-                onClick={() => alert(`Mở bản đồ điều hướng tới: ${job.fullAddress || job.district}`)}
+                style={{ minHeight: 48, marginTop: 14 }}
               >
-                <Navigation size={16} style={{ marginRight: 6 }} />
+                <Navigation size={16} aria-hidden="true" style={{ marginRight: 6 }} />
                 Chỉ đường (Google Maps)
-              </button>
+              </a>
 
-              <div style={{ display: 'flex', gap: 13, alignItems: 'center', borderTop: '1px solid var(--line)', marginTop: 16, paddingTop: 15 }}>
-                <div className="avatar" style={{ background: '#E2E8F0', color: 'var(--navy)' }}>
-                  {job.customerName ? getInitials(job.customerName) : 'AN'}
+              <div className="contact-person-card">
+                <div className="contact-person-card__info">
+                  <div className="avatar" style={{ background: '#E2E8F0', color: 'var(--navy)' }}>
+                    {job.customerName ? getInitials(job.customerName) : 'AN'}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <strong style={{ color: 'var(--navy)', display: 'block', fontSize: 16 }}>
+                      {job.customerName || 'Anh Nguyễn Văn An'}
+                    </strong>
+                    <span style={{ color: 'var(--slate)', fontSize: 14.5, display: 'block', marginTop: 2 }}>
+                      Người đặt ca · SĐT: {job.customerPhoneMasked || '0905 ••• 123'}
+                    </span>
+                  </div>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <strong style={{ color: 'var(--navy)' }}>{job.customerName || 'Anh Nguyễn Văn An'}</strong>
-                  <br />
-                  <span style={{ color: 'var(--slate)', fontSize: 14.5 }}>
-                    Người đặt ca · SĐT: {job.customerPhoneMasked || '0905 ••• 123'}
-                  </span>
+                <div className="contact-person-card__actions">
+                  <button className="btn btn-secondary btn-sm" type="button">
+                    <MessageSquare size={15} aria-hidden="true" /> Chat
+                  </button>
+                  <button className="btn btn-secondary btn-sm" type="button">
+                    <Phone size={15} aria-hidden="true" /> Gọi
+                  </button>
                 </div>
-                <button className="btn btn-secondary btn-sm" type="button" style={{ height: 42 }}>
-                  <MessageSquare size={15} style={{ marginRight: 4 }} /> Chat
-                </button>
-                <button className="btn btn-secondary btn-sm" type="button" style={{ height: 42 }}>
-                  <Phone size={15} style={{ marginRight: 4 }} /> Gọi
-                </button>
               </div>
             </div>
 
@@ -453,17 +520,114 @@ export const ShiftDetailPage: React.FC = () => {
                 <br />
                 Hủy trong vòng 12 giờ trước ca: <b style={{ color: 'var(--navy)' }}>−20 điểm TrustScore, trừ {penaltyPercent}% giá trị ca ({penaltyAmount.toLocaleString('vi-VN')}đ) từ ký quỹ</b> — khoản phạt chuyển thành thưởng nóng cho điều dưỡng thay thế.
               </p>
-              <button
-                className="btn btn-secondary"
-                type="button"
-                style={{ height: 48, color: 'var(--red)', borderColor: '#F3C2C2', marginTop: 12 }}
-                onClick={() => alert('Yêu cầu hủy ca cần xác nhận lý do và trừ điểm TrustScore theo quy định.')}
-              >
-                Yêu cầu hủy ca
-              </button>
+              {cancelNotice ? (
+                <div className="alert-info" style={{ marginTop: 12, marginBottom: 0 }}>
+                  {cancelNotice}
+                </div>
+              ) : (
+                <button
+                  className="btn btn-secondary"
+                  type="button"
+                  style={{ minHeight: 48, color: 'var(--red)', borderColor: '#F3C2C2', marginTop: 12 }}
+                  onClick={() => setShowCancelModal(true)}
+                >
+                  Yêu cầu hủy ca
+                </button>
+              )}
             </div>
           </div>
         </div>
+
+        {/* Cancel Shift Confirmation Modal */}
+        <Modal open={showCancelModal} onClose={() => setShowCancelModal(false)} titleId={cancelModalTitleId} maxWidth={500}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <h2 id={cancelModalTitleId} style={{ margin: 0, fontSize: 20, color: 'var(--red)', fontWeight: 800 }}>
+              Xác nhận yêu cầu hủy ca
+            </h2>
+            <ModalCloseButton onClick={() => setShowCancelModal(false)} />
+          </div>
+
+          <div
+            style={{
+              padding: 12,
+              borderRadius: 10,
+              background: '#FEF2F2',
+              border: '1px solid #FECACA',
+              color: '#991B1B',
+              fontSize: 14,
+              marginBottom: 16,
+              lineHeight: 1.5,
+            }}
+          >
+            Hủy ca sau khi đã xác nhận sẽ ảnh hưởng tới <strong>TrustScore (−5 đến −20 điểm)</strong> và có thể bị trừ <strong>{penaltyPercent}% ({penaltyAmount.toLocaleString('vi-VN')}đ)</strong> nếu hủy trong vòng 12 giờ trước giờ hẹn.
+          </div>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setCancelNotice(
+                `Đã ghi nhận yêu cầu hủy ca với lý do: "${cancelReason}"${cancelNote.trim() ? ` (${cancelNote.trim()})` : ''}. Đội ngũ điều phối sẽ liên hệ xác nhận.`
+              );
+              setShowCancelModal(false);
+            }}
+          >
+            <div style={{ marginBottom: 14 }}>
+              <label
+                htmlFor={`${cancelBaseId}-reason`}
+                style={{ display: 'block', fontSize: 14, fontWeight: 700, color: 'var(--navy)', marginBottom: 6 }}
+              >
+                Lý do hủy ca
+              </label>
+              <select
+                id={`${cancelBaseId}-reason`}
+                className="input"
+                style={{ width: '100%', minHeight: 48 }}
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+              >
+                <option value="Lý do sức khỏe / việc gia đình đột xuất">Lý do sức khỏe / việc gia đình đột xuất</option>
+                <option value="Trùng lịch ca làm việc khác">Trùng lịch ca làm việc khác</option>
+                <option value="Khoảng cách di chuyển không phù hợp">Khoảng cách di chuyển không phù hợp</option>
+                <option value="Lý do khác">Lý do khác</option>
+              </select>
+            </div>
+
+            <div style={{ marginBottom: 18 }}>
+              <label
+                htmlFor={`${cancelBaseId}-note`}
+                style={{ display: 'block', fontSize: 14, fontWeight: 700, color: 'var(--navy)', marginBottom: 6 }}
+              >
+                Ghi chú thêm cho điều phối viên (tùy chọn)
+              </label>
+              <textarea
+                id={`${cancelBaseId}-note`}
+                className="input"
+                style={{ width: '100%', minHeight: 80, padding: 10, fontSize: 14 }}
+                placeholder="Mô tả ngắn để bộ phận điều phối sắp xếp điều dưỡng thay thế..."
+                value={cancelNote}
+                onChange={(e) => setCancelNote(e.target.value)}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ flex: 1, minHeight: 48 }}
+                onClick={() => setShowCancelModal(false)}
+              >
+                Giữ lại ca này
+              </button>
+              <button
+                type="submit"
+                className="btn btn-danger"
+                style={{ flex: 1, minHeight: 48 }}
+              >
+                Xác nhận gửi yêu cầu hủy
+              </button>
+            </div>
+          </form>
+        </Modal>
 
         {/* Check-In Modal (Dual check-in: GPS + Camera live capture) */}
         {showCheckInModal && shiftExecState && (
@@ -478,7 +642,6 @@ export const ShiftDetailPage: React.FC = () => {
             onClose={() => setShowCheckInModal(false)}
           />
         )}
-      </div>
     </div>
   );
 };

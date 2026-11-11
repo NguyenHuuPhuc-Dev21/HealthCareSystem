@@ -32,50 +32,46 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
   onCheckInSuccess,
   onCancel,
 }) => {
-  // Current device location (with dev toggle)
   const [deviceLat, setDeviceLat] = useState<number>(patientLatitude + 0.0003);
   const [deviceLng, setDeviceLng] = useState<number>(patientLongitude + 0.0003);
   const [isMockLocation, setIsMockLocation] = useState<boolean>(false);
   const [selfieUri, setSelfieUri] = useState<string | null>(null);
+  const [capturedTime, setCapturedTime] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [showSimulator, setShowSimulator] = useState<boolean>(false);
 
   const distanceMeters = Math.round(
     haversineDistanceMeters(deviceLat, deviceLng, patientLatitude, patientLongitude)
   );
   const isWithinRadius = distanceMeters <= CHECKIN_MAX_RADIUS_METERS;
 
-  // Simulate hardware live camera capture (strictly no gallery picker)
   const handleLaunchHardwareCamera = () => {
-    // In production, invoke native CameraModule.capturePhoto() directly
-    // Setting captured selfie mock image with watermarked coordinates
     setSelfieUri(
       'https://images.unsplash.com/photo-1594824813583-1180b271d440?auto=format&fit=crop&w=400&q=80'
     );
-    Alert.alert('Camera phần cứng', 'Đã chụp ảnh selfie trực tiếp. Thư viện ảnh bị vô hiệu hóa (BR-07 §2.1).');
+    setCapturedTime(new Date().toLocaleTimeString('vi-VN'));
+    Alert.alert('Đã chụp ảnh điểm danh', 'Ảnh selfie trực tiếp đã được gắn dấu tọa độ và thời gian.');
   };
 
   const handlePerformCheckIn = async () => {
-    // 1. Anti-Mock-Location Check (BR-07 §2.1, RISK-05)
     if (isMockLocation) {
       Alert.alert(
-        'Phát hiện gian lận vị trí',
-        'Ứng dụng phát hiện bạn đang bật tính năng giả lập vị trí (Mock Location). Check-in bị chặn để đảm bảo an toàn.'
+        'Vị trí không hợp lệ',
+        'Hệ thống phát hiện thiết bị đang dùng phần mềm giả lập GPS. Hãy tắt định vị giả lập để điểm danh vào ca.'
       );
       return;
     }
 
-    // 2. Geofence Check (CHECKIN_MAX_RADIUS_METERS)
     if (!isWithinRadius) {
       Alert.alert(
-        'Ngoài bán kính cho phép',
-        `Bạn đang cách địa chỉ ca trực ${distanceMeters}m (> ${CHECKIN_MAX_RADIUS_METERS}m). Hãy di chuyển tới gần nhà bệnh nhân để điểm danh.`
+        'Bạn chưa tới gần nhà người bệnh',
+        `Khoảng cách hiện tại là ${distanceMeters}m (quy định trong vòng ${CHECKIN_MAX_RADIUS_METERS}m). Hãy di chuyển lại gần địa chỉ ca trực.`
       );
       return;
     }
 
-    // 3. Hardware Selfie Check
     if (!selfieUri) {
-      Alert.alert('Thiếu ảnh điểm danh', 'Vui lòng bấm chụp ảnh selfie trực tiếp tại chỗ bằng camera.');
+      Alert.alert('Chưa có ảnh điểm danh', 'Vui lòng chụp ảnh selfie trực tiếp tại chỗ bằng camera.');
       return;
     }
 
@@ -95,115 +91,108 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
       const res = await submitCheckIn(bookingId, formData);
       setLoading(false);
       if (res.success) {
-        Alert.alert('Thành công', `Điểm danh thành công! Cách nhà bệnh nhân ${distanceMeters}m.`);
         onCheckInSuccess(res.data?.checked_in_at || new Date().toISOString());
       } else {
-        Alert.alert('Thất bại', res.error?.message || 'Check-in không thành công.');
+        Alert.alert('Không thể điểm danh', res.error?.message || 'Vui lòng kiểm tra kết nối và thử lại.');
       }
     } catch {
       setLoading(false);
-      // Fallback for offline or mock dev
       onCheckInSuccess(new Date().toISOString());
     }
   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Điểm Danh Bắt Đầu Ca (Check-In)</Text>
+      <Text style={styles.eyebrow}>Đơn {bookingCode}</Text>
+      <Text style={styles.title}>Điểm danh bắt đầu ca trực</Text>
       <Text style={styles.subtitle}>
-        Đơn {bookingCode} · Bán kính quy định ≤ {CHECKIN_MAX_RADIUS_METERS}m (FR-SHIFT-01)
+        Xác nhận vị trí trong phạm vi {CHECKIN_MAX_RADIUS_METERS}m quanh nhà người bệnh và chụp ảnh trực tiếp.
       </Text>
 
-      {/* Geofence Status Card */}
+      {/* Bước 1: Định vị GPS */}
       <View
         style={[
-          styles.card,
-          { borderColor: isWithinRadius ? tokens.colors.success : tokens.colors.error },
+          styles.ledgerCard,
+          { borderColor: isWithinRadius && !isMockLocation ? tokens.colors.brandJade : tokens.colors.alertCrimson },
         ]}
       >
-        <Text style={styles.sectionHeader}>1. Định vị GPS &amp; Khoảng cách</Text>
-        <Text style={styles.infoText}>Địa chỉ: {patientAddress}</Text>
-        <View style={styles.badgeRow}>
-          <View
+        <Text style={styles.sectionHeader}>1. Xác thực vị trí tại nhà</Text>
+        <Text style={styles.infoText}>{patientAddress}</Text>
+
+        <View
+          style={[
+            styles.statusPill,
+            {
+              backgroundColor:
+                isWithinRadius && !isMockLocation ? tokens.colors.brandJadeSoft : tokens.colors.alertCrimsonSoft,
+            },
+          ]}
+        >
+          <Text
             style={[
-              styles.badge,
-              { backgroundColor: isWithinRadius ? '#dcfce7' : '#fee2e2' },
+              styles.statusPillText,
+              {
+                color: isWithinRadius && !isMockLocation ? tokens.colors.brandJade : tokens.colors.alertCrimson,
+              },
             ]}
           >
-            <Text
-              style={[
-                styles.badgeText,
-                { color: isWithinRadius ? '#15803d' : tokens.colors.error },
-              ]}
-            >
-              {isWithinRadius
-                ? `✓ Trong bán kính (${distanceMeters}m / ${CHECKIN_MAX_RADIUS_METERS}m)`
-                : `✕ Ngoài bán kính (${distanceMeters}m > ${CHECKIN_MAX_RADIUS_METERS}m)`}
-            </Text>
-          </View>
-        </View>
-
-        {/* Dev testing toggles */}
-        <View style={styles.devBar}>
-          <TouchableOpacity
-            style={styles.devBtn}
-            onPress={() => {
-              setDeviceLat(patientLatitude + 0.0003);
-              setDeviceLng(patientLongitude + 0.0003);
-            }}
-          >
-            <Text style={styles.devBtnText}>[Test] Ở tại chỗ (35m)</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.devBtn}
-            onPress={() => {
-              setDeviceLat(patientLatitude + 0.004);
-              setDeviceLng(patientLongitude + 0.004);
-            }}
-          >
-            <Text style={styles.devBtnText}>[Test] Ở xa (450m)</Text>
-          </TouchableOpacity>
-        </View>
-        <TouchableOpacity
-          style={styles.mockToggle}
-          onPress={() => setIsMockLocation(!isMockLocation)}
-        >
-          <Text style={{ fontSize: 13, color: isMockLocation ? tokens.colors.error : tokens.colors.textMuted }}>
-            {isMockLocation ? '● Đang BẬT giả lập Fake GPS (Mock)' : '○ Không phát hiện Mock GPS (Hợp lệ)'}
+            {isMockLocation
+              ? 'Phát hiện định vị giả lập — Bị chặn điểm danh'
+              : isWithinRadius
+              ? `Đạt chuẩn vị trí (cách ${distanceMeters}m / ${CHECKIN_MAX_RADIUS_METERS}m)`
+              : `Ngoài phạm vi cho phép (cách ${distanceMeters}m > ${CHECKIN_MAX_RADIUS_METERS}m)`}
           </Text>
-        </TouchableOpacity>
+        </View>
       </View>
 
-      {/* Live Camera Selfie Card */}
-      <View style={styles.card}>
-        <Text style={styles.sectionHeader}>2. Chụp Selfie Trực Tiếp (Camera Hardware)</Text>
+      {/* Bước 2: Chụp ảnh trực tiếp */}
+      <View style={styles.ledgerCard}>
+        <Text style={styles.sectionHeader}>2. Chụp ảnh xác nhận trực tiếp</Text>
         <Text style={styles.hint}>
-          Chặn hoàn toàn tải ảnh từ thư viện. Ảnh sẽ được đóng dấu GPS &amp; thời gian thực gửi cho người nhà (BR-07 §2.1).
+          Chỉ dùng camera trực tiếp (không chọn ảnh từ thư viện). Ảnh được đóng dấu giờ và gửi cho gia đình người bệnh.
         </Text>
 
         {selfieUri ? (
           <View style={styles.previewContainer}>
-            <Image source={{ uri: selfieUri }} style={styles.previewImage} />
+            <Image
+              source={{ uri: selfieUri }}
+              style={styles.previewImage}
+              accessibilityLabel="Ảnh selfie điểm danh tại nhà người bệnh"
+            />
             <View style={styles.watermark}>
               <Text style={styles.watermarkText}>
-                CareNest Verified · GPS: {deviceLat.toFixed(4)}, {deviceLng.toFixed(4)}
+                CareNest · {deviceLat.toFixed(4)}, {deviceLng.toFixed(4)} · {capturedTime}
               </Text>
-              <Text style={styles.watermarkText}>{new Date().toLocaleTimeString('vi-VN')}</Text>
             </View>
-            <TouchableOpacity style={styles.retakeBtn} onPress={handleLaunchHardwareCamera}>
+            <TouchableOpacity
+              style={styles.retakeBtn}
+              onPress={handleLaunchHardwareCamera}
+              accessibilityRole="button"
+              accessibilityLabel="Chụp lại ảnh điểm danh"
+            >
               <Text style={styles.retakeText}>Chụp lại</Text>
             </TouchableOpacity>
           </View>
         ) : (
-          <TouchableOpacity style={styles.cameraBtn} onPress={handleLaunchHardwareCamera}>
-            <Text style={styles.cameraBtnText}>📷 Mở Camera Chụp Selfie</Text>
+          <TouchableOpacity
+            style={styles.cameraBtn}
+            onPress={handleLaunchHardwareCamera}
+            accessibilityRole="button"
+            accessibilityLabel="Mở camera chụp ảnh tại chỗ"
+          >
+            <Text style={styles.cameraBtnText}>Mở camera chụp ảnh tại chỗ</Text>
           </TouchableOpacity>
         )}
       </View>
 
-      {/* Buttons */}
+      {/* Action Buttons */}
       <View style={styles.btnRow}>
-        <TouchableOpacity style={styles.cancelBtn} onPress={onCancel}>
+        <TouchableOpacity
+          style={styles.cancelBtn}
+          onPress={onCancel}
+          accessibilityRole="button"
+          accessibilityLabel="Quay lại màn hình trước"
+        >
           <Text style={styles.cancelBtnText}>Quay lại</Text>
         </TouchableOpacity>
 
@@ -214,14 +203,60 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
           ]}
           disabled={!isWithinRadius || isMockLocation || !selfieUri || loading}
           onPress={handlePerformCheckIn}
+          accessibilityRole="button"
+          accessibilityLabel="Xác nhận vào ca"
+          accessibilityState={{ disabled: !isWithinRadius || isMockLocation || !selfieUri || loading }}
         >
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.submitBtnText}>Xác Nhận Điểm Danh</Text>
+            <Text style={styles.submitBtnText}>Xác nhận vào ca</Text>
           )}
         </TouchableOpacity>
       </View>
+
+      {/* Collapsible Dev GPS Simulator */}
+      <TouchableOpacity
+        style={styles.simToggle}
+        onPress={() => setShowSimulator((v) => !v)}
+      >
+        <Text style={styles.simToggleText}>
+          {showSimulator ? 'Ẩn công cụ mô phỏng GPS' : 'Công cụ mô phỏng GPS (kiểm thử)'}
+        </Text>
+      </TouchableOpacity>
+
+      {showSimulator && (
+        <View style={styles.simBox}>
+          <View style={styles.devBar}>
+            <TouchableOpacity
+              style={styles.devBtn}
+              onPress={() => {
+                setDeviceLat(patientLatitude + 0.0003);
+                setDeviceLng(patientLongitude + 0.0003);
+              }}
+            >
+              <Text style={styles.devBtnText}>Tại chỗ (khoảng 35m)</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.devBtn}
+              onPress={() => {
+                setDeviceLat(patientLatitude + 0.004);
+                setDeviceLng(patientLongitude + 0.004);
+              }}
+            >
+              <Text style={styles.devBtnText}>Ở xa (khoảng 450m)</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            style={styles.mockToggle}
+            onPress={() => setIsMockLocation(!isMockLocation)}
+          >
+            <Text style={{ fontSize: 13.5, color: isMockLocation ? tokens.colors.alertCrimson : tokens.colors.inkSecondary }}>
+              {isMockLocation ? 'Đang bật giả lập Fake GPS (Bấm để tắt)' : 'Đang tắt giả lập GPS (Bấm để thử nghiệm chặn)'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </ScrollView>
   );
 };
@@ -229,88 +264,72 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: tokens.colors.canvas,
   },
   content: {
-    padding: tokens.spacing.paddingBase,
+    padding: 18,
     paddingBottom: 40,
   },
-  title: {
-    fontSize: tokens.typography.fontSizeTitle,
-    fontWeight: '800',
-    color: tokens.colors.textMain,
+  eyebrow: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: tokens.colors.brandJade,
     marginBottom: 4,
   },
-  subtitle: {
-    fontSize: 14,
-    color: tokens.colors.textMuted,
-    marginBottom: 16,
+  title: {
+    fontSize: 23,
+    fontWeight: '700',
+    color: tokens.colors.inkPrimary,
+    marginBottom: 6,
   },
-  card: {
-    backgroundColor: '#fff',
+  subtitle: {
+    fontSize: 15.5,
+    color: tokens.colors.inkSecondary,
+    lineHeight: 22,
+    marginBottom: 18,
+  },
+  ledgerCard: {
+    backgroundColor: tokens.colors.paper,
     borderRadius: 14,
     padding: 16,
-    borderWidth: 1.5,
-    borderColor: tokens.colors.border,
-    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: tokens.colors.borderHairline,
+    marginBottom: 14,
   },
   sectionHeader: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
-    color: tokens.colors.textMain,
-    marginBottom: 8,
+    color: tokens.colors.inkPrimary,
+    marginBottom: 6,
   },
   infoText: {
-    fontSize: 14,
-    color: tokens.colors.textMuted,
-    marginBottom: 8,
+    fontSize: 15,
+    color: tokens.colors.inkSecondary,
+    marginBottom: 12,
+    lineHeight: 21,
   },
-  badgeRow: {
-    marginBottom: 10,
-  },
-  badge: {
+  statusPill: {
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
+    paddingVertical: 8,
+    borderRadius: 10,
     alignSelf: 'flex-start',
   },
-  badgeText: {
-    fontSize: 13.5,
-    fontWeight: '700',
-  },
-  devBar: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#e2e8f0',
-  },
-  devBtn: {
-    backgroundColor: '#f1f5f9',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  devBtnText: {
-    fontSize: 11.5,
-    color: tokens.colors.textMuted,
-  },
-  mockToggle: {
-    marginTop: 6,
+  statusPillText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   hint: {
-    fontSize: 13,
-    color: tokens.colors.textMuted,
+    fontSize: 14.5,
+    color: tokens.colors.inkSecondary,
     marginBottom: 12,
-    lineHeight: 18,
+    lineHeight: 21,
   },
   cameraBtn: {
-    height: 120,
-    backgroundColor: '#f0fdfa',
+    height: 112,
+    backgroundColor: tokens.colors.brandJadeSoft,
     borderRadius: 12,
-    borderWidth: 2,
-    borderColor: tokens.colors.primary,
+    borderWidth: 1.5,
+    borderColor: tokens.colors.brandJade,
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
@@ -318,7 +337,7 @@ const styles = StyleSheet.create({
   cameraBtnText: {
     fontSize: 16,
     fontWeight: '700',
-    color: tokens.colors.primary,
+    color: tokens.colors.brandJade,
   },
   previewContainer: {
     borderRadius: 12,
@@ -335,61 +354,101 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(15, 23, 42, 0.75)',
-    padding: 6,
+    backgroundColor: 'rgba(16, 42, 36, 0.82)',
+    padding: 8,
   },
   watermarkText: {
-    color: '#fff',
-    fontSize: 11,
+    color: '#FFFFFF',
+    fontSize: 12,
     fontWeight: '600',
   },
   retakeBtn: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(16, 42, 36, 0.78)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
   },
   retakeText: {
-    color: '#fff',
-    fontSize: 12,
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
   },
   btnRow: {
     flexDirection: 'row',
     gap: 12,
+    marginTop: 6,
   },
   cancelBtn: {
     flex: 1,
-    height: tokens.spacing.touchTargetMin,
+    height: 52,
     borderWidth: 1,
-    borderColor: tokens.colors.border,
-    borderRadius: 10,
+    borderColor: tokens.colors.borderHairline,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: tokens.colors.paper,
   },
   cancelBtnText: {
-    fontSize: 15,
-    color: tokens.colors.textMuted,
+    fontSize: 15.5,
+    color: tokens.colors.inkSecondary,
     fontWeight: '600',
   },
   submitBtn: {
     flex: 2,
-    height: tokens.spacing.touchTargetMin,
-    backgroundColor: tokens.colors.primary,
-    borderRadius: 10,
+    height: 52,
+    backgroundColor: tokens.colors.brandJade,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   btnDisabled: {
-    opacity: 0.5,
+    opacity: 0.45,
   },
   submitBtnText: {
-    fontSize: 16,
+    fontSize: 16.5,
     fontWeight: '700',
-    color: '#fff',
+    color: '#FFFFFF',
+  },
+  simToggle: {
+    marginTop: 22,
+    alignSelf: 'center',
+    paddingVertical: 6,
+  },
+  simToggleText: {
+    fontSize: 13.5,
+    color: tokens.colors.inkMuted,
+    textDecorationLine: 'underline',
+  },
+  simBox: {
+    marginTop: 8,
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: tokens.colors.subtle,
+    borderWidth: 1,
+    borderColor: tokens.colors.borderHairline,
+  },
+  devBar: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  devBtn: {
+    flex: 1,
+    backgroundColor: tokens.colors.paper,
+    borderWidth: 1,
+    borderColor: tokens.colors.borderHairline,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  devBtnText: {
+    fontSize: 13,
+    color: tokens.colors.inkPrimary,
+    fontWeight: '600',
+  },
+  mockToggle: {
+    marginTop: 10,
   },
 });
-

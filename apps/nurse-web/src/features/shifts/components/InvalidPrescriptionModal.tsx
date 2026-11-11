@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { AlertTriangle, Camera, X } from 'lucide-react';
+import React, { useId, useRef, useState } from 'react';
+import { AlertTriangle, Camera } from 'lucide-react';
 import { rejectInvalidPrescription } from '../shift.api';
 import { DEFAULT_TRAVEL_SUPPORT_VND } from '@healthcare-system/shared';
+import { Modal, ModalCloseButton } from '../../../components';
 
 interface InvalidPrescriptionModalProps {
   bookingId: string;
@@ -16,6 +17,9 @@ export const InvalidPrescriptionModal: React.FC<InvalidPrescriptionModalProps> =
   onSuccess,
   onClose,
 }) => {
+  const titleId = useId();
+  const baseId = useId();
+  const evidenceInputRef = useRef<HTMLInputElement>(null);
   const [reason, setReason] = useState<string>('Thuốc/vật tư thực tế không khớp với y lệnh của bác sĩ');
   const [detailNote, setDetailNote] = useState<string>('');
   const [evidencePhoto, setEvidencePhoto] = useState<string | null>(null);
@@ -59,47 +63,18 @@ export const InvalidPrescriptionModal: React.FC<InvalidPrescriptionModalProps> =
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.75)',
-        display: 'grid',
-        placeItems: 'center',
-        zIndex: 9999,
-        padding: 16,
-      }}
-    >
-      <div
-        className="card"
-        style={{
-          width: '100%',
-          maxWidth: 540,
-          maxHeight: '92vh',
-          overflowY: 'auto',
-          padding: 24,
-          borderRadius: 16,
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
-        }}
-      >
+    <Modal open onClose={onClose} titleId={titleId} maxWidth={540}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: 19, color: 'var(--red)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <AlertTriangle size={20} />
+            <h2 id={titleId} style={{ margin: 0, fontSize: 19, color: 'var(--red)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <AlertTriangle size={20} aria-hidden="true" />
               Từ Chối Ca Do Y Lệnh Không Hợp Lệ
             </h2>
             <p style={{ margin: '4px 0 0 0', color: 'var(--slate)', fontSize: 13.5 }}>
               Đơn {bookingCode} · Cổng bảo vệ điều dưỡng (FR-BOOK-02, BR-15 §2.2)
             </p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn btn-secondary btn-sm"
-            style={{ borderRadius: '50%', width: 36, height: 36, padding: 0 }}
-          >
-            <X size={18} />
-          </button>
+          <ModalCloseButton onClick={onClose} />
         </div>
 
         {/* Legal protection note */}
@@ -126,12 +101,13 @@ export const InvalidPrescriptionModal: React.FC<InvalidPrescriptionModalProps> =
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: 14 }}>
-            <label style={{ display: 'block', fontSize: 13.5, fontWeight: 700, color: 'var(--navy)', marginBottom: 6 }}>
+            <label htmlFor={`${baseId}-reason`} style={{ display: 'block', fontSize: 13.5, fontWeight: 700, color: 'var(--navy)', marginBottom: 6 }}>
               Lý do từ chối can thiệp:
             </label>
             <select
+              id={`${baseId}-reason`}
               className="input"
-              style={{ width: '100%', height: 44 }}
+              style={{ width: '100%', minHeight: 48 }}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             >
@@ -154,10 +130,11 @@ export const InvalidPrescriptionModal: React.FC<InvalidPrescriptionModalProps> =
           </div>
 
           <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', fontSize: 13.5, fontWeight: 700, color: 'var(--navy)', marginBottom: 6 }}>
+            <label htmlFor={`${baseId}-detail`} style={{ display: 'block', fontSize: 13.5, fontWeight: 700, color: 'var(--navy)', marginBottom: 6 }}>
               Chi tiết đối chiếu thực tế:
             </label>
             <textarea
+              id={`${baseId}-detail`}
               className="input"
               style={{ width: '100%', minHeight: 70, padding: 8, fontSize: 14 }}
               placeholder="Ghi rõ tên thuốc, nồng độ hoặc biểu hiện sai lệch cụ thể..."
@@ -169,42 +146,46 @@ export const InvalidPrescriptionModal: React.FC<InvalidPrescriptionModalProps> =
 
           {/* Mandatory Photo Evidence */}
           <div style={{ marginBottom: 20 }}>
-            <label style={{ display: 'block', fontSize: 13.5, fontWeight: 700, color: 'var(--navy)', marginBottom: 6 }}>
+            <label htmlFor={`${baseId}-evidence`} style={{ display: 'block', fontSize: 13.5, fontWeight: 700, color: 'var(--navy)', marginBottom: 6 }}>
               Chụp ảnh bằng chứng đối soát tại chỗ (bắt buộc):
             </label>
             <input
+              ref={evidenceInputRef}
               type="file"
               accept="image/*"
               capture="environment"
               onChange={handleCapturePhoto}
-              style={{ display: 'none' }}
-              id="prescription-evidence-input"
+              className="sr-only"
+              id={`${baseId}-evidence`}
             />
             {evidencePhoto ? (
               <div style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', border: '1.5px solid var(--red)' }}>
-                <img src={evidencePhoto} alt="Evidence" style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }} />
-                <label
-                  htmlFor="prescription-evidence-input"
+                <img src={evidencePhoto} alt="Ảnh bằng chứng đối soát y lệnh" style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }} />
+                <button
+                  type="button"
+                  onClick={() => evidenceInputRef.current?.click()}
                   style={{
                     position: 'absolute',
                     bottom: 8,
                     right: 8,
-                    background: 'rgba(0,0,0,0.7)',
+                    minHeight: 48,
+                    background: 'rgba(0,0,0,0.75)',
                     color: '#fff',
-                    padding: '4px 10px',
-                    borderRadius: 6,
-                    fontSize: 12,
-                    cursor: 'pointer',
+                    padding: '6px 14px',
+                    borderRadius: 8,
+                    fontSize: 13,
                   }}
                 >
                   Chụp lại
-                </label>
+                </button>
               </div>
             ) : (
-              <label
-                htmlFor="prescription-evidence-input"
+              <button
+                type="button"
+                onClick={() => evidenceInputRef.current?.click()}
                 style={{
-                  height: 120,
+                  width: '100%',
+                  minHeight: 120,
                   border: '2px dashed var(--red)',
                   borderRadius: 10,
                   display: 'flex',
@@ -213,13 +194,14 @@ export const InvalidPrescriptionModal: React.FC<InvalidPrescriptionModalProps> =
                   justifyContent: 'center',
                   background: '#FEF2F2',
                   cursor: 'pointer',
+                  padding: 16,
                 }}
               >
-                <Camera size={26} color="var(--red)" />
+                <Camera size={26} color="var(--red)" aria-hidden="true" />
                 <span style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--red)', marginTop: 6 }}>
                   Bấm để chụp ảnh đơn thuốc / vỏ thuốc thực tế
                 </span>
-              </label>
+              </button>
             )}
           </div>
 
@@ -227,7 +209,7 @@ export const InvalidPrescriptionModal: React.FC<InvalidPrescriptionModalProps> =
             <button
               type="button"
               className="btn btn-secondary"
-              style={{ flex: 1, height: 48 }}
+              style={{ flex: 1, minHeight: 48 }}
               onClick={onClose}
             >
               Quay lại
@@ -235,14 +217,13 @@ export const InvalidPrescriptionModal: React.FC<InvalidPrescriptionModalProps> =
             <button
               type="submit"
               className="btn btn-primary"
-              style={{ flex: 2, height: 48, background: 'var(--red)', borderColor: 'var(--red)', fontWeight: 700 }}
+              style={{ flex: 2, minHeight: 48, background: 'var(--red)', borderColor: 'var(--red)', fontWeight: 700 }}
               disabled={isSubmitting || !evidencePhoto}
             >
               {isSubmitting ? 'Đang gửi...' : 'Xác nhận Từ Chối Ca Không Phạt'}
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import { HeartPulse, Plus, AlertTriangle, Clock } from 'lucide-react';
 import { VitalSignRecord } from '../shift.types';
 import { addVitalSigns } from '../shift.api';
@@ -14,6 +14,7 @@ export const VitalSignsForm: React.FC<VitalSignsFormProps> = ({
   vitalsList,
   onVitalsAdded,
 }) => {
+  const baseId = useId();
   const [showAddForm, setShowAddForm] = useState(false);
   const [heartRate, setHeartRate] = useState<number>(78);
   const [bpSystolic, setBpSystolic] = useState<number>(120);
@@ -98,39 +99,41 @@ export const VitalSignsForm: React.FC<VitalSignsFormProps> = ({
           style={{
             padding: 16,
             borderRadius: 12,
-            background: 'var(--mint)',
+            background: 'var(--brand-jade-soft)',
             border: '1px solid #A7F3D0',
             marginBottom: 16,
           }}
         >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 12 }}>
+          <div className="vitals-form-grid">
             <div>
-              <label style={{ fontSize: 13, color: 'var(--slate)', display: 'block', marginBottom: 2 }}>Mạch (bpm)</label>
+              <label htmlFor={`${baseId}-hr`} className="vitals-field-label">Mạch (bpm)</label>
               <input
+                id={`${baseId}-hr`}
                 type="number"
-                className="input"
-                style={{ width: '100%', height: 42, fontSize: 16, fontWeight: 700 }}
+                className="input input-numeric"
                 value={heartRate}
                 onChange={(e) => setHeartRate(Number(e.target.value))}
                 required
               />
             </div>
             <div>
-              <label style={{ fontSize: 13, color: 'var(--slate)', display: 'block', marginBottom: 2 }}>Huyết áp (mmHg)</label>
-              <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+              <label htmlFor={`${baseId}-sbp`} className="vitals-field-label">Huyết áp (mmHg)</label>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <input
+                  id={`${baseId}-sbp`}
+                  aria-label="Huyết áp tâm thu (mmHg)"
                   type="number"
-                  className="input"
-                  style={{ width: '100%', height: 42, fontSize: 15, fontWeight: 700 }}
+                  className="input input-numeric"
                   value={bpSystolic}
                   onChange={(e) => setBpSystolic(Number(e.target.value))}
                   required
                 />
-                <span>/</span>
+                <span style={{ fontWeight: 700, color: 'var(--ink-secondary)' }}>/</span>
                 <input
+                  id={`${baseId}-dbp`}
+                  aria-label="Huyết áp tâm trương (mmHg)"
                   type="number"
-                  className="input"
-                  style={{ width: '100%', height: 42, fontSize: 15, fontWeight: 700 }}
+                  className="input input-numeric"
                   value={bpDiastolic}
                   onChange={(e) => setBpDiastolic(Number(e.target.value))}
                   required
@@ -138,45 +141,45 @@ export const VitalSignsForm: React.FC<VitalSignsFormProps> = ({
               </div>
             </div>
             <div>
-              <label style={{ fontSize: 13, color: 'var(--slate)', display: 'block', marginBottom: 2 }}>Thân nhiệt (°C)</label>
+              <label htmlFor={`${baseId}-temp`} className="vitals-field-label">Thân nhiệt (°C)</label>
               <input
+                id={`${baseId}-temp`}
                 type="number"
                 step="0.1"
-                className="input"
-                style={{ width: '100%', height: 42, fontSize: 16, fontWeight: 700 }}
+                className="input input-numeric"
                 value={temperature}
                 onChange={(e) => setTemperature(Number(e.target.value))}
                 required
               />
             </div>
             <div>
-              <label style={{ fontSize: 13, color: 'var(--slate)', display: 'block', marginBottom: 2 }}>SpO2 (%)</label>
+              <label htmlFor={`${baseId}-spo2`} className="vitals-field-label">SpO2 (%)</label>
               <input
+                id={`${baseId}-spo2`}
                 type="number"
-                className="input"
-                style={{ width: '100%', height: 42, fontSize: 16, fontWeight: 700 }}
+                className="input input-numeric"
                 value={spo2}
                 onChange={(e) => setSpo2(Number(e.target.value))}
                 required
               />
             </div>
             <div>
-              <label style={{ fontSize: 13, color: 'var(--slate)', display: 'block', marginBottom: 2 }}>Nhịp thở (lần/phút)</label>
+              <label htmlFor={`${baseId}-rr`} className="vitals-field-label">Nhịp thở (lần/phút)</label>
               <input
+                id={`${baseId}-rr`}
                 type="number"
-                className="input"
-                style={{ width: '100%', height: 42, fontSize: 16, fontWeight: 700 }}
+                className="input input-numeric"
                 value={respiratoryRate}
                 onChange={(e) => setRespiratoryRate(Number(e.target.value))}
               />
             </div>
             <div>
-              <label style={{ fontSize: 13, color: 'var(--slate)', display: 'block', marginBottom: 2 }}>Đường huyết (mmol/L)</label>
+              <label htmlFor={`${baseId}-glu`} className="vitals-field-label">Đường huyết (mmol/L)</label>
               <input
+                id={`${baseId}-glu`}
                 type="number"
                 step="0.1"
-                className="input"
-                style={{ width: '100%', height: 42, fontSize: 16, fontWeight: 700 }}
+                className="input input-numeric"
                 value={glucose}
                 placeholder="Tùy chọn"
                 onChange={(e) => setGlucose(e.target.value)}
@@ -185,7 +188,7 @@ export const VitalSignsForm: React.FC<VitalSignsFormProps> = ({
           </div>
 
           {currentWarnings.length > 0 && (
-            <div style={{ padding: '8px 12px', background: '#FEF3C7', color: '#92400E', borderRadius: 8, fontSize: 13, marginBottom: 12 }}>
+            <div style={{ padding: '10px 14px', background: '#FEF3C7', color: '#92400E', borderRadius: 10, fontSize: 13.5, marginBottom: 14 }}>
               <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
                 <AlertTriangle size={15} /> Cảnh báo chỉ số sinh lý:
               </div>
@@ -197,10 +200,14 @@ export const VitalSignsForm: React.FC<VitalSignsFormProps> = ({
             </div>
           )}
 
+          <label htmlFor={`${baseId}-notes`} className="sr-only">
+            Ghi chú lâm sàng kèm theo
+          </label>
           <input
+            id={`${baseId}-notes`}
             type="text"
             className="input"
-            style={{ width: '100%', height: 40, marginBottom: 12, fontSize: 13.5 }}
+            style={{ marginBottom: 14, fontSize: 15 }}
             placeholder="Ghi chú lâm sàng kèm theo (ví dụ: đo sau khi uống thuốc 15 phút)..."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
@@ -264,7 +271,7 @@ export const VitalSignsForm: React.FC<VitalSignsFormProps> = ({
                   )}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, fontSize: 13.5 }}>
+                <div className="vitals-history-grid tabular-nums">
                   <div>Mạch: <strong>{item.heartRate}</strong> bpm</div>
                   <div>HA: <strong>{item.bloodPressureSystolic}/{item.bloodPressureDiastolic}</strong> mmHg</div>
                   <div>Nhiệt độ: <strong>{item.temperature}</strong>°C</div>

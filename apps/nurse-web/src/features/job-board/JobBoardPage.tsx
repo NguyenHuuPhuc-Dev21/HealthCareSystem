@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Briefcase,
   Radio,
   AlertTriangle,
   CheckCircle2,
@@ -9,6 +8,8 @@ import {
   UserCheck,
   Zap,
   Wallet,
+  SlidersHorizontal,
+  X,
 } from 'lucide-react';
 import { JobItem, DirectInvitation, RadarJob, JobBoardFilter } from './job-board.types';
 import {
@@ -31,16 +32,19 @@ import { DEFAULT_MIN_NURSE_DEPOSIT_VND } from '@healthcare-system/shared';
 export const JobBoardPage: React.FC = () => {
   const { session } = useAuth();
   const initialDeposit = (session?.profile as any)?.deposit_balance ?? DEFAULT_MIN_NURSE_DEPOSIT_VND;
+  const initialTier: 1 | 2 = session?.profile?.tier === 'TIER_1_BASIC' ? 1 : 2;
+
   const [filter, setFilter] = useState<JobBoardFilter>('all');
   const [jobs, setJobs] = useState<JobItem[]>([]);
   const [selectedJobForDetail, setSelectedJobForDetail] = useState<JobItem | null>(null);
   const [directInvite, setDirectInvite] = useState<DirectInvitation | null>(null);
   const [radarJob, setRadarJob] = useState<RadarJob | null>(null);
   const [depositAmount, setDepositAmount] = useState<number>(initialDeposit);
-  const [userTier, setUserTier] = useState<1 | 2>(2);
+  const [userTier, setUserTier] = useState<1 | 2>(initialTier);
   const [loading, setLoading] = useState<boolean>(true);
   const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [sandboxOpen, setSandboxOpen] = useState<boolean>(false);
 
   const tierCode = userTier === 2 ? 'TIER_2_SPECIALIST' : 'TIER_1_BASIC';
 
@@ -53,14 +57,11 @@ export const JobBoardPage: React.FC = () => {
       ]);
 
       if (boardRes.success) {
-        let list = boardRes.data;
-        // Compute tier-locked status
-        list = list.map((job) => ({
+        let list = boardRes.data.map((job) => ({
           ...job,
           isLockedForTier1: userTier === 1 && job.isInvasive,
         }));
 
-        // Apply tab filters
         if (filter === 'shift') {
           list = list.filter((j) => j.serviceType === 'shift');
         } else if (filter === 'task') {
@@ -134,6 +135,7 @@ export const JobBoardPage: React.FC = () => {
     const res = await getRadarJob();
     if (res.success && res.data) {
       setRadarJob(res.data);
+      setSandboxOpen(false);
     } else {
       showToast('error', 'Hiện không có ca phát sóng khẩn cấp nào.');
     }
@@ -145,265 +147,253 @@ export const JobBoardPage: React.FC = () => {
     setIsProcessing(false);
     setRadarJob(null);
     if (result.success) {
-      showToast('success', result.message ?? 'Đã nhận ca Radar thành công!');
+      showToast('success', result.message ?? 'Đã nhận ca khẩn cấp thành công!');
       await loadData();
     } else {
-      showToast('error', result.message ?? 'Không thể nhận ca Radar.');
+      showToast('error', result.message ?? 'Không thể nhận ca.');
     }
   };
 
   const handleDismissRadar = async () => {
     await dismissRadarJob();
     setRadarJob(null);
-    showToast('success', 'Đã bỏ qua ca Radar. Ca sẽ chuyển đến điều dưỡng tiếp theo.');
+    showToast('success', 'Đã bỏ qua ca khẩn cấp. Ca sẽ chuyển tới điều dưỡng khác.');
   };
 
   const isDepositSufficient = depositAmount >= DEFAULT_MIN_NURSE_DEPOSIT_VND;
 
   return (
-    <div className="screen-body elder">
-      <div className="page">
-        {/* Page Header */}
-        <div className="page-head" style={{ marginBottom: 16 }}>
-          <div>
-            <h1 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Briefcase size={30} color="var(--blue-dark)" />
-              Bảng việc làm
-            </h1>
-            <p>Việc phù hợp với cấp bậc, chuyên môn và lịch rảnh của bạn</p>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            {/* Tier View Switcher for Testing N2 Specs */}
-            <button
-              className="btn btn-secondary btn-sm"
-              type="button"
-              style={{ fontSize: 14, height: 40 }}
-              onClick={() => setUserTier(userTier === 2 ? 1 : 2)}
-              title="Chuyển đổi góc nhìn giữa Cấp 2 và Cấp 1"
-            >
-              <UserCheck size={16} style={{ marginRight: 6 }} />
-              Góc nhìn: {userTier === 2 ? 'Cấp 2 (Hiện tại)' : 'Cấp 1 (Demo khóa xâm lấn)'}
-            </button>
-
-            {/* Deposit Balance Switcher for Testing BR-14 Shortfall */}
-            <button
-              className="btn btn-secondary btn-sm"
-              type="button"
-              style={{ fontSize: 14, height: 40 }}
-              onClick={() =>
-                setDepositAmount((prev) =>
-                  prev >= DEFAULT_MIN_NURSE_DEPOSIT_VND
-                    ? Math.round(DEFAULT_MIN_NURSE_DEPOSIT_VND / 2)
-                    : DEFAULT_MIN_NURSE_DEPOSIT_VND
-                )
-              }
-              title="Chuyển đổi số dư ký quỹ để kiểm thử quy chế BR-14"
-            >
-              <Wallet size={16} style={{ marginRight: 6 }} />
-              Ký quỹ: {depositAmount >= DEFAULT_MIN_NURSE_DEPOSIT_VND
-                ? `${DEFAULT_MIN_NURSE_DEPOSIT_VND.toLocaleString('vi-VN')}đ (Đủ)`
-                : `${Math.round(DEFAULT_MIN_NURSE_DEPOSIT_VND / 2).toLocaleString('vi-VN')}đ (Thiếu BR-14)`}
-            </button>
-
-            {/* Radar Simulation Trigger */}
-            <button
-              className="btn btn-primary btn-sm"
-              type="button"
-              style={{ fontSize: 14, height: 40, background: 'var(--teal)' }}
-              onClick={handleTriggerRadar}
-            >
-              <Radio size={16} style={{ marginRight: 6 }} />
-              Bật Radar N3 (Phát ca gần)
-            </button>
-          </div>
+    <div>
+      {/* Page Header thuần khiết cho Điều dưỡng */}
+      <div className="page-head">
+        <div>
+          <h1>Bảng việc làm</h1>
+          <p>Các ca chăm sóc đang tìm điều dưỡng, lọc theo cấp bậc chuyên môn và lịch rảnh của bạn.</p>
         </div>
 
-        {/* Toast Feedback */}
-        {feedbackMessage && (
-          <div
-            style={{
-              padding: '12px 18px',
-              borderRadius: 12,
-              background: feedbackMessage.type === 'success' ? '#DEF7EC' : '#FDE8E8',
-              color: feedbackMessage.type === 'success' ? '#03543F' : '#9B1C1C',
-              border: `1px solid ${feedbackMessage.type === 'success' ? '#84E1BC' : '#F8B4B4'}`,
-              marginBottom: 16,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              fontSize: 16,
-              fontWeight: 600,
-              animation: 'fadeIn 0.2s ease',
-            }}
-          >
-            {feedbackMessage.type === 'success' ? <CheckCircle2 size={20} /> : <AlertTriangle size={20} />}
-            <span>{feedbackMessage.text}</span>
-          </div>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span className="status-pill status-pill--jade">
+            {userTier === 2 ? 'Chuyên môn Cấp 2' : 'Chăm sóc Cấp 1'}
+          </span>
+        </div>
+      </div>
 
-        {/* Deposit Warning Banner (BR-14) */}
-        {!isDepositSufficient && (
-          <div
-            className="card"
-            style={{
-              background: '#FFF8E1',
-              borderColor: '#FFE082',
-              color: '#8D6E63',
-              marginBottom: 20,
-              padding: '16px 20px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 14,
-            }}
-          >
-            <AlertTriangle size={24} color="#D97706" />
-            <div style={{ flex: 1 }}>
-              <strong style={{ color: '#92400E', fontSize: 16 }}>
-                Số dư ký quỹ hiện tại: {depositAmount.toLocaleString('vi-VN')}đ (Yêu cầu tối thiểu {DEFAULT_MIN_NURSE_DEPOSIT_VND.toLocaleString('vi-VN')}đ)
+      {/* Toast Feedback */}
+      {feedbackMessage && (
+        <div
+          style={{
+            padding: '14px 18px',
+            borderRadius: 12,
+            background: feedbackMessage.type === 'success' ? 'var(--brand-jade-soft)' : 'var(--alert-crimson-soft)',
+            color: feedbackMessage.type === 'success' ? 'var(--brand-jade)' : 'var(--alert-crimson)',
+            border: `1px solid ${feedbackMessage.type === 'success' ? '#A7D7C5' : '#FECACA'}`,
+            marginBottom: 18,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            fontSize: 16,
+            fontWeight: 600,
+          }}
+        >
+          {feedbackMessage.type === 'success' ? <CheckCircle2 size={20} /> : <AlertTriangle size={20} />}
+          <span>{feedbackMessage.text}</span>
+        </div>
+      )}
+
+      {/* Cảnh báo thiếu ký quỹ (Ngôn ngữ tự nhiên, bỏ mã kỹ thuật) */}
+      {!isDepositSufficient && (
+        <div
+          className="ledger-panel"
+          style={{
+            background: 'var(--accent-ochre-soft)',
+            borderColor: '#FCD34D',
+            marginBottom: 20,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 16,
+            flexWrap: 'wrap',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+            <AlertTriangle size={22} color="var(--accent-ochre)" style={{ marginTop: 2, flexShrink: 0 }} />
+            <div>
+              <strong style={{ color: 'var(--ink-primary)', fontSize: 16.5 }}>
+                Số dư ký quỹ hiện tại: <span className="tabular-nums">{depositAmount.toLocaleString('vi-VN')} đ</span>
               </strong>
-              <p style={{ margin: '4px 0 0 0', fontSize: 14.5, color: '#78350F' }}>
-                Theo quy chế BR-14, bạn cần bổ sung ký quỹ để có thể nhận ca chăm sóc.
+              <p style={{ margin: '4px 0 0', fontSize: 15, color: 'var(--ink-secondary)' }}>
+                Bạn cần duy trì ký quỹ tối thiểu <span className="tabular-nums">{DEFAULT_MIN_NURSE_DEPOSIT_VND.toLocaleString('vi-VN')} đ</span> để nhận ca chăm sóc mới.
               </p>
             </div>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              style={{ whiteSpace: 'nowrap' }}
-              onClick={() => {
-                setDepositAmount(DEFAULT_MIN_NURSE_DEPOSIT_VND);
-                showToast(
-                  'success',
-                  `Đã nạp bổ sung ký quỹ thành công! Số dư hiện tại: ${DEFAULT_MIN_NURSE_DEPOSIT_VND.toLocaleString('vi-VN')}đ`
-                );
-              }}
-            >
-              Nạp ký quỹ ngay
-            </button>
           </div>
-        )}
-
-        {/* Direct Invitation Banner if Available */}
-        {directInvite && (
-          <DirectInviteCard
-            invite={directInvite}
-            onAccept={handleAcceptDirectInvite}
-            onDecline={handleDeclineDirectInvite}
-            isProcessing={isProcessing}
-          />
-        )}
-
-        {/* Filter Toolbar */}
-        <div className="toolbar" style={{ borderTop: 0, paddingTop: 4 }}>
           <button
             type="button"
-            className={filter === 'all' ? 'active' : ''}
-            onClick={() => setFilter('all')}
-          >
-            <Filter size={15} />
-            Tất cả
-          </button>
-          <button
-            type="button"
-            className={filter === 'shift' ? 'active' : ''}
-            onClick={() => setFilter('shift')}
-          >
-            Theo ca
-          </button>
-          <button
-            type="button"
-            className={filter === 'task' ? 'active' : ''}
-            onClick={() => setFilter('task')}
-          >
-            Thủ thuật lẻ
-          </button>
-          <button
-            type="button"
-            className={filter === 'near' ? 'active' : ''}
-            onClick={() => setFilter('near')}
-          >
-            Gần tôi (≤ 3 km)
-          </button>
-          <button
-            type="button"
-            className={filter === 'bonus' ? 'active' : ''}
-            onClick={() => setFilter('bonus')}
-          >
-            <Zap size={14} />
-            Thưởng nóng
-          </button>
-        </div>
-
-        {/* Jobs List */}
-        {loading ? (
-          <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--slate)', fontSize: 16 }}>
-            Đang tải danh sách ca phù hợp...
-          </div>
-        ) : jobs.length === 0 ? (
-          <div
-            className="card"
-            style={{
-              padding: '40px 20px',
-              textAlign: 'center',
-              backgroundColor: '#FAFCFB',
-              marginTop: 10,
+            className="btn btn-primary btn-sm"
+            onClick={() => {
+              setDepositAmount(DEFAULT_MIN_NURSE_DEPOSIT_VND);
+              showToast(
+                'success',
+                `Đã bổ sung ký quỹ thành công. Số dư hiện tại: ${DEFAULT_MIN_NURSE_DEPOSIT_VND.toLocaleString('vi-VN')} đ`
+              );
             }}
           >
-            <p style={{ fontSize: 17, color: 'var(--slate)', margin: 0 }}>
-              Chưa có việc trong bán kính 10 km — thử mở rộng lịch rảnh hoặc chọn bộ lọc khác.
-            </p>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {jobs.map((job) => (
-              <JobCard
-                key={job.id}
-                job={job}
-                onAccept={handleAcceptJob}
-                onViewDetails={(j) => setSelectedJobForDetail(j)}
-                isAccepting={isProcessing}
-              />
-            ))}
-          </div>
-        )}
+            Bổ sung ký quỹ ngay
+          </button>
+        </div>
+      )}
 
-        {/* Job Detail Modal */}
-        {selectedJobForDetail && (
-          <JobDetailModal
-            job={selectedJobForDetail}
-            onClose={() => setSelectedJobForDetail(null)}
-            onAccept={handleAcceptJob}
-            isAccepting={isProcessing}
-          />
-        )}
+      {/* Lời mời trực tiếp từ gia đình */}
+      {directInvite && (
+        <DirectInviteCard
+          invite={directInvite}
+          onAccept={handleAcceptDirectInvite}
+          onDecline={handleDeclineDirectInvite}
+          isProcessing={isProcessing}
+        />
+      )}
 
-        {/* Tier Note Explanatory Box */}
-        <div className="banner" style={{ background: '#F8FAFC', borderColor: 'var(--line)', color: 'var(--slate)', marginTop: 26 }}>
-          <span className="variant-tag" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <ShieldCheck size={14} />
-            Quy chế phân quyền Cấp bậc & GPHN
-          </span>
-          <h4 style={{ color: 'var(--navy)', marginTop: 8, marginBottom: 4 }}>
-            Điều dưỡng Cấp 1 và Cấp 2 trên Bảng việc làm
-          </h4>
-          <p style={{ margin: 0, fontSize: 15, lineHeight: 1.5 }}>
-            • <strong>Điều dưỡng Cấp 2:</strong> Đã xác thực GPHN, được quyền nhận tất cả các ca gồm thủ thuật xâm lấn (tiêm truyền, thay băng vết mổ, đặt ống thông) và ca theo dõi.
-            <br />
-            • <strong>Điều dưỡng Cấp 1:</strong> Chỉ nhận ca chăm sóc không xâm lấn (hỗ trợ sinh hoạt, nhắc thuốc, đo sinh hiệu cơ bản). Các ca xâm lấn sẽ tự động hiển thị khóa để đảm bảo an toàn y khoa.
+      {/* Thanh bộ lọc gọn gàng */}
+      <div className="toolbar" style={{ borderTop: 0, paddingTop: 0 }}>
+        <button type="button" className={filter === 'all' ? 'active' : ''} onClick={() => setFilter('all')}>
+          <Filter size={15} />
+          Tất cả
+        </button>
+        <button type="button" className={filter === 'shift' ? 'active' : ''} onClick={() => setFilter('shift')}>
+          Theo ca dài
+        </button>
+        <button type="button" className={filter === 'task' ? 'active' : ''} onClick={() => setFilter('task')}>
+          Thủ thuật lẻ
+        </button>
+        <button type="button" className={filter === 'near' ? 'active' : ''} onClick={() => setFilter('near')}>
+          Gần khu vực (≤ 3 km)
+        </button>
+        <button type="button" className={filter === 'bonus' ? 'active' : ''} onClick={() => setFilter('bonus')}>
+          <Zap size={14} />
+          Có thưởng thêm
+        </button>
+      </div>
+
+      {/* Danh sách ca */}
+      {loading ? (
+        <div className="ledger-panel" style={{ padding: '48px 20px', textAlign: 'center', color: 'var(--ink-secondary)' }}>
+          Đang tải danh sách việc làm phù hợp...
+        </div>
+      ) : jobs.length === 0 ? (
+        <div className="ledger-panel" style={{ padding: '48px 24px', textAlign: 'center' }}>
+          <p className="prose-limit" style={{ fontSize: 17, color: 'var(--ink-secondary)', margin: '0 auto' }}>
+            Hiện chưa có ca nào khớp bộ lọc trong bán kính 10 km. Hãy thử mở rộng lịch rảnh hoặc chuyển sang bộ lọc Tất cả.
           </p>
         </div>
+      ) : (
+        <div>
+          {jobs.map((job) => (
+            <JobCard
+              key={job.id}
+              job={job}
+              onAccept={handleAcceptJob}
+              onViewDetails={(j) => setSelectedJobForDetail(j)}
+              isAccepting={isProcessing}
+            />
+          ))}
+        </div>
+      )}
 
-        {/* Radar Modal Popup */}
-        {radarJob && (
-          <RadarModal
-            radarJob={radarJob}
-            onAccept={handleAcceptRadar}
-            onDismiss={handleDismissRadar}
-            isProcessing={isProcessing}
-          />
+      {/* Ghi chú quy chế chuyên môn gọn nhẹ */}
+      <div className="ledger-panel" style={{ marginTop: 28, background: 'var(--surface-subtle)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: 'var(--ink-primary)', marginBottom: 8 }}>
+          <ShieldCheck size={18} color="var(--brand-jade)" />
+          <span>Phân quyền chuyên môn theo Giấy phép hành nghề</span>
+        </div>
+        <p className="prose-limit" style={{ margin: 0, fontSize: 15, color: 'var(--ink-secondary)', lineHeight: 1.6 }}>
+          Điều dưỡng Cấp 2 (đã xác thực GPHN) nhận được cả ca chăm sóc cơ bản và thủ thuật xâm lấn có y lệnh. Điều dưỡng Cấp 1 tập trung vào nhóm chăm sóc sinh hoạt và theo dõi sinh hiệu cơ bản để bảo đảm an toàn người bệnh.
+        </p>
+      </div>
+
+      {/* Job Detail Modal */}
+      {selectedJobForDetail && (
+        <JobDetailModal
+          job={selectedJobForDetail}
+          onClose={() => setSelectedJobForDetail(null)}
+          onAccept={handleAcceptJob}
+          isAccepting={isProcessing}
+        />
+      )}
+
+      {/* Radar Modal Popup */}
+      {radarJob && (
+        <RadarModal
+          radarJob={radarJob}
+          onAccept={handleAcceptRadar}
+          onDismiss={handleDismissRadar}
+          isProcessing={isProcessing}
+        />
+      )}
+
+      {/* Thanh công cụ kiểm thử thu gọn ở góc màn hình (không làm nhiễu UI thật) */}
+      <div className="dev-sandbox-dock">
+        {sandboxOpen && (
+          <div className="dev-sandbox-panel">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <strong style={{ fontSize: 14, color: 'var(--ink-primary)' }}>Công cụ mô phỏng kiểm thử</strong>
+              <button
+                type="button"
+                className="btn-close-sm"
+                onClick={() => setSandboxOpen(false)}
+                aria-label="Đóng công cụ mô phỏng"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                style={{ justifyContent: 'flex-start', fontSize: 13.5 }}
+                onClick={() => setUserTier(userTier === 2 ? 1 : 2)}
+              >
+                <UserCheck size={15} />
+                Đổi góc nhìn: {userTier === 2 ? 'Cấp 2 (Đang bật)' : 'Cấp 1 (Khóa xâm lấn)'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                style={{ justifyContent: 'flex-start', fontSize: 13.5 }}
+                onClick={() =>
+                  setDepositAmount((prev) =>
+                    prev >= DEFAULT_MIN_NURSE_DEPOSIT_VND
+                      ? Math.round(DEFAULT_MIN_NURSE_DEPOSIT_VND / 2)
+                      : DEFAULT_MIN_NURSE_DEPOSIT_VND
+                  )
+                }
+              >
+                <Wallet size={15} />
+                Ký quỹ: {depositAmount >= DEFAULT_MIN_NURSE_DEPOSIT_VND ? 'Đủ chuẩn' : 'Giả lập thiếu'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                style={{ justifyContent: 'flex-start', fontSize: 13.5 }}
+                onClick={handleTriggerRadar}
+              >
+                <Radio size={15} />
+                Phát ca khẩn cấp qua Radar
+              </button>
+            </div>
+          </div>
         )}
+
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          style={{ borderRadius: 999, boxShadow: '0 6px 18px rgba(16, 42, 36, 0.14)' }}
+          onClick={() => setSandboxOpen((v) => !v)}
+        >
+          <SlidersHorizontal size={15} />
+          Mô phỏng kiểm thử
+        </button>
       </div>
     </div>
   );
 };
+
 export default JobBoardPage;

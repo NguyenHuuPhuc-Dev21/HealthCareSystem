@@ -13,6 +13,19 @@ import {
 } from './shift.types';
 import * as mockShift from './shift.mock';
 
+export async function getMyShifts(): Promise<{ success: boolean; data: ShiftExecutionState[]; message?: string }> {
+  if (USE_MOCK_SHIFTS) {
+    const data = await mockShift.mockGetMyShifts();
+    return { success: true, data };
+  }
+  const res = await apiClient<ShiftExecutionState[]>('/nurse/shifts');
+  return {
+    success: res.success,
+    data: res.data ?? [],
+    message: res.error?.message,
+  };
+}
+
 export async function getShiftExecutionState(bookingId: string): Promise<{ success: boolean; data?: ShiftExecutionState; message?: string }> {
   if (USE_MOCK_SHIFTS) {
     try {

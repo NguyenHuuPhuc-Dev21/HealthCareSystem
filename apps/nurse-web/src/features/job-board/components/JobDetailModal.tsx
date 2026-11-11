@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-  X,
   Clock,
   MapPin,
   FileText,
@@ -17,6 +16,7 @@ import {
   DEFAULT_PLATFORM_COMMISSION_RATE,
   DEFAULT_CANCELLATION_PENALTY_RATE,
 } from '@healthcare-system/shared';
+import { Modal, ModalCloseButton } from '../../../components';
 
 interface JobDetailModalProps {
   job: JobItem;
@@ -35,17 +35,6 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
   const [check2, setCheck2] = useState(false);
   const [reportedMismatch, setReportedMismatch] = useState(false);
 
-  // Close on Escape key for Elder-friendly / accessibility
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
-
   // BR-11: Nurse receives net amount from backend snapshot, fallback to config rate
   const netEarnings =
     job.netAmount ?? Math.round(job.totalAmount * (1 - DEFAULT_PLATFORM_COMMISSION_RATE));
@@ -62,18 +51,14 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
   };
 
   return (
-    <div
-      className="job-detail-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="job-detail-dialog-title"
-      onClick={onClose}
+    <Modal
+      open
+      onClose={onClose}
+      titleId="job-detail-dialog-title"
+      overlayClassName="job-detail-overlay"
+      panelClassName="job-detail-dialog elder"
+      panelStyle={{ padding: '26px 28px' }}
     >
-      <div
-        className="job-detail-dialog elder"
-        onClick={(e) => e.stopPropagation()}
-        style={{ padding: '26px 28px' }}
-      >
         {/* Header */}
         <div
           style={{
@@ -121,15 +106,7 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
             </p>
           </div>
 
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            style={{ width: 40, height: 40, padding: 0, borderRadius: '50%', flexShrink: 0 }}
-            onClick={onClose}
-            aria-label="Đóng"
-          >
-            <X size={20} />
-          </button>
+          <ModalCloseButton onClick={onClose} />
         </div>
 
         {/* 2-column Grid matching Screen N5 */}
@@ -264,26 +241,30 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
                 <div className="pin-label">Nhà {job.patientName}</div>
               </div>
 
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center', borderTop: '1px solid var(--line)', marginTop: 14, paddingTop: 14 }}>
-                <div className="avatar" style={{ background: '#E2E8F0', color: 'var(--navy)' }}>
-                  {job.customerName ? getInitials(job.customerName) : 'KH'}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <b style={{ color: 'var(--navy)', fontSize: 15.5 }}>
-                    {job.customerName || 'Người nhà bệnh nhân'}
-                  </b>
-                  <div style={{ color: 'var(--slate)', fontSize: 14 }}>
-                    SĐT: {job.customerPhoneMasked || '0905 ••• 123'} (Bảo mật)
+              <div className="contact-person-card">
+                <div className="contact-person-card__info">
+                  <div className="avatar" style={{ background: '#E2E8F0', color: 'var(--navy)' }}>
+                    {job.customerName ? getInitials(job.customerName) : 'KH'}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <b style={{ color: 'var(--navy)', fontSize: 15.5, display: 'block' }}>
+                      {job.customerName || 'Người nhà bệnh nhân'}
+                    </b>
+                    <div style={{ color: 'var(--slate)', fontSize: 14, marginTop: 2 }}>
+                      SĐT: {job.customerPhoneMasked || '0905 ••• 123'} (Bảo mật)
+                    </div>
                   </div>
                 </div>
-                <button className="btn btn-secondary btn-sm" type="button" style={{ height: 40, fontSize: 14 }}>
-                  <MessageSquare size={15} style={{ marginRight: 4 }} />
-                  Chat
-                </button>
-                <button className="btn btn-secondary btn-sm" type="button" style={{ height: 40, fontSize: 14 }}>
-                  <Phone size={15} style={{ marginRight: 4 }} />
-                  Gọi
-                </button>
+                <div className="contact-person-card__actions">
+                  <button className="btn btn-secondary btn-sm" type="button">
+                    <MessageSquare size={15} aria-hidden="true" />
+                    Chat
+                  </button>
+                  <button className="btn btn-secondary btn-sm" type="button">
+                    <Phone size={15} aria-hidden="true" />
+                    Gọi
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -371,8 +352,7 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
             </button>
           )}
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 };
 export default JobDetailModal;

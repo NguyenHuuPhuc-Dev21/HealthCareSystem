@@ -614,12 +614,14 @@ export const AvailabilityPage: React.FC = () => {
                                     <div className="avail-custom-hours__row">
                                         <input
                                             type="time"
+                                            aria-label="Giờ bắt đầu mở rảnh riêng"
                                             value={openStart}
                                             onChange={(e) => setOpenStart(e.target.value)}
                                         />
                                         <span style={{ fontSize: '14px', color: 'var(--slate)' }}>đến</span>
                                         <input
                                             type="time"
+                                            aria-label="Giờ kết thúc mở rảnh riêng"
                                             value={openEnd}
                                             onChange={(e) => setOpenEnd(e.target.value)}
                                         />
@@ -719,9 +721,9 @@ export const AvailabilityPage: React.FC = () => {
                                                 <Link
                                                     to={`/shifts/${b.code || b.id}`}
                                                     className="btn btn-secondary btn-sm"
-                                                    style={{ height: '32px', fontSize: '13px', padding: '0 10px', marginLeft: 'auto' }}
+                                                    style={{ fontSize: '14px', marginLeft: 'auto' }}
                                                 >
-                                                    Xem chi tiết →
+                                                    Xem chi tiết
                                                 </Link>
                                             </div>
                                         </div>
@@ -731,6 +733,27 @@ export const AvailabilityPage: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {/* Sticky Save Dock when unsaved edits exist */}
+            {dirty && (
+                <div className="sticky-save-bar" role="status">
+                    <div>
+                        <strong style={{ fontSize: 16 }}>Bạn có thay đổi lịch rảnh chưa lưu</strong>
+                        <div style={{ fontSize: 13.5, opacity: 0.85 }}>
+                            Lưu lại để hệ thống cập nhật gợi ý việc làm phù hợp khung giờ mới.
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        style={{ background: '#fff', color: 'var(--ink-primary)' }}
+                        disabled={saving}
+                        onClick={handleSave}
+                    >
+                        {saving ? 'Đang lưu...' : 'Lưu thay đổi ngay'}
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

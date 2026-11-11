@@ -1,10 +1,19 @@
 import type { ClaimJobResult, DirectInvitation, JobItem, RadarJob } from './job-board.types';
-import { DEFAULT_MIN_NURSE_DEPOSIT_VND } from '@healthcare-system/shared';
+import {
+    DEFAULT_MIN_NURSE_DEPOSIT_VND,
+    DEFAULT_PLATFORM_COMMISSION_RATE,
+    ExecutionStatus,
+    MobilityStatus,
+    PaymentStatus,
+} from '@healthcare-system/shared';
+import { getStoredShiftsMap, upsertAcceptedShiftFromJob } from '../shifts/shift.mock';
+import type { ShiftExecutionState } from '../shifts/shift.types';
 
 const STORAGE_KEY = 'carenest_mock_job_board_v1';
 const RADAR_KEY = 'carenest_mock_radar_job_v1';
 const INVITE_KEY = 'carenest_mock_direct_invite_v1';
 const AVAIL_KEY = 'mock_availability_db_v1';
+const ACCEPTED_JOBS_KEY = 'carenest_mock_accepted_jobs_v1';
 
 function delay<T>(data: T, ms = 300): Promise<T> {
     return new Promise((resolve) => setTimeout(() => resolve(data), ms));
@@ -298,6 +307,149 @@ function syncToConfirmedBookings(job: {
     }
 }
 
+function loadAcceptedJobSnapshots(): Record<string, JobItem> {
+    try {
+        const raw = localStorage.getItem(ACCEPTED_JOBS_KEY);
+        if (raw) return JSON.parse(raw) as Record<string, JobItem>;
+    } catch {
+        // ignore parse errors
+    }
+    return {};
+}
+
+function saveAcceptedJobSnapshot(job: JobItem): void {
+    try {
+        const map = loadAcceptedJobSnapshots();
+        map[job.id] = job;
+        localStorage.setItem(ACCEPTED_JOBS_KEY, JSON.stringify(map));
+    } catch {
+        // ignore storage errors
+    }
+}
+
+function inviteToJobItem(invite: DirectInvitation): JobItem {
+    const netAmount = Math.round(invite.totalAmount * (1 - DEFAULT_PLATFORM_COMMISSION_RATE));
+    return {
+        id: invite.bookingId,
+        code: invite.code,
+        serviceName: invite.serviceName,
+        serviceType: 'procedure',
+        requiredTier: 'TIER_1_BASIC',
+        isInvasive: false,
+        hasPrescription: false,
+        date: invite.date,
+        startTime: invite.startTime,
+        endTime: invite.endTime,
+        district: invite.district,
+        distanceKm: 2.0,
+        patientName: invite.patientName,
+        patientAge: invite.patientAge,
+        mobilityStatus: 'Hỗ trợ di chuyển',
+        medicalCondition: 'Chăm sóc tại nhà theo chỉ định người nhà cũ',
+        fullAddress: `${invite.district}, TP. Đà Nẵng`,
+        customerName: invite.inviterName,
+        customerPhoneMasked: '0905 ••• 456',
+        note: `Lời mời trực tiếp từ gia đình (${invite.inviterName}).`,
+        totalAmount: invite.totalAmount,
+        baseAmount: invite.totalAmount,
+        netAmount,
+        cancellationPenaltyPercent: 20,
+        paymentMethod: 'BANK_TRANSFER',
+        paymentStatus: 'ESCROW_HELD',
+        matchingMode: 'JOB_BOARD',
+        isDirectInvite: true,
+        inviterName: invite.inviterName,
+        status: 'CONFIRMED',
+    };
+}
+
+function mobilityLabel(mobility: MobilityStatus): string {
+    switch (mobility) {
+        case MobilityStatus.BEDRIDDEN:
+            return 'Nằm tại giường';
+        case MobilityStatus.PARTIAL:
+            return 'Hỗ trợ di chuyển';
+        default:
+            return 'Tự đi lại';
+    }
+}
+
+function shiftStateToJobItem(shift: ShiftExecutionState, snapshot?: JobItem): JobItem {
+    const mappedStatus: JobItem['status'] =
+        shift.executionStatus === ExecutionStatus.IN_PROGRESS ? 'IN_PROGRESS' : 'CONFIRMED';
+
+    if (snapshot) {
+        return {
+            ...snapshot,
+            totalAmount: shift.totalAmount,
+            netAmount: Math.round(shift.totalAmount * (1 - DEFAULT_PLATFORM_COMMISSION_RATE)),
+            startTime: shift.startTime,
+            endTime: shift.endTime,
+            status: mappedStatus,
+        };
+    }
+
+    const districtGuess = shift.patientAddress.split(',').slice(-2, -1)[0]?.trim() || 'Hải Châu';
+    return {
+        id: shift.bookingId,
+        code: shift.bookingCode,
+        serviceName: shift.serviceName,
+        serviceType: shift.isInvasive ? 'procedure' : 'shift',
+        requiredTier: shift.isInvasive ? 'TIER_2_SPECIALIST' : 'TIER_1_BASIC',
+        isInvasive: shift.isInvasive,
+        hasPrescription: shift.isInvasive,
+        prescriptionFileName: shift.isInvasive ? `ylenh_${shift.bookingCode.toLowerCase()}.jpg` : undefined,
+        prescriptionPrescribedDate: getTodayDate(),
+        prescriptionExpiryDays: 7,
+        date: getTodayDate(),
+        startTime: shift.startTime,
+        endTime: shift.endTime,
+        district: districtGuess,
+        distanceKm: 1.8,
+        patientName: shift.patientName,
+        patientAge: shift.patientAge,
+        mobilityStatus: mobilityLabel(shift.mobilityStatus),
+        medicalCondition: shift.isInvasive
+            ? 'Cần theo dõi và thực hiện thủ thuật vô khuẩn theo y lệnh'
+            : 'Chăm sóc & hỗ trợ sinh hoạt phục hồi tại nhà',
+        medicalHistory: 'Theo hồ sơ bệnh án người cao tuổi tại CareNest',
+        allergies: 'Không ghi nhận dị ứng',
+        contagionRisk: 'Không có',
+        fullAddress: shift.patientAddress,
+        customerName: 'Người nhà bệnh nhân',
+        customerPhoneMasked: '0905 ••• 123',
+        note: shift.progressNotes[0] || 'Mang đầy đủ thiết bị đo sinh tồn và vật tư tiêu chuẩn.',
+        totalAmount: shift.totalAmount,
+        baseAmount: shift.totalAmount,
+        durationHours: shift.scheduledHours,
+        netAmount: Math.round(shift.totalAmount * (1 - DEFAULT_PLATFORM_COMMISSION_RATE)),
+        cancellationPenaltyPercent: 20,
+        paymentMethod: 'BANK_TRANSFER',
+        paymentStatus: shift.paymentStatus === PaymentStatus.UNPAID ? 'UNPAID' : 'ESCROW_HELD',
+        matchingMode: 'JOB_BOARD',
+        status: mappedStatus,
+    };
+}
+
+function syncJobToShiftStore(job: JobItem) {
+    saveAcceptedJobSnapshot({ ...job, status: 'CONFIRMED' });
+    upsertAcceptedShiftFromJob({
+        bookingId: job.id,
+        bookingCode: job.code,
+        patientName: job.patientName,
+        patientAge: job.patientAge,
+        patientAddress: job.fullAddress || `${job.district}, Đà Nẵng`,
+        serviceName: job.serviceName,
+        startTime: job.startTime,
+        endTime: job.endTime,
+        scheduledHours: job.durationHours,
+        totalAmount: job.totalAmount,
+        isInvasive: job.isInvasive,
+        mobilityStatus: job.mobilityStatus,
+        paymentStatus: job.paymentStatus,
+    });
+}
+
 export async function mockFetchJobBoard(): Promise<JobItem[]> {
     return delay(loadStoredJobs(), 300);
 }
@@ -344,14 +496,15 @@ export async function mockAcceptJob(
         });
     }
 
-    // Nhận thành công: xóa khỏi Job Board & lưu sang Ca đã chốt
+    // Nhận thành công: xóa khỏi Job Board & đồng bộ sang Ca của tôi + Lịch rảnh
     saveStoredJobs(jobs.filter((j) => j.id !== jobId));
     syncToConfirmedBookings(target);
+    syncJobToShiftStore(target);
 
     return delay({
         success: true,
         bookingId: target.id,
-        message: `Đã nhận thành công đơn ${target.code}. Ca trực đã được thêm vào lịch của bạn!`,
+        message: `Đã nhận thành công đơn ${target.code}. Ca trực đã được thêm vào mục Ca của tôi!`,
     });
 }
 
@@ -383,6 +536,7 @@ export async function mockAcceptDirectInvite(
     }
 
     localStorage.setItem(INVITE_KEY, 'accepted');
+    const mappedJob = inviteToJobItem(invite);
     syncToConfirmedBookings({
         id: invite.bookingId,
         code: invite.code,
@@ -391,11 +545,12 @@ export async function mockAcceptDirectInvite(
         startTime: invite.startTime,
         endTime: invite.endTime,
     });
+    syncJobToShiftStore(mappedJob);
 
     return delay({
         success: true,
         bookingId: invite.bookingId,
-        message: `Đã chấp nhận lời mời từ ${invite.inviterName}. Đơn ${invite.code} đã được chốt thành công!`,
+        message: `Đã chấp nhận lời mời từ ${invite.inviterName}. Đơn ${invite.code} đã được thêm vào Ca của tôi!`,
     });
 }
 
@@ -436,6 +591,7 @@ export async function mockAcceptRadar(
 
     localStorage.setItem(RADAR_KEY, 'accepted');
     syncToConfirmedBookings(radar);
+    syncJobToShiftStore(radar);
 
     return delay({
         success: true,
@@ -452,55 +608,78 @@ export async function mockFetchJobById(jobId: string): Promise<JobItem | null> {
     const radar = loadStoredRadar();
     if (radar && (radar.id === jobId || radar.code === jobId)) return delay(radar, 100);
 
-    // Look up from confirmed bookings saved in AVAIL_KEY
+    const invite = loadStoredInvite();
+    if (invite && (invite.bookingId === jobId || invite.code === jobId)) {
+        return delay(inviteToJobItem(invite), 100);
+    }
+
+    const snapshots = loadAcceptedJobSnapshots();
+    const shiftsMap = getStoredShiftsMap();
+    const matchedShift =
+        shiftsMap[jobId] ||
+        Object.values(shiftsMap).find((s) => s.bookingCode === jobId);
+
+    if (matchedShift) {
+        const snapshot = snapshots[matchedShift.bookingId] || snapshots[jobId];
+        return delay(shiftStateToJobItem(matchedShift, snapshot), 100);
+    }
+
+    if (snapshots[jobId]) {
+        return delay(snapshots[jobId], 100);
+    }
+
+    // Fallback: Look up across account bookings saved in AVAIL_KEY (availDb[phone].bookings)
     try {
         const rawAvail = localStorage.getItem(AVAIL_KEY);
         if (rawAvail) {
-            const parsed = JSON.parse(rawAvail);
-            const bookings = parsed.confirmedBookings || [];
-            const matched = bookings.find((b: { id: string; code: string; serviceName: string; date: string; startTime: string; endTime: string }) => b.id === jobId || b.code === jobId);
-            if (matched) {
-                const fullJob: JobItem = {
-                    id: matched.id,
-                    code: matched.code,
-                    serviceName: matched.serviceName,
-                    serviceType: 'procedure',
-                    requiredTier: 'TIER_2_SPECIALIST',
-                    isInvasive: true,
-                    hasPrescription: true,
-                    prescriptionFileName: `ylenh_${matched.code.toLowerCase().replace(/[^a-z0-9]/g, '_')}.jpg`,
-                    prescriptionPrescribedDate: matched.date,
-                    prescriptionExpiryDays: 7,
-                    date: matched.date,
-                    startTime: matched.startTime,
-                    endTime: matched.endTime,
-                    district: 'Hải Châu',
-                    distanceKm: 1.2,
-                    patientName: 'Bà Nguyễn Thị Hoa',
-                    patientAge: 78,
-                    patientWeight: 52,
-                    mobilityStatus: 'Hỗ trợ di chuyển',
-                    medicalCondition: 'Hậu phẫu thay khớp háng phải, theo dõi vết mổ',
-                    medicalHistory: 'Tăng huyết áp · Đái tháo đường type 2',
-                    allergies: 'Penicillin (mề đay, khó thở nhẹ)',
-                    contagionRisk: 'Không có',
-                    fullAddress: 'Số 25 Quang Trung, Hải Châu 1, Hải Châu, Đà Nẵng',
-                    customerName: 'Anh Nguyễn Văn An',
-                    customerPhoneMasked: '0905 ••• 123',
-                    note: 'Bệnh nhân sau phẫu thuật cần hỗ trợ thay băng vô khuẩn tại chỗ.',
-                    baseAmount: 500000,
-                    totalAmount: 500000,
-                    netAmount: 425000,
-                    cancellationPenaltyPercent: 20,
-                    paymentMethod: 'BANK_TRANSFER',
-                    paymentStatus: 'ESCROW_HELD',
-                    matchingMode: 'JOB_BOARD',
-                    status: 'CONFIRMED',
-                };
-                return delay(fullJob, 100);
+            const parsed = JSON.parse(rawAvail) as Record<string, { bookings?: Array<{ id: string; code: string; serviceName: string; date: string; startTime: string; endTime: string }> }>;
+            for (const account of Object.values(parsed)) {
+                const matched = account?.bookings?.find((b) => b.id === jobId || b.code === jobId);
+                if (matched) {
+                    const fullJob: JobItem = {
+                        id: matched.id,
+                        code: matched.code,
+                        serviceName: matched.serviceName,
+                        serviceType: 'procedure',
+                        requiredTier: 'TIER_2_SPECIALIST',
+                        isInvasive: true,
+                        hasPrescription: true,
+                        prescriptionFileName: `ylenh_${matched.code.toLowerCase().replace(/[^a-z0-9]/g, '_')}.jpg`,
+                        prescriptionPrescribedDate: matched.date,
+                        prescriptionExpiryDays: 7,
+                        date: matched.date,
+                        startTime: matched.startTime,
+                        endTime: matched.endTime,
+                        district: 'Hải Châu',
+                        distanceKm: 1.2,
+                        patientName: 'Bà Nguyễn Thị Hoa',
+                        patientAge: 78,
+                        patientWeight: 52,
+                        mobilityStatus: 'Hỗ trợ di chuyển',
+                        medicalCondition: 'Hậu phẫu thay khớp háng phải, theo dõi vết mổ',
+                        medicalHistory: 'Tăng huyết áp · Đái tháo đường type 2',
+                        allergies: 'Penicillin (mề đay, khó thở nhẹ)',
+                        contagionRisk: 'Không có',
+                        fullAddress: 'Số 25 Quang Trung, Hải Châu 1, Hải Châu, Đà Nẵng',
+                        customerName: 'Anh Nguyễn Văn An',
+                        customerPhoneMasked: '0905 ••• 123',
+                        note: 'Bệnh nhân sau phẫu thuật cần hỗ trợ thay băng vô khuẩn tại chỗ.',
+                        baseAmount: 500000,
+                        totalAmount: 500000,
+                        netAmount: 425000,
+                        cancellationPenaltyPercent: 20,
+                        paymentMethod: 'BANK_TRANSFER',
+                        paymentStatus: 'ESCROW_HELD',
+                        matchingMode: 'JOB_BOARD',
+                        status: 'CONFIRMED',
+                    };
+                    return delay(fullJob, 100);
+                }
             }
         }
-    } catch {}
+    } catch {
+        // ignore storage parse error
+    }
 
     return delay(null, 100);
 }

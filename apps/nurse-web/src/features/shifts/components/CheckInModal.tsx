@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
-import { Camera, MapPin, AlertTriangle, X, RefreshCw } from 'lucide-react';
+import React, { useId, useRef, useState } from 'react';
+import { Camera, MapPin, AlertTriangle, RefreshCw } from 'lucide-react';
 import { ShiftExecutionState } from '../shift.types';
 import { submitCheckIn } from '../shift.api';
 import { haversineDistanceMeters, CHECKIN_MAX_RADIUS_METERS } from '@healthcare-system/shared';
+import { Modal, ModalCloseButton } from '../../../components';
 
 interface CheckInModalProps {
   shift: ShiftExecutionState;
@@ -11,11 +12,15 @@ interface CheckInModalProps {
 }
 
 export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, onClose }) => {
+  const titleId = useId();
+  const selfieInputId = useId();
+
   // Mock dev GPS coordinates: near (35m) vs far (450m)
   const [lat, setLat] = useState<number>(shift.patientLatitude + 0.0002);
   const [lng, setLng] = useState<number>(shift.patientLongitude + 0.0002);
   const [isMockLocation, setIsMockLocation] = useState<boolean>(false);
   const [selfieBase64, setSelfieBase64] = useState<string | null>(null);
+  const [capturedAt, setCapturedAt] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -32,6 +37,7 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
       const reader = new FileReader();
       reader.onloadend = () => {
         setSelfieBase64(reader.result as string);
+        setCapturedAt(new Date().toLocaleTimeString('vi-VN'));
       };
       reader.readAsDataURL(file);
     }
@@ -77,47 +83,18 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.75)',
-        display: 'grid',
-        placeItems: 'center',
-        zIndex: 9999,
-        padding: 16,
-      }}
-    >
-      <div
-        className="card"
-        style={{
-          width: '100%',
-          maxWidth: 540,
-          maxHeight: '92vh',
-          overflowY: 'auto',
-          padding: 24,
-          borderRadius: 16,
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
-        }}
-      >
+    <Modal open onClose={onClose} titleId={titleId} maxWidth={540}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: 20, color: 'var(--navy)', fontWeight: 800 }}>
+            <h2 id={titleId} style={{ margin: 0, fontSize: 20, color: 'var(--navy)', fontWeight: 800 }}>
               Điểm Danh Bắt Đầu Ca (Check-In)
             </h2>
             <p style={{ margin: '4px 0 0 0', color: 'var(--slate)', fontSize: 14 }}>
               Đơn {shift.bookingCode} · Bán kính quy định ≤ {CHECKIN_MAX_RADIUS_METERS}m (BR-07)
             </p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn btn-secondary btn-sm"
-            style={{ borderRadius: '50%', width: 36, height: 36, padding: 0 }}
-          >
-            <X size={18} />
-          </button>
+          <ModalCloseButton onClick={onClose} />
         </div>
 
         {errorMessage && (
@@ -169,7 +146,7 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
             <button
               type="button"
               className="btn btn-secondary btn-sm"
-              style={{ fontSize: 12, height: 30 }}
+              style={{ fontSize: 13 }}
               onClick={() => {
                 setLat(shift.patientLatitude + 0.0002);
                 setLng(shift.patientLongitude + 0.0002);
@@ -180,7 +157,7 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
             <button
               type="button"
               className="btn btn-secondary btn-sm"
-              style={{ fontSize: 12, height: 30 }}
+              style={{ fontSize: 13 }}
               onClick={() => {
                 setLat(shift.patientLatitude + 0.004);
                 setLng(shift.patientLongitude + 0.004);
@@ -188,7 +165,7 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
             >
               Ở xa (450m)
             </button>
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--red)', cursor: 'pointer', marginLeft: 'auto' }}>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--red)', cursor: 'pointer', marginLeft: 'auto', minHeight: 48 }}>
               <input
                 type="checkbox"
                 checked={isMockLocation}
@@ -201,7 +178,10 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
 
         {/* Section 2: Camera Live Selfie Capture */}
         <div style={{ marginBottom: 20 }}>
-          <label style={{ display: 'block', fontWeight: 700, fontSize: 15, color: 'var(--navy)', marginBottom: 8 }}>
+          <label
+            htmlFor={selfieInputId}
+            style={{ display: 'block', fontWeight: 700, fontSize: 15, color: 'var(--navy)', marginBottom: 8 }}
+          >
             Chụp ảnh selfie trực tiếp tại chỗ (Camera phần cứng):
           </label>
           <p style={{ fontSize: 13.5, color: 'var(--slate)', margin: '0 0 10px 0' }}>
@@ -210,11 +190,12 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
 
           {/* Hidden native camera capture input */}
           <input
+            id={selfieInputId}
             type="file"
             accept="image/*"
             capture="user"
             ref={fileInputRef}
-            style={{ display: 'none' }}
+            className="sr-only"
             onChange={handleCapturePhoto}
           />
 
@@ -222,7 +203,7 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
             <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', border: '2px solid var(--teal)' }}>
               <img
                 src={selfieBase64}
-                alt="Selfie Check-in"
+                alt="Ảnh selfie điểm danh tại nhà người bệnh"
                 style={{ width: '100%', height: 240, objectFit: 'cover', display: 'block' }}
               />
               {/* Watermark Overlay */}
@@ -239,37 +220,28 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
+                  gap: 8,
                 }}
               >
-                <div>
+                <div className="tabular-nums">
                   <div style={{ fontWeight: 700 }}>CareNest Verified Presence</div>
-                  <div>GPS: {lat.toFixed(4)}, {lng.toFixed(4)} · {new Date().toLocaleTimeString('vi-VN')}</div>
+                  <div>GPS: {lat.toFixed(4)}, {lng.toFixed(4)} · {capturedAt}</div>
                 </div>
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
-                  style={{ height: 28, fontSize: 11, background: 'rgba(255,255,255,0.2)', color: '#fff', border: 'none' }}
+                  style={{ fontSize: 13, background: 'rgba(255,255,255,0.2)', color: '#fff', border: '1px solid rgba(255,255,255,0.35)' }}
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <RefreshCw size={12} style={{ marginRight: 4 }} /> Chụp lại
+                  <RefreshCw size={14} aria-hidden="true" /> Chụp lại
                 </button>
               </div>
             </div>
           ) : (
-            <div
+            <button
+              type="button"
+              className="camera-dropzone"
               onClick={() => fileInputRef.current?.click()}
-              style={{
-                height: 180,
-                borderRadius: 12,
-                border: '2px dashed var(--teal)',
-                backgroundColor: 'var(--mint)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s',
-              }}
             >
               <div
                 style={{
@@ -282,12 +254,13 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
                   color: 'var(--teal)',
                   marginBottom: 8,
                 }}
+                aria-hidden="true"
               >
                 <Camera size={28} />
               </div>
               <strong style={{ color: 'var(--navy)', fontSize: 16 }}>Bấm để mở Camera selfie</strong>
               <span style={{ fontSize: 13, color: 'var(--slate)' }}>Chụp khuôn mặt rõ nét trước cửa/phòng bệnh nhân</span>
-            </div>
+            </button>
           )}
         </div>
 
@@ -296,7 +269,7 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
           <button
             type="button"
             className="btn btn-secondary"
-            style={{ flex: 1, height: 50 }}
+            style={{ flex: 1, minHeight: 50 }}
             onClick={onClose}
           >
             Đóng
@@ -304,14 +277,13 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({ shift, onSuccess, on
           <button
             type="button"
             className="btn btn-primary"
-            style={{ flex: 2, height: 50, fontSize: 16, fontWeight: 700 }}
+            style={{ flex: 2, minHeight: 50, fontSize: 16, fontWeight: 700 }}
             onClick={handleCheckInSubmit}
             disabled={isSubmitting || !isWithinRadius || isMockLocation || !selfieBase64}
           >
             {isSubmitting ? 'Đang xác thực GPS...' : 'Xác nhận Điểm danh (Bắt đầu ca)'}
           </button>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 };

@@ -60,28 +60,24 @@ export const ShiftExecutionPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="screen-body elder">
-        <div className="page" style={{ textAlign: 'center', padding: '60px 0' }}>
-          <p style={{ fontSize: 18, color: 'var(--slate)' }}>Đang tải phòng điều hành ca trực...</p>
-        </div>
+      <div style={{ textAlign: 'center', padding: '60px 0' }}>
+        <p style={{ fontSize: 18, color: 'var(--ink-secondary)' }}>Đang tải không gian thực thi ca trực...</p>
       </div>
     );
   }
 
   if (!shift) {
     return (
-      <div className="screen-body elder">
-        <div className="page">
-          <button className="btn btn-secondary btn-sm" onClick={() => navigate(-1)} style={{ marginBottom: 16 }}>
-            <ArrowLeft size={16} style={{ marginRight: 6 }} /> Quay lại
-          </button>
-          <div className="card" style={{ padding: 30, textAlign: 'center' }}>
-            <h3 style={{ color: 'var(--navy)' }}>Không tìm thấy ca trực</h3>
-            <p style={{ color: 'var(--slate)' }}>{error || 'Ca trực không tồn tại hoặc đã kết thúc.'}</p>
-            <Link to="/jobs" className="btn btn-primary" style={{ marginTop: 14 }}>
-              Về Bảng việc làm
-            </Link>
-          </div>
+      <div>
+        <button className="btn btn-secondary btn-sm" onClick={() => navigate(-1)} style={{ marginBottom: 16 }}>
+          <ArrowLeft size={16} /> Quay lại
+        </button>
+        <div className="ledger-panel" style={{ padding: 30, textAlign: 'center' }}>
+          <h3 style={{ color: 'var(--ink-primary)' }}>Không tìm thấy ca trực</h3>
+          <p style={{ color: 'var(--ink-secondary)' }}>{error || 'Ca trực không tồn tại hoặc đã kết thúc.'}</p>
+          <Link to="/jobs" className="btn btn-primary" style={{ marginTop: 14 }}>
+            Về Bảng việc làm
+          </Link>
         </div>
       </div>
     );
@@ -90,75 +86,72 @@ export const ShiftExecutionPage: React.FC = () => {
   // If shift is completed
   if (shift.executionStatus === ExecutionStatus.COMPLETED) {
     return (
-      <div className="screen-body elder">
-        <div className="page" style={{ maxWidth: 700, margin: '40px auto' }}>
-          <div className="card" style={{ padding: '36px 30px', textAlign: 'center' }}>
-            <div
-              style={{
-                width: 64,
-                height: 64,
-                borderRadius: '50%',
-                backgroundColor: '#DEF7EC',
-                color: '#03543F',
-                display: 'grid',
-                placeItems: 'center',
-                margin: '0 auto 16px',
-              }}
-            >
-              <CheckCircle2 size={36} />
-            </div>
+      <div style={{ maxWidth: 680, margin: '32px auto' }}>
+        <div className="ledger-panel" style={{ padding: '36px 32px', textAlign: 'center' }}>
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: '50%',
+              backgroundColor: 'var(--brand-jade-soft)',
+              color: 'var(--brand-jade)',
+              display: 'grid',
+              placeItems: 'center',
+              margin: '0 auto 16px',
+            }}
+          >
+            <CheckCircle2 size={36} />
+          </div>
 
-            <h1 style={{ color: 'var(--navy)', fontSize: 24, margin: '0 0 8px 0', fontWeight: 800 }}>
-              Ca Làm Việc Đã Hoàn Tất!
-            </h1>
-            <p style={{ color: 'var(--slate)', fontSize: 16, margin: '0 0 24px 0' }}>
-              Đơn {shift.bookingCode} · Bệnh nhân: {shift.patientName}
-            </p>
+          <h1 className="font-display" style={{ color: 'var(--ink-primary)', fontSize: 26, margin: '0 0 8px', fontWeight: 700 }}>
+            Ca làm việc đã hoàn tất
+          </h1>
+          <p style={{ color: 'var(--ink-secondary)', fontSize: 16, margin: '0 0 24px' }}>
+            Đơn {shift.bookingCode} — Người bệnh: {shift.patientName}
+          </p>
 
-            {/* Countdown Timers Triggered by Check-Out (BR-22 §2.3) */}
-            <div
-              style={{
-                textAlign: 'left',
-                background: '#F8FAFC',
-                borderRadius: 12,
-                padding: '18px 20px',
-                border: '1px solid var(--line)',
-                marginBottom: 24,
-              }}
-            >
-              <h4 style={{ margin: '0 0 12px 0', fontSize: 15, color: 'var(--navy)' }}>
-                Các mốc thời gian hệ thống đã kích hoạt:
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 14.5 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Clock size={16} color="var(--teal)" />
-                  <span>
-                    <strong>Quyết toán thù lao:</strong> Tự động giải ngân sau <strong>{DEFAULT_SETTLEMENT_COOLING_HOURS} giờ</strong> nếu không có khiếu nại (hoặc sớm hơn khi người nhà xác nhận).
-                  </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Lock size={16} color="#D97706" />
-                  <span>
-                    <strong>Bảo mật Nghị định 13:</strong> Quyền truy cập bệnh án của bạn sẽ tự động đóng sau <strong>{DEFAULT_RECORD_ACCESS_EXPIRY_HOURS} giờ</strong>.
-                  </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <FileText size={16} color="var(--blue)" />
-                  <span>
-                    <strong>Đánh giá 2 chiều:</strong> Cổng đánh giá người nhà đã mở (FR-RATE-01).
-                  </span>
-                </div>
+          <div
+            style={{
+              textAlign: 'left',
+              background: 'var(--surface-canvas)',
+              borderRadius: 12,
+              padding: '18px 20px',
+              border: '1px solid var(--border-hairline)',
+              marginBottom: 24,
+            }}
+          >
+            <h4 style={{ margin: '0 0 12px', fontSize: 15.5, color: 'var(--ink-primary)' }}>
+              Các mốc thời gian hệ thống đã kích hoạt:
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 15 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Clock size={16} color="var(--brand-jade)" />
+                <span>
+                  <strong>Quyết toán thù lao:</strong> Tự động giải ngân sau <strong>{DEFAULT_SETTLEMENT_COOLING_HOURS} giờ</strong> nếu không có khiếu nại (hoặc sớm hơn khi người nhà xác nhận).
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Lock size={16} color="var(--accent-ochre)" />
+                <span>
+                  <strong>Bảo mật hồ sơ y tế:</strong> Quyền truy cập bệnh án của bạn sẽ tự động đóng sau <strong>{DEFAULT_RECORD_ACCESS_EXPIRY_HOURS} giờ</strong> theo quy định bảo mật dữ liệu cá nhân.
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <FileText size={16} color="var(--brand-jade)" />
+                <span>
+                  <strong>Đánh giá 2 chiều:</strong> Cổng đánh giá với gia đình người bệnh đã mở.
+                </span>
               </div>
             </div>
+          </div>
 
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-              <Link to="/jobs" className="btn btn-secondary" style={{ height: 48, minWidth: 160 }}>
-                Về Bảng việc làm
-              </Link>
-              <Link to="/" className="btn btn-primary" style={{ height: 48, minWidth: 160 }}>
-                Về Trang chủ
-              </Link>
-            </div>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+            <Link to="/shifts" className="btn btn-secondary" style={{ minWidth: 160 }}>
+              Danh sách ca của tôi
+            </Link>
+            <Link to="/" className="btn btn-primary" style={{ minWidth: 160 }}>
+              Về Trang chủ
+            </Link>
           </div>
         </div>
       </div>
@@ -168,173 +161,174 @@ export const ShiftExecutionPage: React.FC = () => {
   // If shift is cancelled
   if (shift.executionStatus === ExecutionStatus.CANCELLED) {
     return (
-      <div className="screen-body elder">
-        <div className="page" style={{ maxWidth: 640, margin: '40px auto' }}>
-          <div className="card" style={{ padding: '30px', textAlign: 'center' }}>
-            <AlertTriangle size={48} color="var(--red)" style={{ margin: '0 auto 14px' }} />
-            <h2 style={{ color: 'var(--navy)', margin: '0 0 8px 0' }}>Ca Trực Đã Dừng / Bị Hủy</h2>
-            <p style={{ color: 'var(--slate)', fontSize: 15 }}>
-              Ca trực {shift.bookingCode} đã được ghi nhận dừng theo quy định an toàn (BR-15/BR-16).
-              <br />
-              Điều dưỡng không bị phạt ký quỹ và không bị trừ điểm TrustScore.
-            </p>
-            <Link to="/jobs" className="btn btn-primary" style={{ marginTop: 18 }}>
-              Về Bảng việc làm
-            </Link>
-          </div>
+      <div style={{ maxWidth: 640, margin: '32px auto' }}>
+        <div className="ledger-panel" style={{ padding: '32px', textAlign: 'center' }}>
+          <AlertTriangle size={48} color="var(--alert-crimson)" style={{ margin: '0 auto 14px' }} />
+          <h2 className="font-display" style={{ color: 'var(--ink-primary)', margin: '0 0 8px' }}>Ca trực đã dừng an toàn</h2>
+          <p className="prose-limit" style={{ color: 'var(--ink-secondary)', fontSize: 15.5, margin: '0 auto' }}>
+            Ca trực {shift.bookingCode} đã được ghi nhận dừng theo quy trình bảo vệ an toàn lâm sàng. Điều dưỡng không bị phạt ký quỹ và không bị trừ điểm tin cậy.
+          </p>
+          <Link to="/jobs" className="btn btn-primary" style={{ marginTop: 18 }}>
+            Về Bảng việc làm
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="screen-body elder">
-      <div className="page">
-        {/* Navigation back */}
-        <div style={{ marginBottom: 14 }}>
+    <div>
+      {/* Navigation back */}
+      <div style={{ marginBottom: 14, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <Link
+          to="/shifts"
+          className="btn btn-secondary btn-sm"
+          style={{ fontSize: 14 }}
+        >
+          <ArrowLeft size={16} aria-hidden="true" /> Về danh sách ca của tôi
+        </Link>
+        <Link
+          to={`/shifts/${shift.bookingId}`}
+          className="btn btn-secondary btn-sm"
+          style={{ fontSize: 14 }}
+        >
+          Xem hồ sơ chi tiết
+        </Link>
+      </div>
+
+      {/* Toast */}
+      {toastMessage && (
+        <div
+          style={{
+            padding: '12px 18px',
+            borderRadius: 12,
+            background: 'var(--brand-jade-soft)',
+            color: 'var(--brand-jade)',
+            border: '1px solid #A7D7C5',
+            marginBottom: 16,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            fontSize: 15.5,
+            fontWeight: 600,
+          }}
+        >
+          <CheckCircle2 size={20} />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Main Header */}
+      <div className="page-head">
+        <div>
+          <h1>{shift.serviceName}</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 6 }}>
+            <span className="status-pill status-pill--jade">
+              Đang thực hiện ({shift.startTime} – {shift.endTime})
+            </span>
+            <span style={{ color: 'var(--ink-secondary)', fontSize: 15 }}>
+              Đơn {shift.bookingCode}
+            </span>
+            {shift.checkedInAt && (
+              <span style={{ color: 'var(--ink-muted)', fontSize: 14 }}>
+                Điểm danh lúc {new Date(shift.checkedInAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 10 }}>
           <button
-            className="btn btn-secondary btn-sm"
+            className="btn btn-primary btn-lg"
             type="button"
-            onClick={() => navigate(`/jobs/${shift.bookingId}`)}
-            style={{ fontSize: 14 }}
+            style={{ fontSize: 16, height: 50, fontWeight: 700 }}
+            onClick={() => setShowCheckOutModal(true)}
           >
-            <ArrowLeft size={16} style={{ marginRight: 6 }} /> Quay lại chi tiết đơn
+            Nộp báo cáo và kết thúc ca
           </button>
         </div>
+      </div>
 
-        {/* Toast */}
-        {toastMessage && (
-          <div
-            style={{
-              padding: '12px 18px',
-              borderRadius: 12,
-              background: '#DEF7EC',
-              color: '#03543F',
-              border: '1px solid #84E1BC',
-              marginBottom: 16,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              fontSize: 15,
-              fontWeight: 600,
-            }}
-          >
-            <CheckCircle2 size={20} />
-            <span>{toastMessage}</span>
-          </div>
-        )}
+      {/* SOS Emergency Callout Banner */}
+      <div style={{ marginBottom: 18 }}>
+        <SosEmergencyButton
+          bookingId={shift.bookingId}
+          latitude={shift.patientLatitude}
+          longitude={shift.patientLongitude}
+          latestVitals={shift.vitalSigns[0]}
+        />
+      </div>
 
-        {/* Main Header */}
-        <div className="page-head" style={{ marginBottom: 18 }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>{shift.serviceName}</h1>
-            <p style={{ margin: '6px 0 0 0', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <span>Đơn {shift.bookingCode}</span> ·
-              <span className="chip teal" style={{ fontWeight: 700 }}>
-                ● Đang thực hiện ({shift.startTime} – {shift.endTime})
-              </span>
-              {shift.checkedInAt && (
-                <span style={{ color: 'var(--slate)', fontSize: 13.5 }}>
-                  Điểm danh lúc {new Date(shift.checkedInAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              )}
-            </p>
-          </div>
+      {/* Pending Extension Notification */}
+      {shift.pendingExtension && (
+        <ShiftExtensionBanner
+          bookingId={shift.bookingId}
+          pendingExtension={shift.pendingExtension}
+          onResponded={(approved) => {
+            if (approved) {
+              showToast('Đã đồng ý gia hạn ca thêm 1 giờ!');
+            } else {
+              showToast('Đã từ chối yêu cầu gia hạn ca.');
+            }
+            getShiftExecutionState(shift.bookingId).then((r) => r.data && setShift(r.data));
+          }}
+        />
+      )}
 
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button
-              className="btn btn-primary btn-lg"
-              type="button"
-              style={{ fontSize: 16, height: 50, fontWeight: 700 }}
-              onClick={() => setShowCheckOutModal(true)}
+      {/* 2-Column Clinical Workspace */}
+      <div className="cols-2" style={{ gap: 20, alignItems: 'flex-start' }}>
+        {/* Left Column: Assessment + Vital Signs + Invalid Prescription Protection */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          {!shift.assessmentCompleted ? (
+            <div
+              className="ledger-panel"
+              style={{
+                background: 'var(--accent-ochre-soft)',
+                borderColor: '#FCD34D',
+              }}
             >
-              Nộp báo cáo &amp; Check-out →
-            </button>
-          </div>
-        </div>
-
-        {/* SOS Emergency Callout Banner (Always accessible) */}
-        <div style={{ marginBottom: 18 }}>
-          <SosEmergencyButton
-            bookingId={shift.bookingId}
-            latitude={shift.patientLatitude}
-            longitude={shift.patientLongitude}
-            latestVitals={shift.vitalSigns[0]}
-          />
-        </div>
-
-        {/* Pending Extension Notification (FR-SHIFT-03) */}
-        {shift.pendingExtension && (
-          <ShiftExtensionBanner
-            bookingId={shift.bookingId}
-            pendingExtension={shift.pendingExtension}
-            onResponded={(approved) => {
-              if (approved) {
-                showToast('Đã đồng ý gia hạn ca thêm 1 giờ!');
-              } else {
-                showToast('Đã từ chối gia hạn ca.');
-              }
-              // Refresh state
-              getShiftExecutionState(shift.bookingId).then((r) => r.data && setShift(r.data));
-            }}
-          />
-        )}
-
-        {/* 2-Column Clinical Workspace */}
-        <div className="cols-2" style={{ gap: 20, alignItems: 'flex-start' }}>
-          {/* Left Column: Assessment + Vital Signs + Invalid Prescription Protection */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            {/* 30-min Assessment Callout */}
-            {!shift.assessmentCompleted ? (
-              <div
-                className="card"
-                style={{
-                  padding: '16px 20px',
-                  background: '#EFF6FF',
-                  border: '1.5px solid #93C5FD',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <Clock size={22} color="#2563EB" />
-                    <div>
-                      <h4 style={{ margin: 0, fontSize: 16, color: '#1E40AF', fontWeight: 800 }}>
-                        Đánh giá ban đầu trong 30 phút (FR-SHIFT-02)
-                      </h4>
-                      <p style={{ margin: '2px 0 0 0', fontSize: 13, color: '#1E3A8A' }}>
-                        Bắt buộc kiểm tra vận động, tri giác &amp; đối soát tình trạng thực tế
-                      </p>
-                    </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <Clock size={22} color="var(--accent-ochre)" />
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: 16.5, color: 'var(--ink-primary)', fontWeight: 700 }}>
+                      Đánh giá thể trạng 30 phút đầu ca
+                    </h4>
+                    <p style={{ margin: '2px 0 0', fontSize: 14, color: 'var(--ink-secondary)' }}>
+                      Kiểm tra khả năng vận động, tri giác và đối soát thực tế
+                    </p>
                   </div>
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    style={{ height: 38 }}
-                    onClick={() => setShowAssessmentModal(true)}
-                  >
-                    Bắt đầu đánh giá
-                  </button>
                 </div>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  onClick={() => setShowAssessmentModal(true)}
+                >
+                  Bắt đầu đánh giá
+                </button>
               </div>
-            ) : (
-              <div
-                style={{
-                  padding: '10px 14px',
-                  borderRadius: 10,
-                  background: '#DEF7EC',
-                  color: '#03543F',
-                  fontSize: 13.5,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                }}
-              >
-                <CheckCircle2 size={16} />
-                <span>
-                  Đã hoàn thành đánh giá ban đầu 30 phút ({shift.mobilityStatus || 'Bình thường'})
-                </span>
-              </div>
-            )}
+            </div>
+          ) : (
+            <div
+              style={{
+                padding: '12px 16px',
+                borderRadius: 12,
+                background: 'var(--brand-jade-soft)',
+                color: 'var(--brand-jade)',
+                border: '1px solid #A7D7C5',
+                fontSize: 14.5,
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <CheckCircle2 size={17} />
+              <span>
+                Đã hoàn thành đánh giá ban đầu 30 phút ({shift.mobilityStatus || 'Bình thường'})
+              </span>
+            </div>
+          )}
 
             {/* Vital Signs Form & History */}
             <VitalSignsForm
@@ -436,7 +430,6 @@ export const ShiftExecutionPage: React.FC = () => {
             onClose={() => setShowCheckOutModal(false)}
           />
         )}
-      </div>
     </div>
   );
 };

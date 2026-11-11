@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Radio, MapPin, Clock, CreditCard, Zap, Check, X } from 'lucide-react';
 import { RadarJob } from '../job-board.types';
+import { useDialogA11y } from '../../../components';
 
 interface RadarModalProps {
   radarJob: RadarJob;
@@ -19,6 +20,7 @@ export const RadarModal: React.FC<RadarModalProps> = ({
   const [secondsLeft, setSecondsLeft] = useState<number>(initialSeconds);
   const totalSeconds = initialSeconds || 45;
   const dismissedRef = useRef(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const triggerDismiss = useCallback(() => {
     if (dismissedRef.current) return;
@@ -26,16 +28,7 @@ export const RadarModal: React.FC<RadarModalProps> = ({
     onDismiss(radarJob.id);
   }, [onDismiss, radarJob.id]);
 
-  // Support Escape to close for Elder-Friendly / A11y
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        triggerDismiss();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [triggerDismiss]);
+  useDialogA11y({ open: true, onClose: triggerDismiss, containerRef: dialogRef });
 
   useEffect(() => {
     if (secondsLeft <= 0) {
@@ -54,13 +47,15 @@ export const RadarModal: React.FC<RadarModalProps> = ({
   const ringGradient = `conic-gradient(var(--red) 0% ${percentage}%, #DCEBE3 ${percentage}% 100%)`;
 
   return (
-    <div
-      className="radar-modal-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="radar-modal-title"
-    >
-      <div className="phone-frame">
+    <div className="radar-modal-overlay">
+      <div
+        ref={dialogRef}
+        className="phone-frame"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="radar-modal-title"
+        tabIndex={-1}
+      >
         <div className="phone-inner">
           {/* Radar Animation Area */}
           <div className="radar-zone">
