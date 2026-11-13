@@ -1,25 +1,12 @@
+import type { MobileShiftSummary } from '@healthcare-system/shared';
 import { apiClient, ApiResponse } from '../../lib/api-client';
+
+export type { MobileShiftSummary };
 
 export interface PendingExtensionDto {
   id: string;
   hours: number;
   extraAmount: number;
-}
-
-export interface MobileShiftSummary {
-  bookingId: string;
-  bookingCode: string;
-  patientName: string;
-  patientAge: number;
-  patientAddress: string;
-  patientLatitude: number;
-  patientLongitude: number;
-  serviceName: string;
-  timeRange: string;
-  mobilityNote?: string;
-  allergies?: string;
-  isInvasive: boolean;
-  prescriptionSummary?: string;
 }
 
 export interface MobileShiftExecutionState {

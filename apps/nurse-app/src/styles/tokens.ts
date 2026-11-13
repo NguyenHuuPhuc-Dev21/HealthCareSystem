@@ -1,6 +1,6 @@
 /**
  * Elder-Friendly Design Tokens for Nurse Mobile App (React Native)
- * Unified with CareNest Web Clinical Ledger & Warm Precision (DESIGN.md / SRS §6 NFR-UI-01)
+ * Unified with CareNest Web Clinical Ledger & Warm Precision (SRS §6 NFR-UI-01)
  */
 export const tokens = {
   colors: {
@@ -10,7 +10,7 @@ export const tokens = {
     subtle: '#EDF0EB',
     inkPrimary: '#102A24',
     inkSecondary: '#4A635D',
-    inkMuted: '#6C827C',
+    inkMuted: '#526862',
     brandJade: '#0F6E5B',
     brandJadeDark: '#0B5546',
     brandJadeSoft: '#E6F2EE',
@@ -41,5 +41,11 @@ export const tokens = {
   spacing: {
     touchTargetMin: 48,
     paddingBase: 16,
+  },
+  radii: {
+    sm: 10,
+    md: 14,
+    lg: 18,
+    pill: 999,
   },
 };
