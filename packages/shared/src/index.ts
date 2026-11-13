@@ -10,3 +10,4 @@ export * from './contracts/onboarding.contracts';
 export * from './contracts/availability.contracts';
 export * from './contracts/job-board.contracts';
 export * from './contracts/shift.contracts';
+export * from './contracts/wallet.contracts';

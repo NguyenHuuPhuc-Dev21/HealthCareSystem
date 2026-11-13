@@ -5,3 +5,4 @@ export const USE_MOCK_CREDENTIALS = import.meta.env.VITE_MOCK_CREDENTIALS === 't
 export const USE_MOCK_AVAILABILITY = import.meta.env.VITE_USE_MOCK_AVAILABILITY !== 'false';
 export const USE_MOCK_JOB_BOARD = import.meta.env.VITE_USE_MOCK_JOB_BOARD !== 'false';
 export const USE_MOCK_SHIFTS = import.meta.env.VITE_USE_MOCK_SHIFTS !== 'false';
+export const USE_MOCK_WALLET = import.meta.env.VITE_USE_MOCK_WALLET !== 'false';
