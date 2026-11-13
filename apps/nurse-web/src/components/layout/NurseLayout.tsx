@@ -7,6 +7,7 @@ import {
   LogOut,
   Menu,
   User,
+  Wallet,
   X,
 } from 'lucide-react';
 import { ExecutionStatus } from '@healthcare-system/shared';
@@ -74,11 +75,18 @@ export function initialsOf(fullName?: string | null): string {
   return parts[0]?.slice(0, 2).toUpperCase() || 'ĐD';
 }
 
-const NAV_TABS = [
+interface NavTab {
+  label: string;
+  path: string;
+  isReady: boolean;
+  tip?: string;
+}
+
+const NAV_TABS: NavTab[] = [
   { label: 'Trang chủ', path: '/', isReady: true },
   { label: 'Việc làm', path: '/jobs', isReady: true },
   { label: 'Ca của tôi', path: '/shifts', isReady: true },
-  { label: 'Ví', path: '/wallet', isReady: false, tip: 'Sắp ra mắt ở giai đoạn Ví và Thu nhập' },
+  { label: 'Ví', path: '/wallet/withdraw', isReady: true },
   { label: 'Lịch rảnh', path: '/schedule', isReady: true },
   { label: 'Văn bằng', path: '/credentials', isReady: true },
 ];
@@ -214,7 +222,9 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
             const active =
               tab.path === '/'
                 ? location.pathname === '/'
-                : location.pathname === tab.path || location.pathname.startsWith(`${tab.path}/`);
+                : location.pathname === tab.path ||
+                  location.pathname.startsWith(`${tab.path}/`) ||
+                  (tab.path === '/wallet/withdraw' && location.pathname.startsWith('/wallet'));
             if (tab.isReady) {
               return (
                 <Link
@@ -349,6 +359,10 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                 <span className="mi"><FileText size={18} /></span>
                 Văn bằng &amp; GPHN
               </Link>
+              <Link to="/wallet/withdraw" role="menuitem">
+                <span className="mi"><Wallet size={18} /></span>
+                Ví &amp; Rút tiền
+              </Link>
 
               <div className="divider" />
 
@@ -376,7 +390,9 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
             const active =
               tab.path === '/'
                 ? location.pathname === '/'
-                : location.pathname === tab.path || location.pathname.startsWith(`${tab.path}/`);
+                : location.pathname === tab.path ||
+                  location.pathname.startsWith(`${tab.path}/`) ||
+                  (tab.path === '/wallet/withdraw' && location.pathname.startsWith('/wallet'));
             if (tab.isReady) {
               return (
                 <Link

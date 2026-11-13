@@ -10,6 +10,8 @@ const STATUS_LABELS: Record<string, string> = {
   BANNED: 'Đã khóa vĩnh viễn',
   TIER_1_BASIC: 'Hạng Cơ bản (Cấp 1)',
   TIER_2_SPECIALIST: 'Hạng Chuyên môn (Cấp 2)',
+  WITHDRAW_REQUESTED: 'Đang chờ duyệt',
+  WITHDRAWN: 'Đã chuyển',
 };
 
 export interface StatusBadgeProps {

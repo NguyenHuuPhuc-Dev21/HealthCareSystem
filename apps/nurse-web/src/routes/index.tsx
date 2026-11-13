@@ -13,6 +13,7 @@ import { ShiftDetailPage } from '../features/shifts/ShiftDetailPage';
 import { ShiftExecutionPage } from '../features/shifts/ShiftExecutionPage';
 import { MyShiftsPage } from '../features/shifts/MyShiftsPage';
 import { NurseHomePage } from '../features/home/NurseHomePage';
+import { WithdrawPage } from '../features/wallet/WithdrawPage';
 import { NurseLayout } from '../components/layout/NurseLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 
@@ -152,6 +153,20 @@ export const AppRoutes: React.FC = () => {
                 </NurseLayout>
               </ProtectedRoute>
             }
+          />
+          <Route
+            path="/wallet/withdraw"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <WithdrawPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/wallet"
+            element={<Navigate to="/wallet/withdraw" replace />}
           />
 
           <Route path="*" element={<Navigate to="/login" replace />} />
