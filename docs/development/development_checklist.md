@@ -70,9 +70,9 @@
 ## Phase 1 — AUTH: Identity, eKYC, Tiers & Privacy [MVP]
 
 ### FE-1
-- [ ] Patient Web — Phone + OTP SMS authentication flow (`features/auth`).
-- [ ] Patient Web — Patient profile creation + mandatory Decree-13 sensitive health data consent checkbox (`features/patient-profiles`).
-- [ ] Patient Web — Customer CCCD identity document upload for eKYC.
+- [x] Patient Web — Phone + OTP SMS authentication flow (`features/auth`).
+- [x] Patient Web — Patient profile creation + mandatory Decree-13 sensitive health data consent checkbox (`features/patient-profiles`).
+- [x] Patient Web — Customer CCCD identity document upload for eKYC.
 - [x] Admin Web — Nurse verification queue: review uploaded credentials, approve/reject, assign professional Tier (`features/nurse-verification`).
 
 ### FE-2
@@ -110,8 +110,8 @@
 ## Phase 2 — SCHED & SEARCH: Availability & Nurse Discovery [MVP]
 
 ### FE-1
-- [ ] Patient Web — Nurse discovery screen: filters by service category, district/location, time slot, Tier, and gender.
-- [ ] Patient Web — Nurse profile summary card: TrustScore, rating average, verified experience, and retired staff honor badge.
+- [x] Patient Web — Nurse discovery screen: filters by service category, district/location, time slot, Tier, and gender.
+- [x] Patient Web — Nurse profile summary card: TrustScore, rating average, verified experience, and retired staff honor badge.
 
 ### FE-2
 - [x] Nurse Web + Mobile App — Availability calendar: configure recurring weekly working time slots.
@@ -141,13 +141,13 @@
 ## Phase 3 — BOOK: Booking, Pricing, Prescription Gate & Matching [MVP]
 
 ### FE-1
-- [ ] Patient Web — End-to-end booking flow: select service → choose patient profile → select time slot → confirm booking.
-- [ ] Patient Web — Mandatory prescription photo upload interface when selecting invasive services (`is_invasive = true`).
-- [ ] Patient Web — Transparent pricing breakdown card: base amount, night surcharge, holiday surcharge, heavy patient surcharge, platform fee, total amount.
-- [ ] Patient Web — Payment method selector: Prepaid Bank Transfer (Escrow) vs On-site Cash.
-- [ ] Patient Web — Pending payment countdown screen with real-time 15-minute expiration timer.
-- [ ] Patient Web — Direct nurse invitation action from profile discovery screen.
-- [ ] Patient Web — My Bookings dashboard presenting independent 3-axis status badges (`execution`, `payment`, `dispute`).
+- [x] Patient Web — End-to-end booking flow: select service → choose patient profile → select time slot → confirm booking.
+- [x] Patient Web — Mandatory prescription photo upload interface when selecting invasive services (`is_invasive = true`).
+- [x] Patient Web — Transparent pricing breakdown card: base amount, night surcharge, holiday surcharge, heavy patient surcharge, platform fee, total amount.
+- [x] Patient Web — Payment method selector: Prepaid Bank Transfer (Escrow) vs On-site Cash.
+- [x] Patient Web — Pending payment countdown screen with real-time 15-minute expiration timer.
+- [x] Patient Web — Direct nurse invitation action from profile discovery screen.
+- [x] Patient Web — My Bookings dashboard presenting independent 3-axis status badges (`execution`, `payment`, `dispute`).
 
 ### FE-2
 - [x] Nurse Web + Mobile App — Job Board interface for advance bookings (> 6 hours).
