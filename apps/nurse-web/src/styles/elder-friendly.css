@@ -2828,6 +2828,364 @@ button:disabled,
   animation: spin 1s linear infinite;
 }
 
+/* ==========================================================================
+   NURSE HOME DASHBOARD ENHANCEMENTS (PULSE BAR, TIMELINE, SAFETY, QUICK ACTIONS)
+   ========================================================================== */
+
+/* ---------- Radar Pill Toggle ---------- */
+.radar-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.radar-pill--active {
+  background: var(--brand-jade-soft);
+  color: var(--brand-jade);
+  border-color: rgba(26, 83, 54, 0.25);
+}
+
+.radar-pill--active:hover {
+  background: rgba(26, 83, 54, 0.18);
+}
+
+.radar-pill--inactive {
+  background: var(--surface-subtle);
+  color: var(--ink-secondary);
+  border-color: var(--border-hairline);
+}
+
+.radar-pill--inactive:hover {
+  background: #eae6df;
+}
+
+.radar-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.radar-pill--active .radar-dot {
+  background: var(--brand-jade);
+  box-shadow: 0 0 0 3px rgba(26, 83, 54, 0.2);
+  animation: pulseDot 2s infinite ease-in-out;
+}
+
+.radar-pill--inactive .radar-dot {
+  background: var(--ink-muted);
+}
+
+/* ---------- Daily Pulse Bar (KPI Bar) ---------- */
+.pulse-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1024px) {
+  .pulse-bar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .pulse-bar {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pulse-card {
+  background: var(--surface-paper);
+  border: 1px solid var(--border-hairline);
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pulse-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+}
+
+.pulse-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.pulse-card__label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink-secondary);
+}
+
+.pulse-card__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.pulse-card__icon--jade {
+  background: var(--brand-jade-soft);
+  color: var(--brand-jade);
+}
+
+.pulse-card__icon--blue {
+  background: #E0F2FE;
+  color: #0284C7;
+}
+
+.pulse-card__icon--emerald {
+  background: #DCFCE7;
+  color: #15803D;
+}
+
+.pulse-card__icon--amber {
+  background: var(--accent-ochre-soft);
+  color: #B45309;
+}
+
+.pulse-card__value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink-primary);
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.pulse-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 13px;
+  border-top: 1px dashed var(--border-hairline);
+  padding-top: 6px;
+}
+
+.pulse-card__sub {
+  color: var(--ink-secondary);
+  font-size: 12.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Daily Timeline ---------- */
+.timeline-section {
+  background: var(--surface-paper);
+  border: 1px solid var(--border-hairline);
+  border-radius: 14px;
+  padding: 22px 24px;
+}
+
+.timeline-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border-hairline);
+  padding-bottom: 12px;
+}
+
+.timeline-track {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.timeline-track::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 17px;
+  width: 2px;
+  background: var(--border-hairline);
+  z-index: 0;
+}
+
+.timeline-node {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  z-index: 1;
+}
+
+.timeline-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-paper);
+  border: 2px solid var(--brand-jade);
+  color: var(--brand-jade);
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.timeline-dot--active {
+  background: var(--brand-jade);
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(26, 83, 54, 0.2);
+}
+
+.timeline-card {
+  flex: 1;
+  background: #fff;
+  border: 1px solid var(--border-hairline);
+  border-radius: 12px;
+  padding: 16px 18px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.timeline-card--active {
+  border: 1.5px solid var(--brand-jade);
+  background: #FCFDFB;
+  box-shadow: 0 2px 6px rgba(26, 83, 54, 0.08);
+}
+
+.timeline-buffer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  margin-left: 52px;
+  background: #FFFBEB;
+  border: 1px dashed #FCD34D;
+  border-radius: 10px;
+  font-size: 13.5px;
+  color: #92400E;
+  z-index: 1;
+}
+
+/* ---------- Clinical Safety Checklist ---------- */
+.clinical-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 14px 0 16px;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--surface-canvas);
+  border: 1px solid var(--border-hairline);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.checklist-item:hover {
+  background: #fff;
+  border-color: rgba(26, 83, 54, 0.3);
+}
+
+.checklist-item--checked {
+  background: var(--brand-jade-soft);
+  border-color: rgba(26, 83, 54, 0.25);
+  color: var(--ink-secondary);
+}
+
+.checklist-item__box {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid var(--border-hairline);
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: transparent;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.checklist-item--checked .checklist-item__box {
+  background: var(--brand-jade);
+  border-color: var(--brand-jade);
+  color: #fff;
+}
+
+.checklist-item__text {
+  font-size: 14.5px;
+  line-height: 1.35;
+  color: var(--ink-primary);
+  font-weight: 500;
+}
+
+.checklist-item--checked .checklist-item__text {
+  color: var(--ink-secondary);
+  text-decoration: line-through;
+}
+
+/* ---------- Quick Actions Grid ---------- */
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.quick-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-hairline);
+  background: var(--surface-canvas);
+  color: var(--ink-primary);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.15s ease;
+  min-height: 72px;
+}
+
+.quick-action-btn:hover {
+  background: #fff;
+  border-color: var(--brand-jade);
+  color: var(--brand-jade);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.quick-action-btn svg {
+  color: var(--brand-jade);
+}
+
 /* ---------- Reduced Motion Support ---------- */
 @media (prefers-reduced-motion: reduce) {
   *,
