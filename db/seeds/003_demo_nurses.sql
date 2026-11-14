@@ -15,22 +15,23 @@
 --   06 0911000006  ACTIVE                T1    baseline Tier 1, no GPHN
 --   07 0911000007  ACTIVE                T1    retired badge WITHOUT GPHN → never Tier 2
 --   08 0911000008  ACTIVE                T1    GPHN expired → already demoted to Tier 1
---   09 0911000009  ACTIVE                T1    deposit 100,000 (< 300,000) → hidden from search
---   10 0911000010  ACTIVE                T1    deposit −50,000 (penalty debt) → hidden from search
+--   09 0911000009  ACTIVE                T1    newcomer Tier 1 (2 years), same area as 01
+--   10 0911000010  ACTIVE                T1    Tier 1 with a middling TrustScore / rating
 --   11 0911000011  ACTIVE                T2    low TrustScore / rating, offline, no schedule
 --   12 0911000012  PENDING_VERIFICATION  —     first submission waiting in the Admin queue
 --   13 0911000013  PENDING_VERIFICATION  —     first submission incl. GPHN, waiting
 --   14 0911000014  SUSPENDED             T2    must never appear in search or matching
 --   15 0911000015  BANNED                T1    must never appear; login is blocked
 --
--- Eligible in HCMC BEFORE the availability filter (ACTIVE + deposit ≥ 300,000 + tier):
---   non-invasive service: 01 02 03 04 06 07 08 11      invasive service: 01 02 03 04 11
+-- Eligible in HCMC BEFORE the availability filter (ACTIVE + qualifying tier):
+--   non-invasive service: 01 02 03 04 06 07 08 09 10 11      invasive service: 01 02 03 04 11
 -- Nurse 11 has no schedule, so the availability engine then removes it for any time slot.
--- Nurses 09 and 10 do have a schedule: the deposit is the only reason they are hidden.
 --
 -- Notes
 --  * Tier and nurse_profiles.gphn_* hold APPROVED data only (see migration 0005), so the
 --    rows are consistent with what credential-review would have written.
+--  * No nurse deposit: the team dropped the 300,000 VND deposit requirement, so every
+--    wallets.deposit_balance here stays at its default 0 and no row depends on it.
 --  * rating_avg is set directly: there are no bookings/reviews behind it yet.
 --  * file_url values are well-formed private object keys, but no file exists in storage.
 --  * Dates written with CURRENT_DATE are fixed on the day the seed is first applied
@@ -83,24 +84,24 @@ VALUES
   ('61000000-0000-0000-0000-000000000015', 'TIER_1_BASIC',      NULL,              NULL,               NULL,                         4, FALSE, 10.7553000, 106.6657000, FALSE,   0, 2.00, 'BANNED',    'Demo: vi phạm nghiêm trọng')
 ON CONFLICT (user_id) DO NOTHING;
 
--- 3. Wallets (deposit drives search eligibility: NURSE_DEPOSIT ≥ 300,000) ----
-INSERT INTO wallets (user_id, available_balance, deposit_balance)
+-- 3. Wallets (earnings only; deposit_balance is left at 0 — see Notes) ------
+INSERT INTO wallets (user_id, available_balance)
 VALUES
-  ('61000000-0000-0000-0000-000000000001', 1200000, 300000),
-  ('61000000-0000-0000-0000-000000000002', 3500000, 500000),
-  ('61000000-0000-0000-0000-000000000003',  800000, 300000),
-  ('61000000-0000-0000-0000-000000000004',  450000, 300000),
-  ('61000000-0000-0000-0000-000000000005',  900000, 300000),
-  ('61000000-0000-0000-0000-000000000006',  250000, 300000),
-  ('61000000-0000-0000-0000-000000000007', 1800000, 300000),
-  ('61000000-0000-0000-0000-000000000008',  600000, 300000),
-  ('61000000-0000-0000-0000-000000000009',       0, 100000),
-  ('61000000-0000-0000-0000-000000000010',  150000, -50000),
-  ('61000000-0000-0000-0000-000000000011',  300000, 300000),
-  ('61000000-0000-0000-0000-000000000012',       0,      0),
-  ('61000000-0000-0000-0000-000000000013',       0,      0),
-  ('61000000-0000-0000-0000-000000000014',  700000, 300000),
-  ('61000000-0000-0000-0000-000000000015',       0,      0)
+  ('61000000-0000-0000-0000-000000000001', 1200000),
+  ('61000000-0000-0000-0000-000000000002', 3500000),
+  ('61000000-0000-0000-0000-000000000003',  800000),
+  ('61000000-0000-0000-0000-000000000004',  450000),
+  ('61000000-0000-0000-0000-000000000005',  900000),
+  ('61000000-0000-0000-0000-000000000006',  250000),
+  ('61000000-0000-0000-0000-000000000007', 1800000),
+  ('61000000-0000-0000-0000-000000000008',  600000),
+  ('61000000-0000-0000-0000-000000000009',       0),
+  ('61000000-0000-0000-0000-000000000010',  150000),
+  ('61000000-0000-0000-0000-000000000011',  300000),
+  ('61000000-0000-0000-0000-000000000012',       0),
+  ('61000000-0000-0000-0000-000000000013',       0),
+  ('61000000-0000-0000-0000-000000000014',  700000),
+  ('61000000-0000-0000-0000-000000000015',       0)
 ON CONFLICT (user_id) DO NOTHING;
 
 -- 4. Credentials ------------------------------------------------------
