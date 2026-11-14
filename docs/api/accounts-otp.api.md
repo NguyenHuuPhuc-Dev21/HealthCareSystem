@@ -117,6 +117,26 @@ Nothing is saved until the first valid code is sent to `verify-2fa`.
 ### `GET /auth/me` — `Authorization: Bearer …`
 `200` → the `user` object. `401 UNAUTHORIZED` if the token is missing, expired or revoked.
 
+### `GET /auth/dev/otp-inbox?phone=0903000003` — dev / staging only
+Reads the code that `request-otp` just issued, for testing without a real SMS/ZNS provider.
+The route exists only when the server runs with `OTP_CHANNEL=mock`; production refuses that channel, so there it is `404`.
+
+`200`
+```json
+{ "success": true, "data": { "message": { "phone": "0903000003", "code": "482913", "channel": "mock", "issuedAt": "2026-11-14T10:00:00.000Z", "expiresAt": "2026-11-14T10:05:00.000Z" } } }
+```
+- `message` is `null` when no code is waiting (none requested, already expired, or the number is banned).
+- Only the latest code per phone is kept; it disappears when the OTP expires.
+- If the server sets `OTP_MOCK_INBOX_KEY`, send it as the header `X-OTP-Inbox-Key`.
+- A code stays listed after it has been used; it can no longer sign anyone in.
+
+| Error | When |
+|---|---|
+| `400 INVALID_PHONE` | `phone` missing or not a Vietnamese mobile number |
+| `401 UNAUTHORIZED` | `OTP_MOCK_INBOX_KEY` is set and the header is missing or wrong |
+
+**Never build product screens on this endpoint** — it is a test tool and does not exist in production.
+
 ## Notes for FE
 - Store the refresh token securely (mobile: secure storage). On any `401`, try `refresh` once, then go to sign-in.
 - A banned/suspended state change revokes all sessions immediately; handle `401` anywhere.

@@ -5,9 +5,10 @@
 import { Router, type Request } from 'express';
 import { UserRole } from '@healthcare-system/shared';
 import { asyncHandler, authGuard, bearerToken, validateBody } from '../../core/middleware';
-import { unauthorized } from '../../core/errors';
+import { badRequest, unauthorized } from '../../core/errors';
 import {
   completeRegistrationSchema,
+  normalizeVietnamPhone,
   refreshSchema,
   requestOtpSchema,
   twoFactorSetupSchema,
@@ -114,6 +115,21 @@ export function createAccountsOtpRouter(service: AccountsOtpService): Router {
       res.json({ success: true, data: await service.getMe(req.user!.id) });
     }),
   );
+
+  // Dev/staging only: exists when OTP_CHANNEL=mock, which the server refuses in production.
+  const inbox = service.mockInbox;
+  if (inbox) {
+    router.get(
+      '/dev/otp-inbox',
+      asyncHandler(async (req, res) => {
+        if (!inbox.isAuthorized(req.get('x-otp-inbox-key') ?? undefined)) throw unauthorized();
+        const raw = req.query.phone;
+        const phone = typeof raw === 'string' ? normalizeVietnamPhone(raw) : null;
+        if (!phone) throw badRequest('INVALID_PHONE', 'Query parameter "phone" must be a Vietnamese mobile number');
+        res.json({ success: true, data: { message: await inbox.latest(phone) } });
+      }),
+    );
+  }
 
   return router;
 }

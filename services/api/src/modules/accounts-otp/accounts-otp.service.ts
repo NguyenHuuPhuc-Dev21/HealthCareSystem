@@ -24,6 +24,7 @@ import type { AuthenticatedUser } from '../../core/middleware';
 import { getKeyValueStore, type KeyValueStore } from '../../core/redis';
 import { isLoginBlocked, requiresSecondFactor, toPublicUser } from './accounts-otp.policy';
 import { PgAccountsRepo } from './accounts-otp.repo';
+import { createOtpDelivery } from './accounts-otp.senders';
 import {
   TOTP_STEP_SECONDS,
   decryptSecret,
@@ -35,6 +36,7 @@ import {
 import type {
   AccountsRepo,
   AuthUserRecord,
+  MockOtpInbox,
   OtpSender,
   PublicUser,
   RequestContext,
@@ -53,6 +55,8 @@ export interface AccountsOtpDeps {
   kv: KeyValueStore;
   repo: AccountsRepo;
   sender: OtpSender;
+  /** Set only when OTP_CHANNEL=mock: lets the dev-only inbox route read issued codes. */
+  mockInbox?: MockOtpInbox;
   getNumber: (key: SystemConfigKey) => Promise<number>;
   /** Server-side secret for OTP HMACs (env OTP_SECRET). */
   otpSecret: string;
@@ -229,6 +233,11 @@ export class AccountsOtpService {
       throw new Error('TOTP encryption key must be 32 bytes');
     }
     this.sessions = new SessionManager(deps);
+  }
+
+  /** The mock inbox when OTP_CHANNEL=mock, otherwise null (the dev route is then not mounted). */
+  get mockInbox(): MockOtpInbox | null {
+    return this.deps.mockInbox ?? null;
   }
 
   private hashOtp(phone: string, code: string): string {
@@ -455,17 +464,6 @@ export class AccountsOtpService {
 // Wiring with real dependencies
 // ---------------------------------------------------------------------------
 
-/**
- * Development sender: no SMS provider is chosen yet (OD-09). It never logs the
- * code — only a masked phone. Use OTP_DEV_ECHO=true to receive the code in the
- * API response while developing.
- */
-export class DevOtpSender implements OtpSender {
-  async sendLoginOtp(phone: string): Promise<void> {
-    console.log(`[accounts-otp] OTP issued for ***${phone.slice(-3)} (no SMS provider configured)`);
-  }
-}
-
 function readOtpSecret(): string {
   const secret = process.env.OTP_SECRET ?? '';
   if (process.env.NODE_ENV === 'production' && (secret.startsWith('replace_with') || secret.length < 32)) {
@@ -497,23 +495,19 @@ function readDevEcho(): boolean {
   return on;
 }
 
-function selectSender(): OtpSender {
-  if (process.env.NODE_ENV === 'production') {
-    // Fail closed until the SMS/ZNS provider decision (OD-09) is implemented.
-    throw new Error('No SMS/ZNS OTP provider configured for production (OD-09)');
-  }
-  return new DevOtpSender();
-}
-
 let singleton: AccountsOtpService | null = null;
 
 export function getAccountsOtpService(): AccountsOtpService {
   if (!singleton) {
     const otpSecret = readOtpSecret();
+    const kv = getKeyValueStore();
+    // OTP_CHANNEL (OD-09). Production fails closed here until the real channel exists.
+    const delivery = createOtpDelivery(process.env, kv);
     singleton = new AccountsOtpService({
-      kv: getKeyValueStore(),
+      kv,
       repo: new PgAccountsRepo(),
-      sender: selectSender(),
+      sender: delivery.sender,
+      ...(delivery.mockInbox ? { mockInbox: delivery.mockInbox } : {}),
       getNumber: getConfigNumber,
       otpSecret,
       devEcho: readDevEcho(),
