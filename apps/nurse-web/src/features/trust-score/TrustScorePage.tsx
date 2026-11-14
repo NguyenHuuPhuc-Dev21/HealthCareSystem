@@ -49,8 +49,8 @@ export const TrustScorePage: React.FC = () => {
   }, [loadData]);
 
   const score = trustScoreData?.score ?? 0;
-  const isSuspended = score < 60;
-  const isWarning = score >= 60 && score < 70;
+  const isSuspended = trustScoreData !== null && score < 60;
+  const isWarning = trustScoreData !== null && score >= 60 && score < 70;
 
   // Switcher for testing (92, 65, 55)
   const handleTestScoreChange = (testScore: number) => {
