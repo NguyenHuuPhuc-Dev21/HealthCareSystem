@@ -14,6 +14,7 @@ import { ShiftExecutionPage } from '../features/shifts/ShiftExecutionPage';
 import { MyShiftsPage } from '../features/shifts/MyShiftsPage';
 import { NurseHomePage } from '../features/home/NurseHomePage';
 import { WithdrawPage } from '../features/wallet/WithdrawPage';
+import { TrustScorePage } from '../features/trust-score/TrustScorePage';
 import { NurseLayout } from '../components/layout/NurseLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 
@@ -167,6 +168,16 @@ export const AppRoutes: React.FC = () => {
           <Route
             path="/wallet"
             element={<Navigate to="/wallet/withdraw" replace />}
+          />
+          <Route
+            path="/trust-score"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <TrustScorePage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
           />
 
           <Route path="*" element={<Navigate to="/login" replace />} />

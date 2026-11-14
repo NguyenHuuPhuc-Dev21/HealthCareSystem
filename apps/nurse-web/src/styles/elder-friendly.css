@@ -2739,6 +2739,82 @@ button:disabled,
   color: var(--ink-primary);
 }
 
+/* ---------- N15 TrustScore & Review Styles ---------- */
+.dist-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14.5px;
+  margin-bottom: 8px;
+}
+
+.dist-row:last-child {
+  margin-bottom: 0;
+}
+
+.dist-row .tr {
+  flex: 1;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface-subtle);
+  overflow: hidden;
+}
+
+.dist-row .tr i {
+  display: block;
+  height: 100%;
+  background: var(--brand-jade);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.review-card {
+  padding: 20px 22px;
+  margin-bottom: 14px;
+  border-radius: 14px;
+  background: var(--surface-paper);
+  border: 1px solid var(--border-hairline);
+  transition: border-color 0.15s ease;
+}
+
+.review-card:last-child {
+  margin-bottom: 0;
+}
+
+.review-card p {
+  color: var(--ink-secondary);
+  font-size: 15px;
+  margin: 8px 0 0;
+  line-height: 1.55;
+}
+
+.stars {
+  color: #F59E0B;
+  letter-spacing: 2px;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.kv {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--border-hairline);
+  font-size: 15px;
+}
+
+.kv:last-child {
+  border-bottom: 0;
+}
+
+.kv b {
+  color: var(--ink-primary);
+  text-align: right;
+  font-weight: 700;
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);

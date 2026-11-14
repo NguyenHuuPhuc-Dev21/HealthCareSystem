@@ -289,7 +289,8 @@
 - [ ] Nurse Web + Mobile App — Dispute notification and rebuttal submission interface.
 - [ ] Nurse Web + Mobile App — Post-shift customer rating form.
 - [ ] Nurse Web + Mobile App — In-app chat interface with customer (reusing FE-1 component).
-- [ ] Nurse Web + Mobile App — Personal TrustScore dashboard: current score, deduction/recovery history, suspension warning near 60.
+- [x] Nurse Web — Personal TrustScore dashboard: current score, deduction/recovery history, suspension warning near 60.
+- [ ] Nurse Mobile App — Personal TrustScore dashboard: current score, deduction/recovery history, suspension warning near 60.
 
 ### BE-1
 - [ ] `reviews-trustscore` (FR-RATE-01): `POST /api/v1/bookings/:id/reviews` — opens immediately upon `COMPLETED` execution status, independent of financial settlement.

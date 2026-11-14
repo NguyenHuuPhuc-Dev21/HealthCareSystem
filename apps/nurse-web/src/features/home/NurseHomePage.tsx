@@ -8,6 +8,7 @@ import { getMyShifts } from '../shifts/shift.api';
 import { ShiftExecutionState } from '../shifts/shift.types';
 import { getJobBoard } from '../job-board/job-board.api';
 import { JobItem } from '../job-board/job-board.types';
+import { getTrustScore } from '../trust-score/trust-score.api';
 
 /**
  * N1 · Trang chủ điều dưỡng — Sổ tay Lâm sàng Chuẩn mực (Clinical Ledger).
@@ -22,6 +23,7 @@ export const NurseHomePage: React.FC = () => {
 
   const [shifts, setShifts] = useState<ShiftExecutionState[]>([]);
   const [suggestedJobs, setSuggestedJobs] = useState<JobItem[]>([]);
+  const [liveTrustScore, setLiveTrustScore] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -29,8 +31,8 @@ export const NurseHomePage: React.FC = () => {
     let cancelled = false;
     setLoading(true);
     setLoadError(null);
-    Promise.all([getMyShifts(), getJobBoard()])
-      .then(([shiftsRes, jobsRes]) => {
+    Promise.all([getMyShifts(), getJobBoard(), getTrustScore()])
+      .then(([shiftsRes, jobsRes, tsRes]) => {
         if (cancelled) return;
         if (!shiftsRes.success && !jobsRes.success) {
           setLoadError('Không thể tải dữ liệu ca trực và việc làm mới. Vui lòng thử lại.');
@@ -40,6 +42,9 @@ export const NurseHomePage: React.FC = () => {
         }
         if (jobsRes.success) {
           setSuggestedJobs(jobsRes.data.slice(0, 2));
+        }
+        if (tsRes.success && tsRes.data) {
+          setLiveTrustScore(tsRes.data.score);
         }
       })
       .catch(() => {
@@ -75,11 +80,12 @@ export const NurseHomePage: React.FC = () => {
   const isDepositSufficient =
     depositBalance !== null && depositBalance >= DEFAULT_MIN_NURSE_DEPOSIT_VND;
   const trustScore: number | null =
-    typeof profile.trust_score === 'number'
+    liveTrustScore ??
+    (typeof profile.trust_score === 'number'
       ? profile.trust_score
       : USE_MOCK_AUTH
-      ? 98
-      : null;
+      ? 92
+      : null);
 
   // Ưu tiên ca đang thực hiện, sau đó tới ca đã xác nhận
   const primaryShift =
@@ -318,11 +324,18 @@ export const NurseHomePage: React.FC = () => {
                 {trustScore !== null ? `${trustScore} / 100` : 'Chưa có dữ liệu'}
               </div>
               <div className="ledger-row__sub">
-                {isTier2
+                {trustScore !== null && trustScore < 60
+                  ? 'Tài khoản đang bị tạm khóa nhận ca'
+                  : trustScore !== null && trustScore < 70
+                  ? 'Cảnh báo: điểm gần ngưỡng tạm khóa (60)'
+                  : isTier2
                   ? 'Đủ điều kiện thực hiện thủ thuật có y lệnh'
                   : 'Phạm vi chăm sóc điều dưỡng cơ bản'}
               </div>
             </div>
+            <Link to="/trust-score" className="ledger-link">
+              Chi tiết
+            </Link>
           </div>
         </aside>
       </div>
