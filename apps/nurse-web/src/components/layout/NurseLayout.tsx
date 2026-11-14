@@ -6,6 +6,7 @@ import {
   FileText,
   LogOut,
   Menu,
+  Star,
   User,
   Wallet,
   X,
@@ -362,6 +363,10 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
               <Link to="/wallet/withdraw" role="menuitem">
                 <span className="mi"><Wallet size={18} /></span>
                 Ví &amp; Rút tiền
+              </Link>
+              <Link to="/trust-score" role="menuitem">
+                <span className="mi"><Star size={18} /></span>
+                Đánh giá &amp; TrustScore
               </Link>
 
               <div className="divider" />

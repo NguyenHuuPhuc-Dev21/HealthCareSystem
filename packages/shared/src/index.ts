@@ -11,3 +11,4 @@ export * from './contracts/availability.contracts';
 export * from './contracts/job-board.contracts';
 export * from './contracts/shift.contracts';
 export * from './contracts/wallet.contracts';
+export * from './contracts/trust-score.contracts';

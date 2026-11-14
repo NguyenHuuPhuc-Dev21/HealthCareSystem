@@ -20,6 +20,9 @@ export const DEFAULT_SURCHARGE_NIGHT_SHIFT_RATE = 0.20;  // 20% surcharge for ni
 export const DEFAULT_TRAVEL_BUFFER_MINUTES = 60;         // 60-minute travel buffer between shifts (SRS §5.1)
 export const DEFAULT_CANCELLATION_PENALTY_RATE = 0.20;   // 20% cancellation penalty within 12h (SRS §5.2)
 
+export const TRUST_SCORE_SUSPEND_THRESHOLD = 60; // < 60 điểm: tạm khóa nhận ca (SRS §5.1, FR-RATE-01)
+export const TRUST_SCORE_WARNING_THRESHOLD = 70; // 60–69 điểm: ngưỡng cảnh báo vàng
+
 export const TIMEZONE_DISPLAY = 'Asia/Ho_Chi_Minh';    // Canonical timezone
 
 /**
