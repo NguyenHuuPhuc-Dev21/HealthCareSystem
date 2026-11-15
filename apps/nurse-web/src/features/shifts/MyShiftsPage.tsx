@@ -1,9 +1,21 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, AlertTriangle, Calendar, Clock, MapPin, ShieldAlert } from 'lucide-react';
+import {
+  Activity,
+  AlertTriangle,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  FileText,
+  MapPin,
+  ShieldAlert,
+  Star,
+} from 'lucide-react';
 import { ExecutionStatus, DEFAULT_PLATFORM_COMMISSION_RATE } from '@healthcare-system/shared';
 import { getMyShifts } from './shift.api';
 import { ShiftExecutionState } from './shift.types';
+import { getSentReviews } from '../reviews/reviews.api';
+import { RateCustomerModal } from '../reviews/components/RateCustomerModal';
 
 function statusMeta(status: ExecutionStatus): { label: string; tone: 'jade' | 'ochre' | 'crimson' | 'neutral' } {
   switch (status) {
@@ -22,6 +34,9 @@ function statusMeta(status: ExecutionStatus): { label: string; tone: 'jade' | 'o
 
 export const MyShiftsPage: React.FC = () => {
   const [shifts, setShifts] = useState<ShiftExecutionState[]>([]);
+  const [reviewedBookingCodes, setReviewedBookingCodes] = useState<string[]>([]);
+  const [selectedReviewShift, setSelectedReviewShift] = useState<ShiftExecutionState | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -29,13 +44,18 @@ export const MyShiftsPage: React.FC = () => {
     let alive = true;
     setLoading(true);
     setLoadError(null);
-    getMyShifts()
-      .then((res) => {
+
+    Promise.all([getMyShifts(), getSentReviews()])
+      .then(([shiftsRes, sentRes]) => {
         if (!alive) return;
-        if (res.success) {
-          setShifts(res.data);
+        if (shiftsRes.success) {
+          setShifts(shiftsRes.data);
         } else {
-          setLoadError(res.message || 'Không thể tải danh sách ca trực. Vui lòng thử lại.');
+          setLoadError(shiftsRes.message || 'Không thể tải danh sách ca trực. Vui lòng thử lại.');
+        }
+
+        if (sentRes.success && sentRes.data) {
+          setReviewedBookingCodes(sentRes.data.map((r) => r.bookingCode));
         }
       })
       .catch(() => {
@@ -46,6 +66,7 @@ export const MyShiftsPage: React.FC = () => {
       .finally(() => {
         if (alive) setLoading(false);
       });
+
     return () => {
       alive = false;
     };
@@ -66,6 +87,29 @@ export const MyShiftsPage: React.FC = () => {
           Tìm thêm ca mới
         </Link>
       </div>
+
+      {/* Toast Alert */}
+      {toastMessage && (
+        <div
+          role="status"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '12px 18px',
+            borderRadius: 10,
+            background: 'var(--brand-jade-soft)',
+            border: '1.5px solid var(--brand-jade)',
+            color: 'var(--brand-jade)',
+            fontSize: 14.5,
+            fontWeight: 600,
+            marginBottom: 20,
+          }}
+        >
+          <CheckCircle2 size={20} style={{ flexShrink: 0 }} aria-hidden="true" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
 
       {loading ? (
         <div className="ledger-panel" style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--ink-secondary)' }}>
@@ -146,12 +190,45 @@ export const MyShiftsPage: React.FC = () => {
                   <div className="tabular-nums" style={{ fontSize: 21, fontWeight: 800, color: 'var(--ink-primary)' }}>
                     {netEstimate.toLocaleString('vi-VN')} đ
                   </div>
-                  <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
                     {isInProgress ? (
                       <Link to={`/shifts/${shift.bookingId}/execute`} className="btn btn-primary btn-sm">
                         <Activity size={16} />
                         Mở bảng điều hành ca
                       </Link>
+                    ) : shift.executionStatus === ExecutionStatus.COMPLETED ? (
+                      <>
+                        {!reviewedBookingCodes.includes(shift.bookingCode) ? (
+                          <button
+                            type="button"
+                            className="btn btn-primary btn-sm"
+                            onClick={() => setSelectedReviewShift(shift)}
+                          >
+                            <Star size={15} />
+                            Đánh giá khách
+                          </button>
+                        ) : (
+                          <span
+                            className="status-pill status-pill--jade"
+                            style={{
+                              fontSize: 12.5,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 4,
+                            }}
+                          >
+                            <CheckCircle2 size={13} />
+                            Đã đánh giá
+                          </span>
+                        )}
+                        <Link
+                          to={`/shifts/${shift.bookingId}`}
+                          className="btn btn-secondary btn-sm"
+                        >
+                          <FileText size={15} />
+                          Hồ sơ ca
+                        </Link>
+                      </>
                     ) : (
                       <Link to={`/shifts/${shift.bookingId}`} className="btn btn-primary btn-sm">
                         <Clock size={16} />
@@ -164,6 +241,27 @@ export const MyShiftsPage: React.FC = () => {
             );
           })}
         </div>
+      )}
+
+      {/* Modal Đánh giá khách hàng sau ca (W06) */}
+      {selectedReviewShift && (
+        <RateCustomerModal
+          bookingId={selectedReviewShift.bookingId}
+          bookingCode={selectedReviewShift.bookingCode}
+          customerName={selectedReviewShift.patientName}
+          isOpen={true}
+          onClose={() => setSelectedReviewShift(null)}
+          onSuccess={() => {
+            const code = selectedReviewShift.bookingCode;
+            setReviewedBookingCodes((prev) => [...prev, code]);
+            setSelectedReviewShift(null);
+            setToastMessage(
+              `Đánh giá ca ${code} đã được gửi! Đánh giá sẽ hiển thị khi khách hàng hoàn tất hoặc sau 7 ngày.`
+            );
+            setTimeout(() => setToastMessage(null), 5000);
+            fetchShifts();
+          }}
+        />
       )}
     </div>
   );

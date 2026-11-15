@@ -3,13 +3,21 @@ import {
   AlertCircle,
   AlertTriangle,
   ArrowLeft,
+  CheckCircle2,
   RefreshCw,
   ShieldAlert,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import type { ReceivedReviewDto, TrustScoreDto } from '@healthcare-system/shared';
+import type {
+  PendingReviewDto,
+  ReceivedReviewDto,
+  SentReviewDto,
+  TrustScoreDto,
+} from '@healthcare-system/shared';
 import { Button } from '../../components';
 import { getReceivedReviews, getTrustScore } from './trust-score.api';
+import { getPendingReviews, getSentReviews } from '../reviews/reviews.api';
+import { RateCustomerModal } from '../reviews/components/RateCustomerModal';
 import { ScoreGauge } from './components/ScoreGauge';
 import { ScoreHistory } from './components/ScoreHistory';
 import { ReceivedReviews } from './components/ReceivedReviews';
@@ -19,6 +27,10 @@ import { USE_MOCK_TRUST_SCORE } from '../../lib/mock-flags';
 export const TrustScorePage: React.FC = () => {
   const [trustScoreData, setTrustScoreData] = useState<TrustScoreDto | null>(null);
   const [reviews, setReviews] = useState<ReceivedReviewDto[]>([]);
+  const [sentReviews, setSentReviews] = useState<SentReviewDto[]>([]);
+  const [pendingReviews, setPendingReviews] = useState<PendingReviewDto[]>([]);
+  const [activeRateModal, setActiveRateModal] = useState<PendingReviewDto | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState<string | null>(null);
 
@@ -26,7 +38,12 @@ export const TrustScorePage: React.FC = () => {
     setLoading(true);
     setPageError(null);
     try {
-      const [tsRes, revRes] = await Promise.all([getTrustScore(), getReceivedReviews()]);
+      const [tsRes, revRes, sentRes, pendingRes] = await Promise.all([
+        getTrustScore(),
+        getReceivedReviews(),
+        getSentReviews(),
+        getPendingReviews(),
+      ]);
 
       if (tsRes.success && tsRes.data) {
         setTrustScoreData(tsRes.data);
@@ -36,6 +53,14 @@ export const TrustScorePage: React.FC = () => {
 
       if (revRes.success && revRes.data) {
         setReviews(revRes.data);
+      }
+
+      if (sentRes.success && sentRes.data) {
+        setSentReviews(sentRes.data);
+      }
+
+      if (pendingRes.success && pendingRes.data) {
+        setPendingReviews(pendingRes.data);
       }
     } catch {
       setPageError('Lỗi kết nối khi tải dữ liệu điểm uy tín');
@@ -76,6 +101,29 @@ export const TrustScorePage: React.FC = () => {
           <span>Về trang chủ</span>
         </Link>
       </div>
+
+      {/* Success Toast Alert */}
+      {toastMessage && (
+        <div
+          role="status"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '12px 18px',
+            borderRadius: 10,
+            background: 'var(--brand-jade-soft)',
+            border: '1.5px solid var(--brand-jade)',
+            color: 'var(--brand-jade)',
+            fontSize: 14.5,
+            fontWeight: 600,
+            marginBottom: 20,
+          }}
+        >
+          <CheckCircle2 size={20} style={{ flexShrink: 0 }} aria-hidden="true" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
 
       {/* Global Error Alert */}
       {pageError && (
@@ -295,15 +343,37 @@ export const TrustScorePage: React.FC = () => {
           <ScoreHistory history={trustScoreData?.history ?? []} loading={loading} />
         </div>
 
-        {/* Right Column: Rating Summary & Received Reviews */}
+        {/* Right Column: Rating Summary, Received Reviews & Sent Reviews */}
         <ReceivedReviews
           ratingAvg={trustScoreData?.ratingAvg ?? null}
           ratingCount={trustScoreData?.ratingCount ?? 0}
           distribution={trustScoreData?.ratingDistribution}
           reviews={reviews}
+          sentReviews={sentReviews}
+          pendingReviews={pendingReviews}
           loading={loading}
+          onOpenRateModal={(pending) => setActiveRateModal(pending)}
         />
       </div>
+
+      {/* Modal đánh giá khách hàng (W06) */}
+      {activeRateModal && (
+        <RateCustomerModal
+          bookingId={activeRateModal.bookingId}
+          bookingCode={activeRateModal.bookingCode}
+          customerName={activeRateModal.customerName}
+          isOpen={true}
+          onClose={() => setActiveRateModal(null)}
+          onSuccess={() => {
+            setActiveRateModal(null);
+            setToastMessage(
+              'Đánh giá đã được gửi thành công! Theo quy định đánh giá 2 chiều (FR-RATE-01), nội dung sẽ hiển thị khi khách hàng hoàn tất đánh giá hoặc sau 7 ngày.'
+            );
+            setTimeout(() => setToastMessage(null), 6000);
+            loadData();
+          }}
+        />
+      )}
     </div>
   );
 };
