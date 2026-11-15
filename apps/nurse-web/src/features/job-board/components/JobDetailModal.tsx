@@ -3,8 +3,6 @@ import {
   Clock,
   MapPin,
   FileText,
-  Phone,
-  MessageSquare,
   AlertTriangle,
   Check,
   CreditCard,
