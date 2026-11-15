@@ -44,6 +44,7 @@ export function validateDraft(d: PatientProfileDraft): DraftErrors {
 
   if (!d.location_type) e.location_type = 'Vui lòng chọn nơi chăm sóc.';
   if (!d.address_text.trim()) e.address_text = 'Vui lòng nhập địa chỉ nơi chăm sóc.';
+  if (d.lat === null || d.lng === null) e.lat = 'Vui lòng ghim vị trí nơi chăm sóc.';
 
   return e;
 }

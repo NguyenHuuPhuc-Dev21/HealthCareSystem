@@ -274,6 +274,8 @@ export enum AuditAction {
   UPDATE_CONFIG = 'UPDATE_CONFIG',
   DELETE_PATIENT_DATA = 'DELETE_PATIENT_DATA',
   GRANT_RECORD_ACCESS = 'GRANT_RECORD_ACCESS',
+  TIER_DEMOTION = 'TIER_DEMOTION',             // migration 0007 · BE-2 tier-lifecycle (system actor)
+  REVIEW_CUSTOMER_KYC = 'REVIEW_CUSTOMER_KYC', // migration 0007 · BE-2 patient-profiles (Admin actor)
 }
 
 // ============================================================================

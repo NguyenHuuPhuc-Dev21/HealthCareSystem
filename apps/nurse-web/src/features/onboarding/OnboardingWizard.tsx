@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../../components';
 import { useAuth } from '../auth/AuthContext';
@@ -21,19 +21,22 @@ const FilePicker: React.FC<{
     file: File | null;
     onChange: (f: File | null) => void;
     accept?: string;
-}> = ({ label, file, onChange, accept = 'image/*,.pdf' }) => (
-    <div className={`file-picker ${file ? 'has-file' : ''}`}>
-        <div className="field">
-            <label>{label}</label>
-            {file ? (
-                <div className="file-name">Đã chọn: {file.name}</div>
-            ) : (
-                <div className="hint">Chưa chọn file nào</div>
-            )}
-            <input type="file" accept={accept} onChange={(e) => onChange(e.target.files?.[0] ?? null)} />
+}> = ({ label, file, onChange, accept = 'image/*,.pdf' }) => {
+    const inputId = useId();
+    return (
+        <div className={`file-picker ${file ? 'has-file' : ''}`}>
+            <div className="field">
+                <label htmlFor={inputId}>{label}</label>
+                {file ? (
+                    <div className="file-name">Đã chọn: {file.name}</div>
+                ) : (
+                    <div className="hint">Chưa chọn file nào</div>
+                )}
+                <input id={inputId} type="file" accept={accept} onChange={(e) => onChange(e.target.files?.[0] ?? null)} />
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 /** Chụp chân dung trực tiếp bằng camera — không cho chọn ảnh từ thư viện (FR-AUTH-01). */
 const CameraCapture: React.FC<{ file: File | null; onCapture: (f: File | null) => void }> = ({

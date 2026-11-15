@@ -15,6 +15,9 @@ This catalogue lists the core endpoints defined by SRS v2.0 §8, grouped by doma
 | `POST /api/v1/auth/request-otp` | PATIENT / NURSE | Request an OTP login code sent to the registered phone number. |
 | `POST /api/v1/auth/verify-otp` | PATIENT / NURSE | Verify the OTP code and issue the application login session. |
 | `POST /api/v1/auth/nurse-onboarding` | NURSE | Submit the eKYC profile on Nurse Web/App: CCCD, graduation degree, GPHN (with expiry date & scope of practice). Profile starts as `PENDING_VERIFICATION` (FR-AUTH-01). |
+| `POST /api/v1/patient/ekyc` | PATIENT | Customer submits CCCD (both sides) + live selfie for eKYC; required before booking **home** care (FR-AUTH-03). Detail: [`patient-profiles.api.md`](./patient-profiles.api.md). |
+| `PATCH /api/v1/admin/customers/:id/ekyc` | ADMIN | Approve / reject a customer's eKYC (`REVIEW_CUSTOMER_KYC` audited). |
+| `POST /api/v1/patient-profiles` | PATIENT | Create a care-recipient profile; refused without the Decree 13/2023 consent tick (FR-AUTH-03, FR-PRIV-01). `GET`/`PATCH /patient-profiles/:id` for the owner. |
 
 ## 2. Nurse Profile, Credentials & Availability
 

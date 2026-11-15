@@ -13,6 +13,8 @@ import { createCredentialReviewRouter } from './modules/credential-review/creden
 import { getCredentialReviewService } from './modules/credential-review/credential-review.service';
 import { createNurseOnboardingRouter } from './modules/nurse-onboarding/nurse-onboarding.routes';
 import { getNurseOnboardingService } from './modules/nurse-onboarding/nurse-onboarding.service';
+import { createPatientProfilesRouter } from './modules/patient-profiles/patient-profiles.routes';
+import { getPatientProfilesService } from './modules/patient-profiles/patient-profiles.service';
 import { createPrivacyConsentRouter } from './modules/privacy-consent/privacy-consent.routes';
 import { getPrivacyConsentService } from './modules/privacy-consent/privacy-consent.service';
 
@@ -36,6 +38,7 @@ function buildApiRouter(): Router {
   api.use(createNurseOnboardingRouter(getNurseOnboardingService())); // BE-1 · Phase 1 · nurse-onboarding
   api.use(createCredentialReviewRouter(getCredentialReviewService())); // BE-1 · Phase 1 · credential-review
   api.use(createPrivacyConsentRouter(getPrivacyConsentService())); // BE-3 · Phase 1 · privacy-consent
+  api.use(createPatientProfilesRouter(getPatientProfilesService())); // BE-2 · Phase 1 · patient-profiles
 
   return api;
 }

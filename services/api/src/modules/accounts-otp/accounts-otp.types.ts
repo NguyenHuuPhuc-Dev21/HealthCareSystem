@@ -38,11 +38,30 @@ export interface AccountsRepo {
 }
 
 /**
- * Delivers the login OTP by SMS/ZNS. The provider is not chosen yet (OD-09);
- * implementations must never log the code (SEC-1.1).
+ * Delivers the login OTP. Channels live in accounts-otp.senders.ts (OD-09: mock inbox now,
+ * Zalo ZNS once the team has an Official Account). Implementations must never log the code (SEC-1.1).
  */
 export interface OtpSender {
   sendLoginOtp(phone: string, code: string, ttlSeconds: number): Promise<void>;
+}
+
+/** One "delivered" code in the mock inbox (OTP_CHANNEL=mock — never in production). */
+export interface MockOtpMessage {
+  phone: string;
+  code: string;
+  channel: 'mock';
+  /** ISO-8601 */
+  issuedAt: string;
+  /** ISO-8601 — the code and this message disappear together. */
+  expiresAt: string;
+}
+
+/** Read side of the mock channel, used by GET /auth/dev/otp-inbox. */
+export interface MockOtpInbox {
+  /** The code currently waiting for this phone, or null. */
+  latest(phone: string): Promise<MockOtpMessage | null>;
+  /** False when OTP_MOCK_INBOX_KEY is set and the presented key does not match. */
+  isAuthorized(presentedKey: string | undefined): boolean;
 }
 
 export interface RequestContext {

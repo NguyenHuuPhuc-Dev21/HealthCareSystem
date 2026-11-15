@@ -1,35 +1,35 @@
 import React from 'react';
-import { SafeAreaView, Text, View, StyleSheet } from 'react-native';
-import { tokens } from './styles/tokens';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import type { MobileShiftSummary } from '@healthcare-system/shared';
+import { LiveCameraProvider } from './components';
+import { AuthProvider } from './features/auth/AuthContext';
+import type { DeviceGeoCoords } from './lib/hardware-providers';
+import { RootNavigator } from './navigation/RootNavigator';
 
-export default function App() {
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>HealthCareSystem — Nurse Mobile App</Text>
-        <Text style={styles.subtitle}>Elder-Friendly Typography (16–18pt) & Touch Targets Scaffolded</Text>
-      </View>
-    </SafeAreaView>
-  );
+export interface NurseAppProps {
+  initialShift?: MobileShiftSummary;
+  onRequestCurrentPosition?: () => Promise<DeviceGeoCoords>;
+  onCaptureLivePhoto?: () => Promise<string | null>;
+  autoStartDevSession?: boolean;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: tokens.colors.background,
-  },
-  content: {
-    padding: tokens.spacing.paddingBase,
-  },
-  title: {
-    fontSize: tokens.typography.fontSizeTitle,
-    fontWeight: 'bold',
-    color: tokens.colors.textMain,
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: tokens.typography.fontSizeBase,
-    color: tokens.colors.textMuted,
-  },
-});
-
+export default function App({
+  initialShift,
+  onRequestCurrentPosition,
+  onCaptureLivePhoto,
+  autoStartDevSession,
+}: NurseAppProps = {}) {
+  return (
+    <SafeAreaProvider>
+      <AuthProvider autoStartDevSession={autoStartDevSession}>
+        <LiveCameraProvider>
+          <RootNavigator
+            initialShift={initialShift}
+            onRequestCurrentPosition={onRequestCurrentPosition}
+            onCaptureLivePhoto={onCaptureLivePhoto}
+          />
+        </LiveCameraProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
+  );
+}

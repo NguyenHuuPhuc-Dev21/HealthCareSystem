@@ -283,14 +283,15 @@ export function PatientProfileForm({
           {value.lat !== null ? (
             <span className="gps-chip"><span className="gps-dot" /> Đã ghim vị trí hiện tại</span>
           ) : (
-            <span className="hint">Chưa ghim vị trí — hệ thống sẽ định vị theo địa chỉ bạn nhập.</span>
+            <span className="hint">Chưa ghim vị trí — bắt buộc để ghép điều dưỡng gần bạn.</span>
           )}
           <button type="button" className="link-button" onClick={pinCurrentLocation} disabled={geo === 'locating'}>
             {geo === 'locating' ? 'Đang lấy vị trí…' : value.lat !== null ? 'Ghim lại' : <><MapPin size={16} style={{ marginRight: 6 }} /> Ghim vị trí hiện tại</>}
           </button>
         </div>
+        {fieldError('lat')}
         {geo === 'error' && (
-          <div className="field-error">Không lấy được vị trí. Bạn có thể bỏ qua — hệ thống sẽ định vị theo địa chỉ.</div>
+          <div className="field-error">Không lấy được vị trí. Hãy bật quyền vị trí của trình duyệt rồi thử lại.</div>
         )}
       </div>
 

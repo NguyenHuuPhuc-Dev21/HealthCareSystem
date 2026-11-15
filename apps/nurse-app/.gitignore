@@ -1,0 +1,21 @@
+# Android / Gradle
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/.cxx/
+*.apk
+*.aab
+*.keystore
+!android/app/debug.keystore
+
+# iOS / Xcode
+ios/Pods/
+ios/build/
+ios/*.xcworkspace/xcuserdata/
+ios/*.xcodeproj/xcuserdata/
+
+# Metro / Bundle
+.bundle/
+*.jsbundle
+
