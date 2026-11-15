@@ -10,11 +10,7 @@ import { CredentialsPage } from '../features/credentials/CredentialsPage';
 import { AvailabilityPage } from '../features/availabilities/AvailabilityPage';
 import { JobBoardPage } from '../features/job-board/JobBoardPage';
 import { ShiftDetailPage } from '../features/shifts/ShiftDetailPage';
-import { ShiftExecutionPage } from '../features/shifts/ShiftExecutionPage';
-import { MyShiftsPage } from '../features/shifts/MyShiftsPage';
 import { NurseHomePage } from '../features/home/NurseHomePage';
-import { WithdrawPage } from '../features/wallet/WithdrawPage';
-import { TrustScorePage } from '../features/trust-score/TrustScorePage';
 import { NurseLayout } from '../components/layout/NurseLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 
@@ -116,16 +112,6 @@ export const AppRoutes: React.FC = () => {
             }
           />
           <Route
-            path="/shifts"
-            element={
-              <ProtectedRoute zone="active">
-                <NurseLayout>
-                  <MyShiftsPage />
-                </NurseLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/shifts/:id"
             element={
               <ProtectedRoute zone="active">
@@ -136,45 +122,11 @@ export const AppRoutes: React.FC = () => {
             }
           />
           <Route
-            path="/shifts/:id/execute"
-            element={
-              <ProtectedRoute zone="active">
-                <NurseLayout>
-                  <ShiftExecutionPage />
-                </NurseLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/schedule"
             element={
               <ProtectedRoute zone="active">
                 <NurseLayout>
                   <AvailabilityPage />
-                </NurseLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/wallet/withdraw"
-            element={
-              <ProtectedRoute zone="active">
-                <NurseLayout>
-                  <WithdrawPage />
-                </NurseLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/wallet"
-            element={<Navigate to="/wallet/withdraw" replace />}
-          />
-          <Route
-            path="/trust-score"
-            element={
-              <ProtectedRoute zone="active">
-                <NurseLayout>
-                  <TrustScorePage />
                 </NurseLayout>
               </ProtectedRoute>
             }

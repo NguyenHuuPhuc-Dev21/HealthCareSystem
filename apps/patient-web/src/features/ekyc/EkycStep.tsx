@@ -18,20 +18,18 @@ type Files = Record<KycDocType, File | null>;
 /** SH3 · Bước 1 (đang thực hiện) — tải CCCD 2 mặt + chụp chân dung, gửi Admin duyệt. */
 export function EkycStep({ rejectionReason, onSubmitted, onCancelEdit }: EkycStepProps) {
   const [files, setFiles] = useState<Files>({ CCCD_FRONT: null, CCCD_BACK: null, SELFIE: null });
-  const [cccdNumber, setCccdNumber] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const setFile = (type: KycDocType) => (file: File | null) => setFiles((prev) => ({ ...prev, [type]: file }));
-  const cccdValid = /^\d{12}$/.test(cccdNumber);
-  const complete = Boolean(files.CCCD_FRONT && files.CCCD_BACK && files.SELFIE) && cccdValid;
+  const complete = Boolean(files.CCCD_FRONT && files.CCCD_BACK && files.SELFIE);
 
   const handleSubmit = async () => {
     const { CCCD_FRONT, CCCD_BACK, SELFIE } = files;
     if (!CCCD_FRONT || !CCCD_BACK || !SELFIE || submitting) return;
     setSubmitting(true);
     setError(null);
-    const res = await submitMyKyc({ CCCD_FRONT, CCCD_BACK, SELFIE }, cccdNumber);
+    const res = await submitMyKyc({ CCCD_FRONT, CCCD_BACK, SELFIE });
     setSubmitting(false);
     if (!res.success) {
       setError(getErrorMessage(res.error));
@@ -48,22 +46,6 @@ export function EkycStep({ rejectionReason, onSubmitted, onCancelEdit }: EkycSte
       </p>
 
       {rejectionReason && <Alert title="Hồ sơ lần trước chưa được duyệt.">Lý do: {rejectionReason}</Alert>}
-
-      <div className="field" id="ekyc-cccd-number">
-        <label htmlFor="cccd-number">Số CCCD (12 chữ số)</label>
-        <input
-          id="cccd-number"
-          className={`input${cccdNumber && !cccdValid ? ' is-invalid' : ''}`}
-          inputMode="numeric"
-          autoComplete="off"
-          maxLength={12}
-          placeholder="VD: 079200001234"
-          value={cccdNumber}
-          onChange={(e) => setCccdNumber(e.target.value.replace(/\D/g, ''))}
-          disabled={submitting}
-        />
-        {cccdNumber && !cccdValid && <div className="field-error">Số CCCD gồm đúng 12 chữ số.</div>}
-      </div>
 
       <div className="upload-grid">
         <DocumentUploadTile

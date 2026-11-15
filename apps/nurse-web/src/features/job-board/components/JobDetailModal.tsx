@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
+  X,
   Clock,
   MapPin,
   FileText,
+  Phone,
+  MessageSquare,
   AlertTriangle,
   Check,
   CreditCard,
@@ -10,14 +13,6 @@ import {
   Zap,
 } from 'lucide-react';
 import { JobItem } from '../job-board.types';
-import {
-  DEFAULT_PLATFORM_COMMISSION_RATE,
-  DEFAULT_CANCELLATION_PENALTY_RATE,
-  DEFAULT_RECORD_ACCESS_EXPIRY_HOURS,
-  DEFAULT_SETTLEMENT_COOLING_HOURS,
-} from '@healthcare-system/shared';
-import { Modal, ModalCloseButton } from '../../../components';
-import { InvalidPrescriptionModal } from '../../shifts/components/InvalidPrescriptionModal';
 
 interface JobDetailModalProps {
   job: JobItem;
@@ -35,13 +30,21 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
   const [check1, setCheck1] = useState(false);
   const [check2, setCheck2] = useState(false);
   const [reportedMismatch, setReportedMismatch] = useState(false);
-  const [showInvalidRxModal, setShowInvalidRxModal] = useState(false);
 
-  // BR-11: Nurse receives net amount from backend snapshot, fallback to config rate
-  const netEarnings =
-    job.netAmount ?? Math.round(job.totalAmount * (1 - DEFAULT_PLATFORM_COMMISSION_RATE));
-  const penaltyPercent =
-    job.cancellationPenaltyPercent ?? Math.round(DEFAULT_CANCELLATION_PENALTY_RATE * 100);
+  // Close on Escape key for Elder-friendly / accessibility
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  // BR-11: Nurse receives net amount from backend (or fallback 85% after 15% platform commission)
+  const netEarnings = job.netAmount ?? Math.round(job.totalAmount * 0.85);
+  const penaltyPercent = job.cancellationPenaltyPercent ?? 20;
   const penaltyAmount = Math.round(job.totalAmount * (penaltyPercent / 100));
 
   const getInitials = (name: string) => {
@@ -52,29 +55,19 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
     return name.slice(0, 2).toUpperCase();
   };
 
-  if (showInvalidRxModal) {
-    return (
-      <InvalidPrescriptionModal
-        bookingId={job.id}
-        bookingCode={job.code}
-        onSuccess={() => {
-          setShowInvalidRxModal(false);
-          setReportedMismatch(true);
-        }}
-        onClose={() => setShowInvalidRxModal(false)}
-      />
-    );
-  }
-
   return (
-    <Modal
-      open
-      onClose={onClose}
-      titleId="job-detail-dialog-title"
-      overlayClassName="job-detail-overlay"
-      panelClassName="job-detail-dialog elder"
-      panelStyle={{ padding: '26px 28px' }}
+    <div
+      className="job-detail-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="job-detail-dialog-title"
+      onClick={onClose}
     >
+      <div
+        className="job-detail-dialog elder"
+        onClick={(e) => e.stopPropagation()}
+        style={{ padding: '26px 28px' }}
+      >
         {/* Header */}
         <div
           style={{
@@ -122,7 +115,15 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
             </p>
           </div>
 
-          <ModalCloseButton onClick={onClose} />
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            style={{ width: 40, height: 40, padding: 0, borderRadius: '50%', flexShrink: 0 }}
+            onClick={onClose}
+            aria-label="Đóng"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         {/* 2-column Grid matching Screen N5 */}
@@ -166,7 +167,7 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
               <div style={{ marginTop: 14 }}>
                 <span className="chip amber" style={{ fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
                   <Lock size={13} />
-                  Bảo mật y tế: Chỉ xem được tới {DEFAULT_RECORD_ACCESS_EXPIRY_HOURS} giờ sau khi kết thúc ca
+                  Bảo mật y tế: Chỉ xem được tới 12 giờ sau khi kết thúc ca
                 </span>
               </div>
             </div>
@@ -225,7 +226,7 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
                   className="btn btn-secondary btn-block"
                   type="button"
                   style={{ height: 46, color: 'var(--red)', borderColor: '#F3C2C2', marginTop: 12, fontSize: 14.5 }}
-                  onClick={() => setShowInvalidRxModal(true)}
+                  onClick={() => setReportedMismatch(true)}
                 >
                   <AlertTriangle size={16} style={{ marginRight: 6 }} />
                   Báo cáo y lệnh không khớp
@@ -257,33 +258,26 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
                 <div className="pin-label">Nhà {job.patientName}</div>
               </div>
 
-              <div className="contact-person-card">
-                <div className="contact-person-card__info">
-                  <div className="avatar" style={{ background: '#E2E8F0', color: 'var(--navy)' }}>
-                    {job.customerName ? getInitials(job.customerName) : 'KH'}
-                  </div>
-                  <div style={{ minWidth: 0 }}>
-                    <b style={{ color: 'var(--navy)', fontSize: 15.5, display: 'block' }}>
-                      {job.customerName || 'Người nhà bệnh nhân'}
-                    </b>
-                    <div style={{ color: 'var(--slate)', fontSize: 13.5, marginTop: 2 }}>
-                      Người đặt ca · SĐT được bảo mật cho tới khi nhận ca
-                    </div>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', borderTop: '1px solid var(--line)', marginTop: 14, paddingTop: 14 }}>
+                <div className="avatar" style={{ background: '#E2E8F0', color: 'var(--navy)' }}>
+                  {job.customerName ? getInitials(job.customerName) : 'KH'}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <b style={{ color: 'var(--navy)', fontSize: 15.5 }}>
+                    {job.customerName || 'Người nhà bệnh nhân'}
+                  </b>
+                  <div style={{ color: 'var(--slate)', fontSize: 14 }}>
+                    SĐT: {job.customerPhoneMasked || '0905 ••• 123'} (Bảo mật)
                   </div>
                 </div>
-                <div
-                  style={{
-                    marginTop: 10,
-                    fontSize: 12.5,
-                    color: 'var(--muted)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                  }}
-                >
-                  <Lock size={13} aria-hidden="true" />
-                  <span>Kênh nhắn tin &amp; gọi thoại sẽ mở sau khi bạn nhận ca (FR-CHAT-01).</span>
-                </div>
+                <button className="btn btn-secondary btn-sm" type="button" style={{ height: 40, fontSize: 14 }}>
+                  <MessageSquare size={15} style={{ marginRight: 4 }} />
+                  Chat
+                </button>
+                <button className="btn btn-secondary btn-sm" type="button" style={{ height: 40, fontSize: 14 }}>
+                  <Phone size={15} style={{ marginRight: 4 }} />
+                  Gọi
+                </button>
               </div>
             </div>
 
@@ -320,7 +314,7 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
                 <span style={{ color: 'var(--teal)', fontSize: 20 }}>{netEarnings.toLocaleString('vi-VN')}đ</span>
               </div>
               <p style={{ fontSize: 13.5, color: 'var(--muted)', margin: '8px 0 0 0' }}>
-                Tiền tự động quyết toán vào Ví điều dưỡng sau {DEFAULT_SETTLEMENT_COOLING_HOURS} giờ kể từ khi hoàn tất ca, hoặc ngay khi khách hàng bấm xác nhận.
+                Tiền tự động quyết toán vào Ví điều dưỡng sau 24 giờ kể từ khi hoàn tất ca, hoặc ngay khi khách hàng bấm xác nhận.
               </p>
             </div>
 
@@ -371,7 +365,8 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
             </button>
           )}
         </div>
-    </Modal>
+      </div>
+    </div>
   );
 };
 export default JobDetailModal;

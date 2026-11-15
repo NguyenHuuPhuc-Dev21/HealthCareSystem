@@ -1,12 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "jsx": "react-native",
-    "noEmit": true,
-    "paths": {
-      "react-native-svg": ["./node_modules/react-native-svg"]
-    }
+    "noEmit": true
   },
   "include": ["src"]
 }
