@@ -21,6 +21,8 @@ import { ShiftExecutionState } from './shift.types';
 import { useAuth } from '../auth/AuthContext';
 import { USE_MOCK_AUTH } from '../../lib/mock-flags';
 import { Modal, ModalCloseButton } from '../../components';
+import { ChatPanel } from '../chat/ChatPanel';
+import { useConversation } from '../chat/useConversation';
 import {
   DEFAULT_PLATFORM_COMMISSION_RATE,
   DEFAULT_MIN_NURSE_DEPOSIT_VND,
@@ -56,6 +58,8 @@ export const ShiftDetailPage: React.FC = () => {
   const [shiftExecState, setShiftExecState] = useState<ShiftExecutionState | null>(null);
   const [loadingCheckIn, setLoadingCheckIn] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showChatPanel, setShowChatPanel] = useState(false);
+  const { unreadCount } = useConversation(id, showChatPanel);
   const [cancelReason, setCancelReason] = useState('Lý do sức khỏe / việc gia đình đột xuất');
   const [cancelNote, setCancelNote] = useState('');
   const [cancelNotice, setCancelNotice] = useState<string | null>(null);
@@ -278,7 +282,23 @@ export const ShiftDetailPage: React.FC = () => {
             </p>
           </div>
 
-          <div>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            {(job.status === 'CONFIRMED' ||
+              job.status === 'IN_PROGRESS' ||
+              shiftExecState?.executionStatus === 'CONFIRMED' ||
+              shiftExecState?.executionStatus === 'IN_PROGRESS') && (
+              <button
+                type="button"
+                className="btn btn-secondary btn-lg"
+                style={{ fontSize: 16, height: 52, position: 'relative' }}
+                onClick={() => setShowChatPanel(true)}
+              >
+                <MessageSquare size={18} aria-hidden="true" />
+                <span>Nhắn tin với khách</span>
+                {unreadCount > 0 && <span className="chat-badge">{unreadCount}</span>}
+              </button>
+            )}
+
             {job.status === 'IN_PROGRESS' || shiftExecState?.executionStatus === 'IN_PROGRESS' ? (
               <button
                 className="btn btn-primary btn-lg"
@@ -478,10 +498,25 @@ export const ShiftDetailPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="contact-person-card__actions">
-                  <button className="btn btn-secondary btn-sm" type="button">
-                    <MessageSquare size={15} aria-hidden="true" /> Chat
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    type="button"
+                    onClick={() => setShowChatPanel(true)}
+                    style={{ position: 'relative' }}
+                  >
+                    <MessageSquare size={15} aria-hidden="true" />
+                    <span>Chat</span>
+                    {unreadCount > 0 && <span className="chat-badge">{unreadCount}</span>}
                   </button>
-                  <button className="btn btn-secondary btn-sm" type="button">
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    type="button"
+                    onClick={() => {
+                      alert(
+                        `Tổng đài gọi thoại ẩn danh CareNest (FR-CHAT-01) đang kết nối tới ${job.customerPhoneMasked || '0905 ••• 123'}...`
+                      );
+                    }}
+                  >
                     <Phone size={15} aria-hidden="true" /> Gọi
                   </button>
                 </div>
@@ -665,6 +700,16 @@ export const ShiftDetailPage: React.FC = () => {
               setToastMessage('Đã gửi báo cáo y lệnh không khớp và ghi nhận bảo vệ miễn phạt tới hệ thống.');
             }}
             onClose={() => setShowInvalidRxModal(false)}
+          />
+        )}
+
+        {/* Chat Drawer Panel (W08) */}
+        {id && (
+          <ChatPanel
+            bookingId={id}
+            bookingCode={job?.code}
+            isOpen={showChatPanel}
+            onClose={() => setShowChatPanel(false)}
           />
         )}
     </div>
