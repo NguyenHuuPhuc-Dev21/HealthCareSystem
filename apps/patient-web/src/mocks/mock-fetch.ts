@@ -15,6 +15,8 @@ export interface MockRequest {
   headers: Headers;
   /** Tham số trên đường dẫn, vd. route '/patients/profiles/:id' → { id } */
   params: Record<string, string>;
+  /** Query string của request (vd. ?district=Hải Châu) */
+  query: URLSearchParams;
 }
 
 export type MockHandler = (body: any, req: MockRequest) => MockResult;
@@ -55,7 +57,8 @@ export function installMockFetch(routes: Record<string, MockHandler>): void {
   window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
     const method = (init?.method ?? (input instanceof Request ? input.method : 'GET')).toUpperCase();
-    const path = new URL(url, window.location.origin).pathname;
+    const parsedUrl = new URL(url, window.location.origin);
+    const path = parsedUrl.pathname;
     const matched = matchRoute(routes, method, path);
 
     if (!matched) return realFetch(input, init);
@@ -74,7 +77,7 @@ export function installMockFetch(routes: Record<string, MockHandler>): void {
 
     await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
     const headers = new Headers(init?.headers);
-    const result = handler(body, { body, headers, params });
+    const result = handler(body, { body, headers, params, query: parsedUrl.searchParams });
     console.info(`[mock] ${method} ${path} → ${result.status}`);
 
     return new Response(JSON.stringify(result.body), {
