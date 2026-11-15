@@ -295,18 +295,7 @@ export const ShiftExecutionPage: React.FC = () => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            className="btn btn-secondary btn-lg"
-            style={{ fontSize: 16, height: 50, position: 'relative' }}
-            onClick={() => setShowChatPanel(true)}
-          >
-            <MessageSquare size={18} aria-hidden="true" />
-            <span>Nhắn tin với khách</span>
-            {unreadCount > 0 && <span className="chat-badge">{unreadCount}</span>}
-          </button>
-
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0 }}>
           <button
             className="btn btn-primary btn-lg"
             type="button"

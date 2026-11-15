@@ -23,7 +23,7 @@ function getInitialConversation(bookingId: string): ConversationDto {
           senderRole: 'SYSTEM',
           type: MessageType.SYSTEM_ALERT,
           content:
-            '🔒 Ca trực đã được xác nhận. Kênh liên lạc trực tiếp giữa điều dưỡng và người nhà đã mở. Số điện thoại hai bên được bảo mật.',
+            ' Ca trực đã được xác nhận. Kênh liên lạc trực tiếp giữa điều dưỡng và người nhà đã mở. Số điện thoại hai bên được bảo mật.',
           createdAt: new Date(Date.now() - 3600000).toISOString(),
         },
         {
