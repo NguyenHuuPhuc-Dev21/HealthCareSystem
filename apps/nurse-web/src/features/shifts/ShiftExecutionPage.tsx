@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   FileText,
   Lock,
+  Star,
 } from 'lucide-react';
 import { ShiftExecutionState } from './shift.types';
 import { getShiftExecutionState } from './shift.api';
@@ -16,6 +17,7 @@ import { ShiftExtensionBanner } from './components/ShiftExtensionBanner';
 import { InitialAssessmentModal } from './components/InitialAssessmentModal';
 import { InvalidPrescriptionModal } from './components/InvalidPrescriptionModal';
 import { CheckOutReportModal } from './components/CheckOutReportModal';
+import { RateCustomerModal } from '../reviews/components/RateCustomerModal';
 import { SosEmergencyButton } from './components/SosEmergencyButton';
 import {
   ExecutionStatus,
@@ -35,6 +37,8 @@ export const ShiftExecutionPage: React.FC = () => {
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
   const [showCheckOutModal, setShowCheckOutModal] = useState(false);
   const [showRejectPrescriptionModal, setShowRejectPrescriptionModal] = useState(false);
+  const [showRateCustomerModal, setShowRateCustomerModal] = useState(false);
+  const [isCustomerRated, setIsCustomerRated] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -145,15 +149,44 @@ export const ShiftExecutionPage: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            {!isCustomerRated && (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => setShowRateCustomerModal(true)}
+                style={{ minWidth: 170 }}
+              >
+                <Star size={16} aria-hidden="true" />
+                <span>Đánh giá khách hàng</span>
+              </button>
+            )}
             <Link to="/shifts" className="btn btn-secondary" style={{ minWidth: 160 }}>
               Danh sách ca của tôi
             </Link>
-            <Link to="/" className="btn btn-primary" style={{ minWidth: 160 }}>
+            <Link to="/" className="btn btn-secondary" style={{ minWidth: 160 }}>
               Về Trang chủ
             </Link>
           </div>
         </div>
+
+        {/* Modal đánh giá khách sau check-out */}
+        {showRateCustomerModal && (
+          <RateCustomerModal
+            bookingId={shift.bookingId}
+            bookingCode={shift.bookingCode}
+            customerName={shift.patientName}
+            isOpen={true}
+            onClose={() => setShowRateCustomerModal(false)}
+            onSuccess={() => {
+              setIsCustomerRated(true);
+              setShowRateCustomerModal(false);
+              showToast(
+                'Đánh giá khách hàng thành công! Đánh giá sẽ hiển thị khi khách cũng hoàn tất đánh giá hoặc sau 7 ngày.'
+              );
+            }}
+          />
+        )}
       </div>
     );
   }
@@ -426,6 +459,7 @@ export const ShiftExecutionPage: React.FC = () => {
             onSuccess={(updated) => {
               setShift(updated);
               setShowCheckOutModal(false);
+              setShowRateCustomerModal(true);
             }}
             onClose={() => setShowCheckOutModal(false)}
           />

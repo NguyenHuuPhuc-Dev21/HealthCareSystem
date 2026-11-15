@@ -1,14 +1,23 @@
 import React, { useState } from 'react';
-import { EyeOff, Lock, MessageSquare } from 'lucide-react';
-import type { RatingDistributionDto, ReceivedReviewDto } from '@healthcare-system/shared';
+import { Lock, MessageSquare } from 'lucide-react';
+import type {
+  PendingReviewDto,
+  RatingDistributionDto,
+  ReceivedReviewDto,
+  SentReviewDto,
+} from '@healthcare-system/shared';
 import { formatDateTime } from '../../../lib/formatters';
+import { SentReviewList } from '../../reviews/components/SentReviewList';
 
 export interface ReceivedReviewsProps {
   ratingAvg: number | null;
   ratingCount: number;
   distribution?: RatingDistributionDto;
   reviews: ReceivedReviewDto[];
+  sentReviews?: SentReviewDto[];
+  pendingReviews?: PendingReviewDto[];
   loading?: boolean;
+  onOpenRateModal?: (pending: PendingReviewDto) => void;
 }
 
 export const ReceivedReviews: React.FC<ReceivedReviewsProps> = ({
@@ -16,7 +25,10 @@ export const ReceivedReviews: React.FC<ReceivedReviewsProps> = ({
   ratingCount,
   distribution = { star5: 84, star4: 12, star3: 3, star2: 1, star1: 0 },
   reviews,
+  sentReviews = [],
+  pendingReviews = [],
   loading = false,
+  onOpenRateModal,
 }) => {
   const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
 
@@ -107,7 +119,24 @@ export const ReceivedReviews: React.FC<ReceivedReviewsProps> = ({
           className={activeTab === 'sent' ? 'active' : ''}
           onClick={() => setActiveTab('sent')}
         >
-          Đánh giá tôi đã gửi
+          Đánh giá tôi đã gửi ({sentReviews.length})
+          {pendingReviews.length > 0 && (
+            <span
+              style={{
+                display: 'inline-block',
+                marginLeft: 6,
+                padding: '0 6px',
+                borderRadius: 999,
+                background: 'var(--accent-ochre)',
+                color: '#fff',
+                fontSize: 11,
+                fontWeight: 700,
+              }}
+              title={`${pendingReviews.length} ca chờ đánh giá`}
+            >
+              {pendingReviews.length}
+            </span>
+          )}
         </button>
       </div>
 
@@ -211,28 +240,13 @@ export const ReceivedReviews: React.FC<ReceivedReviewsProps> = ({
           )}
         </div>
       ) : (
-        /* Tab "Đánh giá tôi đã gửi" - Preview / Notice for W06 */
-        <div
-          className="card"
-          style={{
-            padding: '26px 24px',
-            background: 'var(--surface-subtle)',
-            border: '1px dashed var(--border-hairline)',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            <EyeOff size={22} style={{ color: 'var(--brand-jade)' }} aria-hidden="true" />
-            <h3 style={{ margin: 0, fontSize: 17, color: 'var(--ink-primary)' }}>
-              Đánh giá hai chiều minh bạch (W06)
-            </h3>
-          </div>
-          <p style={{ margin: 0, fontSize: 15, color: 'var(--ink-secondary)', lineHeight: 1.6 }}>
-            Sau mỗi ca trực, điều dưỡng cũng đánh giá khách hàng (thái độ, độ chính xác của khai
-            báo, điều kiện môi trường làm việc). Cơ chế đánh giá hai chiều áp dụng quy tắc ẩn tương
-            tự để bảo đảm tính khách quan. Màn hình chi tiết gửi và quản lý đánh giá của điều dưỡng
-            sẽ được hoàn thiện ở Phase tiếp theo (W06).
-          </p>
-        </div>
+        /* Tab "Đánh giá tôi đã gửi" (W06) */
+        <SentReviewList
+          reviews={sentReviews}
+          pendingReviews={pendingReviews}
+          loading={loading}
+          onOpenRateModal={onOpenRateModal}
+        />
       )}
     </div>
   );

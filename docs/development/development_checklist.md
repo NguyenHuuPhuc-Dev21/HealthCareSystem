@@ -287,7 +287,8 @@
 
 ### FE-2
 - [ ] Nurse Web + Mobile App — Dispute notification and rebuttal submission interface.
-- [ ] Nurse Web + Mobile App — Post-shift customer rating form.
+- [x] Nurse Web — Post-shift customer rating form.
+- [ ] Nurse Mobile App — Post-shift customer rating form.
 - [ ] Nurse Web + Mobile App — In-app chat interface with customer (reusing FE-1 component).
 - [x] Nurse Web — Personal TrustScore dashboard: current score, deduction/recovery history, suspension warning near 60.
 - [ ] Nurse Mobile App — Personal TrustScore dashboard: current score, deduction/recovery history, suspension warning near 60.
