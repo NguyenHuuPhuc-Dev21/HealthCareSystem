@@ -24,9 +24,9 @@ export interface CustomerKyc {
   rejection_reason?: string | null; // có khi Admin từ chối, kyc_status quay về UNVERIFIED
 }
 
-/** Tên field multipart khi nộp — khớp với KycDocType */
-export const KYC_FORM_FIELD: Record<KycDocType, string> = {
-  CCCD_FRONT: 'cccd_front',
-  CCCD_BACK: 'cccd_back',
-  SELFIE: 'selfie',
+/** `purpose` backend dùng khi xin link tải lên (SELFIE ↔ PORTRAIT). */
+export const KYC_PURPOSE: Record<KycDocType, 'CCCD_FRONT' | 'CCCD_BACK' | 'PORTRAIT'> = {
+  CCCD_FRONT: 'CCCD_FRONT',
+  CCCD_BACK: 'CCCD_BACK',
+  SELFIE: 'PORTRAIT',
 };
