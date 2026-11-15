@@ -1,180 +1,170 @@
 /**
- * Mock hồ sơ người bệnh — mô phỏng contract backend (patient-profiles + privacy-consent).
- *   GET   /patient-profiles                        → { items } tóm tắt (không có medicalHistory)
- *   GET   /patient-profiles/:id                    → chi tiết
- *   POST  /patient-profiles                        → thiếu dataConsentAccepted=true → 400 CONSENT_REQUIRED (TC-PRIV-01)
- *   PATCH /patient-profiles/:id
- *   POST  /patient-profiles/:id/consent/withdraw   → 409 CONSENT_ALREADY_WITHDRAWN nếu đã rút
- *   POST  /privacy-requests · GET /privacy-requests
+ * Mock hồ sơ người bệnh (P13 + SH3).
+ *   GET    /patients/profiles                     → danh sách tóm tắt (không có tiền sử bệnh)
+ *   GET    /patients/profiles/:id                 → chi tiết (403 nếu đã rút đồng ý / đang chờ xoá)
+ *   POST   /patients/profiles                     → thiếu data_consent_accepted=true → 400 CONSENT_REQUIRED (TC-PRIV-01)
+ *   PATCH  /patients/profiles/:id
+ *   POST   /patients/profiles/:id/consent         → đồng ý lại
+ *   DELETE /patients/profiles/:id/consent         → rút đồng ý
+ *   POST   /patients/profiles/:id/deletion-request
  *
  * Tài khoản 0905 123 456 có sẵn 2 hồ sơ mẫu (bà Hoa, ông Đức) giống thiết kế P13.
  */
 
+import type {
+  CreatePatientProfileRequest,
+  PatientProfileDetail,
+  PatientProfileDto,
+} from '../features/patient-profiles/patient-profiles.types';
 import { fail, ok } from './mock-fetch';
 import type { MockHandler, MockRequest, MockResult } from './mock-fetch';
 import { getUserData, setUserData, userIdFromHeaders } from './mock-db';
 
-export interface MockProfile {
-  id: string;
-  fullName: string;
-  dob: string | null;
-  gender: string | null;
-  weightKg: number | null;
-  mobilityStatus: 'NORMAL' | 'PARTIAL' | 'BEDRIDDEN';
-  medicalHistory: string | null;
-  isInfectious: boolean;
-  addressText: string;
-  locationType: 'HOME' | 'HOSPITAL';
-  lat: number;
-  lng: number;
-  consent: { accepted: boolean; acceptedAt: string | null; withdrawnAt: string | null };
-  createdAt: string;
-}
-
-interface MockPrivacyRequest {
-  requestId: string;
-  patientProfileId: string;
-  requestType: 'DELETE' | 'ANONYMIZE';
-  status: 'PENDING' | 'DONE' | 'REJECTED';
-  createdAt: string;
-  processedAt: string | null;
-}
-
-const SAMPLE: MockProfile[] = [
+const SAMPLE: PatientProfileDetail[] = [
   {
-    id: '11111111-1111-4111-8111-111111111111',
-    fullName: 'Nguyễn Thị Hoa',
-    dob: '1948-01-01',
-    gender: 'FEMALE',
-    weightKg: 52,
-    mobilityStatus: 'PARTIAL',
-    medicalHistory: 'Tăng huyết áp, đái tháo đường type 2. Đã thay khớp háng phải (3 tháng trước). Dị ứng Penicillin.',
-    isInfectious: false,
-    addressText: '25 Quang Trung, Hải Châu 1, Hải Châu, Đà Nẵng',
-    locationType: 'HOME',
+    id: 'pp-hoa',
+    full_name: 'Nguyễn Thị Hoa',
+    relationship: 'MOTHER',
+    birth_year: 1948,
+    weight_kg: 52,
+    mobility_status: 'PARTIAL',
+    medical_history: 'Tăng huyết áp, đái tháo đường type 2. Đã thay khớp háng phải (3 tháng trước). Dị ứng Penicillin.',
+    is_infectious: false,
+    location_type: 'HOME',
+    address_text: '25 Quang Trung, Hải Châu 1, Hải Châu, Đà Nẵng',
     lat: 16.0717,
     lng: 108.2208,
-    consent: { accepted: true, acceptedAt: '2026-10-12T02:41:00Z', withdrawnAt: null },
-    createdAt: '2026-10-12T02:41:00Z',
+    data_consent_accepted: true,
+    consent_timestamp: '2026-10-12T02:41:00Z',
+    booking_count: 3,
+    deletion_requested_at: null,
   },
   {
-    id: '22222222-2222-4222-8222-222222222222',
-    fullName: 'Nguyễn Văn Đức',
-    dob: '1944-01-01',
-    gender: 'MALE',
-    weightKg: 61,
-    mobilityStatus: 'NORMAL',
-    medicalHistory: 'Thoái hóa khớp gối hai bên. Không dị ứng thuốc.',
-    isInfectious: false,
-    addressText: '25 Quang Trung, Hải Châu 1, Hải Châu, Đà Nẵng',
-    locationType: 'HOME',
-    lat: 16.0717,
-    lng: 108.2208,
-    consent: { accepted: true, acceptedAt: '2026-10-12T02:43:00Z', withdrawnAt: null },
-    createdAt: '2026-10-12T02:43:00Z',
+    id: 'pp-duc',
+    full_name: 'Nguyễn Văn Đức',
+    relationship: 'FATHER',
+    birth_year: 1944,
+    weight_kg: 61,
+    mobility_status: 'NORMAL',
+    medical_history: 'Thoái hóa khớp gối hai bên. Không dị ứng thuốc.',
+    is_infectious: false,
+    location_type: 'HOME',
+    address_text: '25 Quang Trung, Hải Châu 1, Hải Châu, Đà Nẵng',
+    lat: null,
+    lng: null,
+    data_consent_accepted: true,
+    consent_timestamp: '2026-10-12T02:43:00Z',
+    booking_count: 0,
+    deletion_requested_at: null,
   },
 ];
 
-export const loadMockProfiles = (userId: string) =>
-  getUserData<MockProfile[]>(userId, 'profiles', userId === 'u-patient-verified' ? SAMPLE : []);
-const save = (userId: string, list: MockProfile[]) => setUserData(userId, 'profiles', list);
-const loadRequests = (userId: string) => getUserData<MockPrivacyRequest[]>(userId, 'privacy-requests', []);
+const REQUIRED: Array<keyof CreatePatientProfileRequest> = [
+  'relationship', 'full_name', 'birth_year', 'weight_kg', 'mobility_status',
+  'medical_history', 'location_type', 'address_text',
+];
 
-const summary = ({ medicalHistory: _m, ...rest }: MockProfile) => rest;
+function load(userId: string): PatientProfileDetail[] {
+  return getUserData<PatientProfileDetail[]>(userId, 'profiles', userId === 'u-patient-verified' ? SAMPLE : []);
+}
 
-const REQUIRED: Array<keyof MockProfile> = ['fullName', 'addressText', 'locationType', 'lat', 'lng'];
+function save(userId: string, list: PatientProfileDetail[]) {
+  setUserData(userId, 'profiles', list);
+}
 
+/** Bỏ dữ liệu sức khoẻ khỏi bản tóm tắt. */
+function summary(p: PatientProfileDetail): PatientProfileDto {
+  return {
+    id: p.id,
+    full_name: p.full_name,
+    relationship: p.relationship,
+    birth_year: p.birth_year,
+    mobility_status: p.mobility_status,
+    location_type: p.location_type,
+    data_consent_accepted: p.data_consent_accepted,
+    consent_timestamp: p.consent_timestamp,
+    booking_count: p.booking_count,
+    deletion_requested_at: p.deletion_requested_at,
+  };
+}
+
+/** Bọc handler: kiểm tra đăng nhập + tìm hồ sơ theo :id. */
 function withProfile(
-  fn: (ctx: { userId: string; list: MockProfile[]; index: number; body: any }) => MockResult,
+  fn: (ctx: { userId: string; list: PatientProfileDetail[]; index: number; body: any }) => MockResult
 ): MockHandler {
   return (body, { headers, params }: MockRequest) => {
     const userId = userIdFromHeaders(headers);
     if (!userId) return fail(401, 'UNAUTHORIZED', 'Phiên đăng nhập đã hết hạn');
-    const list = loadMockProfiles(userId);
+    const list = load(userId);
     const index = list.findIndex((p) => p.id === params.id);
-    if (index < 0) return fail(403, 'FORBIDDEN', 'Không có quyền truy cập hồ sơ này');
+    if (index < 0) return fail(404, 'NOT_FOUND', 'Không tìm thấy hồ sơ');
     return fn({ userId, list, index, body });
   };
 }
 
 export const patientProfileHandlers: Record<string, MockHandler> = {
-  'GET /api/v1/patient-profiles': (_body, { headers }) => {
+  'GET /api/v1/patients/profiles': (_body, { headers }) => {
     const userId = userIdFromHeaders(headers);
     if (!userId) return fail(401, 'UNAUTHORIZED', 'Phiên đăng nhập đã hết hạn');
-    return ok({ items: loadMockProfiles(userId).map(summary) });
+    return ok(load(userId).map(summary));
   },
 
-  'GET /api/v1/patient-profiles/:id': withProfile(({ list, index }) => ok(list[index])),
+  'GET /api/v1/patients/profiles/:id': withProfile(({ list, index }) => {
+    const p = list[index];
+    if (!p.data_consent_accepted || p.deletion_requested_at) {
+      return fail(403, 'CONSENT_NOT_ACTIVE', 'Hồ sơ chưa có đồng ý xử lý dữ liệu.');
+    }
+    return ok(p);
+  }),
 
-  'POST /api/v1/patient-profiles': (body: Record<string, any>, { headers }) => {
+  'POST /api/v1/patients/profiles': (body: Partial<CreatePatientProfileRequest>, { headers }) => {
     const userId = userIdFromHeaders(headers);
     if (!userId) return fail(401, 'UNAUTHORIZED', 'Phiên đăng nhập đã hết hạn');
-    if (body?.dataConsentAccepted !== true) {
+    if (body?.data_consent_accepted !== true) {
       return fail(400, 'CONSENT_REQUIRED', 'Cần đồng ý xử lý dữ liệu sức khỏe theo NĐ 13/2023 trước khi lưu hồ sơ.');
     }
-    const missing = REQUIRED.filter((k) => body[k] === undefined || body[k] === null || body[k] === '');
+    const missing = REQUIRED.filter((k) => body[k] === undefined || body[k] === '');
     if (missing.length) return fail(400, 'VALIDATION_ERROR', 'Thiếu thông tin bắt buộc.', { fields: missing });
 
-    const now = new Date().toISOString();
-    const { dataConsentAccepted: _c, ...fields } = body;
-    const profile: MockProfile = {
-      gender: null,
-      dob: null,
-      weightKg: null,
-      medicalHistory: null,
-      isInfectious: false,
-      mobilityStatus: 'NORMAL',
-      ...fields,
-      id: crypto.randomUUID(),
-      consent: { accepted: true, acceptedAt: now, withdrawnAt: null },
-      createdAt: now,
-    } as MockProfile;
-    save(userId, [...loadMockProfiles(userId), profile]);
-    console.info('[mock] Đã lưu hồ sơ + consent', { ...profile, medicalHistory: '(ẩn)' });
-    return { status: 201, body: { success: true, data: profile } };
-  },
-
-  'PATCH /api/v1/patient-profiles/:id': withProfile(({ userId, list, index, body }) => {
-    if (!body || Object.keys(body).length === 0) return fail(400, 'VALIDATION_ERROR', 'Cần ít nhất một trường để sửa.');
-    list[index] = { ...list[index], ...body, id: list[index].id, consent: list[index].consent };
-    save(userId, list);
-    return ok(list[index]);
-  }),
-
-  'POST /api/v1/patient-profiles/:id/consent/withdraw': withProfile(({ userId, list, index }) => {
-    if (!list[index].consent.accepted) return fail(409, 'CONSENT_ALREADY_WITHDRAWN', 'Đã rút đồng ý trước đó.');
-    const withdrawnAt = new Date().toISOString();
-    list[index] = { ...list[index], consent: { ...list[index].consent, accepted: false, withdrawnAt } };
-    save(userId, list);
-    return ok({ consent: 'WITHDRAWN', withdrawnAt });
-  }),
-
-  'GET /api/v1/privacy-requests': (_body, { headers }) => {
-    const userId = userIdFromHeaders(headers);
-    if (!userId) return fail(401, 'UNAUTHORIZED', 'Phiên đăng nhập đã hết hạn');
-    return ok(loadRequests(userId));
-  },
-
-  'POST /api/v1/privacy-requests': (body: { patientProfileId?: string; requestType?: string }, { headers }) => {
-    const userId = userIdFromHeaders(headers);
-    if (!userId) return fail(401, 'UNAUTHORIZED', 'Phiên đăng nhập đã hết hạn');
-    if (!loadMockProfiles(userId).some((p) => p.id === body?.patientProfileId)) return fail(403, 'FORBIDDEN', 'Không có quyền truy cập hồ sơ này');
-    if (body.requestType !== 'DELETE' && body.requestType !== 'ANONYMIZE') {
-      return fail(400, 'VALIDATION_ERROR', 'Loại yêu cầu không hợp lệ.');
-    }
-    const requests = loadRequests(userId);
-    if (requests.some((r) => r.patientProfileId === body.patientProfileId && r.status === 'PENDING')) {
-      return fail(409, 'REQUEST_ALREADY_PENDING', 'Đã có yêu cầu đang chờ xử lý.');
-    }
-    const created: MockPrivacyRequest = {
-      requestId: crypto.randomUUID(),
-      patientProfileId: body.patientProfileId!,
-      requestType: body.requestType,
-      status: 'PENDING',
-      createdAt: new Date().toISOString(),
-      processedAt: null,
+    const profile: PatientProfileDetail = {
+      ...(body as CreatePatientProfileRequest),
+      id: `pp-${Date.now()}`,
+      data_consent_accepted: true,
+      consent_timestamp: new Date().toISOString(),
+      booking_count: 0,
+      deletion_requested_at: null,
     };
-    setUserData(userId, 'privacy-requests', [created, ...requests]);
-    return { status: 201, body: { success: true, data: { requestId: created.requestId, status: 'PENDING' } } };
+    save(userId, [...load(userId), profile]);
+    console.info('[mock] Đã lưu hồ sơ + consent', { ...profile, medical_history: '(ẩn)' });
+    return ok(profile);
   },
+
+  'PATCH /api/v1/patients/profiles/:id': withProfile(({ userId, list, index, body }) => {
+    const p = list[index];
+    if (!p.data_consent_accepted || p.deletion_requested_at) {
+      return fail(403, 'CONSENT_NOT_ACTIVE', 'Hồ sơ chưa có đồng ý xử lý dữ liệu.');
+    }
+    const next = { ...p, ...body, id: p.id, data_consent_accepted: p.data_consent_accepted };
+    list[index] = next;
+    save(userId, list);
+    return ok(next);
+  }),
+
+  'POST /api/v1/patients/profiles/:id/consent': withProfile(({ userId, list, index }) => {
+    list[index] = { ...list[index], data_consent_accepted: true, consent_timestamp: new Date().toISOString() };
+    save(userId, list);
+    return ok(summary(list[index]));
+  }),
+
+  'DELETE /api/v1/patients/profiles/:id/consent': withProfile(({ userId, list, index }) => {
+    list[index] = { ...list[index], data_consent_accepted: false };
+    save(userId, list);
+    return ok(summary(list[index]));
+  }),
+
+  'POST /api/v1/patients/profiles/:id/deletion-request': withProfile(({ userId, list, index }) => {
+    list[index] = { ...list[index], deletion_requested_at: new Date().toISOString() };
+    save(userId, list);
+    return ok(summary(list[index]));
+  }),
 };

@@ -70,9 +70,9 @@
 ## Phase 1 — AUTH: Identity, eKYC, Tiers & Privacy [MVP]
 
 ### FE-1
-- [x] Patient Web — Phone + OTP SMS authentication flow (`features/auth`).
-- [x] Patient Web — Patient profile creation + mandatory Decree-13 sensitive health data consent checkbox (`features/patient-profiles`).
-- [x] Patient Web — Customer CCCD identity document upload for eKYC.
+- [ ] Patient Web — Phone + OTP SMS authentication flow (`features/auth`).
+- [ ] Patient Web — Patient profile creation + mandatory Decree-13 sensitive health data consent checkbox (`features/patient-profiles`).
+- [ ] Patient Web — Customer CCCD identity document upload for eKYC.
 - [x] Admin Web — Nurse verification queue: review uploaded credentials, approve/reject, assign professional Tier (`features/nurse-verification`).
 
 ### FE-2
@@ -110,8 +110,8 @@
 ## Phase 2 — SCHED & SEARCH: Availability & Nurse Discovery [MVP]
 
 ### FE-1
-- [x] Patient Web — Nurse discovery screen: filters by service category, district/location, time slot, Tier, and gender.
-- [x] Patient Web — Nurse profile summary card: TrustScore, rating average, verified experience, and retired staff honor badge.
+- [ ] Patient Web — Nurse discovery screen: filters by service category, district/location, time slot, Tier, and gender.
+- [ ] Patient Web — Nurse profile summary card: TrustScore, rating average, verified experience, and retired staff honor badge.
 
 ### FE-2
 - [x] Nurse Web + Mobile App — Availability calendar: configure recurring weekly working time slots.
@@ -141,13 +141,13 @@
 ## Phase 3 — BOOK: Booking, Pricing, Prescription Gate & Matching [MVP]
 
 ### FE-1
-- [x] Patient Web — End-to-end booking flow: select service → choose patient profile → select time slot → confirm booking.
-- [x] Patient Web — Mandatory prescription photo upload interface when selecting invasive services (`is_invasive = true`).
-- [x] Patient Web — Transparent pricing breakdown card: base amount, night surcharge, holiday surcharge, heavy patient surcharge, platform fee, total amount.
-- [x] Patient Web — Payment method selector: Prepaid Bank Transfer (Escrow) vs On-site Cash.
-- [x] Patient Web — Pending payment countdown screen with real-time 15-minute expiration timer.
-- [x] Patient Web — Direct nurse invitation action from profile discovery screen.
-- [x] Patient Web — My Bookings dashboard presenting independent 3-axis status badges (`execution`, `payment`, `dispute`).
+- [ ] Patient Web — End-to-end booking flow: select service → choose patient profile → select time slot → confirm booking.
+- [ ] Patient Web — Mandatory prescription photo upload interface when selecting invasive services (`is_invasive = true`).
+- [ ] Patient Web — Transparent pricing breakdown card: base amount, night surcharge, holiday surcharge, heavy patient surcharge, platform fee, total amount.
+- [ ] Patient Web — Payment method selector: Prepaid Bank Transfer (Escrow) vs On-site Cash.
+- [ ] Patient Web — Pending payment countdown screen with real-time 15-minute expiration timer.
+- [ ] Patient Web — Direct nurse invitation action from profile discovery screen.
+- [ ] Patient Web — My Bookings dashboard presenting independent 3-axis status badges (`execution`, `payment`, `dispute`).
 
 ### FE-2
 - [x] Nurse Web + Mobile App — Job Board interface for advance bookings (> 6 hours).
@@ -192,13 +192,13 @@
 - [ ] Patient Web — Real-time emergency SOS broadcast banner for active family bookings.
 
 ### FE-2 (Frontend Lead)
-- [x] Nurse Mobile App — Dual check-in: mock location detection blocked, direct hardware camera selfie capture, photo gallery upload disabled.
-- [x] Nurse Mobile App — Initial 30-minute patient assessment report + condition mismatch reporting flow.
-- [x] Nurse Mobile App — Clinical care logging: vital signs chart, completed nursing activities, clinical notes.
-- [x] Nurse Mobile App — Approve or decline patient-requested shift extensions.
-- [x] Nurse Mobile App — On-site invalid prescription rejection flow with mandatory photo evidence.
-- [x] Nurse Mobile App — Dedicated SOS emergency button: immediately opens device 115 emergency dialer with zero network latency.
-- [x] Nurse Web + Mobile App — Check-out flow enforcing submission of mandatory minimal clinical care report.
+- [ ] Nurse Mobile App — Dual check-in: mock location detection blocked, direct hardware camera selfie capture, photo gallery upload disabled.
+- [ ] Nurse Mobile App — Initial 30-minute patient assessment report + condition mismatch reporting flow.
+- [ ] Nurse Mobile App — Clinical care logging: vital signs chart, completed nursing activities, clinical notes.
+- [ ] Nurse Mobile App — Approve or decline patient-requested shift extensions.
+- [ ] Nurse Mobile App — On-site invalid prescription rejection flow with mandatory photo evidence.
+- [ ] Nurse Mobile App — Dedicated SOS emergency button: immediately opens device 115 emergency dialer with zero network latency.
+- [ ] Nurse Web + Mobile App — Check-out flow enforcing submission of mandatory minimal clinical care report.
 
 ### BE-1
 - [ ] `shift-extend` (FR-SHIFT-03): `POST /api/v1/bookings/:id/extend` — 1-hour increments, validates nurse schedule conflicts, requires nurse approval.
@@ -238,8 +238,7 @@
 - [ ] Nurse Web + Mobile App — Wallet dashboard displaying 3 strictly segregated balances: Available (`available_balance`), Escrow Locked (`escrow_locked_balance`), Deposit (`deposit_balance`).
 - [ ] Nurse Web + Mobile App — Deposit top-up flow maintaining the 300,000 VND requirement.
 - [ ] Nurse Web + Mobile App — Cash booking 15% platform commission payment: generates VietQR link, 24h countdown, overdue suspension warning banner.
-- [x] Nurse Web — Earnings withdrawal request interface.
-- [ ] Nurse Mobile App — Earnings withdrawal request interface.
+- [ ] Nurse Web + Mobile App — Earnings withdrawal request interface.
 - [ ] Nurse Web + Mobile App — Immutable wallet transaction ledger history.
 
 ### BE-1
@@ -287,12 +286,9 @@
 
 ### FE-2
 - [ ] Nurse Web + Mobile App — Dispute notification and rebuttal submission interface.
-- [x] Nurse Web — Post-shift customer rating form.
-- [ ] Nurse Mobile App — Post-shift customer rating form.
-- [x] Nurse Web — In-app chat interface with customer (reusing FE-1 component).
-- [ ] Nurse Mobile App — In-app chat interface with customer (reusing FE-1 component).
-- [x] Nurse Web — Personal TrustScore dashboard: current score, deduction/recovery history, suspension warning near 60.
-- [ ] Nurse Mobile App — Personal TrustScore dashboard: current score, deduction/recovery history, suspension warning near 60.
+- [ ] Nurse Web + Mobile App — Post-shift customer rating form.
+- [ ] Nurse Web + Mobile App — In-app chat interface with customer (reusing FE-1 component).
+- [ ] Nurse Web + Mobile App — Personal TrustScore dashboard: current score, deduction/recovery history, suspension warning near 60.
 
 ### BE-1
 - [ ] `reviews-trustscore` (FR-RATE-01): `POST /api/v1/bookings/:id/reviews` — opens immediately upon `COMPLETED` execution status, independent of financial settlement.

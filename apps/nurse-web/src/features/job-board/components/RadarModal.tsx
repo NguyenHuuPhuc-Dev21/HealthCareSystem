@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Radio, MapPin, Clock, CreditCard, Zap, Check, X } from 'lucide-react';
 import { RadarJob } from '../job-board.types';
-import { useDialogA11y } from '../../../components';
 
 interface RadarModalProps {
   radarJob: RadarJob;
@@ -10,30 +9,16 @@ interface RadarModalProps {
   isProcessing?: boolean;
 }
 
-function computeRemainingSeconds(expiresAt?: string, expiresInSeconds?: number): number {
-  if (expiresAt) {
-    const expiryMs = Date.parse(expiresAt);
-    if (!Number.isNaN(expiryMs)) {
-      return Math.max(0, Math.floor((expiryMs - Date.now()) / 1000));
-    }
-  }
-  return Math.max(0, expiresInSeconds ?? 45);
-}
-
 export const RadarModal: React.FC<RadarModalProps> = ({
   radarJob,
   onAccept,
   onDismiss,
   isProcessing = false,
 }) => {
-  const [secondsLeft, setSecondsLeft] = useState<number>(() =>
-    computeRemainingSeconds(radarJob.radarExpiresAt, radarJob.expiresInSeconds)
-  );
-  const totalSecondsRef = useRef<number>(
-    Math.max(1, computeRemainingSeconds(radarJob.radarExpiresAt, radarJob.expiresInSeconds))
-  );
+  const initialSeconds = radarJob.expiresInSeconds ?? 45;
+  const [secondsLeft, setSecondsLeft] = useState<number>(initialSeconds);
+  const totalSeconds = initialSeconds || 45;
   const dismissedRef = useRef(false);
-  const dialogRef = useRef<HTMLDivElement>(null);
 
   const triggerDismiss = useCallback(() => {
     if (dismissedRef.current) return;
@@ -41,53 +26,41 @@ export const RadarModal: React.FC<RadarModalProps> = ({
     onDismiss(radarJob.id);
   }, [onDismiss, radarJob.id]);
 
-  useDialogA11y({ open: true, onClose: triggerDismiss, containerRef: dialogRef });
+  // Support Escape to close for Elder-Friendly / A11y
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        triggerDismiss();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [triggerDismiss]);
 
   useEffect(() => {
-    const initial = computeRemainingSeconds(radarJob.radarExpiresAt, radarJob.expiresInSeconds);
-    totalSecondsRef.current = Math.max(1, initial);
-    setSecondsLeft(initial);
-    if (initial <= 0) {
+    if (secondsLeft <= 0) {
       triggerDismiss();
       return;
     }
 
     const interval = setInterval(() => {
-      if (radarJob.radarExpiresAt && !Number.isNaN(Date.parse(radarJob.radarExpiresAt))) {
-        const next = Math.max(0, Math.floor((Date.parse(radarJob.radarExpiresAt) - Date.now()) / 1000));
-        setSecondsLeft(next);
-        if (next <= 0) {
-          clearInterval(interval);
-          triggerDismiss();
-        }
-      } else {
-        setSecondsLeft((prev: number) => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            triggerDismiss();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }
+      setSecondsLeft((prev: number) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [radarJob.id, radarJob.radarExpiresAt, radarJob.expiresInSeconds, triggerDismiss]);
+  }, [secondsLeft, triggerDismiss]);
 
-  const percentage = Math.max(0, (secondsLeft / totalSecondsRef.current) * 100);
+  const percentage = Math.max(0, (secondsLeft / totalSeconds) * 100);
   const ringGradient = `conic-gradient(var(--red) 0% ${percentage}%, #DCEBE3 ${percentage}% 100%)`;
 
   return (
-    <div className="radar-modal-overlay">
-      <div
-        ref={dialogRef}
-        className="phone-frame"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="radar-modal-title"
-        tabIndex={-1}
-      >
+    <div
+      className="radar-modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="radar-modal-title"
+    >
+      <div className="phone-frame">
         <div className="phone-inner">
           {/* Radar Animation Area */}
           <div className="radar-zone">
