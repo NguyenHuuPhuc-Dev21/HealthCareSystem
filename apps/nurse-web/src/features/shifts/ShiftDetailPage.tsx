@@ -282,18 +282,18 @@ export const ShiftDetailPage: React.FC = () => {
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0, flexWrap: 'wrap' }}>
             {(job.status === 'CONFIRMED' ||
               job.status === 'IN_PROGRESS' ||
               shiftExecState?.executionStatus === 'CONFIRMED' ||
               shiftExecState?.executionStatus === 'IN_PROGRESS') && (
               <button
                 type="button"
-                className="btn btn-secondary btn-lg"
-                style={{ fontSize: 16, height: 52, position: 'relative' }}
+                className="btn btn-secondary"
+                style={{ fontSize: 15.5, height: 48, minHeight: 48, padding: '0 18px', position: 'relative' }}
                 onClick={() => setShowChatPanel(true)}
               >
-                <MessageSquare size={18} aria-hidden="true" />
+                <MessageSquare size={17} aria-hidden="true" />
                 <span>Nhắn tin với khách</span>
                 {unreadCount > 0 && <span className="chat-badge">{unreadCount}</span>}
               </button>

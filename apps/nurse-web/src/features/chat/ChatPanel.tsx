@@ -84,6 +84,11 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
   const counterpartPhone = conversation?.counterpartPhoneMasked || '09•• ••• 123';
   const isConversationOpen = conversation?.isOpen ?? false;
 
+  // Phân tách tên bệnh nhân và thông tin người nhà nếu có dạng "Bà Nguyễn Thị Mai (Người nhà: Anh Tuấn)"
+  const match = counterpartName.match(/^(.*?)\s*\((Người nhà:\s*.*?)\)$/);
+  const patientNameDisplay = match ? match[1] : counterpartName;
+  const relativeInfoDisplay = match ? match[2] : null;
+
   const getInitials = (name: string) => {
     const parts = name.trim().split(' ');
     if (parts.length >= 2) {
@@ -97,7 +102,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
       className="chat-drawer-overlay"
       role="dialog"
       aria-modal="true"
-      aria-label={`Cuộc trò chuyện với ${counterpartName}`}
+      aria-label={`Cuộc trò chuyện ca trực ${bookingCode || bookingId} với ${counterpartName}`}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -107,34 +112,29 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
         <div className="chat-header">
           <div className="chat-header__info">
             <div className="chat-header__avatar" aria-hidden="true">
-              {getInitials(counterpartName)}
+              {getInitials(patientNameDisplay)}
             </div>
-            <div>
-              <div className="chat-header__name" title={counterpartName}>
-                {counterpartName}
+            <div className="chat-header__title-wrap">
+              <div className="chat-header__title-row">
+                <span className="chat-header__name" title={counterpartName}>
+                  {patientNameDisplay}
+                </span>
+                <span className={`chat-status-pill ${isConversationOpen ? '' : 'closed'}`}>
+                  <span className="chat-status-dot" />
+                  {isConversationOpen ? 'Đang mở' : 'Đã đóng'}
+                </span>
               </div>
               <div className="chat-header__sub">
+                {relativeInfoDisplay && <span>{relativeInfoDisplay} · </span>}
                 <span className="tabular-nums">{counterpartPhone}</span>
-                {' · '}
-                <span style={{ color: isConversationOpen ? 'var(--brand-jade)' : 'var(--ink-muted)' }}>
-                  {isConversationOpen ? 'Đang hoạt động' : 'Đã đóng ca'}
-                </span>
-                {bookingCode && ` · ${bookingCode}`}
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="chat-header__actions">
             <button
               type="button"
-              className="btn btn-secondary btn-sm"
-              style={{
-                width: 38,
-                height: 38,
-                minHeight: 38,
-                padding: 0,
-                borderRadius: '50%',
-              }}
+              className="chat-action-btn chat-action-btn--phone"
               title={`Gọi tổng đài ẩn danh tới ${counterpartPhone}`}
               onClick={() => {
                 alert(
@@ -143,33 +143,26 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
               }}
               aria-label="Gọi thoại ẩn danh"
             >
-              <Phone size={17} color="var(--brand-jade)" />
+              <Phone size={17} />
             </button>
 
             <button
               type="button"
-              className="btn btn-secondary btn-sm"
-              style={{
-                width: 38,
-                height: 38,
-                minHeight: 38,
-                padding: 0,
-                borderRadius: '50%',
-              }}
+              className="chat-action-btn"
               onClick={onClose}
               aria-label="Đóng bảng chat"
             >
-              <X size={20} />
+              <X size={19} />
             </button>
           </div>
         </div>
 
         {/* 2. Top System Security Notice */}
         <div className="chat-system-notice">
-          <ShieldCheck size={18} style={{ flexShrink: 0, marginTop: 1 }} aria-hidden="true" />
-          <div>
-            <b>Bảo mật CareNest (FR-CHAT-01):</b> Số điện thoại hai bên được che giấu. Hệ thống tự
-            động quét và cảnh báo các số điện thoại hoặc gợi ý giao dịch ngoài ứng dụng.
+          <ShieldCheck size={16} className="chat-system-notice__icon" aria-hidden="true" />
+          <div className="chat-system-notice__text">
+            <b>Bảo mật CareNest:</b> Số điện thoại được ẩn danh. Giao dịch ngoài ứng dụng sẽ không
+            được bảo hiểm ca trực & hỗ trợ đối soát.
           </div>
         </div>
 
@@ -188,7 +181,16 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
               if (m.senderRole === 'SYSTEM' || m.type === 'SYSTEM_ALERT') {
                 return (
                   <div key={m.id} className="chat-bubble--system">
-                    <Lock size={13} style={{ display: 'inline', marginRight: 4 }} aria-hidden="true" />
+                    <Lock
+                      size={13}
+                      style={{
+                        display: 'inline-block',
+                        verticalAlign: '-1px',
+                        marginRight: 6,
+                        color: 'var(--slate)',
+                      }}
+                      aria-hidden="true"
+                    />
                     <span>{m.content}</span>
                   </div>
                 );
@@ -321,30 +323,18 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
                 />
                 <button
                   type="submit"
-                  className="btn btn-primary"
+                  className="chat-send-btn"
                   disabled={!inputText.trim()}
-                  style={{
-                    height: 48,
-                    minHeight: 48,
-                    padding: '0 16px',
-                    borderRadius: 12,
-                    flexShrink: 0,
-                  }}
+                  title="Gửi tin nhắn (Enter)"
                   aria-label="Gửi tin nhắn"
                 >
                   <Send size={18} aria-hidden="true" />
                 </button>
               </div>
 
-              <div
-                style={{
-                  fontSize: 11.5,
-                  color: 'var(--ink-muted)',
-                  textAlign: 'center',
-                  marginTop: 8,
-                }}
-              >
-                Lịch sử chat được lưu trữ vĩnh viễn làm bằng chứng giải quyết khiếu nại (FR-CHAT-01)
+              <div className="chat-disclaimer">
+                <Lock size={12} aria-hidden="true" />
+                <span>Lịch sử chat được lưu trữ đối soát bảo vệ quyền lợi hai bên (FR-CHAT-01)</span>
               </div>
             </form>
           )}

@@ -69,7 +69,19 @@ export function useConversation(bookingId: string | undefined, isPanelOpen: bool
     // Real-time subscription
     const unsubscribe = subscribeConversation(convId, (newMsg) => {
       setMessages((prev) => {
-        // avoid duplicate
+        // If an optimistic message with matching content and sender exists, update it
+        const optIndex = prev.findIndex(
+          (m) =>
+            m.id.startsWith('temp-') &&
+            m.senderRole === newMsg.senderRole &&
+            m.content === newMsg.content
+        );
+        if (optIndex !== -1) {
+          const copy = [...prev];
+          copy[optIndex] = { ...newMsg, status: 'sent' };
+          return copy;
+        }
+        // avoid duplicate by id
         if (prev.some((m) => m.id === newMsg.id)) return prev;
         return [...prev, { ...newMsg, status: 'sent' }];
       });
@@ -146,11 +158,15 @@ export function useConversation(bookingId: string | undefined, isPanelOpen: bool
       try {
         const res = await sendMessage(bookingId, content.trim());
         if (res.success && res.data) {
-          setMessages((prev) =>
-            prev.map((m) =>
+          setMessages((prev) => {
+            // If subscriber already added/replaced it, remove tempId
+            if (prev.some((m) => m.id === res.data.id)) {
+              return prev.filter((m) => m.id !== tempId);
+            }
+            return prev.map((m) =>
               m.id === tempId ? { ...res.data, status: 'sent' } : m
-            )
-          );
+            );
+          });
           return true;
         } else {
           setMessages((prev) =>
