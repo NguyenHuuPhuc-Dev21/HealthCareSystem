@@ -21,6 +21,8 @@ import { ShiftExecutionState } from './shift.types';
 import { useAuth } from '../auth/AuthContext';
 import { USE_MOCK_AUTH } from '../../lib/mock-flags';
 import { Modal, ModalCloseButton } from '../../components';
+import { ChatPanel } from '../chat/ChatPanel';
+import { useConversation } from '../chat/useConversation';
 import {
   DEFAULT_PLATFORM_COMMISSION_RATE,
   DEFAULT_MIN_NURSE_DEPOSIT_VND,
@@ -56,6 +58,8 @@ export const ShiftDetailPage: React.FC = () => {
   const [shiftExecState, setShiftExecState] = useState<ShiftExecutionState | null>(null);
   const [loadingCheckIn, setLoadingCheckIn] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showChatPanel, setShowChatPanel] = useState(false);
+  const { unreadCount } = useConversation(id, showChatPanel);
   const [cancelReason, setCancelReason] = useState('Lý do sức khỏe / việc gia đình đột xuất');
   const [cancelNote, setCancelNote] = useState('');
   const [cancelNotice, setCancelNotice] = useState<string | null>(null);
@@ -199,6 +203,9 @@ export const ShiftDetailPage: React.FC = () => {
   const backPath = job.status === 'MATCHING' ? '/jobs' : '/shifts';
   const backLabel = job.status === 'MATCHING' ? 'Quay lại Bảng việc làm' : 'Về danh sách ca của tôi';
 
+  const isConfirmedOrInProgress =
+    job.status === 'CONFIRMED' || job.status === 'IN_PROGRESS';
+
   return (
     <div>
       {/* Navigation Breadcrumb */}
@@ -278,7 +285,7 @@ export const ShiftDetailPage: React.FC = () => {
             </p>
           </div>
 
-          <div>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0 }}>
             {job.status === 'IN_PROGRESS' || shiftExecState?.executionStatus === 'IN_PROGRESS' ? (
               <button
                 className="btn btn-primary btn-lg"
@@ -466,25 +473,59 @@ export const ShiftDetailPage: React.FC = () => {
               <div className="contact-person-card">
                 <div className="contact-person-card__info">
                   <div className="avatar" style={{ background: '#E2E8F0', color: 'var(--navy)' }}>
-                    {job.customerName ? getInitials(job.customerName) : 'AN'}
+                    {job.customerName ? getInitials(job.customerName) : 'KH'}
                   </div>
                   <div style={{ minWidth: 0 }}>
                     <strong style={{ color: 'var(--navy)', display: 'block', fontSize: 16 }}>
-                      {job.customerName || 'Anh Nguyễn Văn An'}
+                      {job.customerName || 'Người nhà bệnh nhân'}
                     </strong>
-                    <span style={{ color: 'var(--slate)', fontSize: 14.5, display: 'block', marginTop: 2 }}>
-                      Người đặt ca · SĐT: {job.customerPhoneMasked || '0905 ••• 123'}
+                    <span style={{ color: 'var(--slate)', fontSize: 14, display: 'block', marginTop: 2 }}>
+                      {isConfirmedOrInProgress
+                        ? `Người đặt ca · SĐT: ${job.customerPhoneMasked || '0905 ••• 123'}`
+                        : 'Người đặt ca · SĐT được bảo mật cho tới khi nhận ca'}
                     </span>
                   </div>
                 </div>
-                <div className="contact-person-card__actions">
-                  <button className="btn btn-secondary btn-sm" type="button">
-                    <MessageSquare size={15} aria-hidden="true" /> Chat
-                  </button>
-                  <button className="btn btn-secondary btn-sm" type="button">
-                    <Phone size={15} aria-hidden="true" /> Gọi
-                  </button>
-                </div>
+
+                {isConfirmedOrInProgress ? (
+                  <div className="contact-person-card__actions">
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      type="button"
+                      onClick={() => setShowChatPanel(true)}
+                      style={{ position: 'relative' }}
+                    >
+                      <MessageSquare size={15} aria-hidden="true" />
+                      <span>Nhắn tin</span>
+                      {unreadCount > 0 && <span className="chat-badge">{unreadCount}</span>}
+                    </button>
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      type="button"
+                      onClick={() => {
+                        alert(
+                          `Tổng đài gọi thoại ẩn danh CareNest (FR-CHAT-01) đang kết nối tới ${job.customerPhoneMasked || '0905 ••• 123'}...`
+                        );
+                      }}
+                    >
+                      <Phone size={15} aria-hidden="true" /> Gọi
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      marginTop: 10,
+                      fontSize: 12.5,
+                      color: 'var(--muted)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                    }}
+                  >
+                    <Lock size={13} aria-hidden="true" />
+                    <span>Kênh nhắn tin &amp; gọi thoại sẽ mở sau khi bạn nhận ca (FR-CHAT-01).</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -665,6 +706,16 @@ export const ShiftDetailPage: React.FC = () => {
               setToastMessage('Đã gửi báo cáo y lệnh không khớp và ghi nhận bảo vệ miễn phạt tới hệ thống.');
             }}
             onClose={() => setShowInvalidRxModal(false)}
+          />
+        )}
+
+        {/* Chat Drawer Panel (W08) */}
+        {id && (
+          <ChatPanel
+            bookingId={id}
+            bookingCode={job?.code}
+            isOpen={showChatPanel}
+            onClose={() => setShowChatPanel(false)}
           />
         )}
     </div>
