@@ -3,6 +3,7 @@ import {
   BookingDisputeStatus,
   ExecutionStatus,
   MobilityStatus,
+  PaymentMethod,
   PaymentStatus,
 } from '../enums';
 
@@ -45,6 +46,7 @@ export interface ShiftExecutionState {
   totalAmount: number;
   executionStatus: ExecutionStatus;
   paymentStatus: PaymentStatus;
+  paymentMethod?: PaymentMethod | string;
   disputeStatus: BookingDisputeStatus;
   checkedInAt?: string;
   checkInDistanceMeters?: number;

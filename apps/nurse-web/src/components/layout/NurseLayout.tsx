@@ -16,6 +16,7 @@ import { useAuth } from '../../features/auth/AuthContext';
 import { getMyShifts } from '../../features/shifts/shift.api';
 import { maskPhone } from '../../lib/formatters';
 import { DepositWarningBanner } from '../DepositWarningBanner';
+import { CommissionOverdueBanner } from '../CommissionOverdueBanner';
 
 interface HeaderNotification {
   id: string;
@@ -386,6 +387,7 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
         </div>
       </header>
 
+      <CommissionOverdueBanner />
       <DepositWarningBanner />
 
       {mobileNavOpen && (
