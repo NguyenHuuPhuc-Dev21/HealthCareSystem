@@ -235,12 +235,12 @@
 - [ ] Patient Web — Transparent refund tracking view mapped to §5.2 SLA cancellation matrix scenarios.
 
 ### FE-2
-- [ ] Nurse Web + Mobile App — Wallet dashboard displaying 3 strictly segregated balances: Available (`available_balance`), Escrow Locked (`escrow_locked_balance`), Deposit (`deposit_balance`).
+- [ ] Nurse Web + Mobile App — Wallet dashboard displaying 3 strictly segregated balances: Available (`available_balance`), Escrow Locked (`escrow_locked_balance`), Deposit (`deposit_balance`) (Nurse Web: [x], Mobile: [ ]).
 - [ ] Nurse Web + Mobile App — Deposit top-up flow maintaining the 300,000 VND requirement.
 - [ ] Nurse Web + Mobile App — Cash booking 15% platform commission payment: generates VietQR link, 24h countdown, overdue suspension warning banner.
 - [x] Nurse Web — Earnings withdrawal request interface.
 - [ ] Nurse Mobile App — Earnings withdrawal request interface.
-- [ ] Nurse Web + Mobile App — Immutable wallet transaction ledger history.
+- [ ] Nurse Web + Mobile App — Immutable wallet transaction ledger history (Nurse Web: [x], Mobile: [ ]).
 
 ### BE-1
 - [ ] `cancellation-policy`: Implements the §5.2 SLA matrix as a centralized data-driven policy engine — 9 scenarios, each with dedicated unit tests.

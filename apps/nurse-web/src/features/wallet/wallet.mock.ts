@@ -1,22 +1,178 @@
-import { WithdrawalStatus } from '@healthcare-system/shared';
-import type { BankAccountDto, WithdrawalDto } from '@healthcare-system/shared';
+import {
+  BalanceType,
+  TxStatus,
+  TxType,
+  WithdrawalStatus,
+} from '@healthcare-system/shared';
+import type {
+  BankAccountDto,
+  EarningsPointDto,
+  Paged,
+  UpcomingSettlementDto,
+  WalletSummaryDto,
+  WalletTransactionDto,
+  WithdrawalDto,
+} from '@healthcare-system/shared';
 import type { WalletBalancesDto } from './wallet.api';
 
-const WALLET_STORAGE_KEY = 'carenest_mock_wallet_v1';
+const WALLET_STORAGE_KEY = 'carenest_mock_wallet_v2';
 
 interface MockWalletState {
-  balances: WalletBalancesDto;
+  availableBalance: number;
+  escrowLockedBalance: number;
+  depositBalance: number;
+  minDeposit: number;
+  isSuspended: boolean;
+  suspendedReason?: 'DEPOSIT_BELOW_MIN' | 'COMMISSION_OVERDUE' | 'TRUST_SCORE_LOW' | 'ACCOUNT_CLOSING' | null;
+  depositGraceActive: boolean;
   bankAccount: BankAccountDto | null;
   withdrawals: WithdrawalDto[];
-  idempotencyKeys: Record<string, string>; // idempotencyKey -> withdrawal_id
+  transactions: WalletTransactionDto[];
+  upcomingSettlements: UpcomingSettlementDto[];
+  idempotencyKeys: Record<string, string>;
 }
 
-const INITIAL_WALLET_STATE: MockWalletState = {
-  balances: {
-    available_balance: 3850000,
-    escrow_locked_balance: 500000,
-    deposit_balance: 300000,
+const INITIAL_TRANSACTIONS: WalletTransactionDto[] = [
+  {
+    id: 'tx-001',
+    type: TxType.ESCROW_RELEASE,
+    status: TxStatus.COMPLETED,
+    balanceType: BalanceType.AVAILABLE,
+    amount: 297500,
+    bookingCode: 'HC-2026-1042',
+    description: 'Quyết toán ca HC-2026-1042 (thực nhận 70% sau khi trích ký quỹ ân hạn)',
+    createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
   },
+  {
+    id: 'tx-002',
+    type: TxType.DEPOSIT_WITHHOLD,
+    status: TxStatus.COMPLETED,
+    balanceType: BalanceType.DEPOSIT,
+    amount: 127500,
+    bookingCode: 'HC-2026-1042',
+    description: 'Trích 30% thu nhập ca HC-2026-1042 vào ký quỹ (ân hạn)',
+    createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'tx-003',
+    type: TxType.ESCROW_RELEASE,
+    status: TxStatus.COMPLETED,
+    balanceType: BalanceType.AVAILABLE,
+    amount: 425000,
+    bookingCode: 'HC-2026-1039',
+    description: 'Quyết toán ca HC-2026-1039 (Vào ví khả dụng)',
+    createdAt: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'tx-004',
+    type: TxType.WITHDRAW,
+    status: TxStatus.COMPLETED,
+    balanceType: BalanceType.AVAILABLE,
+    amount: -2000000,
+    description: 'Rút tiền về Vietcombank •••• 6899 (Đã xử lý)',
+    createdAt: new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'tx-005',
+    type: TxType.COMMISSION_PAYMENT,
+    status: TxStatus.COMPLETED,
+    balanceType: BalanceType.AVAILABLE,
+    amount: -60000,
+    bookingCode: 'HC-2026-1035',
+    description: 'Nộp hoa hồng 15% ca thu tiền mặt HC-2026-1035',
+    createdAt: new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'tx-006',
+    type: TxType.PENALTY_DEDUCT,
+    status: TxStatus.COMPLETED,
+    balanceType: BalanceType.DEPOSIT,
+    amount: -100000,
+    bookingCode: 'HC-2026-1031',
+    description: 'Phạt hủy ca gấp HC-2026-1031 (20% giá trị ca theo SLA)',
+    createdAt: new Date(Date.now() - 4 * 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'tx-007',
+    type: TxType.PENALTY_REVERSAL,
+    status: TxStatus.COMPLETED,
+    balanceType: BalanceType.DEPOSIT,
+    amount: 100000,
+    bookingCode: 'HC-2026-1031',
+    description: 'Hoàn lại khoản phạt ca HC-2026-1031 sau khiếu nại thành công',
+    createdAt: new Date(Date.now() - 5 * 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'tx-008',
+    type: TxType.ESCROW_RELEASE,
+    status: TxStatus.COMPLETED,
+    balanceType: BalanceType.AVAILABLE,
+    amount: 680000,
+    bookingCode: 'HC-2026-1028',
+    description: 'Quyết toán ca toàn diện HC-2026-1028',
+    createdAt: new Date(Date.now() - 6 * 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'tx-009',
+    type: TxType.WITHDRAW,
+    status: TxStatus.COMPLETED,
+    balanceType: BalanceType.AVAILABLE,
+    amount: -1000000,
+    description: 'Rút tiền về Vietcombank •••• 6899',
+    createdAt: new Date(Date.now() - 8 * 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'tx-010',
+    type: TxType.TOPUP,
+    status: TxStatus.COMPLETED,
+    balanceType: BalanceType.DEPOSIT,
+    amount: 300000,
+    description: 'Nạp ký quỹ qua VietQR (Đủ mức 300.000đ)',
+    createdAt: new Date(Date.now() - 10 * 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'tx-011',
+    type: TxType.ESCROW_RELEASE,
+    status: TxStatus.COMPLETED,
+    balanceType: BalanceType.AVAILABLE,
+    amount: 425000,
+    bookingCode: 'HC-2026-1020',
+    description: 'Quyết toán ca phục hồi chức năng HC-2026-1020',
+    createdAt: new Date(Date.now() - 12 * 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'tx-012',
+    type: TxType.COMMISSION_PAYMENT,
+    status: TxStatus.COMPLETED,
+    balanceType: BalanceType.AVAILABLE,
+    amount: -75000,
+    bookingCode: 'HC-2026-1018',
+    description: 'Nộp hoa hồng ca tiền mặt HC-2026-1018',
+    createdAt: new Date(Date.now() - 14 * 24 * 3600 * 1000).toISOString(),
+  },
+];
+
+const INITIAL_UPCOMING_SETTLEMENTS: UpcomingSettlementDto[] = [
+  {
+    bookingCode: 'HC-2026-1048',
+    serviceName: 'Chăm sóc người cao tuổi tại nhà (4 giờ)',
+    grossAmount: 500000,
+    commissionAmount: 75000,
+    netAmount: 425000,
+    // settleAt in ~9 hours 12 minutes
+    settleAt: new Date(Date.now() + 9 * 3600 * 1000 + 12 * 60 * 1000).toISOString(),
+    disputeOpen: false,
+  },
+];
+
+const INITIAL_WALLET_STATE: MockWalletState = {
+  availableBalance: 3850000,
+  escrowLockedBalance: 425000,
+  depositBalance: 300000,
+  minDeposit: 300000,
+  isSuspended: false,
+  suspendedReason: null,
+  depositGraceActive: false,
   bankAccount: {
     bankName: 'Vietcombank',
     accountMasked: '•••• 6899',
@@ -45,6 +201,8 @@ const INITIAL_WALLET_STATE: MockWalletState = {
       processedAt: '2026-10-18T11:20:00.000Z',
     },
   ],
+  transactions: INITIAL_TRANSACTIONS,
+  upcomingSettlements: INITIAL_UPCOMING_SETTLEMENTS,
   idempotencyKeys: {},
 };
 
@@ -73,10 +231,28 @@ function saveWalletState(state: MockWalletState): void {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export async function mockGetWalletBalances(): Promise<WalletBalancesDto> {
+export async function mockGetWalletSummary(): Promise<WalletSummaryDto> {
   await delay(180);
   const state = loadWalletState();
-  return state.balances;
+  return {
+    availableBalance: state.availableBalance,
+    escrowLockedBalance: state.escrowLockedBalance,
+    depositBalance: state.depositBalance,
+    minDeposit: state.minDeposit,
+    isSuspended: state.isSuspended,
+    suspendedReason: state.suspendedReason,
+    depositGraceActive: state.depositGraceActive,
+  };
+}
+
+export async function mockGetWalletBalances(): Promise<WalletBalancesDto> {
+  await delay(150);
+  const state = loadWalletState();
+  return {
+    available_balance: state.availableBalance,
+    escrow_locked_balance: state.escrowLockedBalance,
+    deposit_balance: state.depositBalance,
+  };
 }
 
 export async function mockGetBankAccount(): Promise<BankAccountDto | null> {
@@ -91,6 +267,96 @@ export async function mockGetWithdrawals(): Promise<WithdrawalDto[]> {
   return state.withdrawals;
 }
 
+export async function mockGetUpcomingSettlements(): Promise<UpcomingSettlementDto[]> {
+  await delay(150);
+  const state = loadWalletState();
+  return state.upcomingSettlements;
+}
+
+export async function mockGetEarnings(range: 'week' | 'month'): Promise<{
+  points: EarningsPointDto[];
+  totalAmount: number;
+  periodLabel: string;
+}> {
+  await delay(180);
+  if (range === 'week') {
+    const points: EarningsPointDto[] = [
+      { label: 'T2', amount: 350000 },
+      { label: 'T3', amount: 500000 },
+      { label: 'T4', amount: 425000 },
+      { label: 'T5', amount: 750000 },
+      { label: 'T6', amount: 850000 },
+      { label: 'T7', amount: 500000 },
+      { label: 'CN', amount: 200000 },
+    ];
+    const totalAmount = points.reduce((acc, p) => acc + p.amount, 0);
+    return {
+      points,
+      totalAmount,
+      periodLabel: 'Tuần này',
+    };
+  }
+
+  const points: EarningsPointDto[] = [
+    { label: 'Tuần 1', amount: 2450000 },
+    { label: 'Tuần 2', amount: 3200000 },
+    { label: 'Tuần 3', amount: 2850000 },
+    { label: 'Tuần 4', amount: 3575000 },
+  ];
+  const totalAmount = points.reduce((acc, p) => acc + p.amount, 0);
+  return {
+    points,
+    totalAmount,
+    periodLabel: 'Tháng 11/2026',
+  };
+}
+
+export async function mockGetWalletTransactions(params?: {
+  type?: string;
+  cursor?: string;
+  pageSize?: number;
+}): Promise<Paged<WalletTransactionDto>> {
+  await delay(200);
+  const state = loadWalletState();
+  const pageSize = params?.pageSize || 6;
+  const startIndex = params?.cursor ? parseInt(params.cursor, 10) : 0;
+
+  let filtered = state.transactions;
+  if (params?.type && params.type !== 'ALL') {
+    if (params.type === 'SETTLE') {
+      filtered = filtered.filter(
+        (tx) => tx.type === TxType.ESCROW_RELEASE || tx.type === TxType.DEPOSIT_WITHHOLD
+      );
+    } else if (params.type === 'PENALTY') {
+      filtered = filtered.filter(
+        (tx) => tx.type === TxType.PENALTY_DEDUCT || tx.type === TxType.PENALTY_REVERSAL
+      );
+    } else if (params.type === 'WITHDRAW') {
+      filtered = filtered.filter((tx) => tx.type === TxType.WITHDRAW);
+    } else if (params.type === 'DEPOSIT') {
+      filtered = filtered.filter(
+        (tx) =>
+          tx.type === TxType.TOPUP ||
+          tx.type === TxType.DEPOSIT_WITHHOLD ||
+          tx.type === TxType.DEPOSIT_REFUND ||
+          tx.type === TxType.PENALTY_DEDUCT ||
+          tx.type === TxType.PENALTY_REVERSAL
+      );
+    } else {
+      filtered = filtered.filter((tx) => tx.type === (params.type as TxType));
+    }
+  }
+
+  const slice = filtered.slice(startIndex, startIndex + pageSize);
+  const nextIndex = startIndex + pageSize;
+  const nextCursor = nextIndex < filtered.length ? String(nextIndex) : null;
+
+  return {
+    items: slice,
+    nextCursor,
+  };
+}
+
 export async function mockRequestWithdrawal(
   amount: number,
   idempotencyKey?: string
@@ -98,13 +364,11 @@ export async function mockRequestWithdrawal(
   await delay(350);
   const state = loadWalletState();
 
-  // Check idempotency key to prevent double submissions
   if (idempotencyKey && state.idempotencyKeys[idempotencyKey]) {
     return { withdrawal_id: state.idempotencyKeys[idempotencyKey] };
   }
 
-  // Validate balance
-  if (amount > state.balances.available_balance) {
+  if (amount > state.availableBalance) {
     const error: any = new Error('Số dư khả dụng không đủ để thực hiện yêu cầu rút tiền');
     error.code = 'INSUFFICIENT_BALANCE';
     throw error;
@@ -124,8 +388,19 @@ export async function mockRequestWithdrawal(
     requestedAt: new Date().toISOString(),
   };
 
-  state.balances.available_balance -= amount;
+  const newTx: WalletTransactionDto = {
+    id: `tx-${Date.now()}`,
+    type: TxType.WITHDRAW,
+    status: TxStatus.COMPLETED,
+    balanceType: BalanceType.AVAILABLE,
+    amount: -amount,
+    description: `Rút tiền về ${state.bankAccount?.bankName || 'ngân hàng'} ${state.bankAccount?.accountMasked || ''}`,
+    createdAt: new Date().toISOString(),
+  };
+
+  state.availableBalance -= amount;
   state.withdrawals = [newWithdrawal, ...state.withdrawals];
+  state.transactions = [newTx, ...state.transactions];
   if (idempotencyKey) {
     state.idempotencyKeys[idempotencyKey] = withdrawalId;
   }
@@ -134,8 +409,31 @@ export async function mockRequestWithdrawal(
   return { withdrawal_id: withdrawalId };
 }
 
+/** Mock helper to switch deposit scenario for manual testing (Test #2) */
+export function mockSetDepositScenario(
+  scenario: 'FULL' | 'SHORTFALL_180K' | 'GRACE_ACTIVE'
+): void {
+  const state = loadWalletState();
+  if (scenario === 'SHORTFALL_180K') {
+    state.depositBalance = 180000;
+    state.depositGraceActive = false;
+    state.isSuspended = false;
+    state.suspendedReason = null;
+  } else if (scenario === 'GRACE_ACTIVE') {
+    state.depositBalance = 180000;
+    state.depositGraceActive = true;
+    state.isSuspended = false;
+    state.suspendedReason = null;
+  } else {
+    state.depositBalance = 300000;
+    state.depositGraceActive = false;
+    state.isSuspended = false;
+    state.suspendedReason = null;
+  }
+  saveWalletState(state);
+}
+
 export function mockResetWallet(): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(WALLET_STORAGE_KEY, JSON.stringify(INITIAL_WALLET_STATE));
 }
-

@@ -499,7 +499,7 @@ export const NurseHomePage: React.FC = () => {
                   </span>
                 </div>
               </div>
-              <Link to="/wallet/withdraw" className="ledger-link">
+              <Link to="/wallet" className="ledger-link">
                 Chi tiết
               </Link>
             </div>
