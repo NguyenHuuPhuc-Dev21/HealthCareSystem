@@ -81,5 +81,21 @@ export class MoneyHelper {
       maximumFractionDigits: 0,
     }).format(amount);
   }
-}
 
+  /**
+   * Grace-period deposit withholding (ADR-0004 D2).
+   * withhold = min(round(rate × netPayout), minDeposit − depositBalance), never negative.
+   * Example: net 425,000, deposit 0 → withhold 127,500, payout 297,500.
+   *          net 425,000, deposit 255,000 → withhold 45,000 (only the remaining shortfall).
+   */
+  public static calculateDepositWithhold(
+    netPayoutVnd: number,
+    depositBalanceVnd: number,
+    minDepositVnd = 300_000,
+    withholdRate = 0.30
+  ): { withhold: number; payout: number } {
+    const shortfall = Math.max(minDepositVnd - depositBalanceVnd, 0);
+    const withhold = Math.min(Math.round(netPayoutVnd * withholdRate), shortfall, netPayoutVnd);
+    return { withhold, payout: netPayoutVnd - withhold };
+  }
+}
