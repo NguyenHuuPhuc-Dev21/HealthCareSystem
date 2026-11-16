@@ -1,4 +1,15 @@
 import React from 'react';
+import {
+  AlertTriangle,
+  Building2,
+  CheckCircle2,
+  CreditCard,
+  FileText,
+  Inbox,
+  RefreshCw,
+  RotateCcw,
+  Shield,
+} from 'lucide-react';
 import { TxType } from '@healthcare-system/shared';
 import type { WalletTransactionDto } from '@healthcare-system/shared';
 import { formatDateTime, formatVND } from '../../../lib/formatters';
@@ -13,7 +24,7 @@ export interface TransactionListProps {
 }
 
 interface TxMeta {
-  icon: string;
+  icon: React.ReactNode;
   ticClass: string;
   title: string;
   badgeLabel: string;
@@ -23,14 +34,14 @@ function getTxMeta(tx: WalletTransactionDto): TxMeta {
   switch (tx.type) {
     case TxType.ESCROW_RELEASE:
       return {
-        icon: '✅',
+        icon: <CheckCircle2 size={20} color="var(--brand-jade, #166B58)" aria-hidden="true" />,
         ticClass: 'tic',
         title: tx.bookingCode ? `Quyết toán ca ${tx.bookingCode}` : 'Quyết toán ca làm việc',
         badgeLabel: 'Ví khả dụng',
       };
     case TxType.DEPOSIT_WITHHOLD:
       return {
-        icon: '🛡️',
+        icon: <Shield size={20} color="#0284C7" aria-hidden="true" />,
         ticClass: 'tic pending',
         title: tx.bookingCode
           ? `Giữ lại vào ký quỹ (ân hạn) ca ${tx.bookingCode}`
@@ -39,14 +50,14 @@ function getTxMeta(tx: WalletTransactionDto): TxMeta {
       };
     case TxType.WITHDRAW:
       return {
-        icon: '🏦',
+        icon: <Building2 size={20} color="var(--brand-jade, #166B58)" aria-hidden="true" />,
         ticClass: 'tic',
         title: 'Rút tiền về ngân hàng',
         badgeLabel: 'Chuyển khoản',
       };
     case TxType.COMMISSION_PAYMENT:
       return {
-        icon: '💸',
+        icon: <CreditCard size={20} color="#D97706" aria-hidden="true" />,
         ticClass: 'tic pending',
         title: tx.bookingCode
           ? `Nộp hoa hồng ca tiền mặt ${tx.bookingCode}`
@@ -55,14 +66,14 @@ function getTxMeta(tx: WalletTransactionDto): TxMeta {
       };
     case TxType.PENALTY_DEDUCT:
       return {
-        icon: '⚠️',
+        icon: <AlertTriangle size={20} color="#DC2626" aria-hidden="true" />,
         ticClass: 'tic rejected',
         title: tx.bookingCode ? `Phạt vi phạm SLA ca ${tx.bookingCode}` : 'Phạt trừ ký quỹ SLA',
         badgeLabel: 'Trừ ký quỹ',
       };
     case TxType.PENALTY_REVERSAL:
       return {
-        icon: '↩️',
+        icon: <RotateCcw size={20} color="var(--brand-jade, #166B58)" aria-hidden="true" />,
         ticClass: 'tic',
         title: tx.bookingCode
           ? `Hoàn lại khoản phạt ca ${tx.bookingCode}`
@@ -71,21 +82,21 @@ function getTxMeta(tx: WalletTransactionDto): TxMeta {
       };
     case TxType.TOPUP:
       return {
-        icon: '🛡️',
+        icon: <Shield size={20} color="var(--brand-jade, #166B58)" aria-hidden="true" />,
         ticClass: 'tic',
         title: 'Nạp ký quỹ qua VietQR',
         badgeLabel: 'Ví ký quỹ',
       };
     case TxType.DEPOSIT_REFUND:
       return {
-        icon: '🔄',
+        icon: <RefreshCw size={20} color="var(--brand-jade, #166B58)" aria-hidden="true" />,
         ticClass: 'tic',
         title: 'Hoàn ký quỹ khi đóng tài khoản',
         badgeLabel: 'Chi hoàn',
       };
     default:
       return {
-        icon: '📄',
+        icon: <FileText size={20} color="var(--text-secondary, #64748B)" aria-hidden="true" />,
         ticClass: 'tic',
         title: tx.description || 'Giao dịch ví',
         badgeLabel: 'Giao dịch',
@@ -142,12 +153,16 @@ export const TransactionList: React.FC<TransactionListProps> = ({
               className={isActive ? 'btn btn-primary' : 'btn btn-secondary'}
               onClick={() => onFilterChange(tab.key)}
               style={{
-                padding: '6px 14px',
-                fontSize: '14px',
-                fontWeight: 700,
+                padding: '6px 16px',
+                fontSize: '14.5px',
+                fontWeight: isActive ? 900 : 500,
                 borderRadius: 8,
-                borderWidth: 1,
+                borderWidth: isActive ? 2 : 1,
                 cursor: 'pointer',
+                letterSpacing: isActive ? '0.02em' : 'normal',
+                boxShadow: isActive ? '0 2px 6px rgba(22, 107, 88, 0.25)' : 'none',
+                transform: isActive ? 'scale(1.02)' : 'none',
+                transition: 'all 0.15s ease',
               }}
             >
               {tab.label}
@@ -165,9 +180,25 @@ export const TransactionList: React.FC<TransactionListProps> = ({
             color: 'var(--text-secondary, #64748B)',
           }}
         >
-          <div style={{ fontSize: '32px', marginBottom: 8 }}>📭</div>
-          <p style={{ fontWeight: 700, margin: 0 }}>Chưa có giao dịch nào phù hợp</p>
-          <p style={{ fontSize: '14px', margin: '4px 0 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: '50%',
+                background: 'var(--surface-subtle, #F1F5F9)',
+                display: 'grid',
+                placeItems: 'center',
+                color: 'var(--text-secondary, #64748B)',
+              }}
+            >
+              <Inbox size={28} />
+            </div>
+          </div>
+          <p style={{ fontWeight: 800, fontSize: '16px', color: 'var(--navy, #0F172A)', margin: 0 }}>
+            Chưa có giao dịch nào phù hợp
+          </p>
+          <p style={{ fontSize: '14px', margin: '6px 0 0' }}>
             Các biến động số dư khi quyết toán, rút tiền hoặc nạp ký quỹ sẽ hiển thị tại đây.
           </p>
         </div>
