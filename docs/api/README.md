@@ -25,7 +25,8 @@ This catalogue lists the core endpoints defined by SRS v2.0 §8, grouped by doma
 |---|---|---|
 | `PATCH /api/v1/admin/nurses/:id/verify` | ADMIN | Approve a nurse's GPHN (stores `reviewed_by = admin_id`) and assign `TIER_1_BASIC` or `TIER_2_SPECIALIST` — including the automatic re-upgrade to `TIER_2_SPECIALIST` when approving a renewed GPHN (FR-AUTH-02). |
 | `PUT /api/v1/nurse/credentials/gphn` | NURSE (Web/App) | Nurse uploads a new GPHN after the previous one expired; once an Admin approves it, the nurse is automatically re-upgraded to `TIER_2_SPECIALIST` (FR-AUTH-02). |
-| `PUT /api/v1/nurse/availabilities` | NURSE | Nurse updates recurring availability windows and registers time-off days (FR-SCHED-01). |
+| `PUT /api/v1/nurse/availabilities` | NURSE | Nurse updates recurring availability windows and registers time-off days (FR-SCHED-01). Detail: [`nurse-availabilities.api.md`](./nurse-availabilities.api.md). |
+| `GET /api/v1/nurse/availabilities` | NURSE | Nurse reads the saved schedule plus confirmed / in-progress shifts for the calendar (board N13). |
 
 ## 3. Nurse Search
 
