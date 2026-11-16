@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  AlertTriangle,
   Calendar,
   CheckCircle2,
   Clock,
@@ -32,10 +33,12 @@ export const AccountClosureSection: React.FC<AccountClosureSectionProps> = ({
   onCancelRequest,
 }) => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [cancelModalOpen, setCancelModalOpen] = useState<boolean>(false);
   const [confirmedUnderstood, setConfirmedUnderstood] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [cancelling, setCancelling] = useState<boolean>(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [cancelError, setCancelError] = useState<string | null>(null);
 
   const hasOpenRequest =
     refundRequest &&
@@ -61,16 +64,20 @@ export const AccountClosureSection: React.FC<AccountClosureSectionProps> = ({
     }
   };
 
-  const handleCancelClick = async () => {
+  const handleOpenCancelModal = () => {
+    setCancelError(null);
+    setCancelModalOpen(true);
+  };
+
+  const handleConfirmCancel = async () => {
     if (!refundRequest || cancelling) return;
-    if (!window.confirm('Bạn có chắc chắn muốn hủy yêu cầu ngừng hợp tác và tiếp tục nhận ca?')) {
-      return;
-    }
     setCancelling(true);
+    setCancelError(null);
     try {
       await onCancelRequest(refundRequest.id);
+      setCancelModalOpen(false);
     } catch (err: any) {
-      alert(err.message || 'Không thể hủy yêu cầu');
+      setCancelError(err.message || 'Không thể hủy yêu cầu ngừng hợp tác. Vui lòng thử lại.');
     } finally {
       setCancelling(false);
     }
@@ -179,11 +186,11 @@ export const AccountClosureSection: React.FC<AccountClosureSectionProps> = ({
               <button
                 type="button"
                 className="btn btn-secondary"
-                onClick={handleCancelClick}
+                onClick={handleOpenCancelModal}
                 disabled={cancelling}
-                style={{ padding: '4px 12px', fontSize: '13px', borderRadius: 8 }}
+                style={{ padding: '6px 14px', fontSize: '13.5px', borderRadius: 8, fontWeight: 700 }}
               >
-                {cancelling ? 'Đang hủy...' : 'Hủy yêu cầu ngừng hợp tác'}
+                Hủy yêu cầu ngừng hợp tác
               </button>
             )}
           </div>
@@ -490,6 +497,129 @@ export const AccountClosureSection: React.FC<AccountClosureSectionProps> = ({
                 }}
               >
                 {submitting ? 'Đang gửi...' : 'Xác nhận ngừng hợp tác'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal xác nhận HỦY yêu cầu ngừng hợp tác */}
+      {cancelModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 999,
+            background: 'rgba(15, 23, 42, 0.65)',
+            display: 'grid',
+            placeItems: 'center',
+            padding: 16,
+          }}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="card"
+            style={{
+              width: '100%',
+              maxWidth: 500,
+              background: '#ffffff',
+              borderRadius: 18,
+              padding: 24,
+              boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+              position: 'relative',
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setCancelModalOpen(false)}
+              disabled={cancelling}
+              style={{
+                position: 'absolute',
+                top: 18,
+                right: 18,
+                background: 'transparent',
+                border: 0,
+                cursor: 'pointer',
+                color: 'var(--text-secondary, #64748B)',
+              }}
+              aria-label="Đóng modal"
+            >
+              <X size={22} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  background: '#FEF3C7',
+                  color: '#D97706',
+                  display: 'grid',
+                  placeItems: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <AlertTriangle size={24} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--navy, #0F172A)', margin: 0 }}>
+                  Hủy yêu cầu ngừng hợp tác?
+                </h3>
+                <p style={{ fontSize: '13.5px', color: 'var(--text-secondary, #64748B)', margin: '2px 0 0' }}>
+                  Tiếp tục hoạt động điều dưỡng trên CareNest
+                </p>
+              </div>
+            </div>
+
+            <p style={{ fontSize: '14.5px', color: 'var(--navy, #0F172A)', lineHeight: 1.6, margin: '0 0 16px' }}>
+              Khi bạn hủy yêu cầu ngừng hợp tác, tài khoản của bạn sẽ được kích hoạt lại quyền nhận ca làm việc bình
+              thường (theo mức ký quỹ hiện tại). Bạn vẫn có thể gửi lại yêu cầu ngừng hợp tác bất cứ lúc nào trong tương
+              lai nếu muốn.
+            </p>
+
+            {cancelError && (
+              <div
+                style={{
+                  padding: '10px 14px',
+                  background: '#FEF2F2',
+                  color: '#DC2626',
+                  borderRadius: 8,
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  marginBottom: 16,
+                }}
+              >
+                {cancelError}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setCancelModalOpen(false)}
+                disabled={cancelling}
+                style={{ padding: '8px 18px', fontSize: '14.5px', borderRadius: 10 }}
+              >
+                Giữ yêu cầu
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleConfirmCancel}
+                disabled={cancelling}
+                style={{
+                  padding: '8px 20px',
+                  fontSize: '14.5px',
+                  fontWeight: 800,
+                  borderRadius: 10,
+                  background: 'var(--brand-jade, #166B58)',
+                  borderColor: 'var(--brand-jade, #166B58)',
+                }}
+              >
+                {cancelling ? 'Đang hủy...' : 'Xác nhận hủy yêu cầu'}
               </button>
             </div>
           </div>
