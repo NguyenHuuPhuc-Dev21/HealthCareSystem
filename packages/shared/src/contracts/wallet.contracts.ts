@@ -1,4 +1,52 @@
-import type { DepositRefundStatus, PenaltyReason, WithdrawalStatus } from '../enums';
+import type {
+  BalanceType,
+  DepositRefundStatus,
+  PenaltyReason,
+  TxStatus,
+  TxType,
+  WithdrawalStatus,
+} from '../enums';
+
+export interface WalletSummaryDto {
+  availableBalance: number;      // có thể rút
+  escrowLockedBalance: number;   // đang giữ chờ quyết toán
+  depositBalance: number;        // ký quỹ, chỉ trừ phạt SLA
+  minDeposit: number;            // từ cấu hình MIN_NURSE_DEPOSIT
+  isSuspended: boolean;
+  suspendedReason?: 'DEPOSIT_BELOW_MIN' | 'COMMISSION_OVERDUE' | 'TRUST_SCORE_LOW' | 'ACCOUNT_CLOSING' | null;
+  depositGraceActive: boolean;   // ân hạn ký quỹ (ADR-0004): chỉ nhận ca chuyển khoản
+}
+
+export interface WalletTransactionDto {
+  id: string;
+  type: TxType;
+  status: TxStatus;
+  balanceType: BalanceType;
+  amount: number;                // dương = cộng, âm = trừ
+  bookingCode?: string;          // HC-2026-1042
+  description: string;
+  createdAt: string;             // ISO
+}
+
+export interface EarningsPointDto {
+  label: string;
+  amount: number;
+}
+
+export interface UpcomingSettlementDto {
+  bookingCode: string;
+  serviceName: string;
+  grossAmount: number;
+  commissionAmount: number;
+  netAmount: number;
+  settleAt: string;              // checkout + 24h
+  disputeOpen: boolean;          // true = đang khiếu nại, đồng hồ dừng
+}
+
+export interface Paged<T> {
+  items: T[];
+  nextCursor?: string | null;
+}
 
 export interface BankAccountDto {
   bankName: string; // Vietcombank

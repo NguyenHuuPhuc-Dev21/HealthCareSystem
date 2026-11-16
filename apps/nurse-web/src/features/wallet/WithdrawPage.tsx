@@ -197,13 +197,13 @@ export const WithdrawPage: React.FC = () => {
           <p>Tiền chỉ rút được từ ngăn Khả dụng — hai ngăn còn lại đang bị khóa theo quy tắc</p>
         </div>
         <Link
-          to="/"
+          to="/wallet"
           className="btn btn-secondary btn-sm"
           style={{ minHeight: 44, padding: '8px 18px', fontSize: 14.5 }}
-          aria-label="Về trang chủ"
+          aria-label="Quay lại ví"
         >
           <ArrowLeft size={16} aria-hidden="true" />
-          <span>Về trang chủ</span>
+          <span>Quay lại ví</span>
         </Link>
       </div>
 
