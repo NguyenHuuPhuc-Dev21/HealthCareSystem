@@ -60,7 +60,6 @@ export enum VerificationStatus {
 export enum AvailabilityType {
   RECURRING_AVAILABLE = 'RECURRING_AVAILABLE',
   TIME_OFF_EXCEPTION = 'TIME_OFF_EXCEPTION',
-  DATE_AVAILABLE = 'DATE_AVAILABLE', // migration 0008 · BE-2: open hours for one date, replaces that weekday's windows
 }
 
 // ============================================================================
