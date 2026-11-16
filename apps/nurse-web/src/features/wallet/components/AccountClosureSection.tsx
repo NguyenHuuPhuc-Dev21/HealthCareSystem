@@ -190,7 +190,7 @@ export const AccountClosureSection: React.FC<AccountClosureSectionProps> = ({
                 disabled={cancelling}
                 style={{ padding: '6px 14px', fontSize: '13.5px', borderRadius: 8, fontWeight: 700 }}
               >
-                Hủy yêu cầu ngừng hợp tác
+                Không muốn ngừng hợp tác nữa
               </button>
             )}
           </div>
@@ -565,10 +565,10 @@ export const AccountClosureSection: React.FC<AccountClosureSectionProps> = ({
               </div>
               <div>
                 <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--navy, #0F172A)', margin: 0 }}>
-                  Hủy yêu cầu ngừng hợp tác?
+                  Không muốn ngừng hợp tác nữa?
                 </h3>
                 <p style={{ fontSize: '13.5px', color: 'var(--text-secondary, #64748B)', margin: '2px 0 0' }}>
-                  Tiếp tục hoạt động điều dưỡng trên CareNest
+                  Hủy yêu cầu và tiếp tục làm việc trên CareNest
                 </p>
               </div>
             </div>
@@ -603,7 +603,7 @@ export const AccountClosureSection: React.FC<AccountClosureSectionProps> = ({
                 disabled={cancelling}
                 style={{ padding: '8px 18px', fontSize: '14.5px', borderRadius: 10 }}
               >
-                Giữ yêu cầu
+                Đóng (Giữ yêu cầu)
               </button>
               <button
                 type="button"
@@ -619,7 +619,7 @@ export const AccountClosureSection: React.FC<AccountClosureSectionProps> = ({
                   borderColor: 'var(--brand-jade, #166B58)',
                 }}
               >
-                {cancelling ? 'Đang hủy...' : 'Xác nhận hủy yêu cầu'}
+                {cancelling ? 'Đang xử lý...' : 'Xác nhận tiếp tục làm việc'}
               </button>
             </div>
           </div>
