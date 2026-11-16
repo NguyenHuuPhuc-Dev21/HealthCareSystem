@@ -4,6 +4,7 @@ import { OnboardingPage } from '../features/onboarding/OnboardingPage';
 import { PatientProfilesPage } from '../features/patient-profiles/PatientProfilesPage';
 import { BookingNewPage } from '../features/booking/BookingNewPage';
 import { BookingPaymentPage } from '../features/booking/BookingPaymentPage';
+import { ShiftTrackingPage } from '../features/booking-tracking/ShiftTrackingPage';
 import { MyBookingsPage } from '../features/booking/MyBookingsPage';
 import { NurseSearchPage } from '../features/nurse-search/NurseSearchPage';
 import { HomePage } from './HomePage';
@@ -26,6 +27,7 @@ export const AppRoutes = () => {
         <Route path="/bookings" element={<MyBookingsPage />} />
         <Route path="/bookings/new" element={<BookingNewPage />} />
         <Route path="/bookings/:id/pay" element={<BookingPaymentPage />} />
+        <Route path="/bookings/:id" element={<ShiftTrackingPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

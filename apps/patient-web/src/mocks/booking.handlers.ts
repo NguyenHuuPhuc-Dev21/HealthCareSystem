@@ -57,7 +57,7 @@ function holidayOf(d: Date): { name: string; rate: number } | null {
 
 const vnHour = (d: Date) => (d.getUTCHours() + 7) % 24;
 
-function computeQuote(serviceCode: string, startAt: string, endAt: string, weightKg: number | null, mobility: string): PricingQuote {
+export function computeQuote(serviceCode: string, startAt: string, endAt: string, weightKg: number | null, mobility: string): PricingQuote {
   const start = new Date(startAt);
   const end = new Date(endAt);
   const hours = Math.max(1, Math.round((end.getTime() - start.getTime()) / 3_600_000));
@@ -128,8 +128,32 @@ const SAMPLE: Booking[] = [
   },
 ];
 
+/** Ca đang thực hiện để demo Phase 4: bắt đầu 2 giờ 35 phút trước, còn 25 phút nữa kết thúc (đủ điều kiện gia hạn). Tự dựng lại khi ca đã hết. */
+const liveSample = (): Booking => {
+  const now = Date.now();
+  return {
+    ...SAMPLE_BASE, id: 'b-live', code: 'HC-2026-1060', serviceCode: 'BEDSIDE_CARE', serviceLabel: 'Chăm sóc tại giường (ca 4–24 giờ)',
+    startAt: new Date(now - 155 * 60_000).toISOString(), endAt: new Date(now + 25 * 60_000).toISOString(),
+    paymentMethod: 'BANK_TRANSFER', pricing: { ...sampleQuote(150_000), hours: 3 },
+    executionStatus: 'IN_PROGRESS', paymentStatus: 'ESCROW_HELD', disputeStatus: 'NONE', matchingMode: 'DIRECT_REQUEST',
+    invitedNurse: { nurseId: 'n-mai', fullName: 'Trần Thị Mai', respondBy: null }, createdAt: new Date(now - 26 * 3_600_000).toISOString(),
+  };
+};
+
+export const loadMockBookings = (userId: string): Booking[] => load(userId);
+export const saveMockBookings = (userId: string, list: Booking[]) => save(userId, list);
+
 const load = (userId: string): Booking[] => {
-  const list = getUserData<Booking[]>(userId, 'bookings', userId === 'u-patient-verified' ? SAMPLE : []);
+  let list = getUserData<Booking[]>(userId, 'bookings', userId === 'u-patient-verified' ? SAMPLE : []);
+  if (userId === 'u-patient-verified') {
+    const live = list.find((b) => b.id === 'b-live');
+    if (!live || Date.parse(live.endAt) < Date.now()) {
+      list = [liveSample(), ...list.filter((b) => b.id !== 'b-live')];
+      setUserData(userId, 'bookings', list);
+      setUserData(userId, 'ext:b-live', []);
+      setUserData(userId, 'sos', []);
+    }
+  }
   let changed = false;
   const now = Date.now();
   const next = list.map((b) => {
@@ -144,7 +168,7 @@ const load = (userId: string): Booking[] => {
 };
 
 const save = (userId: string, list: Booking[]) => setUserData(userId, 'bookings', list);
-const unauthorized = () => fail(401, 'UNAUTHORIZED', 'Phiên đăng nhập đã hết hạn');
+export const unauthorized = () => fail(401, 'UNAUTHORIZED', 'Phiên đăng nhập đã hết hạn');
 
 function profileOf(userId: string, id: string) {
   return loadMockProfiles(userId).find((p) => p.id === id);
