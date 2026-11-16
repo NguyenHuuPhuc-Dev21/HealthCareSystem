@@ -117,3 +117,19 @@ export interface DepositRefundRequestDto {
   requestedAt: string;
   updatedAt: string;
 }
+
+export interface DepositTopupLinkDto {
+  topupId: string;
+  amount: number;            // ≤ shortfall
+  qrImageUrl: string;        // hoặc qrPayload để tự vẽ QR
+  bankName: string;          // ngân hàng của đối tác lưu ký, không phải tài khoản nền tảng
+  accountNumber: string;
+  transferContent: string;   // ví dụ "KQ NURSE123 TOPUP-0001"
+  expiresAt: string;         // ISO
+}
+
+export interface AppealPenaltyRequest {
+  reason: string;            // ≥ 20 ký tự
+  evidenceKeys?: string[];   // ảnh đã tải lên qua presigned URL
+}
+

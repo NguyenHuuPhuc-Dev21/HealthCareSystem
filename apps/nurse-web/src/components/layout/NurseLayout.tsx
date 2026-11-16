@@ -15,6 +15,7 @@ import { ExecutionStatus } from '@healthcare-system/shared';
 import { useAuth } from '../../features/auth/AuthContext';
 import { getMyShifts } from '../../features/shifts/shift.api';
 import { maskPhone } from '../../lib/formatters';
+import { DepositWarningBanner } from '../DepositWarningBanner';
 
 interface HeaderNotification {
   id: string;
@@ -384,6 +385,8 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
           )}
         </div>
       </header>
+
+      <DepositWarningBanner />
 
       {mobileNavOpen && (
         <nav
