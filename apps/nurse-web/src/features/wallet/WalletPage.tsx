@@ -284,7 +284,7 @@ export const WalletPage: React.FC = () => {
             <span>Rút tiền về ngân hàng</span>
           </Link>
 
-          <Link to="/shifts">
+          <Link to="/wallet/commission">
             <CreditCard size={22} color="#D97706" aria-hidden="true" />
             <span>Nộp hoa hồng ca tiền mặt</span>
           </Link>

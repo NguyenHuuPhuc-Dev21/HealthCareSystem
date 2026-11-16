@@ -133,3 +133,27 @@ export interface AppealPenaltyRequest {
   evidenceKeys?: string[];   // ảnh đã tải lên qua presigned URL
 }
 
+/** Cash booking platform commission debt (FR-PAY-01, FR-PAY-02, BR-05) */
+export interface CommissionDebtDto {
+  bookingId: string;
+  bookingCode: string;          // HC-2026-1057
+  serviceName: string;
+  bookingAmount: number;        // giá trong app, không gồm tiền tip
+  commissionAmount: number;     // floor(bookingAmount × 0.15)
+  dueAt: string;                // checkout + 24h
+  status: 'UNPAID' | 'PAID' | 'OVERDUE';
+  paidAt?: string;
+}
+
+/** VietQR & payment link for self-paying 15% platform commission */
+export interface CommissionPaymentLinkDto {
+  checkoutUrl: string;
+  qrCode: string;
+  transferContent: string;      // có mã ca
+  dueTime: string;
+  amount?: number;
+  bankName?: string;
+  accountNumber?: string;
+}
+
+

@@ -16,6 +16,7 @@ import { NurseHomePage } from '../features/home/NurseHomePage';
 import { DepositPage } from '../features/wallet/DepositPage';
 import { WalletPage } from '../features/wallet/WalletPage';
 import { WithdrawPage } from '../features/wallet/WithdrawPage';
+import { CommissionPaymentPage } from '../features/commission-payment/CommissionPaymentPage';
 import { TrustScorePage } from '../features/trust-score/TrustScorePage';
 import { NurseLayout } from '../components/layout/NurseLayout';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -173,6 +174,16 @@ export const AppRoutes: React.FC = () => {
               <ProtectedRoute zone="active">
                 <NurseLayout>
                   <DepositPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/wallet/commission"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <CommissionPaymentPage />
                 </NurseLayout>
               </ProtectedRoute>
             }
