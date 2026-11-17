@@ -1,5 +1,6 @@
 import React, { useId, useState } from 'react';
-import { AlertCircle, AlertTriangle, Check, Lock, Send, Tag } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { AlertCircle, AlertTriangle, Check, Lock, Send, ShieldAlert, Tag } from 'lucide-react';
 import type { CreateReviewInput } from '@healthcare-system/shared';
 import { Modal, ModalCloseButton } from '../../../components';
 import { StarInput } from './StarInput';
@@ -182,6 +183,28 @@ export const RateCustomerModal: React.FC<RateCustomerModalProps> = ({
               <div style={{ marginTop: 2 }}>
                 Nếu xảy ra vi phạm hợp đồng, xúc phạm hoặc môi trường nguy hiểm, bạn có thể gửi phản
                 ánh hoặc mở khiếu nại để ban quản trị CareNest bảo vệ quyền lợi của bạn.
+              </div>
+              <div style={{ marginTop: 8 }}>
+                <Link
+                  to={`/disputes/new?bookingId=${bookingId}&bookingCode=${bookingCode}`}
+                  className="btn btn-secondary btn-sm"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    color: '#991B1B',
+                    borderColor: '#FCA5A5',
+                    background: '#FFFFFF',
+                    fontSize: 12.5,
+                    padding: '4px 10px',
+                    minHeight: 30,
+                    textDecoration: 'none',
+                  }}
+                  onClick={onClose}
+                >
+                  <ShieldAlert size={14} aria-hidden="true" />
+                  <span>Mở khiếu nại ca này</span>
+                </Link>
               </div>
             </div>
           </div>
