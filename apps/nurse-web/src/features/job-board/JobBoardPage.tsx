@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Radio,
   AlertTriangle,
   CheckCircle2,
   Filter,
+  ShieldAlert,
   ShieldCheck,
   UserCheck,
   Zap,
@@ -22,6 +24,7 @@ import {
   acceptRadarJob,
   dismissRadarJob,
 } from './job-board.api';
+import { getWalletSummary } from '../wallet/wallet.api';
 import { JobCard } from './components/JobCard';
 import { DirectInviteCard } from './components/DirectInviteCard';
 import { RadarModal } from './components/RadarModal';
@@ -51,6 +54,10 @@ export const JobBoardPage: React.FC = () => {
   const [depositAmount, setDepositAmount] = useState<number | null>(initialDeposit);
   const [userTier, setUserTier] = useState<1 | 2>(initialTier);
   const [loading, setLoading] = useState<boolean>(true);
+  const [walletSuspension, setWalletSuspension] = useState<{ isSuspended: boolean; reason: string | null }>({
+    isSuspended: false,
+    reason: null,
+  });
   const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [sandboxOpen, setSandboxOpen] = useState<boolean>(false);
@@ -60,10 +67,18 @@ export const JobBoardPage: React.FC = () => {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const [boardRes, inviteRes] = await Promise.all([
+      const [boardRes, inviteRes, walletRes] = await Promise.all([
         getJobBoard(),
         getDirectInvitation(),
+        getWalletSummary(),
       ]);
+
+      if (walletRes.success && walletRes.data) {
+        setWalletSuspension({
+          isSuspended: !!walletRes.data.isSuspended,
+          reason: walletRes.data.suspendedReason || null,
+        });
+      }
 
       if (boardRes.success) {
         let list = boardRes.data.map((job) => ({
@@ -206,6 +221,55 @@ export const JobBoardPage: React.FC = () => {
         >
           {feedbackMessage.type === 'success' ? <CheckCircle2 size={20} /> : <AlertTriangle size={20} />}
           <span>{feedbackMessage.text}</span>
+        </div>
+      )}
+
+      {/* Cảnh báo tài khoản bị tạm khóa (do quá hạn nộp hoa hồng hoặc TrustScore < 60) */}
+      {walletSuspension.isSuspended && (
+        <div
+          role="alert"
+          style={{
+            padding: '16px 20px',
+            background: '#FEF2F2',
+            border: '2px solid #DC2626',
+            borderRadius: 14,
+            marginBottom: 20,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 14,
+            boxShadow: '0 4px 14px rgba(220, 38, 38, 0.12)',
+            flexWrap: 'wrap',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <ShieldAlert size={28} color="#DC2626" style={{ flexShrink: 0 }} />
+            <div>
+              <h4 style={{ fontSize: '16.5px', fontWeight: 800, color: '#991B1B', margin: '0 0 3px' }}>
+                Tài khoản đang tạm khóa nhận ca mới!
+              </h4>
+              <p style={{ fontSize: '14.5px', color: '#B91C1C', margin: 0 }}>
+                {walletSuspension.reason === 'COMMISSION_OVERDUE'
+                  ? 'Bạn có khoản hoa hồng ca tiền mặt đã quá hạn 24 giờ. Vui lòng thanh toán để gỡ khóa tài khoản.'
+                  : walletSuspension.reason === 'TRUST_SCORE_LOW'
+                  ? 'Điểm TrustScore của bạn đang dưới ngưỡng an toàn 60 điểm. Vui lòng kiểm tra trang đánh giá.'
+                  : 'Tài khoản đang bị tạm khóa nhận việc theo quy chuẩn an toàn nền tảng.'}
+              </p>
+            </div>
+          </div>
+          <Link
+            to={walletSuspension.reason === 'COMMISSION_OVERDUE' ? '/wallet/commission' : '/trust-score'}
+            className="btn btn-primary btn-sm"
+            style={{
+              padding: '8px 16px',
+              fontSize: '14px',
+              fontWeight: 700,
+              background: '#DC2626',
+              borderColor: '#DC2626',
+            }}
+          >
+            {walletSuspension.reason === 'COMMISSION_OVERDUE' ? 'Nộp hoa hồng gỡ khóa' : 'Xem điểm TrustScore'}
+          </Link>
         </div>
       )}
 
