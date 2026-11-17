@@ -1,5 +1,5 @@
 import React, { useId, useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   ArrowLeft,
   MapPin,
@@ -40,6 +40,7 @@ import {
 export const ShiftDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { session } = useAuth();
 
   const nurseTier = session?.profile?.tier || 'TIER_1_BASIC';
@@ -135,6 +136,13 @@ export const ShiftDetailPage: React.FC = () => {
       alive = false;
     };
   }, [id]);
+
+  // Tự động mở khung chat khi đường dẫn có query ?chat=1 (từ thông báo tin nhắn mới - W09)
+  useEffect(() => {
+    if (searchParams.get('chat') === '1') {
+      setShowChatPanel(true);
+    }
+  }, [searchParams]);
 
   const handleOpenCheckIn = async () => {
     if (shiftExecState) {
