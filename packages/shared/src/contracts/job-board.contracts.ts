@@ -75,6 +75,11 @@ export interface ClaimJobResult {
   success: boolean;
   bookingId?: string;
   message?: string;
-  errorCode?: 'ALREADY_CLAIMED' | 'TIER_MISMATCH' | 'DEPOSIT_SHORTFALL' | 'SCHEDULE_CONFLICT';
+  errorCode?:
+    | 'ALREADY_CLAIMED'
+    | 'TIER_MISMATCH'
+    | 'DEPOSIT_SHORTFALL'
+    | 'SCHEDULE_CONFLICT'
+    | 'ACCOUNT_SUSPENDED';
 }
 

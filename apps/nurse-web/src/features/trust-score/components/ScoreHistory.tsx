@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AlertCircle, AlertTriangle, History, Star } from 'lucide-react';
 import type { TrustScoreHistoryItem, TrustScoreReason } from '@healthcare-system/shared';
 import { formatDateTime } from '../../../lib/formatters';
@@ -17,6 +17,17 @@ const REASON_LABELS: Record<TrustScoreReason, string> = {
 };
 
 export const ScoreHistory: React.FC<ScoreHistoryProps> = ({ history, loading = false }) => {
+  const [filter, setFilter] = useState<'all' | 'positive' | 'negative'>('all');
+
+  const positiveCount = history.filter((h) => h.delta > 0).length;
+  const negativeCount = history.filter((h) => h.delta < 0).length;
+
+  const filteredHistory = history.filter((item) => {
+    if (filter === 'positive') return item.delta > 0;
+    if (filter === 'negative') return item.delta < 0;
+    return true;
+  });
+
   return (
     <div className="card" style={{ padding: '22px 24px' }}>
       <div
@@ -24,7 +35,7 @@ export const ScoreHistory: React.FC<ScoreHistoryProps> = ({ history, loading = f
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: 16,
+          marginBottom: 14,
           borderBottom: '1px solid var(--border-hairline)',
           paddingBottom: 10,
         }}
@@ -47,6 +58,60 @@ export const ScoreHistory: React.FC<ScoreHistoryProps> = ({ history, loading = f
         </span>
       </div>
 
+      {/* Bộ lọc nhanh: Tất cả / Cộng điểm / Bị trừ */}
+      {!loading && history.length > 0 && (
+        <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => setFilter('all')}
+            style={{
+              padding: '4px 10px',
+              borderRadius: 8,
+              fontSize: 12.5,
+              fontWeight: 700,
+              background: filter === 'all' ? 'var(--brand-jade, #166B58)' : '#F1F5F9',
+              color: filter === 'all' ? '#ffffff' : 'var(--ink-secondary, #64748B)',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            Tất cả ({history.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilter('positive')}
+            style={{
+              padding: '4px 10px',
+              borderRadius: 8,
+              fontSize: 12.5,
+              fontWeight: 700,
+              background: filter === 'positive' ? '#15803D' : '#F0FDF4',
+              color: filter === 'positive' ? '#ffffff' : '#166534',
+              border: filter === 'positive' ? 'none' : '1px solid #BBF7D0',
+              cursor: 'pointer',
+            }}
+          >
+            Cộng điểm (+{positiveCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setFilter('negative')}
+            style={{
+              padding: '4px 10px',
+              borderRadius: 8,
+              fontSize: 12.5,
+              fontWeight: 700,
+              background: filter === 'negative' ? '#DC2626' : '#FEF2F2',
+              color: filter === 'negative' ? '#ffffff' : '#991B1B',
+              border: filter === 'negative' ? 'none' : '1px solid #FECACA',
+              cursor: 'pointer',
+            }}
+          >
+            Bị trừ (−{negativeCount})
+          </button>
+        </div>
+      )}
+
       {loading ? (
         <div style={{ textAlign: 'center', padding: '36px 0', color: 'var(--ink-muted)' }}>
           Đang tải lịch sử điểm uy tín...
@@ -65,9 +130,13 @@ export const ScoreHistory: React.FC<ScoreHistoryProps> = ({ history, loading = f
             Điểm khởi tạo được bảo toàn. Các thay đổi sau ca hoàn tất hoặc sự cố sẽ hiển thị tại đây.
           </p>
         </div>
+      ) : filteredHistory.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '24px 16px', color: 'var(--ink-muted)', fontSize: 14 }}>
+          Không có biến động nào phù hợp với bộ lọc đã chọn.
+        </div>
       ) : (
         <div>
-          {history.map((item) => {
+          {filteredHistory.map((item) => {
             const isPositive = item.delta > 0;
             const isWarning = item.delta === -5;
 

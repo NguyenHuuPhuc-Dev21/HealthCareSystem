@@ -14,6 +14,7 @@ import {
 import { ExecutionStatus } from '@healthcare-system/shared';
 import { useAuth } from '../../features/auth/AuthContext';
 import { getMyShifts } from '../../features/shifts/shift.api';
+import { getCommissionDebts } from '../../features/commission-payment/commission-payment.api';
 import { maskPhone } from '../../lib/formatters';
 import { DepositWarningBanner } from '../DepositWarningBanner';
 import { CommissionOverdueBanner } from '../CommissionOverdueBanner';
@@ -103,6 +104,8 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [notifications, setNotifications] = useState<HeaderNotification[]>([]);
   const [notifLoading, setNotifLoading] = useState(true);
+  const [unpaidCommissionCount, setUnpaidCommissionCount] = useState<number>(0);
+  const [hasUrgentCommission, setHasUrgentCommission] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const profile = session?.profile;
@@ -112,43 +115,76 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
   const tier = profile?.tier === 'TIER_2_SPECIALIST' ? 'Cấp 2' : 'Cấp 1';
   const tierDesc = profile?.tier === 'TIER_2_SPECIALIST' ? 'Điều dưỡng Cấp 2 — Chuyên môn' : 'Điều dưỡng Cấp 1 — Cơ bản';
 
-  // Aggregate real notifications from shifts API
+  // Aggregate real notifications from shifts API & commission debts API
   useEffect(() => {
     let alive = true;
     setNotifLoading(true);
-    getMyShifts()
-      .then((res) => {
+
+    Promise.all([getMyShifts(), getCommissionDebts()])
+      .then(([shiftsRes, commissionRes]) => {
         if (!alive) return;
-        if (!res.success) {
-          setNotifications([]);
-          return;
-        }
         const items: HeaderNotification[] = [];
-        for (const s of res.data) {
-          if (s.executionStatus === ExecutionStatus.IN_PROGRESS && !s.assessmentCompleted) {
+
+        // 1. Kiểm tra nợ hoa hồng ca tiền mặt
+        if (commissionRes.success && commissionRes.data) {
+          const unpaid = commissionRes.data.filter((d) => d.status === 'UNPAID' || d.status === 'OVERDUE');
+          setUnpaidCommissionCount(unpaid.length);
+          const urgent = commissionRes.data.some(
+            (d) =>
+              d.status === 'OVERDUE' ||
+              (d.status === 'UNPAID' && new Date(d.dueAt).getTime() - Date.now() < 2 * 3600 * 1000)
+          );
+          setHasUrgentCommission(urgent);
+
+          const overdue = commissionRes.data.filter((d) => d.status === 'OVERDUE');
+          if (overdue.length > 0) {
             items.push({
-              id: `${s.bookingId}-assess`,
-              title: `Cần đánh giá 30 phút · ${s.serviceName}`,
-              subtitle: `Đơn ${s.bookingCode} · Người bệnh ${s.patientName}`,
-              to: `/shifts/${s.bookingId}/execute`,
+              id: 'comm-overdue',
+              title: `Quá hạn nộp hoa hồng (${overdue.length} ca)`,
+              subtitle: 'Tài khoản đang bị tạm khóa nhận ca · Bấm để nộp ngay',
+              to: '/wallet/commission',
               urgent: true,
             });
-          } else if (s.executionStatus === ExecutionStatus.IN_PROGRESS) {
+          } else if (unpaid.length > 0) {
             items.push({
-              id: `${s.bookingId}-active`,
-              title: `Ca đang thực hiện · ${s.serviceName}`,
-              subtitle: `${s.startTime} – ${s.endTime} · ${s.patientName}`,
-              to: `/shifts/${s.bookingId}/execute`,
-            });
-          } else if (s.executionStatus === ExecutionStatus.CONFIRMED) {
-            items.push({
-              id: `${s.bookingId}-upcoming`,
-              title: `Ca trực sắp tới · ${s.serviceName}`,
-              subtitle: `${s.startTime} – ${s.endTime} · Đơn ${s.bookingCode}`,
-              to: `/shifts/${s.bookingId}`,
+              id: 'comm-unpaid',
+              title: `Có ${unpaid.length} ca tiền mặt cần nộp hoa hồng 15%`,
+              subtitle: 'Đồng hồ 24h đang đếm ngược · Nộp qua VietQR',
+              to: '/wallet/commission',
+              urgent: urgent,
             });
           }
         }
+
+        // 2. Ca trực
+        if (shiftsRes.success && shiftsRes.data) {
+          for (const s of shiftsRes.data) {
+            if (s.executionStatus === ExecutionStatus.IN_PROGRESS && !s.assessmentCompleted) {
+              items.push({
+                id: `${s.bookingId}-assess`,
+                title: `Cần đánh giá 30 phút · ${s.serviceName}`,
+                subtitle: `Đơn ${s.bookingCode} · Người bệnh ${s.patientName}`,
+                to: `/shifts/${s.bookingId}/execute`,
+                urgent: true,
+              });
+            } else if (s.executionStatus === ExecutionStatus.IN_PROGRESS) {
+              items.push({
+                id: `${s.bookingId}-active`,
+                title: `Ca đang thực hiện · ${s.serviceName}`,
+                subtitle: `${s.startTime} – ${s.endTime} · ${s.patientName}`,
+                to: `/shifts/${s.bookingId}/execute`,
+              });
+            } else if (s.executionStatus === ExecutionStatus.CONFIRMED) {
+              items.push({
+                id: `${s.bookingId}-upcoming`,
+                title: `Ca trực sắp tới · ${s.serviceName}`,
+                subtitle: `${s.startTime} – ${s.endTime} · Đơn ${s.bookingCode}`,
+                to: `/shifts/${s.bookingId}`,
+              });
+            }
+          }
+        }
+
         setNotifications(items);
       })
       .catch(() => {
@@ -235,8 +271,31 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                   to={tab.path}
                   className={active ? 'active' : ''}
                   aria-current={active ? 'page' : undefined}
+                  style={{ display: 'inline-flex', alignItems: 'center' }}
                 >
-                  {tab.label}
+                  <span>{tab.label}</span>
+                  {tab.path === '/wallet' && unpaidCommissionCount > 0 && (
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: 18,
+                        height: 18,
+                        borderRadius: 999,
+                        fontSize: 11,
+                        fontWeight: 800,
+                        marginLeft: 6,
+                        padding: '0 5px',
+                        background: hasUrgentCommission ? '#DC2626' : '#D97706',
+                        color: '#ffffff',
+                        lineHeight: 1,
+                      }}
+                      title={`${unpaidCommissionCount} khoản hoa hồng cần nộp`}
+                    >
+                      {unpaidCommissionCount}
+                    </span>
+                  )}
                 </Link>
               );
             }
@@ -362,9 +421,25 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                 <span className="mi"><FileText size={18} /></span>
                 Văn bằng &amp; GPHN
               </Link>
-              <Link to="/wallet" role="menuitem">
-                <span className="mi"><Wallet size={18} /></span>
-                Ví &amp; thu nhập
+              <Link to="/wallet" role="menuitem" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span className="mi"><Wallet size={18} /></span>
+                  <span>Ví &amp; thu nhập</span>
+                </div>
+                {unpaidCommissionCount > 0 && (
+                  <span
+                    style={{
+                      fontSize: 11.5,
+                      fontWeight: 800,
+                      background: hasUrgentCommission ? '#FEE2E2' : '#FEF3C7',
+                      color: hasUrgentCommission ? '#DC2626' : '#B45309',
+                      padding: '2px 8px',
+                      borderRadius: 999,
+                    }}
+                  >
+                    {unpaidCommissionCount} nợ hoa hồng
+                  </span>
+                )}
               </Link>
               <Link to="/trust-score" role="menuitem">
                 <span className="mi"><Star size={18} /></span>
@@ -411,8 +486,28 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                   className={active ? 'active' : ''}
                   aria-current={active ? 'page' : undefined}
                   onClick={() => setMobileNavOpen(false)}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
                 >
-                  {tab.label}
+                  <span>{tab.label}</span>
+                  {tab.path === '/wallet' && unpaidCommissionCount > 0 && (
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: 18,
+                        height: 18,
+                        borderRadius: 999,
+                        fontSize: 11,
+                        fontWeight: 800,
+                        padding: '0 6px',
+                        background: hasUrgentCommission ? '#DC2626' : '#D97706',
+                        color: '#ffffff',
+                      }}
+                    >
+                      {unpaidCommissionCount} nợ hoa hồng
+                    </span>
+                  )}
                 </Link>
               );
             }

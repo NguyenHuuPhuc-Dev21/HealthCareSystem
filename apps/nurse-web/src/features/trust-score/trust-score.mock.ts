@@ -4,6 +4,26 @@ import type {
 } from '@healthcare-system/shared';
 
 const TRUST_SCORE_STORAGE_KEY = 'carenest_mock_trust_score_v1';
+const WALLET_STORAGE_KEY = 'carenest_mock_wallet_v2';
+
+function syncTrustScoreSuspension(score: number): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = localStorage.getItem(WALLET_STORAGE_KEY);
+    if (!raw) return;
+    const walletState = JSON.parse(raw);
+    if (score < 60) {
+      walletState.isSuspended = true;
+      walletState.suspendedReason = 'TRUST_SCORE_LOW';
+    } else if (walletState.suspendedReason === 'TRUST_SCORE_LOW') {
+      walletState.isSuspended = false;
+      walletState.suspendedReason = null;
+    }
+    localStorage.setItem(WALLET_STORAGE_KEY, JSON.stringify(walletState));
+  } catch {
+    // ignore
+  }
+}
 
 interface MockTrustScoreState {
   score: number;
@@ -134,6 +154,7 @@ export function saveTrustScoreState(state: MockTrustScoreState): void {
   } catch {
     // ignore
   }
+  syncTrustScoreSuspension(state.score);
 }
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -141,6 +162,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export async function mockGetTrustScore(): Promise<TrustScoreDto> {
   await delay(180);
   const state = loadTrustScoreState();
+  syncTrustScoreSuspension(state.score);
   return {
     score: state.score,
     ratingAvg: state.ratingAvg,
@@ -162,7 +184,26 @@ export function mockSetScoreForTesting(score: number): void {
   saveTrustScoreState(state);
 }
 
+export function mockAddPositiveRatingRecovery(bookingCode?: string, note?: string): void {
+  const state = loadTrustScoreState();
+  if (state.score >= 100) return;
+
+  const newScore = Math.min(100, state.score + 2);
+  state.score = newScore;
+  const newItem = {
+    id: `tsh-${Date.now()}`,
+    delta: 2,
+    reason: 'GOOD_RATING_RECOVERY' as const,
+    bookingCode: bookingCode || 'HC-2026-MOCK',
+    note: note || 'Ca quyết toán, được đánh giá tốt (≥ 4★)',
+    createdAt: new Date().toISOString(),
+  };
+  state.history = [newItem, ...state.history];
+  saveTrustScoreState(state);
+}
+
 export function mockResetTrustScore(): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(TRUST_SCORE_STORAGE_KEY, JSON.stringify(INITIAL_TRUST_SCORE_STATE));
+  syncTrustScoreSuspension(INITIAL_TRUST_SCORE_STATE.score);
 }

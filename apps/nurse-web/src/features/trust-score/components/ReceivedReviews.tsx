@@ -31,6 +31,15 @@ export const ReceivedReviews: React.FC<ReceivedReviewsProps> = ({
   onOpenRateModal,
 }) => {
   const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
+  const [ratingFilter, setRatingFilter] = useState<'all' | '5' | '4' | 'other' | 'hidden'>('all');
+
+  const filteredReviews = reviews.filter((r) => {
+    if (ratingFilter === '5') return r.isVisible && r.rating === 5;
+    if (ratingFilter === '4') return r.isVisible && r.rating === 4;
+    if (ratingFilter === 'other') return r.isVisible && r.rating < 4;
+    if (ratingFilter === 'hidden') return !r.isVisible;
+    return true;
+  });
 
   const renderStars = (rating: number) => {
     return (
@@ -143,6 +152,96 @@ export const ReceivedReviews: React.FC<ReceivedReviewsProps> = ({
       {/* Tab Content */}
       {activeTab === 'received' ? (
         <div>
+          {/* Bộ lọc theo số sao */}
+          {!loading && reviews.length > 0 && (
+            <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => setRatingFilter('all')}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: 8,
+                  fontSize: 12.5,
+                  fontWeight: 700,
+                  background: ratingFilter === 'all' ? 'var(--brand-jade, #166B58)' : '#F1F5F9',
+                  color: ratingFilter === 'all' ? '#ffffff' : 'var(--ink-secondary, #64748B)',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Tất cả ({reviews.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setRatingFilter('5')}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: 8,
+                  fontSize: 12.5,
+                  fontWeight: 700,
+                  background: ratingFilter === '5' ? '#D97706' : '#FEF3C7',
+                  color: ratingFilter === '5' ? '#ffffff' : '#92400E',
+                  border: ratingFilter === '5' ? 'none' : '1px solid #FDE68A',
+                  cursor: 'pointer',
+                }}
+              >
+                5★ ({reviews.filter((r) => r.isVisible && r.rating === 5).length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setRatingFilter('4')}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: 8,
+                  fontSize: 12.5,
+                  fontWeight: 700,
+                  background: ratingFilter === '4' ? '#D97706' : '#FEF3C7',
+                  color: ratingFilter === '4' ? '#ffffff' : '#92400E',
+                  border: ratingFilter === '4' ? 'none' : '1px solid #FDE68A',
+                  cursor: 'pointer',
+                }}
+              >
+                4★ ({reviews.filter((r) => r.isVisible && r.rating === 4).length})
+              </button>
+              {reviews.some((r) => r.isVisible && r.rating < 4) && (
+                <button
+                  type="button"
+                  onClick={() => setRatingFilter('other')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 8,
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    background: ratingFilter === 'other' ? '#64748B' : '#F1F5F9',
+                    color: ratingFilter === 'other' ? '#ffffff' : '#475569',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  ≤ 3★ ({reviews.filter((r) => r.isVisible && r.rating < 4).length})
+                </button>
+              )}
+              {reviews.some((r) => !r.isVisible) && (
+                <button
+                  type="button"
+                  onClick={() => setRatingFilter('hidden')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 8,
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    background: ratingFilter === 'hidden' ? '#B45309' : '#FFFBEB',
+                    color: ratingFilter === 'hidden' ? '#ffffff' : '#92400E',
+                    border: ratingFilter === 'hidden' ? 'none' : '1px solid #FDE68A',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Đang ẩn ({reviews.filter((r) => !r.isVisible).length})
+                </button>
+              )}
+            </div>
+          )}
+
           {loading ? (
             <div style={{ textAlign: 'center', padding: '36px 0', color: 'var(--ink-muted)' }}>
               Đang tải danh sách đánh giá...
@@ -162,8 +261,20 @@ export const ReceivedReviews: React.FC<ReceivedReviewsProps> = ({
                 Đánh giá từ khách hàng sau khi hoàn tất ca trực sẽ hiển thị tại đây.
               </p>
             </div>
+          ) : filteredReviews.length === 0 ? (
+            <div
+              className="card"
+              style={{
+                textAlign: 'center',
+                padding: '30px 16px',
+                color: 'var(--ink-muted)',
+                fontSize: 14.5,
+              }}
+            >
+              Không có đánh giá nào phù hợp với bộ lọc đã chọn.
+            </div>
           ) : (
-            reviews.map((rev) => {
+            filteredReviews.map((rev) => {
               if (!rev.isVisible) {
                 // Blind Review hidden state
                 return (

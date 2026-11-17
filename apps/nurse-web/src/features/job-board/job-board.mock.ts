@@ -462,11 +462,41 @@ export async function mockFetchRadarJob(): Promise<RadarJob | null> {
     return delay(loadStoredRadar(), 200);
 }
 
+function checkAccountSuspended(): string | null {
+    if (typeof window === 'undefined') return null;
+    try {
+        const raw = localStorage.getItem('carenest_mock_wallet_v2');
+        if (!raw) return null;
+        const walletState = JSON.parse(raw);
+        if (walletState.isSuspended) {
+            if (walletState.suspendedReason === 'COMMISSION_OVERDUE') {
+                return 'Tài khoản của bạn đang bị tạm khóa nhận ca do quá hạn nộp hoa hồng ca tiền mặt (24 giờ). Vui lòng nộp hoa hồng tại mục Ví để được mở lại nhận ca.';
+            }
+            if (walletState.suspendedReason === 'TRUST_SCORE_LOW') {
+                return 'Tài khoản của bạn đang bị tạm khóa nhận ca do điểm TrustScore dưới 60 điểm. Vui lòng liên hệ Admin để được hướng dẫn hỗ trợ.';
+            }
+            return 'Tài khoản của bạn hiện đang bị tạm khóa nhận ca mới.';
+        }
+    } catch {
+        // ignore
+    }
+    return null;
+}
+
 export async function mockAcceptJob(
     jobId: string,
     nurseTier: string,
     depositBalance = DEFAULT_MIN_NURSE_DEPOSIT_VND,
 ): Promise<ClaimJobResult> {
+    const suspensionMsg = checkAccountSuspended();
+    if (suspensionMsg) {
+        return delay({
+            success: false,
+            message: suspensionMsg,
+            errorCode: 'ACCOUNT_SUSPENDED',
+        });
+    }
+
     const jobs = loadStoredJobs();
     const target = jobs.find((j) => j.id === jobId);
 
@@ -518,6 +548,15 @@ export async function mockAcceptDirectInvite(
     _nurseTier: string,
     depositBalance = DEFAULT_MIN_NURSE_DEPOSIT_VND,
 ): Promise<ClaimJobResult> {
+    const suspensionMsg = checkAccountSuspended();
+    if (suspensionMsg) {
+        return delay({
+            success: false,
+            message: suspensionMsg,
+            errorCode: 'ACCOUNT_SUSPENDED',
+        });
+    }
+
     const invite = loadStoredInvite();
     if (!invite || invite.bookingId !== bookingId) {
         return delay({
@@ -564,6 +603,15 @@ export async function mockAcceptRadar(
     nurseTier: string,
     depositBalance = DEFAULT_MIN_NURSE_DEPOSIT_VND,
 ): Promise<ClaimJobResult> {
+    const suspensionMsg = checkAccountSuspended();
+    if (suspensionMsg) {
+        return delay({
+            success: false,
+            message: suspensionMsg,
+            errorCode: 'ACCOUNT_SUSPENDED',
+        });
+    }
+
     const radar = loadStoredRadar();
     if (!radar || radar.id !== jobId) {
         return delay({

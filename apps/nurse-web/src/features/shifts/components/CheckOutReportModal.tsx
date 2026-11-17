@@ -17,6 +17,8 @@ import {
 } from '@healthcare-system/shared';
 import { Modal, ModalCloseButton } from '../../../components';
 import { formatVND } from '../../../lib/formatters';
+import { USE_MOCK_WALLET } from '../../../lib/mock-flags';
+import { mockAddCashCommissionDebt } from '../../commission-payment/commission-payment.mock';
 
 interface CheckOutReportModalProps {
   shift: ShiftExecutionState;
@@ -87,6 +89,14 @@ export const CheckOutReportModal: React.FC<CheckOutReportModalProps> = ({
 
       if (res.success && res.data) {
         if (isCash) {
+          if (USE_MOCK_WALLET) {
+            mockAddCashCommissionDebt({
+              bookingId: shift.bookingId,
+              bookingCode: shift.bookingCode,
+              serviceName: shift.serviceName,
+              totalAmount: shift.totalAmount,
+            });
+          }
           setCompletedShift(res.data);
           setShowCashPrompt(true);
         } else {
