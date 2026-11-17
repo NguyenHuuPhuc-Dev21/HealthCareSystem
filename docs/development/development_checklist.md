@@ -186,10 +186,10 @@
 ## Phase 4 — SHIFT: Shift Execution, Anti-Fraud Check-In & SOS [MVP]
 
 ### FE-1
-- [ ] Patient Web — Real-time shift tracking: live status, check-in selfie photo for visual identity verification.
-- [ ] Patient Web — Real-time vital signs and clinical care log viewer.
-- [ ] Patient Web — Shift extension request: select 1-hour increments, top up escrow for bank-transfer bookings.
-- [ ] Patient Web — Real-time emergency SOS broadcast banner for active family bookings.
+- [x] Patient Web — Real-time shift tracking: live status, check-in selfie photo for visual identity verification.
+- [x] Patient Web — Real-time vital signs and clinical care log viewer.
+- [x] Patient Web — Shift extension request: select 1-hour increments, top up escrow for bank-transfer bookings.
+- [x] Patient Web — Real-time emergency SOS broadcast banner for active family bookings.
 
 ### FE-2 (Frontend Lead)
 - [x] Nurse Mobile App — Dual check-in: mock location detection blocked, direct hardware camera selfie capture, photo gallery upload disabled.
