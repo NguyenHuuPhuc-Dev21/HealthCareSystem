@@ -230,9 +230,9 @@
 ## Phase 5 — PAY: Wallets, Escrow, Settlement, Deposit & Withdrawals [MVP]
 
 ### FE-1
-- [ ] Patient Web — Prepaid bank transfer flow: displays VietQR/checkout link with 15-minute countdown.
-- [ ] Patient Web — Platform escrow holding indicator for prepaid bookings.
-- [ ] Patient Web — Transparent refund tracking view mapped to §5.2 SLA cancellation matrix scenarios.
+- [x] Patient Web — Prepaid bank transfer flow: displays VietQR/checkout link with 15-minute countdown.
+- [x] Patient Web — Platform escrow holding indicator for prepaid bookings.
+- [x] Patient Web — Transparent refund tracking view mapped to §5.2 SLA cancellation matrix scenarios.
 
 ### FE-2
 - [ ] Nurse Web + Mobile App — Wallet dashboard displaying 3 strictly segregated balances: Available (`available_balance`), Escrow Locked (`escrow_locked_balance`), Deposit (`deposit_balance`) (Nurse Web: [x], Mobile: [ ]).

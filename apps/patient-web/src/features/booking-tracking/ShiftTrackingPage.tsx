@@ -8,6 +8,9 @@ import { formatDateTime } from '../../lib/formatters';
 import { usePolling } from '../../lib/usePolling';
 import { useAuth } from '../auth';
 import { EXECUTION_LABEL } from '../booking/booking.types';
+import { getBooking } from '../booking/booking.api';
+import type { Booking } from '../booking/booking.types';
+import { EscrowIndicator } from '../payments/components/EscrowIndicator';
 import { getBookingTracking, raiseSos } from './booking-tracking.api';
 import type { BookingTracking } from './booking-tracking.types';
 import { EXTENSION_WINDOW_MINUTES } from './booking-tracking.types';
@@ -54,13 +57,15 @@ export function ShiftTrackingPage() {
 
   const [load, setLoad] = useState<Load>({ state: 'loading' });
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
+  const [booking, setBooking] = useState<Booking | null>(null);
   const [extendOpen, setExtendOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [sosBusy, setSosBusy] = useState(false);
   const [sosError, setSosError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    const res = await getBookingTracking(id);
+    const [res, bookingRes] = await Promise.all([getBookingTracking(id), getBooking(id)]);
+    if (bookingRes.success) setBooking(bookingRes.data);
     if (res.success) {
       setLoad({ state: 'ready', data: res.data });
       setUpdatedAt(new Date());
@@ -186,6 +191,8 @@ export function ShiftTrackingPage() {
             </section>
           </div>
         )}
+
+        {booking && <EscrowIndicator booking={{ ...booking, totalAmount: booking.pricing.totalAmount }} />}
 
         <ExtensionsCard bookingId={data.bookingId} extensions={data.extensions} onChanged={refresh} />
 
