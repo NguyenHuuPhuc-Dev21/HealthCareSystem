@@ -15,4 +15,5 @@ export * from './contracts/trust-score.contracts';
 export * from './contracts/review.contracts';
 export * from './contracts/dispute.contracts';
 export * from './contracts/chat.contracts';
+export * from './contracts/notification.contracts';
 export * from './chat/contact-detector';

@@ -12,21 +12,13 @@ import {
   Wallet,
   X,
 } from 'lucide-react';
-import { ExecutionStatus } from '@healthcare-system/shared';
 import { useAuth } from '../../features/auth/AuthContext';
-import { getMyShifts } from '../../features/shifts/shift.api';
+import { useNotifications } from '../../features/notifications/NotificationContext';
+import { getNotificationRoute } from '../../features/notifications/notification-routes';
 import { getCommissionDebts } from '../../features/commission-payment/commission-payment.api';
 import { maskPhone } from '../../lib/formatters';
 import { DepositWarningBanner } from '../DepositWarningBanner';
 import { CommissionOverdueBanner } from '../CommissionOverdueBanner';
-
-interface HeaderNotification {
-  id: string;
-  title: string;
-  subtitle: string;
-  to: string;
-  urgent?: boolean;
-}
 
 export function LogoMark({ size = 33 }: { size?: number }) {
   return (
@@ -103,8 +95,7 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [notifications, setNotifications] = useState<HeaderNotification[]>([]);
-  const [notifLoading, setNotifLoading] = useState(true);
+  const { notifications, unreadCount, loading: notifLoading, markAsRead } = useNotifications();
   const [unpaidCommissionCount, setUnpaidCommissionCount] = useState<number>(0);
   const [hasUrgentCommission, setHasUrgentCommission] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -116,17 +107,13 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
   const tier = profile?.tier === 'TIER_2_SPECIALIST' ? 'Cấp 2' : 'Cấp 1';
   const tierDesc = profile?.tier === 'TIER_2_SPECIALIST' ? 'Điều dưỡng Cấp 2 — Chuyên môn' : 'Điều dưỡng Cấp 1 — Cơ bản';
 
-  // Aggregate real notifications from shifts API & commission debts API
+  // Check commission debts for Wallet navigation badge
   useEffect(() => {
     let alive = true;
-    setNotifLoading(true);
 
-    Promise.all([getMyShifts(), getCommissionDebts()])
-      .then(([shiftsRes, commissionRes]) => {
+    getCommissionDebts()
+      .then((commissionRes) => {
         if (!alive) return;
-        const items: HeaderNotification[] = [];
-
-        // 1. Kiểm tra nợ hoa hồng ca tiền mặt
         if (commissionRes.success && commissionRes.data) {
           const unpaid = commissionRes.data.filter((d) => d.status === 'UNPAID' || d.status === 'OVERDUE');
           setUnpaidCommissionCount(unpaid.length);
@@ -136,64 +123,15 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
               (d.status === 'UNPAID' && new Date(d.dueAt).getTime() - Date.now() < 2 * 3600 * 1000)
           );
           setHasUrgentCommission(urgent);
-
-          const overdue = commissionRes.data.filter((d) => d.status === 'OVERDUE');
-          if (overdue.length > 0) {
-            items.push({
-              id: 'comm-overdue',
-              title: `Quá hạn nộp hoa hồng (${overdue.length} ca)`,
-              subtitle: 'Tài khoản đang bị tạm khóa nhận ca · Bấm để nộp ngay',
-              to: '/wallet/commission',
-              urgent: true,
-            });
-          } else if (unpaid.length > 0) {
-            items.push({
-              id: 'comm-unpaid',
-              title: `Có ${unpaid.length} ca tiền mặt cần nộp hoa hồng 15%`,
-              subtitle: 'Đồng hồ 24h đang đếm ngược · Nộp qua VietQR',
-              to: '/wallet/commission',
-              urgent: urgent,
-            });
-          }
         }
-
-        // 2. Ca trực
-        if (shiftsRes.success && shiftsRes.data) {
-          for (const s of shiftsRes.data) {
-            if (s.executionStatus === ExecutionStatus.IN_PROGRESS && !s.assessmentCompleted) {
-              items.push({
-                id: `${s.bookingId}-assess`,
-                title: `Cần đánh giá 30 phút · ${s.serviceName}`,
-                subtitle: `Đơn ${s.bookingCode} · Người bệnh ${s.patientName}`,
-                to: `/shifts/${s.bookingId}/execute`,
-                urgent: true,
-              });
-            } else if (s.executionStatus === ExecutionStatus.IN_PROGRESS) {
-              items.push({
-                id: `${s.bookingId}-active`,
-                title: `Ca đang thực hiện · ${s.serviceName}`,
-                subtitle: `${s.startTime} – ${s.endTime} · ${s.patientName}`,
-                to: `/shifts/${s.bookingId}/execute`,
-              });
-            } else if (s.executionStatus === ExecutionStatus.CONFIRMED) {
-              items.push({
-                id: `${s.bookingId}-upcoming`,
-                title: `Ca trực sắp tới · ${s.serviceName}`,
-                subtitle: `${s.startTime} – ${s.endTime} · Đơn ${s.bookingCode}`,
-                to: `/shifts/${s.bookingId}`,
-              });
-            }
-          }
-        }
-
-        setNotifications(items);
       })
       .catch(() => {
-        if (alive) setNotifications([]);
-      })
-      .finally(() => {
-        if (alive) setNotifLoading(false);
+        if (alive) {
+          setUnpaidCommissionCount(0);
+          setHasUrgentCommission(false);
+        }
       });
+
     return () => {
       alive = false;
     };
@@ -317,18 +255,18 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
           <button
             type="button"
             className="bell"
-            aria-label={`Thông báo${notifications.length > 0 ? ` (${notifications.length} mục mới)` : ''}`}
+            aria-label={`Thông báo${unreadCount > 0 ? ` (${unreadCount} mục chưa đọc)` : ''}`}
             aria-expanded={notifOpen}
             aria-controls="nurse-notif-popover"
-            title="Thông báo ca trực"
+            title="Trung tâm thông báo"
             onClick={() => {
               setNotifOpen((v) => !v);
               setMenuOpen(false);
             }}
           >
             <Bell size={20} aria-hidden="true" />
-            {notifications.length > 0 && (
-              <span className="dot tabular-nums">{notifications.length}</span>
+            {unreadCount > 0 && (
+              <span className="dot tabular-nums">{unreadCount > 99 ? '99+' : unreadCount}</span>
             )}
           </button>
 
@@ -337,50 +275,116 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
               id="nurse-notif-popover"
               className="notif-popover"
               role="region"
-              aria-label="Thông báo ca trực"
+              aria-label="Trung tâm thông báo"
             >
               <div className="notif-popover__head">
-                <strong style={{ fontSize: 15.5, color: 'var(--ink-primary)' }}>
-                  Thông báo ca trực
-                </strong>
-                <span className="status-pill status-pill--neutral tabular-nums">
-                  {notifications.length} mục
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <strong style={{ fontSize: 15, color: 'var(--ink-primary)' }}>
+                    Thông báo
+                  </strong>
+                  {unreadCount > 0 && (
+                    <span className="status-pill status-pill--rose tabular-nums" style={{ fontSize: 11.5, padding: '1px 6px' }}>
+                      {unreadCount} mới
+                    </span>
+                  )}
+                </div>
+                <Link
+                  to="/notifications"
+                  className="notif-popover__view-all"
+                  onClick={() => setNotifOpen(false)}
+                >
+                  Xem tất cả →
+                </Link>
               </div>
 
               {notifLoading ? (
-                <p style={{ margin: '8px 6px', fontSize: 14, color: 'var(--ink-secondary)' }}>
+                <p style={{ margin: '12px 8px', fontSize: 13.5, color: 'var(--ink-secondary)' }}>
                   Đang tải thông báo...
                 </p>
               ) : notifications.length === 0 ? (
-                <p style={{ margin: '8px 6px', fontSize: 14, color: 'var(--ink-secondary)' }}>
-                  Hiện chưa có thông báo ca trực nào cần xử lý.
+                <p style={{ margin: '12px 8px', fontSize: 13.5, color: 'var(--ink-secondary)' }}>
+                  Hiện chưa có thông báo nào.
                 </p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  {notifications.map((n) => (
-                    <Link
-                      key={n.id}
-                      to={n.to}
-                      className="notif-item"
-                      onClick={() => setNotifOpen(false)}
-                    >
+                  {notifications.slice(0, 5).map((n) => {
+                    const isUnread = !n.readAt;
+                    const isHigh = n.priority === 'HIGH';
+                    return (
                       <div
-                        style={{
-                          fontWeight: 700,
-                          fontSize: 14.5,
-                          color: n.urgent ? 'var(--alert-crimson)' : 'var(--ink-primary)',
+                        key={n.id}
+                        className={`notif-item ${isUnread ? 'notif-item--unread' : ''}`}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => {
+                          if (isUnread) markAsRead(n.id);
+                          setNotifOpen(false);
+                          navigate(getNotificationRoute(n));
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            if (isUnread) markAsRead(n.id);
+                            setNotifOpen(false);
+                            navigate(getNotificationRoute(n));
+                          }
                         }}
                       >
-                        {n.title}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6 }}>
+                          <span
+                            style={{
+                              fontWeight: isUnread ? 700 : 600,
+                              fontSize: 14,
+                              color: isHigh ? 'var(--alert-crimson)' : 'var(--ink-primary)',
+                              lineHeight: 1.35,
+                            }}
+                          >
+                            {n.title}
+                          </span>
+                          {isUnread && (
+                            <span
+                              style={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: '50%',
+                                background: 'var(--alert-crimson)',
+                                flexShrink: 0,
+                                marginTop: 4,
+                              }}
+                              title="Chưa đọc"
+                            />
+                          )}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 13,
+                            color: 'var(--ink-secondary)',
+                            marginTop: 3,
+                            lineHeight: 1.35,
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          {n.body}
+                        </div>
                       </div>
-                      <div style={{ fontSize: 13.5, color: 'var(--ink-secondary)', marginTop: 2 }}>
-                        {n.subtitle}
-                      </div>
-                    </Link>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
+
+              <div className="notif-popover__foot">
+                <Link
+                  to="/notifications"
+                  className="btn btn-secondary btn-sm"
+                  style={{ width: '100%', justifyContent: 'center', fontSize: 13, minHeight: 32 }}
+                  onClick={() => setNotifOpen(false)}
+                >
+                  Mở trung tâm thông báo
+                </Link>
+              </div>
             </div>
           )}
 
