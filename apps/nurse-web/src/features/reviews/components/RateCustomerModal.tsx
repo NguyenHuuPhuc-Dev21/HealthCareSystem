@@ -186,7 +186,7 @@ export const RateCustomerModal: React.FC<RateCustomerModalProps> = ({
               </div>
               <div style={{ marginTop: 8 }}>
                 <Link
-                  to={`/disputes/new?bookingId=${bookingId}&bookingCode=${bookingCode}`}
+                  to={`/shifts/${bookingId}`}
                   className="btn btn-secondary btn-sm"
                   style={{
                     display: 'inline-flex',
