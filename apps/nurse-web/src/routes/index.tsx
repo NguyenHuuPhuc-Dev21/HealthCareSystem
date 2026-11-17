@@ -18,6 +18,8 @@ import { WalletPage } from '../features/wallet/WalletPage';
 import { WithdrawPage } from '../features/wallet/WithdrawPage';
 import { CommissionPaymentPage } from '../features/commission-payment/CommissionPaymentPage';
 import { TrustScorePage } from '../features/trust-score/TrustScorePage';
+import { DisputeListPage } from '../features/disputes/DisputeListPage';
+import { DisputeDetailPage } from '../features/disputes/DisputeDetailPage';
 import { NurseLayout } from '../components/layout/NurseLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 
@@ -204,6 +206,26 @@ export const AppRoutes: React.FC = () => {
               <ProtectedRoute zone="active">
                 <NurseLayout>
                   <TrustScorePage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/disputes"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <DisputeListPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/disputes/:id"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <DisputeDetailPage />
                 </NurseLayout>
               </ProtectedRoute>
             }

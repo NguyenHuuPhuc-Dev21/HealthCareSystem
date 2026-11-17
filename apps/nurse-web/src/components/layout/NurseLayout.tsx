@@ -6,6 +6,7 @@ import {
   FileText,
   LogOut,
   Menu,
+  Scale,
   Star,
   User,
   Wallet,
@@ -444,6 +445,10 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
               <Link to="/trust-score" role="menuitem">
                 <span className="mi"><Star size={18} /></span>
                 Đánh giá &amp; TrustScore
+              </Link>
+              <Link to="/disputes" role="menuitem">
+                <span className="mi"><Scale size={18} /></span>
+                Khiếu nại &amp; Phản hồi
               </Link>
 
               <div className="divider" />
