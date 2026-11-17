@@ -66,6 +66,7 @@ export const StarInput: React.FC<StarInputProps> = ({ value, onChange, disabled 
               key={star}
               type="button"
               role="radio"
+              tabIndex={-1}
               aria-checked={value === star}
               aria-label={`${star} trên 5 sao`}
               disabled={disabled}

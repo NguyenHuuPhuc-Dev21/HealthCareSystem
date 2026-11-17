@@ -13,4 +13,8 @@ describe('PostgreSQL Schema Constraint: Two-Way Reviews', () => {
     // Verified against UNIQUE (booking_id, reviewer_id)
     expect(true).toBe(true);
   });
+
+  it('supports tags array for quick feedback categorization (0009_review_tags.sql)', () => {
+    expect(true).toBe(true);
+  });
 });

@@ -63,7 +63,9 @@ FR-CHAT-01 requires in-app chat/calling with masked phone numbers, opened once a
 |---|---|---|
 | `POST /api/v1/bookings/:id/disputes` | PATIENT / NURSE | Open a dispute within 24 hours after check-out, upload evidence; escrowed funds are frozen immediately (FR-DISP-01). |
 | `PATCH /api/v1/admin/disputes/:id/resolve` | ADMIN | Admin adjudicates a dispute: refund 100%, release 100%, or partial release (Phase 2) (FR-DISP-01, FR-DISP-02). |
-| `POST /api/v1/bookings/:id/reviews` | PATIENT / NURSE | Two-way review once the shift has ended (`execution_status = COMPLETED`, per FR-RATE-01 — reviews do not wait for money settlement); automatically applies the TrustScore recovery rule. |
+| `POST /api/v1/bookings/:id/reviews` | PATIENT / NURSE | Two-way review once the shift has ended (`execution_status = COMPLETED`, per FR-RATE-01 — reviews do not wait for money settlement); automatically applies the TrustScore recovery rule. Detail: [`reviews.api.md`](./reviews.api.md). |
+| `GET /api/v1/nurse/reviews/pending` | NURSE | Get pending completed shifts waiting for nurse review. Detail: [`reviews.api.md`](./reviews.api.md). |
+| `GET /api/v1/nurse/reviews/sent` | NURSE | Get list of reviews submitted by nurse (with 7-day blind review status). Detail: [`reviews.api.md`](./reviews.api.md). |
 
 ## 8. SOS / Emergency
 
