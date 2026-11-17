@@ -43,10 +43,8 @@ Shifts already `IN_PROGRESS`, non-invasive shifts and shifts that already starte
 ## Notes for the team
 - **Phase 2/3 callers (nurse-search BE-3, matching-radar, job-board, bookings):** check Tier 2 with
   `isTier2ValidOn(nurse, serviceDate)` — the `tier` column alone can lag up to one day behind the GPHN expiry.
-- **Phase 3 (matching-radar):** register the real `matching-radar.redispatch` handler, then delete
-  `registerRedispatchPlaceholder` and its call in `worker.ts`. The handler must re-check the booking is still
-  `MATCHING` with no nurse, and must not offer it to `releasedNurseId`. As a safety net the radar should also pick up
-  `MATCHING` bookings that have no open offer.
+- **Redispatch:** `matching-radar.redispatch` is handled by `matching-radar` since Phase 3 (urgent bookings go back to
+  Radar without the released nurse; later ones stay on the Job Board).
 - **core/middleware `requireNurseEligibility`** reads the `tier` column only; once Phase 3 accepts invasive shifts it
   should also apply `isTier2ValidOn` for the shift date.
 - **Notifications:** `core/notifications` has no shared singleton yet, so `worker.ts` does not pass `notify`.

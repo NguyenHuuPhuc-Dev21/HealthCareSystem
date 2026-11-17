@@ -6,6 +6,14 @@
 export const DEFAULT_PLATFORM_COMMISSION_RATE = 0.15; // 15% (SRS §5.1)
 export const DEFAULT_MIN_NURSE_DEPOSIT_VND = 300_000;  // 300,000 VND (SRS §5.1, FR-PAY-03)
 
+// Nurse deposit grace period, refund and appeal (ADR-0004, migration 0008) — defaults only; runtime values come from system_configs
+export const DEFAULT_DEPOSIT_GRACE_MAX_SHIFTS = 3;          // transfer-paid shifts while deposit is short
+export const DEFAULT_DEPOSIT_GRACE_DAYS = 30;               // days from first ACTIVE
+export const DEFAULT_DEPOSIT_WITHHOLD_RATE = 0.30;          // share of each net payout withheld into the deposit
+export const DEFAULT_DEPOSIT_REFUND_HOLD_DAYS = 7;          // dispute-free days after last check-out (SRS §2.3)
+export const DEFAULT_DEPOSIT_REFUND_SLA_WORKING_DAYS = 5;   // payout SLA once READY
+export const DEFAULT_PENALTY_APPEAL_DAYS = 3;               // window to contest a deposit penalty
+
 export const DEFAULT_PAYMENT_TIMEOUT_MINUTES = 15;     // 15-minute hold window (SRS §5.1)
 export const DEFAULT_SETTLEMENT_COOLING_HOURS = 24;    // 24 hours post check-out (SRS §5.1)
 export const DEFAULT_RECORD_ACCESS_EXPIRY_HOURS = 12;  // 12 hours post check-out (Decree 13 / FR-PRIV-01)
@@ -85,3 +93,12 @@ export function getVitalSignsWarnings(input: VitalSignsThresholdInput): string[]
 
   return warnings;
 }
+
+// ---- Pricing & booking definitions (BE-2 Phase 3 · FR-BOOK-01/02, BR-03 §2.1–2.2) ----
+// Definitions fixed by the SRS text (not tunable rates; the rates themselves live in system_configs).
+export const NIGHT_SHIFT_START_HOUR = 22;              // night hours 22:00 …
+export const NIGHT_SHIFT_END_HOUR = 6;                 // … to 06:00 the next morning (Vietnam time)
+export const HEAVY_PATIENT_WEIGHT_KG = 80;             // weight_kg >= 80 or BEDRIDDEN → heavy-patient surcharge
+export const PRESCRIPTION_MAX_AGE_DAYS = 7;            // medical order issued within the last 7 days (FR-BOOK-02)
+export const SHIFT_DURATION_HOURS = [4, 8, 12, 24] as const; // bookable shift lengths (BR-03 §2.1)
+export const TASK_MAX_DURATION_HOURS = 4;              // upper bound for one task-based (PER_TIME) visit

@@ -27,7 +27,7 @@ describe("privacy-consent — xem bệnh án (integration)", () => {
   beforeAll(async () => {
     pool = createTestPool();
     const { rows } = await pool.query(
-      "SELECT id FROM service_categories WHERE is_invasive = TRUE ORDER BY code LIMIT 1",
+      "SELECT id FROM service_categories WHERE is_invasive = TRUE AND NOT is_prohibited ORDER BY code LIMIT 1",
     );
     invasiveServiceId = rows[0].id;
   });

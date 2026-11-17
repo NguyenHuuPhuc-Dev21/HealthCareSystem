@@ -20,7 +20,7 @@ describe("privacy-consent — job dọn dữ liệu quá hạn lưu trữ (integ
   beforeAll(async () => {
     pool = createTestPool();
     const { rows } = await pool.query(
-      "SELECT id FROM service_categories ORDER BY code LIMIT 1",
+      "SELECT id FROM service_categories WHERE NOT is_prohibited ORDER BY code LIMIT 1",
     );
     serviceId = rows[0].id;
   });

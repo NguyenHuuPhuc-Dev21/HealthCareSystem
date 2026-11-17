@@ -13,6 +13,10 @@ import { createCredentialReviewRouter } from './modules/credential-review/creden
 import { getCredentialReviewService } from './modules/credential-review/credential-review.service';
 import { createNurseOnboardingRouter } from './modules/nurse-onboarding/nurse-onboarding.routes';
 import { getNurseOnboardingService } from './modules/nurse-onboarding/nurse-onboarding.service';
+import { createBookingsRouter } from './modules/bookings/bookings.routes';
+import { getBookingsService } from './modules/bookings/bookings.service';
+import { createMatchingRadarRouter } from './modules/matching-radar/matching-radar.routes';
+import { getMatchingRadarService } from './modules/matching-radar/matching-radar.service';
 import { createNurseAvailabilitiesRouter } from './modules/nurse-availabilities/nurse-availabilities.routes';
 import { getNurseAvailabilitiesService } from './modules/nurse-availabilities/nurse-availabilities.service';
 import { createPatientProfilesRouter } from './modules/patient-profiles/patient-profiles.routes';
@@ -42,6 +46,8 @@ function buildApiRouter(): Router {
   api.use(createPrivacyConsentRouter(getPrivacyConsentService())); // BE-3 · Phase 1 · privacy-consent
   api.use(createPatientProfilesRouter(getPatientProfilesService())); // BE-2 · Phase 1 · patient-profiles
   api.use(createNurseAvailabilitiesRouter(getNurseAvailabilitiesService())); // BE-2 · Phase 2 · nurse-availabilities
+  api.use(createBookingsRouter(getBookingsService())); // BE-2 · Phase 3 · bookings + pricing-engine
+  api.use(createMatchingRadarRouter(getMatchingRadarService())); // BE-2 · Phase 3 · matching-radar
 
   return api;
 }

@@ -38,7 +38,11 @@ This catalogue lists the core endpoints defined by SRS v2.0 §8, grouped by doma
 
 | Method & Endpoint | Role | Description |
 |---|---|---|
-| `POST /api/v1/bookings` | PATIENT | Create a booking: validates Decree 13/2023 data consent, validates customer eKYC (mandatory for home-care), records `payment_method (BANK_TRANSFER \| CASH)`, and computes the price from `system_configs` (FR-BOOK-01). |
+| `POST /api/v1/bookings` | PATIENT | Create a booking: validates Decree 13/2023 data consent, validates customer eKYC (mandatory for home-care), records `payment_method (BANK_TRANSFER \| CASH)`, and computes the price from `system_configs` (FR-BOOK-01). Detail: [`bookings.api.md`](./bookings.api.md). |
+| `POST /api/v1/bookings/quote` | PATIENT | Price breakdown computed by the backend (base, night, holiday, heavy patient, platform fee) — stores nothing. |
+| `GET /api/v1/bookings` · `GET /api/v1/bookings/:id` | PATIENT | The customer's bookings with the three independent status axes. |
+| `GET /api/v1/nurse/radar` | NURSE | Current open Radar Dispatch offer for the nurse, or `null` (FR-BOOK-03). |
+| `POST /api/v1/bookings/:id/claim-radar` | NURSE | Accept a Radar offer — first accept wins; ACTIVE / Tier / deposit / availability re-checked at that moment. `POST …/dismiss-radar` declines it. |
 | `POST /api/v1/bookings/:id/check-in` | NURSE | Check-in: verifies the anti-mock-GPS flag, distance ≤ 200 m, uploads the live selfie and confirms the on-site medical-order cross-check (FR-SHIFT-01). |
 | `POST /api/v1/bookings/:id/reject-invalid-prescription` | NURSE (Tier 2) | Nurse rejects a shift on site because the medical order is forged / the medication does not match, without penalty (FR-BOOK-02). |
 | `POST /api/v1/bookings/:id/check-out` | NURSE | Check-out and submission of the minimum shift report; records `checkout_time`, starts the 24-hour dispute window and the 12-hour medical-record access closure timer (FR-SHIFT-04). |

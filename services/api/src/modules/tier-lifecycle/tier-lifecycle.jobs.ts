@@ -216,20 +216,3 @@ export async function registerTierLifecycleJobs(
   });
   await queue.scheduleRecurring(GPHN_EXPIRY_SWEEP_JOB, GPHN_EXPIRY_SWEEP_SCHEDULE, GPHN_EXPIRY_SWEEP_JOB);
 }
-
-/**
- * TEMPORARY (Phase 1 → Phase 3): matching-radar does not exist yet, so nothing consumes
- * matching-radar.redispatch. Without a handler core/jobs would dead-letter every job and raise
- * the backlog alert. This placeholder only logs; the booking already sits in MATCHING.
- * Phase 3: delete this function and its call in worker.ts when matching-radar registers the real handler.
- */
-export function registerRedispatchPlaceholder(queue: {
-  registerHandler(jobName: string, handler: (payload: RedispatchPayload) => Promise<void>): void;
-}): void {
-  queue.registerHandler(REDISPATCH_JOB, async (payload) => {
-    console.warn(
-      `[tier-lifecycle] redispatch placeholder: booking ${payload.bookingId} is MATCHING ` +
-        `(reason ${payload.reason}); matching-radar (Phase 3) is not wired yet`,
-    );
-  });
-}

@@ -123,9 +123,9 @@
 - [ ] Seed representative sample nurse profiles with diverse credentials and locations for search test suites.
 
 ### BE-2 (Phase Lead)
-- [ ] `nurse-availabilities` (FR-SCHED-01): `PUT /api/v1/nurse/availabilities` — updates recurring windows and time-off exceptions in a single atomic transaction.
-- [ ] `availability-engine`: Effective availability = declared schedule − confirmed/in-progress bookings − **60-minute travel buffer**.
-- [ ] `availability-engine` serves as the single source of truth for both nurse search and automated matching (no divergent availability logic).
+- [x] `nurse-availabilities` (FR-SCHED-01): `PUT /api/v1/nurse/availabilities` — updates recurring windows and time-off exceptions in a single atomic transaction.
+- [x] `availability-engine`: Effective availability = declared schedule − confirmed/in-progress bookings − **60-minute travel buffer**.
+- [x] `availability-engine` serves as the single source of truth for both nurse search and automated matching (no divergent availability logic).
 
 ### BE-3
 - [ ] `nurse-search`: `GET /api/v1/nurses/search` implementing all FR-SEARCH-01 query filters.
@@ -160,13 +160,13 @@
 - [ ] `prescription-gate` Layer 2: Tier 2 nurse is granted authorized read access to review the prescription image prior to shift acceptance.
 
 ### BE-2 (Phase Lead)
-- [ ] `pricing-engine` (FR-BOOK-01): Price calculation = base price + segment-based night surcharge (22:00–06:00, +20%) + holiday surcharges (+300% Tết / +200% holiday) + heavy patient surcharge (+15%); all surcharges calculate strictly on base price without compounding.
-- [ ] `pricing-engine`: Boundary test suite passing all SRS worked examples (night shift 580,000 VND; Tết shift 500,000 VND → 2,000,000 VND).
-- [ ] `pricing-engine`: Persists authoritative price snapshot onto booking record (`base_amount`, `surcharge_amount`, `platform_fee`, `total_amount`).
-- [ ] `bookings`: `POST /api/v1/bookings` — validates Decree-13 consent, customer eKYC, prescription gate, blocks prohibited services (Group 3), stores `payment_method`, initializes `DRAFT` booking with 15-minute payment hold.
-- [ ] `matching-radar` (FR-BOOK-03): Urgent bookings $\le 6\text{h}$ — broadcasts 5 km radius for minutes 0–5, expands to 10 km thereafter.
-- [ ] `matching-radar`: Concurrency control — first accept wins enforced via Redis Distributed Lock / `SELECT … FOR UPDATE`.
-- [ ] `matching-radar`: Backend re-validates `profile_status = ACTIVE`, Tier qualification, `deposit_balance ≥ 300,000` VND, and effective availability at the exact moment of acceptance.
+- [x] `pricing-engine` (FR-BOOK-01): Price calculation = base price + segment-based night surcharge (22:00–06:00, +20%) + holiday surcharges (+300% Tết / +200% holiday) + heavy patient surcharge (+15%); all surcharges calculate strictly on base price without compounding.
+- [x] `pricing-engine`: Boundary test suite passing all SRS worked examples (night shift 580,000 VND; Tết shift 500,000 VND → 2,000,000 VND).
+- [x] `pricing-engine`: Persists authoritative price snapshot onto booking record (`base_amount`, `surcharge_amount`, `platform_fee`, `total_amount`).
+- [x] `bookings`: `POST /api/v1/bookings` — validates Decree-13 consent, customer eKYC, prescription gate, blocks prohibited services (Group 3), stores `payment_method`, initializes `DRAFT` booking with 15-minute payment hold.
+- [x] `matching-radar` (FR-BOOK-03): Urgent bookings $\le 6\text{h}$ — broadcasts 5 km radius for minutes 0–5, expands to 10 km thereafter.
+- [x] `matching-radar`: Concurrency control — first accept wins enforced via Redis Distributed Lock / `SELECT … FOR UPDATE`.
+- [x] `matching-radar`: Backend re-validates `profile_status = ACTIVE`, Tier qualification, deposit rule (`≥ MIN_NURSE_DEPOSIT`, or ADR-0004 grace for bank-transfer bookings), no closure request, and effective availability at the exact moment of acceptance.
 
 ### BE-3
 - [ ] `job-board`: Advance bookings $> 6\text{h}$ published to Job Board for eligible nurses.

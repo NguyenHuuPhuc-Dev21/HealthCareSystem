@@ -29,7 +29,7 @@ describe("privacy-consent — cấp lại quyền & rút đồng ý (integration
     pool = createTestPool();
     adminId = await findOrCreateAdmin(pool);
     const { rows } = await pool.query(
-      "SELECT id FROM service_categories ORDER BY code LIMIT 1",
+      "SELECT id FROM service_categories WHERE NOT is_prohibited ORDER BY code LIMIT 1",
     );
     serviceId = rows[0].id;
   });
