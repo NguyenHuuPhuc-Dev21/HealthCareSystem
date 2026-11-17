@@ -72,6 +72,19 @@ export interface BankTransferInfo {
   transferContent: string;
 }
 
+/**
+ * Escrow của đơn chuyển khoản (FR-PAY-01/02, BR-04): tiền khoá khi cổng thanh toán xác nhận,
+ * giải ngân 24 giờ sau check-out (hoặc khi khách xác nhận hoàn thành sớm) nếu không có khiếu nại.
+ */
+export interface EscrowInfo {
+  heldAmount: number;
+  heldAt: string;
+  /** Mốc tự giải ngân (check-out + 24 giờ); null khi ca chưa check-out. */
+  releaseAt: string | null;
+  /** Khiếu nại đang mở → đóng băng, không tự giải ngân (BR-11). */
+  frozenByDispute: boolean;
+}
+
 export interface Booking {
   id: string;
   code: string;
@@ -91,6 +104,8 @@ export interface Booking {
   /** Hạn thanh toán (DRAFT + chuyển khoản): tạo + 15 phút. */
   paymentExpiresAt: string | null;
   bankTransfer: BankTransferInfo | null;
+  /** Tiền đang tạm giữ (chỉ đơn chuyển khoản đã thanh toán, chưa quyết toán/hoàn). */
+  escrow?: EscrowInfo | null;
   /** Ca đặt trực tiếp: điều dưỡng được mời có 15 phút để phản hồi, quá hạn thì phát lên Job Board. */
   invitedNurse: { nurseId: string; fullName: string; respondBy: string | null } | null;
   matchingMode: 'RADAR' | 'JOB_BOARD' | 'DIRECT_REQUEST' | null;

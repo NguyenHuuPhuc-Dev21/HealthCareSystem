@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { CalendarClock, Plus, Send } from 'lucide-react';
+import { CalendarClock, Plus, ReceiptText, Send } from 'lucide-react';
 import { Alert, Button } from '../../components';
 import { PatientLayout } from '../../components/layout/PatientLayout';
 import { getErrorMessage } from '../../lib/errors';
@@ -9,6 +9,8 @@ import { useAuth } from '../auth';
 import { getBookings } from './booking.api';
 import type { Booking } from './booking.types';
 import { StatusBadges } from './components/StatusBadges';
+import { EscrowIndicator } from '../payments/components/EscrowIndicator';
+import { CancelBookingModal } from '../refunds/components/CancelBookingModal';
 
 type Load = { state: 'loading' } | { state: 'error'; message: string } | { state: 'ready'; items: Booking[] };
 
@@ -18,6 +20,8 @@ export function MyBookingsPage() {
   const location = useLocation();
   const flash = (location.state as { flash?: string } | null)?.flash;
   const [load, setLoad] = useState<Load>({ state: 'loading' });
+  const [cancelTarget, setCancelTarget] = useState<Booking | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const fetchList = async () => {
     setLoad({ state: 'loading' });
@@ -36,10 +40,14 @@ export function MyBookingsPage() {
           <h1>Đơn của tôi</h1>
           <p>Theo dõi ca chăm sóc, thanh toán và khiếu nại — ba trạng thái này độc lập với nhau.</p>
         </div>
-        <Link to="/bookings/new" className="btn btn-primary"><Plus size={16} style={{ marginRight: 6 }} /> Đặt ca mới</Link>
+        <div className="bk-head-actions">
+          <Link to="/refunds" className="btn btn-secondary"><ReceiptText size={16} style={{ marginRight: 6 }} /> Theo dõi hoàn tiền</Link>
+          <Link to="/bookings/new" className="btn btn-primary"><Plus size={16} style={{ marginRight: 6 }} /> Đặt ca mới</Link>
+        </div>
       </div>
 
       {flash && <Alert tone="success" title={flash} />}
+      {notice && <Alert tone="success" title={notice}><Link to="/refunds" className="link-strong">Theo dõi hoàn tiền →</Link></Alert>}
 
       {load.state === 'loading' && <div className="card step-card skeleton">Đang tải đơn…</div>}
       {load.state === 'error' && (
@@ -72,6 +80,7 @@ export function MyBookingsPage() {
                   )}
                   {b.prescriptionReview === 'PENDING' && <p className="bk-item__meta">Y lệnh đang chờ Admin duyệt</p>}
                   <StatusBadges booking={b} />
+                  <EscrowIndicator compact booking={{ ...b, totalAmount: b.pricing.totalAmount }} />
                 </div>
                 <div className="bk-item__side">
                   <b>{formatVND(b.pricing.totalAmount)}</b>
@@ -81,6 +90,9 @@ export function MyBookingsPage() {
                       {b.executionStatus === 'COMPLETED' ? 'Xem nhật ký ca' : 'Theo dõi ca'}
                     </Link>
                   )}
+                  {['DRAFT', 'MATCHING', 'CONFIRMED'].includes(b.executionStatus) && Date.parse(b.startAt) > Date.now() && (
+                    <button type="button" className="btn btn-secondary btn-sm" onClick={() => { setNotice(null); setCancelTarget(b); }}>Huỷ ca</button>
+                  )}
                   {payNow && <Link to={`/bookings/${b.id}/pay`} className="btn btn-primary btn-sm">Thanh toán ngay</Link>}
                 </div>
               </li>
@@ -88,6 +100,17 @@ export function MyBookingsPage() {
           })}
         </ul>
       )}
+      <CancelBookingModal
+        bookingId={cancelTarget?.id ?? null}
+        bookingCode={cancelTarget?.code}
+        onClose={() => setCancelTarget(null)}
+        onCancelled={(refund) => {
+          const code = cancelTarget?.code;
+          setCancelTarget(null);
+          setNotice(refund ? `Đã huỷ ca ${code}. Khoản hoàn ${new Intl.NumberFormat('vi-VN').format(refund.refundAmount)} ₫ đang được xử lý.` : `Đã huỷ ca ${code}. Không có khoản tiền nào bị trừ.`);
+          fetchList();
+        }}
+      />
     </PatientLayout>
   );
 }

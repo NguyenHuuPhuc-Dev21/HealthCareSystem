@@ -7,6 +7,9 @@ import { getErrorMessage } from '../../lib/errors';
 import { formatDateTime, formatVND } from '../../lib/formatters';
 import { useAuth } from '../auth';
 import { formatMmSs, useCountdown } from '../auth/useCountdown';
+import { getPaymentLink } from '../payments/payments.api';
+import type { PaymentLink } from '../payments/payments.api';
+import { EscrowIndicator } from '../payments/components/EscrowIndicator';
 import { getBooking, simulatePaymentForMock } from './booking.api';
 import type { Booking } from './booking.types';
 
@@ -23,6 +26,7 @@ export function BookingPaymentPage() {
   const [load, setLoad] = useState<Load>({ state: 'loading' });
   const [simulating, setSimulating] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [link, setLink] = useState<PaymentLink | null>(null);
 
   const refresh = useCallback(async () => {
     const res = await getBooking(id);
@@ -46,6 +50,18 @@ export function BookingPaymentPage() {
     const t = window.setInterval(refresh, POLL_MS);
     return () => window.clearInterval(t);
   }, [waiting, refresh]);
+
+  // Lấy mã VietQR / liên kết thanh toán của cổng khi đơn còn chờ thanh toán
+  useEffect(() => {
+    if (!waiting) return;
+    let cancelled = false;
+    getPaymentLink(id).then((res) => {
+      if (!cancelled && res.success) setLink(res.data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [waiting, id]);
 
   const expiresMs = booking?.paymentExpiresAt ? Date.parse(booking.paymentExpiresAt) : 0;
   const secondsLeft = useCountdown(expiresMs);
@@ -83,6 +99,7 @@ export function BookingPaymentPage() {
           <CheckCircle2 size={44} aria-hidden="true" />
           <h2>Đã nhận thanh toán</h2>
           <p>Số tiền {formatVND(b.pricing.totalAmount)} đang được tạm giữ an toàn. Chúng tôi đang {b.invitedNurse ? `chuyển lời mời tới điều dưỡng ${b.invitedNurse.fullName}` : 'tìm điều dưỡng phù hợp cho bạn'}.</p>
+          <EscrowIndicator booking={{ ...b, totalAmount: b.pricing.totalAmount }} />
           <Link to="/bookings" className="btn btn-primary btn-lg">Xem đơn của tôi</Link>
         </section>
       );
@@ -115,9 +132,21 @@ export function BookingPaymentPage() {
         <section className="card step-card bk-bank" aria-labelledby="bank-title">
           <h3 id="bank-title" className="step-card__title">Chuyển khoản {formatVND(b.pricing.totalAmount)}</h3>
           <div className="bk-bank__grid">
-            <div className="bk-qr" role="img" aria-label="Mã QR chuyển khoản (mô phỏng)">
-              <QrCode size={96} aria-hidden="true" />
-              <small>Mã VietQR sẽ hiển thị ở đây khi nối cổng thanh toán</small>
+            <div className="bk-qr">
+              {link?.qrImageUrl ? (
+                <img src={link.qrImageUrl} alt={`Mã VietQR chuyển khoản ${formatVND(b.pricing.totalAmount)} cho ca ${b.code}`} />
+              ) : (
+                <>
+                  <QrCode size={96} aria-hidden="true" />
+                  <small>Đang tạo mã VietQR…</small>
+                </>
+              )}
+              <small>Quét bằng app ngân hàng — số tiền và nội dung đã được điền sẵn</small>
+              {link?.checkoutUrl && (
+                <a href={link.checkoutUrl} target="_blank" rel="noreferrer" className="btn btn-secondary btn-sm">
+                  Mở trang thanh toán
+                </a>
+              )}
             </div>
             {bank && (
               <dl className="bk-summary">

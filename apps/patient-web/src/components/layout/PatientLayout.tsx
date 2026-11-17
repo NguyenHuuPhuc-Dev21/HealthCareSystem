@@ -28,7 +28,7 @@ import { initialsOf, LogoMark } from './SetupLayout';
 const NAV_ITEMS: Array<{ label: string; icon: ReactNode; to: string | null; match?: string[] }> = [
   { label: 'Trang chủ', icon: <Home size={20} />, to: '/' },
   { label: 'Dịch vụ', icon: <Stethoscope size={20} />, to: '/nurses', match: ['/nurses'] },
-  { label: 'Đơn của tôi', icon: <ClipboardList size={20} />, to: '/bookings', match: ['/bookings'] },
+  { label: 'Đơn của tôi', icon: <ClipboardList size={20} />, to: '/bookings', match: ['/bookings', '/refunds'] },
   { label: 'Tin nhắn', icon: <MessageSquare size={20} />, to: null },
   { label: 'Tài khoản', icon: <UserRound size={20} />, to: '/patient-profiles', match: ['/patient-profiles'] },
 ];

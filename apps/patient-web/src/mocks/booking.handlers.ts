@@ -93,6 +93,21 @@ export function computeQuote(serviceCode: string, startAt: string, endAt: string
 
 /* ----- Dữ liệu ----- */
 
+/** Ảnh "QR" mô phỏng (đủ 3 ô định vị + hoạ tiết giả lập) — KHÔNG quét được; backend thật trả VietQR từ cổng thanh toán. */
+function mockQrDataUri(seed: string): string {
+  const N = 25;
+  let h = 2166136261;
+  for (const c of seed) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  const rnd = () => ((h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0), (h & 0xffff) / 0xffff);
+  const inFinder = (x: number, y: number) => (x < 8 && y < 8) || (x >= N - 8 && y < 8) || (x < 8 && y >= N - 8);
+  let cells = '';
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (!inFinder(x, y) && rnd() > 0.52) cells += `<rect x="${x}" y="${y}" width="1" height="1"/>`;
+  const finder = (ox: number, oy: number) =>
+    `<rect x="${ox}" y="${oy}" width="7" height="7"/><rect x="${ox + 1}" y="${oy + 1}" width="5" height="5" fill="#fff"/><rect x="${ox + 2}" y="${oy + 2}" width="3" height="3"/>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 ${N + 4} ${N + 4}" shape-rendering="crispEdges"><rect x="-2" y="-2" width="${N + 4}" height="${N + 4}" fill="#fff"/><g fill="#12211c">${cells}${finder(0, 0)}${finder(N - 7, 0)}${finder(0, N - 7)}</g></svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
 const sampleQuote = (total: number): PricingQuote => ({
   hours: 8, baseAmount: total, nightSurcharge: 0, nightHours: 0, holidaySurcharge: 0, holidayName: null,
   heavyPatientSurcharge: 0, platformFee: Math.round(total * 0.15), platformFeeRate: 0.15, totalAmount: total,
@@ -156,7 +171,20 @@ const load = (userId: string): Booking[] => {
   }
   let changed = false;
   const now = Date.now();
-  const next = list.map((b) => {
+  const next = list.map((b0) => {
+    // Đơn chuyển khoản đã nạp tiền mà chưa có thông tin escrow (dữ liệu mẫu) → suy ra từ trạng thái
+    const b: Booking =
+      b0.paymentStatus === 'ESCROW_HELD' && !b0.escrow
+        ? {
+            ...b0,
+            escrow: {
+              heldAmount: b0.pricing.totalAmount,
+              heldAt: b0.createdAt,
+              releaseAt: b0.executionStatus === 'COMPLETED' ? new Date(Date.parse(b0.endAt) + 24 * 3_600_000).toISOString() : null,
+              frozenByDispute: b0.disputeStatus === 'OPEN' || b0.disputeStatus === 'UNDER_REVIEW',
+            },
+          }
+        : b0;
     if (b.executionStatus === 'DRAFT' && b.paymentExpiresAt && Date.parse(b.paymentExpiresAt) <= now) {
       changed = true;
       return { ...b, executionStatus: 'EXPIRED' as ExecutionStatus, paymentExpiresAt: null, bankTransfer: null };
@@ -281,6 +309,16 @@ export const bookingHandlers: Record<string, MockHandler> = {
     return ok({ items: [...load(userId)].sort((a, b) => b.createdAt.localeCompare(a.createdAt)) });
   },
 
+  // Liên kết thanh toán của cổng (mock: ảnh QR mô phỏng, không có trang checkout)
+  'GET /api/v1/bookings/:id/payment-link': (_body, { headers, params }) => {
+    const userId = userIdFromHeaders(headers);
+    if (!userId) return unauthorized();
+    const b = load(userId).find((x) => x.id === params.id);
+    if (!b) return fail(403, 'FORBIDDEN', 'Không có quyền truy cập ca này.');
+    if (b.executionStatus !== 'DRAFT' || !b.paymentExpiresAt) return fail(409, 'BOOKING_NOT_PAYABLE', 'Ca này không còn ở trạng thái chờ thanh toán.');
+    return ok({ checkoutUrl: null, qrImageUrl: mockQrDataUri(b.code + b.pricing.totalAmount), expiresAt: b.paymentExpiresAt });
+  },
+
   'GET /api/v1/bookings/:id': (_body, { headers, params }) => {
     const userId = userIdFromHeaders(headers);
     if (!userId) return unauthorized();
@@ -302,6 +340,7 @@ export const bookingHandlers: Record<string, MockHandler> = {
       ...b,
       executionStatus: 'MATCHING',
       paymentStatus: 'ESCROW_HELD',
+      escrow: { heldAmount: b.pricing.totalAmount, heldAt: new Date().toISOString(), releaseAt: null, frozenByDispute: false },
       paymentExpiresAt: null,
       matchingMode: b.invitedNurse ? 'DIRECT_REQUEST' : urgent ? 'RADAR' : 'JOB_BOARD',
       invitedNurse: b.invitedNurse ? { ...b.invitedNurse, respondBy: new Date(Date.now() + INVITE_TIMEOUT_MS).toISOString() } : null,

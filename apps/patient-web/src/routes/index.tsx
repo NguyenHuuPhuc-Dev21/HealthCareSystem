@@ -5,6 +5,7 @@ import { PatientProfilesPage } from '../features/patient-profiles/PatientProfile
 import { BookingNewPage } from '../features/booking/BookingNewPage';
 import { BookingPaymentPage } from '../features/booking/BookingPaymentPage';
 import { ShiftTrackingPage } from '../features/booking-tracking/ShiftTrackingPage';
+import { RefundsPage } from '../features/refunds/RefundsPage';
 import { MyBookingsPage } from '../features/booking/MyBookingsPage';
 import { NurseSearchPage } from '../features/nurse-search/NurseSearchPage';
 import { HomePage } from './HomePage';
@@ -25,6 +26,7 @@ export const AppRoutes = () => {
         <Route path="/patient-profiles" element={<PatientProfilesPage />} />
         <Route path="/nurses" element={<NurseSearchPage />} />
         <Route path="/bookings" element={<MyBookingsPage />} />
+        <Route path="/refunds" element={<RefundsPage />} />
         <Route path="/bookings/new" element={<BookingNewPage />} />
         <Route path="/bookings/:id/pay" element={<BookingPaymentPage />} />
         <Route path="/bookings/:id" element={<ShiftTrackingPage />} />
