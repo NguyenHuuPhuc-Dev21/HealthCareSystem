@@ -93,3 +93,12 @@ export function getVitalSignsWarnings(input: VitalSignsThresholdInput): string[]
 
   return warnings;
 }
+
+// ---- Pricing & booking definitions (BE-2 Phase 3 · FR-BOOK-01/02, BR-03 §2.1–2.2) ----
+// Definitions fixed by the SRS text (not tunable rates; the rates themselves live in system_configs).
+export const NIGHT_SHIFT_START_HOUR = 22;              // night hours 22:00 …
+export const NIGHT_SHIFT_END_HOUR = 6;                 // … to 06:00 the next morning (Vietnam time)
+export const HEAVY_PATIENT_WEIGHT_KG = 80;             // weight_kg >= 80 or BEDRIDDEN → heavy-patient surcharge
+export const PRESCRIPTION_MAX_AGE_DAYS = 7;            // medical order issued within the last 7 days (FR-BOOK-02)
+export const SHIFT_DURATION_HOURS = [4, 8, 12, 24] as const; // bookable shift lengths (BR-03 §2.1)
+export const TASK_MAX_DURATION_HOURS = 4;              // upper bound for one task-based (PER_TIME) visit

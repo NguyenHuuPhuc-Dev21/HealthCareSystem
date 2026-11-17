@@ -52,6 +52,10 @@ export const SYSTEM_CONFIG_KEYS = {
   DEPOSIT_REFUND_HOLD_DAYS: 'DEPOSIT_REFUND_HOLD_DAYS',               // 7 days after last check-out (SRS §2.3)
   DEPOSIT_REFUND_SLA_WORKING_DAYS: 'DEPOSIT_REFUND_SLA_WORKING_DAYS', // 5 working days
   PENALTY_APPEAL_DAYS: 'PENALTY_APPEAL_DAYS',                         // 3 days
+
+  // Booking & matching (BE-2 Phase 3 — migration 0009)
+  URGENT_BOOKING_LEAD_HOURS: 'URGENT_BOOKING_LEAD_HOURS',     // 6 (start within <= 6h → Radar Dispatch, FR-BOOK-03)
+  RADAR_WINDOW_MINUTES: 'RADAR_WINDOW_MINUTES',               // 15 (Radar offers end 15 min after dispatch starts)
 } as const;
 
 export type SystemConfigKey = keyof typeof SYSTEM_CONFIG_KEYS;

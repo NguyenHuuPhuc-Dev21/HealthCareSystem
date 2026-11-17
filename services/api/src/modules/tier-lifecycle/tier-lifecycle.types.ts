@@ -17,8 +17,7 @@ export const GPHN_EXPIRY_SWEEP_SCHEDULE = { pattern: '5 0 * * *', tz: TIMEZONE_D
 
 /**
  * Job that puts a booking back into dispatch after its nurse was removed.
- * OWNED BY matching-radar (BE-2 · Phase 3). Until Phase 3 lands, worker.ts registers a
- * placeholder handler (registerRedispatchPlaceholder) so the jobs do not fall into the DLQ.
+ * Handled by matching-radar (BE-2 · Phase 3): urgent bookings go back to Radar, later ones stay on the Job Board.
  */
 export const REDISPATCH_JOB = 'matching-radar.redispatch';
 
