@@ -15,6 +15,8 @@ import { ExecutionStatus } from '@healthcare-system/shared';
 import { useAuth } from '../../features/auth/AuthContext';
 import { getMyShifts } from '../../features/shifts/shift.api';
 import { maskPhone } from '../../lib/formatters';
+import { DepositWarningBanner } from '../DepositWarningBanner';
+import { CommissionOverdueBanner } from '../CommissionOverdueBanner';
 
 interface HeaderNotification {
   id: string;
@@ -87,7 +89,7 @@ const NAV_TABS: NavTab[] = [
   { label: 'Trang chủ', path: '/', isReady: true },
   { label: 'Việc làm', path: '/jobs', isReady: true },
   { label: 'Ca của tôi', path: '/shifts', isReady: true },
-  { label: 'Ví', path: '/wallet/withdraw', isReady: true },
+  { label: 'Ví', path: '/wallet', isReady: true },
   { label: 'Lịch rảnh', path: '/schedule', isReady: true },
   { label: 'Văn bằng', path: '/credentials', isReady: true },
 ];
@@ -225,7 +227,7 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                 ? location.pathname === '/'
                 : location.pathname === tab.path ||
                   location.pathname.startsWith(`${tab.path}/`) ||
-                  (tab.path === '/wallet/withdraw' && location.pathname.startsWith('/wallet'));
+                  (tab.path === '/wallet' && location.pathname.startsWith('/wallet'));
             if (tab.isReady) {
               return (
                 <Link
@@ -360,9 +362,9 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                 <span className="mi"><FileText size={18} /></span>
                 Văn bằng &amp; GPHN
               </Link>
-              <Link to="/wallet/withdraw" role="menuitem">
+              <Link to="/wallet" role="menuitem">
                 <span className="mi"><Wallet size={18} /></span>
-                Ví &amp; Rút tiền
+                Ví &amp; thu nhập
               </Link>
               <Link to="/trust-score" role="menuitem">
                 <span className="mi"><Star size={18} /></span>
@@ -385,6 +387,9 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
         </div>
       </header>
 
+      <CommissionOverdueBanner />
+      <DepositWarningBanner />
+
       {mobileNavOpen && (
         <nav
           id="nurse-mobile-nav"
@@ -397,7 +402,7 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                 ? location.pathname === '/'
                 : location.pathname === tab.path ||
                   location.pathname.startsWith(`${tab.path}/`) ||
-                  (tab.path === '/wallet/withdraw' && location.pathname.startsWith('/wallet'));
+                  (tab.path === '/wallet' && location.pathname.startsWith('/wallet'));
             if (tab.isReady) {
               return (
                 <Link

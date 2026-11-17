@@ -1,12 +1,22 @@
 import React, { useId, useState } from 'react';
-import { CheckCircle2, HeartPulse, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Banknote,
+  CheckCircle2,
+  Clock,
+  FileText,
+  HeartPulse,
+  QrCode,
+} from 'lucide-react';
 import { ShiftExecutionState, VitalSignRecord } from '../shift.types';
 import { submitCheckOut } from '../shift.api';
 import {
   DEFAULT_SETTLEMENT_COOLING_HOURS,
   DEFAULT_RECORD_ACCESS_EXPIRY_HOURS,
+  PaymentMethod,
 } from '@healthcare-system/shared';
 import { Modal, ModalCloseButton } from '../../../components';
+import { formatVND } from '../../../lib/formatters';
 
 interface CheckOutReportModalProps {
   shift: ShiftExecutionState;
@@ -19,6 +29,7 @@ export const CheckOutReportModal: React.FC<CheckOutReportModalProps> = ({
   onSuccess,
   onClose,
 }) => {
+  const navigate = useNavigate();
   const titleId = useId();
   const baseId = useId();
   // Final vital signs defaults from latest recorded or typical
@@ -31,6 +42,16 @@ export const CheckOutReportModal: React.FC<CheckOutReportModalProps> = ({
   const [handoverNote, setHandoverNote] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Cash commission post-checkout flow
+  const [completedShift, setCompletedShift] = useState<ShiftExecutionState | null>(null);
+  const [showCashPrompt, setShowCashPrompt] = useState(false);
+
+  const isCash =
+    shift.paymentMethod === PaymentMethod.CASH ||
+    shift.paymentMethod === 'CASH' ||
+    (shift as any).payment_method === 'CASH';
+  const commissionAmount = Math.floor(shift.totalAmount * 0.15);
 
   const completedActivities = shift.careActivities.filter((a) => a.completed);
 
@@ -65,7 +86,12 @@ export const CheckOutReportModal: React.FC<CheckOutReportModalProps> = ({
       });
 
       if (res.success && res.data) {
-        onSuccess(res.data);
+        if (isCash) {
+          setCompletedShift(res.data);
+          setShowCashPrompt(true);
+        } else {
+          onSuccess(res.data);
+        }
       } else {
         setErrorMessage(res.message || 'Check-out thất bại.');
       }
@@ -75,6 +101,109 @@ export const CheckOutReportModal: React.FC<CheckOutReportModalProps> = ({
       setIsSubmitting(false);
     }
   };
+
+  // Màn hình hoàn tất sau check-out ca tiền mặt (CASH)
+  if (showCashPrompt && completedShift) {
+    return (
+      <Modal open onClose={() => onSuccess(completedShift)} titleId={titleId} maxWidth={540}>
+        <div style={{ textAlign: 'center', padding: '10px 6px 16px' }}>
+          <div
+            style={{
+              width: 60,
+              height: 60,
+              borderRadius: '50%',
+              background: '#F0FDF4',
+              display: 'grid',
+              placeItems: 'center',
+              margin: '0 auto 16px',
+            }}
+          >
+            <CheckCircle2 size={36} color="#16A34A" />
+          </div>
+
+          <h2
+            id={titleId}
+            style={{ fontSize: 20, color: 'var(--navy)', fontWeight: 800, margin: '0 0 8px' }}
+          >
+            Đã Hoàn Tất Check-Out Ca Trực!
+          </h2>
+
+          <div
+            style={{
+              padding: '16px 18px',
+              borderRadius: 12,
+              background: '#FFFBEB',
+              border: '1px solid #FDE68A',
+              color: '#92400E',
+              fontSize: 15,
+              lineHeight: 1.6,
+              margin: '18px 0',
+              textAlign: 'left',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <Banknote size={20} color="#D97706" />
+              <strong style={{ fontSize: 15.5 }}>Thu tiền mặt trực tiếp:</strong>
+            </div>
+            <div>
+              Khách trả tiền mặt <b>{formatVND(shift.totalAmount)}</b> — bạn cần nộp{' '}
+              <b style={{ color: '#DC2626', fontSize: 16 }}>{formatVND(commissionAmount)}</b> hoa hồng
+              (15%) trong 24 giờ.
+            </div>
+            <div
+              style={{
+                fontSize: 13,
+                color: '#78350F',
+                marginTop: 8,
+                paddingTop: 8,
+                borderTop: '1px dashed #FCD34D',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
+              <Clock size={14} />
+              <span>
+                Đồng hồ 24 giờ đã bắt đầu đếm ngược. Quá 24 giờ chưa nộp, tài khoản sẽ tạm bị khóa
+                nhận ca mới (BR-05). Hoa hồng không trừ vào tiền ký quỹ.
+              </span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ flex: 1, minHeight: 46 }}
+              onClick={() => onSuccess(completedShift)}
+            >
+              Để sau (nộp trong 24h)
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              style={{
+                flex: 1,
+                minHeight: 46,
+                fontWeight: 800,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+              }}
+              onClick={() => {
+                onSuccess(completedShift);
+                navigate('/wallet/commission');
+              }}
+            >
+              <QrCode size={18} />
+              <span>Nộp hoa hồng ngay</span>
+            </button>
+          </div>
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal open onClose={onClose} titleId={titleId} maxWidth={580}>
@@ -110,6 +239,31 @@ export const CheckOutReportModal: React.FC<CheckOutReportModalProps> = ({
             <li>Mở ngay màn hình đánh giá chất lượng 2 chiều.</li>
           </ul>
         </div>
+
+        {/* Ca thanh toán tiền mặt CASH (FR-PAY-01, FR-PAY-02) */}
+        {isCash && (
+          <div
+            style={{
+              padding: '12px 14px',
+              borderRadius: 10,
+              background: '#FFFBEB',
+              border: '1px solid #FDE68A',
+              color: '#92400E',
+              fontSize: 13.5,
+              marginBottom: 16,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+            }}
+          >
+            <Banknote size={22} color="#D97706" style={{ flexShrink: 0 }} />
+            <div>
+              <strong>Ca thanh toán tiền mặt:</strong> Khách trả tiền mặt{' '}
+              <b>{formatVND(shift.totalAmount)}</b> — bạn cần nộp{' '}
+              <b style={{ color: '#DC2626' }}>{formatVND(commissionAmount)}</b> hoa hồng trong 24 giờ.
+            </div>
+          </div>
+        )}
 
         {errorMessage && (
           <div style={{ padding: 10, borderRadius: 8, background: '#FEE2E2', color: '#991B1B', fontSize: 13.5, marginBottom: 14 }}>

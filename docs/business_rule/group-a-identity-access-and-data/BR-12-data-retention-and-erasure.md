@@ -28,6 +28,8 @@
 ### 2.3 Account Closure & Deposit Withdrawal Condition (SRS §2.3)
 - A nurse's deposit (`deposit_balance`) may be withdrawn **in full only when the nurse stops cooperating and closes the account, after 7 days with no disputes**.
 - Until that condition is met, the deposit remains locked as security for SLA penalties (BR-14, FR-PAY-03); account closure does not bypass the 7 dispute-free days condition.
+- **Refund workflow (ADR-0004 D3):** the closure request creates a `deposit_refund_requests` row (`REQUESTED → WAITING_HOLD → READY → REFUNDED`; `REJECTED` only with a written reason, `CANCELLED` by the nurse before `READY`). From the request onwards the nurse receives no new jobs. The request becomes `READY` when the holds of §2.4 are clear **and** no cash commission is unpaid; it is then paid within `DEPOSIT_REFUND_SLA_WORKING_DAYS = 5` working days, amount `max(deposit_balance, 0)`, as one `DEPOSIT_REFUND` transaction carrying the custody partner's reference. The nurse sees which hold is still pending and the earliest date it clears.
+- Personal-data erasure of a nurse account runs only after the refund request is `REFUNDED` (or the balance is zero/negative), because the bank details and ledger must be kept for the payout and for financial audit.
 
 ### 2.4 Holds Deferring Erasure / Closure
 Erasure or account closure is deferred while any of the following is active:

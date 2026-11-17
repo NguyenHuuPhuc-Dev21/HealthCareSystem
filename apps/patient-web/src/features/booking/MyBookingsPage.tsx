@@ -76,6 +76,11 @@ export function MyBookingsPage() {
                 <div className="bk-item__side">
                   <b>{formatVND(b.pricing.totalAmount)}</b>
                   <span className="ns-muted">{b.paymentMethod === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản'}</span>
+                  {['CONFIRMED', 'IN_PROGRESS', 'COMPLETED'].includes(b.executionStatus) && (
+                    <Link to={`/bookings/${b.id}`} className={`btn btn-sm ${b.executionStatus === 'IN_PROGRESS' ? 'btn-primary' : 'btn-secondary'}`}>
+                      {b.executionStatus === 'COMPLETED' ? 'Xem nhật ký ca' : 'Theo dõi ca'}
+                    </Link>
+                  )}
                   {payNow && <Link to={`/bookings/${b.id}/pay`} className="btn btn-primary btn-sm">Thanh toán ngay</Link>}
                 </div>
               </li>

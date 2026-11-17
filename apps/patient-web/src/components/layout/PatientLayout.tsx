@@ -17,6 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import { maskPhone } from '../../lib/phone';
+import { SosBanner } from '../../features/sos/SosBanner';
 import { initialsOf, LogoMark } from './SetupLayout';
 
 /**
@@ -218,7 +219,10 @@ export function PatientLayout({ fullName, phone, onSignOut, children }: PatientL
         </div>
       </aside>
 
-      <main className="page page--wide side-main">{children}</main>
+      <main className="page page--wide side-main">
+        <SosBanner />
+        {children}
+      </main>
     </div>
   );
 }

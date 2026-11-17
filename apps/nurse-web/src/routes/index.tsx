@@ -13,7 +13,10 @@ import { ShiftDetailPage } from '../features/shifts/ShiftDetailPage';
 import { ShiftExecutionPage } from '../features/shifts/ShiftExecutionPage';
 import { MyShiftsPage } from '../features/shifts/MyShiftsPage';
 import { NurseHomePage } from '../features/home/NurseHomePage';
+import { DepositPage } from '../features/wallet/DepositPage';
+import { WalletPage } from '../features/wallet/WalletPage';
 import { WithdrawPage } from '../features/wallet/WithdrawPage';
+import { CommissionPaymentPage } from '../features/commission-payment/CommissionPaymentPage';
 import { TrustScorePage } from '../features/trust-score/TrustScorePage';
 import { NurseLayout } from '../components/layout/NurseLayout';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -156,6 +159,36 @@ export const AppRoutes: React.FC = () => {
             }
           />
           <Route
+            path="/wallet"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <WalletPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/wallet/deposit"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <DepositPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/wallet/commission"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <CommissionPaymentPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/wallet/withdraw"
             element={
               <ProtectedRoute zone="active">
@@ -164,10 +197,6 @@ export const AppRoutes: React.FC = () => {
                 </NurseLayout>
               </ProtectedRoute>
             }
-          />
-          <Route
-            path="/wallet"
-            element={<Navigate to="/wallet/withdraw" replace />}
           />
           <Route
             path="/trust-score"

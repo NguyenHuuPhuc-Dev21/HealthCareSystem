@@ -275,7 +275,7 @@ Services are structured into three distinct clinical and regulatory tiers per La
 * **Mechanism B: Job Board (Advance Bookings > 6 Hours):**
   * Posted to the active "Job Board" feed for eligible nurses.
   * Direct bookings provide the chosen nurse a 15-minute exclusive reservation window before broadcasting.
-* **Universal Eligibility Gate:** Nurses must have `deposit_balance >= 300,000 VND` to receive dispatch alerts or accept jobs.
+* **Universal Eligibility Gate:** Nurses must have `deposit_balance >= 300,000 VND` to receive dispatch alerts or accept jobs, **or** be within the deposit grace period (FR-PAY-03 rule 6), in which case only `BANK_TRANSFER` bookings (Job Board and Radar) are offered. Nurses with a pending account-closure request (`wallets.closure_requested_at` set) receive no new jobs. (ADR-0004)
 * **Matching Expiry:** If unclaimed 30 minutes before start time (or after 30 mins for urgent bookings), `execution_status` moves to `EXPIRED`, and prepaid funds are refunded 100%.
 
 #### FR-BOOK-04 & FR-BOOK-05: Long-Term Contract Management (Phase 2)
@@ -415,6 +415,11 @@ The platform operates a **Simulated Escrow Ledger** with strictly separated bala
   3. Never used to offset booking values, cash commissions, or operational fees.
   4. If penalties reduce `deposit_balance` below 300,000 VND, the nurse is immediately `SUSPENDED` from accepting new jobs until topped back up.
   5. Deposit is fully refundable only upon voluntary account termination, following a 7-day dispute-free waiting period.
+  6. **Grace period for new nurses (ADR-0004 D2):** a nurse whose `deposit_balance < MIN_NURSE_DEPOSIT` may still accept jobs if (a) the booking is `BANK_TRANSFER`, (b) fewer than `DEPOSIT_GRACE_MAX_SHIFTS` (3) grace shifts have been completed and (c) less than `DEPOSIT_GRACE_DAYS` (30) days have passed since the profile first became `ACTIVE`. Cash bookings always require the full deposit.
+  7. **Progressive funding:** while `deposit_balance < MIN_NURSE_DEPOSIT`, the settlement worker withholds `min(DEPOSIT_WITHHOLD_RATE × net payout, MIN_NURSE_DEPOSIT − deposit_balance)` from each settled transfer payout and credits it to `deposit_balance` (`DEPOSIT_WITHHOLD`), in the same ACID transaction as the 85% credit. A `TOPUP` may cover the shortfall at any time but may not take the balance above `MIN_NURSE_DEPOSIT`.
+  8. **Custody (ADR-0004 D1):** deposit money is held in a segregated escrow account at a partner bank or a sub-wallet at a State-Bank-licensed intermediary, never in the platform's operating account. `deposit_balance` mirrors that account; every real money movement stores the partner reference in `wallet_transactions.external_ref`, and a daily reconciliation job compares the two. In the demo scope the custody account is simulated.
+  9. **Explained deductions and appeal:** every `PENALTY_DEDUCT` has a `deposit_penalty_details` row (reason, SLA rule, booking, dispute, appeal deadline) shown to the nurse. The nurse may appeal within `PENALTY_APPEAL_DAYS` (3) days through the dispute channel; an upheld appeal writes a `PENALTY_REVERSAL` credit (the original row is never edited). Penalties decided by a dispute ruling are not appealable again.
+  10. **Refund workflow (ADR-0004 D3):** closure request → `deposit_refund_requests` (`REQUESTED` → `WAITING_HOLD` → `READY` → `REFUNDED`). `READY` requires: no `CONFIRMED`/`IN_PROGRESS` booking, `DEPOSIT_REFUND_HOLD_DAYS` (7) days since the last check-out, no `OPEN`/`UNDER_REVIEW` dispute, no unpaid cash commission. Refund = `max(deposit_balance, 0)`, paid as one `DEPOSIT_REFUND` transaction within `DEPOSIT_REFUND_SLA_WORKING_DAYS` (5) working days. Admin may reject only with a written reason; rejection never forfeits the money. The app shows each pending condition and the earliest date it clears.
 
 #### FR-PAY-04: Earnings Management & Bank Account Withdrawals
 * **Priority:** `MVP` | **Source:** SRS §4.5
@@ -500,6 +505,12 @@ All platform monetary norms, time windows, and surcharge percentages reside in t
 | `CHECKIN_MAX_RADIUS_METERS` | `200` | Meters | Anti-Fraud GPS | Maximum acceptable Haversine distance between nurse check-in GPS and booking coordinates. |
 | `ICU_TRAVEL_SUPPORT` | `50000` | VND | Operational Subsidy | Travel allowance paid to nurse if customer cancels due to emergency ICU transfer after nurse travelled. |
 | `NO_SHOW_PENALTY` | `50000` | VND | Penalty & Voucher | Surcharge levied on no-show nurse; converted directly into an apology voucher for the customer. |
+| `DEPOSIT_GRACE_MAX_SHIFTS` | `3` | Shifts | Security Deposit | Max transfer-paid shifts a nurse may complete while the deposit is below `MIN_NURSE_DEPOSIT` (ADR-0004, pending PO). |
+| `DEPOSIT_GRACE_DAYS` | `30` | Days | Security Deposit | Grace period length counted from first `ACTIVE` status (ADR-0004, pending PO). |
+| `DEPOSIT_WITHHOLD_RATE` | `0.30` | Ratio (30%) | Security Deposit | Share of each settled net payout withheld into `deposit_balance` until it reaches `MIN_NURSE_DEPOSIT`. |
+| `DEPOSIT_REFUND_HOLD_DAYS` | `7` | Days | Security Deposit | Dispute-free days after the last check-out before a closure refund becomes `READY` (SRS §2.3). |
+| `DEPOSIT_REFUND_SLA_WORKING_DAYS` | `5` | Working days | Security Deposit | Time to pay out a `READY` deposit refund. |
+| `PENALTY_APPEAL_DAYS` | `3` | Days | Security Deposit | Window for a nurse to contest an automatic deposit penalty. |
 
 ---
 
