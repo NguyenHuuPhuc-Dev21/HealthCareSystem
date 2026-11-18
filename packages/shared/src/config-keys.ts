@@ -56,6 +56,11 @@ export const SYSTEM_CONFIG_KEYS = {
   // Booking & matching (BE-2 Phase 3 — migration 0009)
   URGENT_BOOKING_LEAD_HOURS: 'URGENT_BOOKING_LEAD_HOURS',     // 6 (start within <= 6h → Radar Dispatch, FR-BOOK-03)
   RADAR_WINDOW_MINUTES: 'RADAR_WINDOW_MINUTES',               // 15 (Radar offers end 15 min after dispatch starts)
+
+  // Booking expiry & Job Board direct request (BE-3 Phase 3 — migration 0010)
+  UNMATCHED_EXPIRY_LEAD_MINUTES: 'UNMATCHED_EXPIRY_LEAD_MINUTES',     // 30 (unclaimed 30 min before start → EXPIRED + 100% refund)
+  URGENT_UNMATCHED_EXPIRY_MINUTES: 'URGENT_UNMATCHED_EXPIRY_MINUTES', // 30 (urgent booking unclaimed 30 min after matching starts → EXPIRED)
+  DIRECT_REQUEST_WINDOW_MINUTES: 'DIRECT_REQUEST_WINDOW_MINUTES',     // 15 (invited nurse's exclusive window, BR-08 §2.2)
 } as const;
 
 export type SystemConfigKey = keyof typeof SYSTEM_CONFIG_KEYS;
