@@ -15,6 +15,10 @@ import { createNurseOnboardingRouter } from './modules/nurse-onboarding/nurse-on
 import { getNurseOnboardingService } from './modules/nurse-onboarding/nurse-onboarding.service';
 import { createNurseSearchRouter } from './modules/nurse-search/nurse-search.routes';
 import { getNurseSearchService } from './modules/nurse-search/nurse-search.service';
+import { createGatewayWebhooksRouter } from './modules/gateway-webhooks/gateway-webhooks.routes';
+import { getGatewayWebhooksService } from './modules/gateway-webhooks/gateway-webhooks.service';
+import { createJobBoardRouter } from './modules/job-board/job-board.routes';
+import { getJobBoardService } from './modules/job-board/job-board.service';
 import { createBookingsRouter } from './modules/bookings/bookings.routes';
 import { getBookingsService } from './modules/bookings/bookings.service';
 import { createMatchingRadarRouter } from './modules/matching-radar/matching-radar.routes';
@@ -51,6 +55,8 @@ function buildApiRouter(): Router {
   api.use(createNurseSearchRouter(getNurseSearchService())); // BE-3 · Phase 2 · nurse-search
   api.use(createBookingsRouter(getBookingsService())); // BE-2 · Phase 3 · bookings + pricing-engine
   api.use(createMatchingRadarRouter(getMatchingRadarService())); // BE-2 · Phase 3 · matching-radar
+  api.use(createGatewayWebhooksRouter(getGatewayWebhooksService())); // BE-3 · Phase 3 · gateway-webhooks (escrow webhook, payment link)
+  api.use(createJobBoardRouter(getJobBoardService())); // BE-3 · Phase 3 · job-board (board, direct requests)
 
   return api;
 }
