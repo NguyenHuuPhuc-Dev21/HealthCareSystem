@@ -14,11 +14,11 @@ import { HomeScreen } from '../features/home/HomeScreen';
 import { ShiftBriefingScreen } from '../features/shift-briefing/ShiftBriefingScreen';
 import { CheckInScreen } from '../features/check-in/CheckInScreen';
 import { ActiveShiftScreen } from '../features/active-shift/ActiveShiftScreen';
+import { OnboardingWizardScreen } from '../features/onboarding/OnboardingWizardScreen';
+import { PendingApprovalScreen } from '../features/onboarding/PendingApprovalScreen';
+import { AccountLockedScreen } from '../features/onboarding/AccountLockedScreen';
 import {
-  AccountLockedScreen,
   JobsPlaceholderScreen,
-  OnboardingPlaceholderScreen,
-  PendingApprovalScreen,
   ProfilePlaceholderScreen,
   SchedulePlaceholderScreen,
   ShiftResultScreen,
@@ -171,7 +171,7 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
               : 'OnboardingWizard'
           }
         >
-          <OnboardingStack.Screen name="OnboardingWizard" component={OnboardingPlaceholderScreen} />
+          <OnboardingStack.Screen name="OnboardingWizard" component={OnboardingWizardScreen} />
           <OnboardingStack.Screen name="PendingApproval" component={PendingApprovalScreen} />
           <OnboardingStack.Screen name="AccountLocked" component={AccountLockedScreen} />
         </OnboardingStack.Navigator>

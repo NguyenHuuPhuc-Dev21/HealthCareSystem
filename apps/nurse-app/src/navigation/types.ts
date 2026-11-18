@@ -1,4 +1,4 @@
-import type { MobileShiftSummary } from '@healthcare-system/shared';
+import type { DocType, MobileShiftSummary } from '@healthcare-system/shared';
 
 export type AuthStackParamList = {
   PhoneLogin: undefined;
@@ -15,7 +15,7 @@ export type AuthStackParamList = {
 };
 
 export type OnboardingStackParamList = {
-  OnboardingWizard: undefined;
+  OnboardingWizard: { fixDocType?: DocType } | undefined;
   PendingApproval: undefined;
   AccountLocked: undefined;
 };
