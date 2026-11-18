@@ -1,5 +1,5 @@
 import React, { useId, useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   ArrowLeft,
   MapPin,
@@ -11,7 +11,12 @@ import {
   Lock,
   Check,
   Navigation,
+  Scale,
+  ShieldAlert,
 } from 'lucide-react';
+import { DisputeDto, DisputeStatus } from '@healthcare-system/shared';
+import { getMyDisputes } from '../disputes/disputes.api';
+import { OpenDisputeModal } from '../disputes/components/OpenDisputeModal';
 import { getJobById, acceptJob } from '../job-board/job-board.api';
 import { JobItem } from '../job-board/job-board.types';
 import { CheckInModal } from './components/CheckInModal';
@@ -29,11 +34,13 @@ import {
   DEFAULT_CANCELLATION_PENALTY_RATE,
   DEFAULT_RECORD_ACCESS_EXPIRY_HOURS,
   DEFAULT_SETTLEMENT_COOLING_HOURS,
+  ExecutionStatus,
 } from '@healthcare-system/shared';
 
 export const ShiftDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { session } = useAuth();
 
   const nurseTier = session?.profile?.tier || 'TIER_1_BASIC';
@@ -63,6 +70,8 @@ export const ShiftDetailPage: React.FC = () => {
   const [cancelReason, setCancelReason] = useState('Lý do sức khỏe / việc gia đình đột xuất');
   const [cancelNote, setCancelNote] = useState('');
   const [cancelNotice, setCancelNotice] = useState<string | null>(null);
+  const [existingDispute, setExistingDispute] = useState<DisputeDto | null>(null);
+  const [showOpenDisputeModal, setShowOpenDisputeModal] = useState(false);
   const cancelModalTitleId = useId();
   const cancelBaseId = useId();
 
@@ -91,14 +100,27 @@ export const ShiftDetailPage: React.FC = () => {
       if (!id) return;
       setLoading(true);
       try {
-        const res = await getJobById(id);
+        const [jobRes, disputesRes] = await Promise.all([
+          getJobById(id),
+          getMyDisputes().catch(() => ({ success: false, data: [] })),
+        ]);
         if (!alive) return;
-        if (res.success && res.data) {
-          setJob(res.data);
+        if (jobRes.success && jobRes.data) {
+          setJob(jobRes.data);
           setError(null);
+
+          // Kiểm tra xem ca này đã có khiếu nại nào chưa
+          if (disputesRes.success && disputesRes.data) {
+            const found = disputesRes.data.find(
+              (d) => d.bookingId === id || d.bookingCode === jobRes.data?.code
+            );
+            if (found) {
+              setExistingDispute(found);
+            }
+          }
         } else {
           setJob(null);
-          setError(res.message || 'Không tìm thấy ca làm việc. Ca có thể đã bị hủy hoặc không còn khả dụng.');
+          setError(jobRes.message || 'Không tìm thấy ca làm việc. Ca có thể đã bị hủy hoặc không còn khả dụng.');
         }
       } catch {
         if (alive) {
@@ -114,6 +136,13 @@ export const ShiftDetailPage: React.FC = () => {
       alive = false;
     };
   }, [id]);
+
+  // Tự động mở khung chat khi đường dẫn có query ?chat=1 (từ thông báo tin nhắn mới - W09)
+  useEffect(() => {
+    if (searchParams.get('chat') === '1') {
+      setShowChatPanel(true);
+    }
+  }, [searchParams]);
 
   const handleOpenCheckIn = async () => {
     if (shiftExecState) {
@@ -206,6 +235,22 @@ export const ShiftDetailPage: React.FC = () => {
   const isConfirmedOrInProgress =
     job.status === 'CONFIRMED' || job.status === 'IN_PROGRESS';
 
+  const isDisputeEligible = Boolean(
+    job &&
+      (!existingDispute ||
+        (existingDispute.status !== DisputeStatus.OPEN &&
+          existingDispute.status !== DisputeStatus.UNDER_REVIEW)) &&
+      (job.status === 'IN_PROGRESS' ||
+        shiftExecState?.executionStatus === ExecutionStatus.IN_PROGRESS ||
+        (shiftExecState?.executionStatus === ExecutionStatus.COMPLETED &&
+          (() => {
+            const checkedOutAt = shiftExecState?.checkedOutAt;
+            if (!checkedOutAt) return true;
+            const hoursSince = (Date.now() - new Date(checkedOutAt).getTime()) / (1000 * 3600);
+            return hoursSince <= 24;
+          })()))
+  );
+
   return (
     <div>
       {/* Navigation Breadcrumb */}
@@ -220,104 +265,178 @@ export const ShiftDetailPage: React.FC = () => {
         </Link>
       </div>
 
-        {/* Toast Feedback */}
-        {toastMessage && (
+      {/* Banner cảnh báo ca trực đang có khiếu nại (FR-DISP-01) */}
+      {existingDispute &&
+        (existingDispute.status === DisputeStatus.OPEN ||
+          existingDispute.status === DisputeStatus.UNDER_REVIEW) && (
           <div
+            role="alert"
             style={{
-              padding: '12px 18px',
-              borderRadius: 12,
-              background: '#DEF7EC',
-              color: '#03543F',
-              border: '1px solid #84E1BC',
-              marginBottom: 16,
               display: 'flex',
               alignItems: 'center',
-              gap: 10,
-              fontSize: 16,
-              fontWeight: 600,
+              justifyContent: 'space-between',
+              gap: 12,
+              padding: '14px 18px',
+              borderRadius: 12,
+              background: '#FFFBEB',
+              border: '1.5px solid var(--accent-ochre)',
+              color: '#78350F',
+              marginBottom: 18,
+              flexWrap: 'wrap',
             }}
           >
-            <Check size={20} />
-            <span>{toastMessage}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Scale size={22} style={{ flexShrink: 0, color: 'var(--accent-ochre)' }} aria-hidden="true" />
+              <div>
+                <b style={{ fontSize: 15.5 }}>Ca trực đang có khiếu nại ({existingDispute.id})</b>
+                <div style={{ fontSize: 13.5, marginTop: 2 }}>
+                  Theo quy định FR-DISP-01, việc quyết toán thù lao ca trực đang được{' '}
+                  <b>tạm dừng đóng băng</b> cho đến khi Ban quản trị hoàn tất thẩm tra.
+                </div>
+              </div>
+            </div>
+            <Link
+              to={`/disputes/${existingDispute.id}`}
+              className="btn btn-secondary btn-sm"
+              style={{
+                background: '#fff',
+                borderColor: 'var(--accent-ochre)',
+                color: '#78350F',
+                fontSize: 13.5,
+              }}
+            >
+              <span>Xem chi tiết khiếu nại</span>
+            </Link>
           </div>
         )}
 
-        {error && (
-          <div
-            style={{
-              padding: '12px 18px',
-              borderRadius: 12,
-              background: '#FDE8E8',
-              color: '#9B1C1C',
-              border: '1px solid #F8B4B4',
-              marginBottom: 16,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              fontSize: 16,
-              fontWeight: 600,
-            }}
-          >
-            <AlertTriangle size={20} />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {/* Page Head matching Screen N5 */}
-        <div className="page-head" style={{ marginBottom: 20 }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800 }}>{job.serviceName}</h1>
-            <p style={{ margin: '6px 0 0 0', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <span>Đơn {job.code}</span> ·
-              <span>{job.date} {job.startTime} – {job.endTime}</span> ·
-              {job.isInvasive ? (
-                <span className="chip" style={{ marginLeft: 4 }}>Xâm lấn · Chỉ Cấp 2</span>
-              ) : (
-                <span className="chip teal">Không xâm lấn</span>
-              )}
-              {job.status === 'IN_PROGRESS' || shiftExecState?.executionStatus === 'IN_PROGRESS' ? (
-                <span className="chip teal" style={{ fontWeight: 700 }}>● Đang diễn ra</span>
-              ) : job.status === 'CONFIRMED' ? (
-                <span className="chip teal">Đã xác nhận</span>
-              ) : (
-                <span className="chip" style={{ background: '#FEF3C7', color: '#92400E' }}>Đang mở nhận</span>
-              )}
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0 }}>
-            {job.status === 'IN_PROGRESS' || shiftExecState?.executionStatus === 'IN_PROGRESS' ? (
-              <button
-                className="btn btn-primary btn-lg"
-                type="button"
-                style={{ fontSize: 17, height: 52 }}
-                onClick={() => navigate(`/shifts/${job.id}/execute`)}
-              >
-                Mở bảng điều hành ca trực
-              </button>
-            ) : job.status === 'CONFIRMED' ? (
-              <button
-                className="btn btn-primary btn-lg"
-                type="button"
-                style={{ fontSize: 17, minHeight: 52 }}
-                disabled={loadingCheckIn}
-                onClick={handleOpenCheckIn}
-              >
-                {loadingCheckIn ? 'Đang mở điểm danh...' : 'Điểm danh khi tới nơi'}
-              </button>
-            ) : (
-              <button
-                className="btn btn-primary btn-lg tabular-nums"
-                type="button"
-                style={{ fontSize: 17, height: 52, minWidth: 180 }}
-                onClick={handleAccept}
-                disabled={isAccepting}
-              >
-                {isAccepting ? 'Đang nhận...' : `Nhận ca (${job.totalAmount.toLocaleString('vi-VN')} đ)`}
-              </button>
-            )}
-          </div>
+      {/* Toast Feedback */}
+      {toastMessage && (
+        <div
+          style={{
+            padding: '12px 18px',
+            borderRadius: 12,
+            background: '#DEF7EC',
+            color: '#03543F',
+            border: '1px solid #84E1BC',
+            marginBottom: 16,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            fontSize: 16,
+            fontWeight: 600,
+          }}
+        >
+          <Check size={20} />
+          <span>{toastMessage}</span>
         </div>
+      )}
+
+      {error && (
+        <div
+          style={{
+            padding: '12px 18px',
+            borderRadius: 12,
+            background: '#FDE8E8',
+            color: '#9B1C1C',
+            border: '1px solid #F8B4B4',
+            marginBottom: 16,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            fontSize: 16,
+            fontWeight: 600,
+          }}
+        >
+          <AlertTriangle size={20} />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Page Head matching Screen N5 */}
+      <div className="page-head" style={{ marginBottom: 20 }}>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800 }}>{job.serviceName}</h1>
+          <p style={{ margin: '6px 0 0 0', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span>Đơn {job.code}</span> ·
+            <span>{job.date} {job.startTime} – {job.endTime}</span> ·
+            {job.isInvasive ? (
+              <span className="chip" style={{ marginLeft: 4 }}>Xâm lấn · Chỉ Cấp 2</span>
+            ) : (
+              <span className="chip teal">Không xâm lấn</span>
+            )}
+            {existingDispute &&
+            (existingDispute.status === DisputeStatus.OPEN ||
+              existingDispute.status === DisputeStatus.UNDER_REVIEW) ? (
+              <span className="chip" style={{ background: '#FEE2E2', color: '#991B1B', fontWeight: 700 }}>
+                ⚠️ Đang có khiếu nại
+              </span>
+            ) : null}
+            {job.status === 'IN_PROGRESS' || shiftExecState?.executionStatus === 'IN_PROGRESS' ? (
+              <span className="chip teal" style={{ fontWeight: 700 }}>● Đang diễn ra</span>
+            ) : job.status === 'CONFIRMED' ? (
+              <span className="chip teal">Đã xác nhận</span>
+            ) : (
+              <span className="chip" style={{ background: '#FEF3C7', color: '#92400E' }}>Đang mở nhận</span>
+            )}
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0, flexWrap: 'wrap' }}>
+          {isDisputeEligible && (
+            <button
+              type="button"
+              className="btn btn-secondary btn-lg"
+              onClick={() => setShowOpenDisputeModal(true)}
+              style={{
+                height: 52,
+                color: 'var(--alert-crimson)',
+                borderColor: '#FECACA',
+                background: '#FFF5F5',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                fontSize: 15,
+                fontWeight: 600,
+              }}
+            >
+              <ShieldAlert size={18} aria-hidden="true" />
+              <span>Mở khiếu nại ca</span>
+            </button>
+          )}
+
+          {job.status === 'IN_PROGRESS' || shiftExecState?.executionStatus === 'IN_PROGRESS' ? (
+            <button
+              className="btn btn-primary btn-lg"
+              type="button"
+              style={{ fontSize: 17, height: 52 }}
+              onClick={() => navigate(`/shifts/${job.id}/execute`)}
+            >
+              Mở bảng điều hành ca trực
+            </button>
+          ) : job.status === 'CONFIRMED' ? (
+            <button
+              className="btn btn-primary btn-lg"
+              type="button"
+              style={{ fontSize: 17, minHeight: 52 }}
+              disabled={loadingCheckIn}
+              onClick={handleOpenCheckIn}
+            >
+              {loadingCheckIn ? 'Đang mở điểm danh...' : 'Điểm danh khi tới nơi'}
+            </button>
+          ) : (
+            <button
+              className="btn btn-primary btn-lg tabular-nums"
+              type="button"
+              style={{ fontSize: 17, height: 52, minWidth: 180 }}
+              onClick={handleAccept}
+              disabled={isAccepting}
+            >
+              {isAccepting ? 'Đang nhận...' : `Nhận ca (${job.totalAmount.toLocaleString('vi-VN')} đ)`}
+            </button>
+          )}
+        </div>
+      </div>
 
         {/* 2-Column Layout */}
         <div className="cols-2" style={{ gap: 22, alignItems: 'flex-start' }}>
@@ -716,6 +835,21 @@ export const ShiftDetailPage: React.FC = () => {
             bookingCode={job?.code}
             isOpen={showChatPanel}
             onClose={() => setShowChatPanel(false)}
+          />
+        )}
+
+        {/* Modal Mở khiếu nại ca trực (W07) */}
+        {showOpenDisputeModal && job && (
+          <OpenDisputeModal
+            bookingId={job.id}
+            bookingCode={job.code}
+            patientName={job.patientName}
+            isOpen={true}
+            onClose={() => setShowOpenDisputeModal(false)}
+            onSuccess={(disputeId) => {
+              setShowOpenDisputeModal(false);
+              navigate(`/disputes/${disputeId}`);
+            }}
           />
         )}
     </div>

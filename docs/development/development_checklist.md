@@ -286,7 +286,10 @@
 - [ ] Shared in-app chat component (FE-1 leads development; FE-2 integrates for nurse surfaces).
 
 ### FE-2
-- [ ] Nurse Web + Mobile App — Dispute notification and rebuttal submission interface.
+- [x] Nurse Web — In-app notification center with read/unread, direct routing to relevant booking, dispute, or commission action.
+- [ ] Nurse Mobile App — In-app notification center (FCM client + in-app tray).
+- [x] Nurse Web — Dispute notification and rebuttal submission interface.
+- [ ] Nurse Mobile App — Dispute notification and rebuttal submission interface.
 - [x] Nurse Web — Post-shift customer rating form.
 - [ ] Nurse Mobile App — Post-shift customer rating form.
 - [x] Nurse Web — In-app chat interface with customer (reusing FE-1 component).

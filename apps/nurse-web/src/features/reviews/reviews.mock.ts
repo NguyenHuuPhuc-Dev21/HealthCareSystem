@@ -3,7 +3,6 @@ import type {
   PendingReviewDto,
   SentReviewDto,
 } from '@healthcare-system/shared';
-import { mockAddPositiveRatingRecovery } from '../trust-score/trust-score.mock';
 
 const STORAGE_PENDING_KEY = 'carenest_mock_pending_reviews_v1';
 const STORAGE_SENT_KEY = 'carenest_mock_sent_reviews_v1';
@@ -152,14 +151,8 @@ export async function mockSubmitCustomerRating(
   setSentStorage([newSent, ...sentList]);
   setPendingStorage(pendingList.filter((p) => p.bookingId !== bookingId));
 
-  // Tự động phục hồi +2 điểm TrustScore (FR-RATE-01) nếu ca đạt từ 4 sao trở lên
-  if (input.rating >= 4) {
-    try {
-      mockAddPositiveRatingRecovery(bookingCode, `Được đánh giá ${input.rating}★ cho đơn ${bookingCode}`);
-    } catch {
-      // ignore
-    }
-  }
+  // Lưu ý: Điểm TrustScore (+2 điểm) chỉ phục hồi khi KHÁCH HÀNG gửi đánh giá >= 4★ cho điều dưỡng (FR-RATE-01),
+  // không cộng khi điều dưỡng chủ động đánh giá khách hàng.
 
   return { review_id: newReviewId };
 }

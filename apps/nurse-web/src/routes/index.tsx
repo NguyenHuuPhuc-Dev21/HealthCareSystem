@@ -18,6 +18,10 @@ import { WalletPage } from '../features/wallet/WalletPage';
 import { WithdrawPage } from '../features/wallet/WithdrawPage';
 import { CommissionPaymentPage } from '../features/commission-payment/CommissionPaymentPage';
 import { TrustScorePage } from '../features/trust-score/TrustScorePage';
+import { DisputeListPage } from '../features/disputes/DisputeListPage';
+import { DisputeDetailPage } from '../features/disputes/DisputeDetailPage';
+import { NotificationsPage } from '../features/notifications/NotificationsPage';
+import { NotificationProvider } from '../features/notifications/NotificationContext';
 import { NurseLayout } from '../components/layout/NurseLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 
@@ -36,7 +40,8 @@ export const AppRoutes: React.FC = () => {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Routes>
+        <NotificationProvider>
+          <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/login/otp" element={<OtpPage />} />
 
@@ -208,9 +213,40 @@ export const AppRoutes: React.FC = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/disputes"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <DisputeListPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/disputes/:id"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <DisputeDetailPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute zone="active">
+                <NurseLayout>
+                  <NotificationsPage />
+                </NurseLayout>
+              </ProtectedRoute>
+            }
+          />
 
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
+        </NotificationProvider>
       </BrowserRouter>
     </AuthProvider>
   );
