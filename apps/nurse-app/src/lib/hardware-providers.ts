@@ -14,10 +14,12 @@ export interface HardwareProviderOverrides {
 }
 
 export type CameraFacing = 'front' | 'back';
+export type CameraCaptureMode = 'selfie' | 'document';
 
 export interface LiveCameraCaptureOptions {
   facing?: CameraFacing;
   instruction?: string;
+  mode?: CameraCaptureMode;
 }
 
 type CameraCaptureHandler = (options?: LiveCameraCaptureOptions) => Promise<string | null>;

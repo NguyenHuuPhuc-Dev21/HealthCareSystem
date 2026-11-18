@@ -80,7 +80,34 @@ const mockDatabase: Record<string, MockAccount> = {
       created_at: '2026-11-01T08:00:00+07:00',
       updated_at: '2026-11-01T08:00:00+07:00',
     },
-    credentials: [],
+    credentials: [
+      {
+        id: 'cred-ha-cccd',
+        nurse_id: 'nurse-ha',
+        doc_type: DocType.CCCD,
+        file_url: 'mock://cccd.jpg',
+        verification_status: VerificationStatus.APPROVED,
+        created_at: '2026-11-01T08:00:00+07:00',
+      },
+      {
+        id: 'cred-ha-degree',
+        nurse_id: 'nurse-ha',
+        doc_type: DocType.DEGREE,
+        file_url: 'mock://degree.jpg',
+        verification_status: VerificationStatus.PENDING,
+        created_at: '2026-11-01T08:00:00+07:00',
+      },
+      {
+        id: 'cred-ha-gphn',
+        nurse_id: 'nurse-ha',
+        doc_type: DocType.GPHN,
+        file_url: 'mock://gphn.jpg',
+        verification_status: VerificationStatus.REJECTED,
+        rejection_reason: 'Ảnh GPHN mờ, không đọc được số giấy phép. Vui lòng chụp lại rõ nét.',
+        expiry_date: '2027-05-15',
+        created_at: '2026-11-01T08:00:00+07:00',
+      },
+    ],
   },
 
   // 3. Số mẫu Vùng Locked (Tạm khóa do vi phạm hoặc điểm tín nhiệm thấp)
@@ -110,6 +137,57 @@ const mockDatabase: Record<string, MockAccount> = {
     credentials: [],
   },
 };
+
+export function mockGetAccount(phone: string): MockAccount | null {
+  return mockDatabase[phone] ?? null;
+}
+
+export function mockSaveProfile(
+  phone: string,
+  profile: NurseProfile,
+  credentials: NurseCredential[],
+  user?: SessionData['user']
+): void {
+  if (!mockDatabase[phone]) {
+    mockDatabase[phone] = {
+      user: user || {
+        id: profile.user_id,
+        phone,
+        full_name: 'Điều dưỡng mới',
+        role: UserRole.NURSE,
+      },
+      profile,
+      credentials,
+    };
+    return;
+  }
+  const account = mockDatabase[phone];
+  account.profile = profile;
+  account.credentials = credentials;
+}
+
+export function mockUpdateAccount(
+  phone: string,
+  patch: Partial<Pick<MockAccount, 'profile' | 'credentials'>>
+): MockAccount | null {
+  if (!mockDatabase[phone]) {
+    mockDatabase[phone] = {
+      user: {
+        id: `nurse-${phone}`,
+        phone,
+        full_name: 'Điều dưỡng mới',
+        role: UserRole.NURSE,
+      },
+      profile: patch.profile ?? null,
+      credentials: patch.credentials ?? [],
+    };
+    return mockDatabase[phone];
+  }
+  const account = mockDatabase[phone];
+  if (patch.profile !== undefined) account.profile = patch.profile;
+  if (patch.credentials !== undefined) account.credentials = patch.credentials;
+  return account;
+}
 
 // Lưu tạm phiên đăng ký cho số mới
 const pendingRegistrations: Record<string, { phone: string; token: string }> = {};
