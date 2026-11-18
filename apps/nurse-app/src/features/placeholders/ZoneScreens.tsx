@@ -14,47 +14,6 @@ import { IS_DEV } from '../../lib/hardware-providers';
 import { tokens } from '../../styles/tokens';
 import type { ActiveStackParamList } from '../../navigation/types';
 
-export const LoginPlaceholderScreen: React.FC = () => {
-  const { enterDevZone } = useAuth();
-
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.brandMark}>CareNest</Text>
-        <Text style={styles.title}>Đăng nhập điều dưỡng</Text>
-        <Text style={styles.subtitle}>
-          Luồng đăng nhập SĐT + OTP và Onboarding eKYC sẽ được triển khai ở Giai đoạn M1.
-        </Text>
-
-        <View style={styles.card}>
-          <StatusBadge label="Vùng 1 · Chưa đăng nhập" tone="neutral" />
-          <Text style={styles.cardBody}>
-            API đang cấu hình: {env.apiBaseUrl}
-          </Text>
-          {IS_DEV ? (
-            <View style={styles.stack}>
-              <AppButton
-                label="[DEV] Vào thẳng ca mẫu (ACTIVE)"
-                onPress={() => void enterDevZone('active')}
-              />
-              <AppButton
-                label="[DEV] Kiểm thử vùng Onboarding"
-                variant="secondary"
-                onPress={() => void enterDevZone('onboarding')}
-              />
-              <AppButton
-                label="[DEV] Kiểm thử vùng Chờ duyệt"
-                variant="secondary"
-                onPress={() => void enterDevZone('pending')}
-              />
-            </View>
-          ) : null}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
-
 export const OnboardingPlaceholderScreen: React.FC = () => {
   const { logout, enterDevZone } = useAuth();
   return (

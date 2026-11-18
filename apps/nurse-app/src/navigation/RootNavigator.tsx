@@ -7,6 +7,9 @@ import { Briefcase, Calendar, ClipboardList, Home, User } from 'lucide-react-nat
 import type { MobileShiftSummary } from '@healthcare-system/shared';
 import { StateView } from '../components';
 import { useAuth } from '../features/auth/AuthContext';
+import { PhoneLoginScreen } from '../features/auth/PhoneLoginScreen';
+import { OtpScreen } from '../features/auth/OtpScreen';
+import { CompleteRegistrationScreen } from '../features/auth/CompleteRegistrationScreen';
 import { HomeScreen } from '../features/home/HomeScreen';
 import { ShiftBriefingScreen } from '../features/shift-briefing/ShiftBriefingScreen';
 import { CheckInScreen } from '../features/check-in/CheckInScreen';
@@ -14,7 +17,6 @@ import { ActiveShiftScreen } from '../features/active-shift/ActiveShiftScreen';
 import {
   AccountLockedScreen,
   JobsPlaceholderScreen,
-  LoginPlaceholderScreen,
   OnboardingPlaceholderScreen,
   PendingApprovalScreen,
   ProfilePlaceholderScreen,
@@ -151,7 +153,12 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
     <NavigationContainer>
       {zone === 'auth' ? (
         <AuthStack.Navigator screenOptions={{ headerShown: false }}>
-          <AuthStack.Screen name="Login" component={LoginPlaceholderScreen} />
+          <AuthStack.Screen name="PhoneLogin" component={PhoneLoginScreen} />
+          <AuthStack.Screen name="Otp" component={OtpScreen} />
+          <AuthStack.Screen
+            name="CompleteRegistration"
+            component={CompleteRegistrationScreen}
+          />
         </AuthStack.Navigator>
       ) : zone === 'onboarding' || zone === 'pending' || zone === 'locked' ? (
         <OnboardingStack.Navigator

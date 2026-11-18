@@ -16,8 +16,14 @@ try {
 }
 
 export const env = {
-  apiBaseUrl: nativeConfig.API_BASE_URL?.trim() || DEFAULT_API_BASE_URL,
-  useMockAuth: nativeConfig.USE_MOCK_AUTH === 'true',
-  useMockShifts: nativeConfig.USE_MOCK_SHIFTS !== 'false',
+  get apiBaseUrl(): string {
+    return nativeConfig.API_BASE_URL?.trim() || process.env.API_BASE_URL || DEFAULT_API_BASE_URL;
+  },
+  get useMockAuth(): boolean {
+    return nativeConfig.USE_MOCK_AUTH === 'true' || process.env.USE_MOCK_AUTH === 'true';
+  },
+  get useMockShifts(): boolean {
+    return nativeConfig.USE_MOCK_SHIFTS !== 'false' && process.env.USE_MOCK_SHIFTS !== 'false';
+  },
 };
 
