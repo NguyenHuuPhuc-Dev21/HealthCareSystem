@@ -7,9 +7,10 @@ import {
   type NurseProfile,
   type SessionData,
 } from '@healthcare-system/shared';
-import { setAuthToken } from '../../lib/api-client';
+import { setAuthToken, setUnauthorizedHandler } from '../../lib/api-client';
 import { IS_DEV } from '../../lib/hardware-providers';
-import { loadSession, saveSession } from '../../lib/storage';
+import { loadRefreshToken, loadSession, saveSession } from '../../lib/storage';
+import { logoutServer } from './auth.api';
 
 export type AppZone = 'auth' | 'onboarding' | 'pending' | 'locked' | 'active';
 
@@ -88,7 +89,7 @@ function makeDevSession(targetZone: Exclude<AppZone, 'auth'>): SessionData {
 export const AuthProvider: React.FC<{
   children: React.ReactNode;
   autoStartDevSession?: boolean;
-}> = ({ children, autoStartDevSession = IS_DEV }) => {
+}> = ({ children, autoStartDevSession = false }) => {
   const [hydrated, setHydrated] = useState(false);
   const [session, setSession] = useState<SessionData | null>(null);
 
@@ -118,10 +119,26 @@ export const AuthProvider: React.FC<{
   }, []);
 
   const logout = useCallback(async () => {
-    setAuthToken(null);
-    await saveSession(null);
-    setSession(null);
+    try {
+      const refreshToken = await loadRefreshToken();
+      await logoutServer(refreshToken);
+    } catch {
+      // Ignore network error on logout
+    } finally {
+      setAuthToken(null);
+      await saveSession(null);
+      setSession(null);
+    }
   }, []);
+
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      void logout();
+    });
+    return () => {
+      setUnauthorizedHandler(null);
+    };
+  }, [logout]);
 
   const updateProfile = useCallback(
     async (profile: NurseProfile | null, credentials?: NurseCredential[]) => {

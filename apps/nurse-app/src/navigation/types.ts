@@ -1,7 +1,17 @@
 import type { MobileShiftSummary } from '@healthcare-system/shared';
 
 export type AuthStackParamList = {
-  Login: undefined;
+  PhoneLogin: undefined;
+  Otp: {
+    phone: string;
+    requestId: string;
+    resendAfterSeconds: number;
+    devOtp?: string;
+  };
+  CompleteRegistration: {
+    registrationToken: string;
+    phone: string;
+  };
 };
 
 export type OnboardingStackParamList = {

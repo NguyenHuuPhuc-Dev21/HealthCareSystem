@@ -5,6 +5,7 @@ export * from './config-keys';
 export * from './money';
 export * from './geo';
 export * from './api/http-client';
+export * from './api/auth.mapper';
 export * from './contracts/auth.contracts';
 export * from './contracts/onboarding.contracts';
 export * from './contracts/availability.contracts';
