@@ -24,7 +24,7 @@ import {
   ExecutionStatus,
   type MobileShiftSummary,
 } from '@healthcare-system/shared';
-import { StateView } from '../../components';
+import { CareNestLogoMark, StateView } from '../../components';
 import { useAuth } from '../auth/AuthContext';
 import { tokens } from '../../styles/tokens';
 import type { ActiveStackParamList, MainTabParamList } from '../../navigation/types';
@@ -132,7 +132,10 @@ export const MyShiftsScreen: React.FC<MyShiftsScreenProps> = ({ navigation }) =>
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Top Header */}
       <View style={styles.appTop}>
-        <Text style={styles.brandText}>CareNest</Text>
+        <View style={styles.brandLeft}>
+          <CareNestLogoMark size={26} />
+          <Text style={styles.brandText}>CareNest</Text>
+        </View>
         <View style={styles.topRight}>
           <View style={styles.avatarMini}>
             <Text style={styles.avatarMiniText}>{initials}</Text>
@@ -318,10 +321,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: tokens.colors.borderHairline,
   },
+  brandLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   brandText: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '800',
     color: tokens.colors.brandJade,
+    letterSpacing: -0.4,
   },
   topRight: {
     flexDirection: 'row',

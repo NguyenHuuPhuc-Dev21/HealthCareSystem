@@ -18,7 +18,7 @@ import {
   ShieldX,
 } from 'lucide-react-native';
 import { ProfileStatus } from '@healthcare-system/shared';
-import { AppButton, StatusBadge } from '../../components';
+import { AppButton, CareNestLogoMark, StatusBadge } from '../../components';
 import { useAuth } from '../auth/AuthContext';
 import { env } from '../../lib/env';
 import { tokens } from '../../styles/tokens';
@@ -45,6 +45,10 @@ export const AccountLockedScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.topBrandWrap}>
+          <CareNestLogoMark size={36} />
+        </View>
+
         <View style={styles.topIconBox}>
           {isBanned ? (
             <ShieldX color={tokens.colors.alertCrimson} size={48} />
@@ -142,6 +146,10 @@ const styles = StyleSheet.create({
     padding: tokens.spacing.paddingBase,
     paddingBottom: 40,
     alignItems: 'center',
+  },
+  topBrandWrap: {
+    alignItems: 'center',
+    marginBottom: 8,
   },
   topIconBox: {
     width: 80,

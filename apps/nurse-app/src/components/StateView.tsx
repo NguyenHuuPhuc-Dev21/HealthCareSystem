@@ -2,6 +2,7 @@ import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { tokens } from '../styles/tokens';
 import { AppButton } from './AppButton';
+import { CareNestLogoMark } from './CareNestLogo';
 
 interface StateViewProps {
   kind: 'loading' | 'empty' | 'error';
@@ -21,7 +22,10 @@ export const StateView: React.FC<StateViewProps> = ({
   return (
     <View style={[styles.card, kind === 'error' && styles.errorCard]}>
       {kind === 'loading' && (
-        <ActivityIndicator size="large" color={tokens.colors.brandJade} style={styles.spinner} />
+        <View style={styles.loadingWrap}>
+          <CareNestLogoMark size={44} style={styles.logoMark} />
+          <ActivityIndicator size="small" color={tokens.colors.brandJade} style={styles.spinner} />
+        </View>
       )}
       <Text style={[styles.title, kind === 'error' && styles.errorTitle]}>{title}</Text>
       {message ? <Text style={styles.message}>{message}</Text> : null}
@@ -50,8 +54,15 @@ const styles = StyleSheet.create({
     borderColor: '#FCA5A5',
     backgroundColor: tokens.colors.alertCrimsonSoft,
   },
-  spinner: {
+  loadingWrap: {
+    alignItems: 'center',
     marginBottom: 12,
+  },
+  logoMark: {
+    marginBottom: 10,
+  },
+  spinner: {
+    marginBottom: 4,
   },
   title: {
     fontSize: 18,

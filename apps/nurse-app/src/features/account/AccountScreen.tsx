@@ -24,7 +24,7 @@ import {
   User,
 } from 'lucide-react-native';
 import { DocType, NurseTier, VerificationStatus } from '@healthcare-system/shared';
-import { AppButton, StatusBadge } from '../../components';
+import { AppButton, CareNestLogoMark, StatusBadge } from '../../components';
 import { useAuth } from '../auth/AuthContext';
 import { formatMaskedPhone } from '../../lib/formatters';
 import { IS_DEV } from '../../lib/hardware-providers';
@@ -105,6 +105,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
       {/* Top Bar per APP-N5 */}
       <View style={styles.appTop}>
         <View style={styles.brandRow}>
+          <CareNestLogoMark size={26} />
           <Text style={styles.brandText}>CareNest</Text>
         </View>
         <View style={styles.topRight}>
@@ -294,11 +295,13 @@ const styles = StyleSheet.create({
   brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
   },
   brandText: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '800',
     color: tokens.colors.brandJade,
+    letterSpacing: -0.4,
   },
   topRight: {
     flexDirection: 'row',
