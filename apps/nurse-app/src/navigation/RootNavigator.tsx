@@ -23,8 +23,9 @@ import { RenewGphnScreen } from '../features/credentials/RenewGphnScreen';
 import { MyShiftsScreen } from '../features/shifts/MyShiftsScreen';
 import { CompletedShiftDetailScreen } from '../features/shifts/CompletedShiftDetailScreen';
 import { AvailabilityScreen } from '../features/availability/AvailabilityScreen';
+import { JobBoardScreen } from '../features/job-board/JobBoardScreen';
+import { JobDetailScreen } from '../features/job-board/JobDetailScreen';
 import {
-  JobsPlaceholderScreen,
   ShiftResultScreen,
 } from '../features/placeholders/ZoneScreens';
 import {
@@ -93,7 +94,7 @@ function MainTabsNavigator({
       </MainTab.Screen>
       <MainTab.Screen
         name="JobsTab"
-        component={JobsPlaceholderScreen}
+        component={JobBoardScreen}
         options={{
           title: 'Việc làm',
           tabBarIcon: ({ color, size }) => <Briefcase color={color} size={size} />,
@@ -260,6 +261,10 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
           <ActiveStack.Screen
             name="CompletedShiftDetail"
             component={CompletedShiftDetailScreen}
+          />
+          <ActiveStack.Screen
+            name="JobDetail"
+            component={JobDetailScreen}
           />
         </ActiveStack.Navigator>
       )}

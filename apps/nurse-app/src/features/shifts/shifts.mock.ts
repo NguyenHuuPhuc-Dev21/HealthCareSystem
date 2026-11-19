@@ -153,3 +153,14 @@ export function mockGetShifts(filter?: {
 export function mockGetShiftById(bookingId: string): MobileShiftSummary | null {
   return mockShiftsStore.find((s) => s.bookingId === bookingId) ?? null;
 }
+
+export function upsertShiftFromJob(shift: MobileShiftSummary): void {
+  const idx = mockShiftsStore.findIndex((s) => s.bookingId === shift.bookingId);
+  if (idx >= 0) {
+    mockShiftsStore[idx] = shift;
+  } else {
+    // Add to top of list
+    mockShiftsStore.unshift(shift);
+  }
+}
+
