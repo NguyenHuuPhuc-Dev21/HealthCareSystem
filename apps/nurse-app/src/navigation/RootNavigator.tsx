@@ -17,9 +17,11 @@ import { ActiveShiftScreen } from '../features/active-shift/ActiveShiftScreen';
 import { OnboardingWizardScreen } from '../features/onboarding/OnboardingWizardScreen';
 import { PendingApprovalScreen } from '../features/onboarding/PendingApprovalScreen';
 import { AccountLockedScreen } from '../features/onboarding/AccountLockedScreen';
+import { AccountScreen } from '../features/account/AccountScreen';
+import { CredentialsScreen } from '../features/credentials/CredentialsScreen';
+import { RenewGphnScreen } from '../features/credentials/RenewGphnScreen';
 import {
   JobsPlaceholderScreen,
-  ProfilePlaceholderScreen,
   SchedulePlaceholderScreen,
   ShiftResultScreen,
   ShiftsPlaceholderScreen,
@@ -114,7 +116,7 @@ function MainTabsNavigator({
       />
       <MainTab.Screen
         name="ProfileTab"
-        component={ProfilePlaceholderScreen}
+        component={AccountScreen}
         options={{
           title: 'Hồ sơ',
           tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
@@ -252,6 +254,8 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
             }}
           </ActiveStack.Screen>
           <ActiveStack.Screen name="ShiftResult" component={ShiftResultScreen} />
+          <ActiveStack.Screen name="Credentials" component={CredentialsScreen} />
+          <ActiveStack.Screen name="RenewGphn" component={RenewGphnScreen} />
         </ActiveStack.Navigator>
       )}
     </NavigationContainer>

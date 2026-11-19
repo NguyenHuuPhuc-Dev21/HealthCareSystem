@@ -32,6 +32,13 @@ export const env = {
   get useMockShifts(): boolean {
     return nativeConfig.USE_MOCK_SHIFTS !== 'false' && process.env.USE_MOCK_SHIFTS !== 'false';
   },
+  get useMockCredentials(): boolean {
+    return (
+      nativeConfig.USE_MOCK_CREDENTIALS === 'true' ||
+      process.env.USE_MOCK_CREDENTIALS === 'true' ||
+      this.useMockOnboarding
+    );
+  },
   get supportHotline(): string {
     return nativeConfig.SUPPORT_HOTLINE?.trim() || process.env.SUPPORT_HOTLINE || '1900 6868';
   },

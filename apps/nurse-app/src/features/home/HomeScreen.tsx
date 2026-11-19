@@ -1,14 +1,19 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   CHECKIN_MAX_RADIUS_METERS,
+  DocType,
+  VerificationStatus,
   type MobileShiftSummary,
 } from '@healthcare-system/shared';
+import { AlertTriangle, ChevronRight, FileText, ShieldAlert } from 'lucide-react-native';
 import { AppButton, StateView, StatusBadge } from '../../components';
+import { useAuth } from '../auth/AuthContext';
+import { getGphnAlertInfo } from '../credentials/credentials.api';
 import { getMyShifts } from '../active-shift/active-shift.api';
 import {
   getHardwareCapabilityStatus,
@@ -53,11 +58,25 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onRequestCurrentPosition,
   onCaptureLivePhoto,
 }) => {
+  const { session } = useAuth();
+
   const [activeShift, setActiveShift] = useState<MobileShiftSummary | null>(
     initialShift ?? (IS_DEV ? DEV_SAMPLE_SHIFT : null)
   );
   const [loadingShift, setLoadingShift] = useState<boolean>(!initialShift);
   const [shiftLoadError, setShiftLoadError] = useState<string | null>(null);
+
+  const gphnCred = session?.credentials?.find((c) => c.doc_type === DocType.GPHN);
+  const hasPendingGphn = Boolean(
+    session?.credentials?.some(
+      (c) => c.doc_type === DocType.GPHN && c.verification_status === VerificationStatus.PENDING
+    )
+  );
+  const expiryDate = session?.profile?.gphn_expiry_date || gphnCred?.expiry_date;
+  const alertInfo = useMemo(
+    () => getGphnAlertInfo(expiryDate, hasPendingGphn),
+    [expiryDate, hasPendingGphn]
+  );
 
   const hardwareStatus = useMemo(
     () => getHardwareCapabilityStatus({ onRequestCurrentPosition, onCaptureLivePhoto }),
@@ -98,6 +117,70 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             Kiểm tra hồ sơ người bệnh, điểm danh tại nhà và ghi nhận chăm sóc lâm sàng.
           </Text>
         </View>
+
+        {/* Thẻ GPHN trên trang chủ — Bấm vào mở Credentials */}
+        <TouchableOpacity
+          style={[
+            styles.gphnCard,
+            alertInfo.status === 'EXPIRED' && styles.gphnCardExpired,
+            alertInfo.status === 'EXPIRING_SOON' && styles.gphnCardExpiring,
+            alertInfo.status === 'PENDING' && styles.gphnCardPending,
+          ]}
+          onPress={() => navigation.navigate('Credentials')}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Trạng thái Giấy phép hành nghề"
+        >
+          <View style={styles.gphnCardLeft}>
+            {alertInfo.status === 'EXPIRED' ? (
+              <ShieldAlert color={tokens.colors.alertCrimson} size={22} />
+            ) : alertInfo.status === 'EXPIRING_SOON' ? (
+              <AlertTriangle color={tokens.colors.accentOchre} size={22} />
+            ) : (
+              <FileText color={tokens.colors.brandJade} size={22} />
+            )}
+          </View>
+          <View style={styles.gphnCardBody}>
+            <View style={styles.gphnCardTitleRow}>
+              <Text
+                style={[
+                  styles.gphnCardTitle,
+                  alertInfo.status === 'EXPIRED' && styles.gphnTextRed,
+                  alertInfo.status === 'EXPIRING_SOON' && styles.gphnTextAmber,
+                ]}
+              >
+                {alertInfo.label}
+              </Text>
+              {alertInfo.status === 'EXPIRED' ? (
+                <View style={styles.badgeDanger}>
+                  <Text style={styles.badgeDangerText}>Hạ Tầng 1</Text>
+                </View>
+              ) : null}
+            </View>
+            <Text style={styles.gphnCardDesc}>{alertInfo.description}</Text>
+            {alertInfo.status === 'EXPIRED' ? (
+              <View style={styles.gphnActionRow}>
+                <TouchableOpacity
+                  style={styles.gphnBtnRed}
+                  onPress={() => navigation.navigate('RenewGphn')}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.gphnBtnRedText}>Nộp GPHN mới</Text>
+                </TouchableOpacity>
+              </View>
+            ) : null}
+          </View>
+          <ChevronRight
+            color={
+              alertInfo.status === 'EXPIRED'
+                ? tokens.colors.alertCrimson
+                : alertInfo.status === 'EXPIRING_SOON'
+                ? tokens.colors.accentOchre
+                : tokens.colors.inkSecondary
+            }
+            size={20}
+          />
+        </TouchableOpacity>
 
         {!IS_DEV && !hardwareStatus.isReadyForRelease && (
           <View style={styles.hardwareWarnBox}>
@@ -301,6 +384,89 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: tokens.colors.alertCrimson,
     lineHeight: 19,
+  },
+  gphnCard: {
+    backgroundColor: tokens.colors.paper,
+    borderRadius: tokens.radii.md,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: tokens.colors.brandJade,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  gphnCardExpired: {
+    backgroundColor: tokens.colors.alertCrimsonSoft,
+    borderColor: tokens.colors.alertCrimson,
+  },
+  gphnCardExpiring: {
+    backgroundColor: tokens.colors.accentOchreSoft,
+    borderColor: tokens.colors.accentOchre,
+  },
+  gphnCardPending: {
+    backgroundColor: '#FFFBEB',
+    borderColor: tokens.colors.accentOchre,
+    borderStyle: 'dashed',
+  },
+  gphnCardLeft: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: tokens.colors.canvas,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gphnCardBody: {
+    flex: 1,
+  },
+  gphnCardTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 2,
+  },
+  gphnCardTitle: {
+    fontSize: 15.5,
+    fontWeight: '700',
+    color: tokens.colors.inkPrimary,
+  },
+  gphnTextRed: {
+    color: tokens.colors.alertCrimson,
+  },
+  gphnTextAmber: {
+    color: tokens.colors.accentOchre,
+  },
+  badgeDanger: {
+    backgroundColor: tokens.colors.alertCrimson,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: tokens.radii.pill,
+  },
+  badgeDangerText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  gphnCardDesc: {
+    fontSize: 13.5,
+    color: tokens.colors.inkSecondary,
+    lineHeight: 18,
+  },
+  gphnActionRow: {
+    marginTop: 8,
+  },
+  gphnBtnRed: {
+    alignSelf: 'flex-start',
+    backgroundColor: tokens.colors.alertCrimson,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: tokens.radii.sm,
+  },
+  gphnBtnRedText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
   },
 });
 
