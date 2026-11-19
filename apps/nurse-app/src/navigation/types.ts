@@ -37,5 +37,7 @@ export type ActiveStackParamList = {
     outcomeType: 'COMPLETED' | 'CANCELLED_SAFE';
     note?: string;
   };
+  Credentials: undefined;
+  RenewGphn: undefined;
 };
 

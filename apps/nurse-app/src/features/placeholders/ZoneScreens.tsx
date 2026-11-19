@@ -8,9 +8,6 @@ import {
   DEFAULT_TRAVEL_SUPPORT_VND,
 } from '@healthcare-system/shared';
 import { AppButton, StatusBadge } from '../../components';
-import { useAuth } from '../auth/AuthContext';
-import { env } from '../../lib/env';
-import { IS_DEV } from '../../lib/hardware-providers';
 import { tokens } from '../../styles/tokens';
 import type { ActiveStackParamList } from '../../navigation/types';
 
@@ -57,51 +54,6 @@ export const SchedulePlaceholderScreen: React.FC = () => (
     description="Cấu hình khung giờ rảnh hằng tuần, ngày nghỉ và phủ lớp ca đã xác nhận."
   />
 );
-
-export const ProfilePlaceholderScreen: React.FC = () => {
-  const { session, logout, enterDevZone } = useAuth();
-  return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <StatusBadge label="Vùng 3 · Đã duyệt (ACTIVE)" tone="jade" />
-        <Text style={[styles.title, { marginTop: 12 }]}>
-          {session?.user.full_name || 'Điều dưỡng CareNest'}
-        </Text>
-        <Text style={styles.subtitle}>
-          SĐT: {session?.user.phone || 'Chưa cập nhật'} · TrustScore:{' '}
-          {session?.profile?.trust_score ?? 100}
-        </Text>
-
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Kiểm thử chuyển vùng điều hướng</Text>
-          <Text style={styles.cardBody}>Endpoint: {env.apiBaseUrl}</Text>
-          <View style={styles.stack}>
-            {IS_DEV ? (
-              <>
-                <AppButton
-                  label="[DEV] Chuyển vùng Onboarding"
-                  variant="secondary"
-                  onPress={() => void enterDevZone('onboarding')}
-                />
-                <AppButton
-                  label="[DEV] Chuyển vùng Chờ duyệt"
-                  variant="secondary"
-                  onPress={() => void enterDevZone('pending')}
-                />
-                <AppButton
-                  label="[DEV] Chuyển vùng Bị khóa"
-                  variant="secondary"
-                  onPress={() => void enterDevZone('locked')}
-                />
-              </>
-            ) : null}
-            <AppButton label="Đăng xuất" variant="danger" onPress={() => void logout()} />
-          </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
 
 type ShiftResultProps = NativeStackScreenProps<ActiveStackParamList, 'ShiftResult'>;
 
