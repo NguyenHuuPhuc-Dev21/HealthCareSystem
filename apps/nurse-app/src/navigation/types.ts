@@ -40,5 +40,6 @@ export type ActiveStackParamList = {
   Credentials: undefined;
   RenewGphn: undefined;
   CompletedShiftDetail: { bookingId: string };
+  JobDetail: { jobId: string; isDirectInvite?: boolean };
 };
 

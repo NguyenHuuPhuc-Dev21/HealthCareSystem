@@ -18,3 +18,4 @@ export * from './contracts/dispute.contracts';
 export * from './contracts/chat.contracts';
 export * from './contracts/notification.contracts';
 export * from './chat/contact-detector';
+export * from './mocks/job-board.mock';

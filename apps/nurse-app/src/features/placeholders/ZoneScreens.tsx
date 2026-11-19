@@ -31,14 +31,6 @@ function RoadmapTabTemplate({
   );
 }
 
-export const JobsPlaceholderScreen: React.FC = () => (
-  <RoadmapTabTemplate
-    badge="Giai đoạn M3"
-    title="Bảng việc làm & Radar"
-    description="Danh sách ca đặt trước > 6 giờ, lời mời trực tiếp và Radar ca khẩn cấp sẽ hiển thị tại đây."
-  />
-);
-
 type ShiftResultProps = NativeStackScreenProps<ActiveStackParamList, 'ShiftResult'>;
 
 export const ShiftResultScreen: React.FC<ShiftResultProps> = ({ navigation, route }) => {

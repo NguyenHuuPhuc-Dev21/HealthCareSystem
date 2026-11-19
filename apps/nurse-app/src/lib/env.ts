@@ -35,6 +35,9 @@ export const env = {
   get useMockAvailability(): boolean {
     return nativeConfig.USE_MOCK_AVAILABILITY !== 'false' && process.env.USE_MOCK_AVAILABILITY !== 'false';
   },
+  get useMockJobBoard(): boolean {
+    return nativeConfig.USE_MOCK_JOB_BOARD !== 'false' && process.env.USE_MOCK_JOB_BOARD !== 'false';
+  },
   get useMockCredentials(): boolean {
     return (
       nativeConfig.USE_MOCK_CREDENTIALS === 'true' ||
