@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  Linking,
 } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 import { tokens } from '../../styles/tokens';
-import { triggerSos } from '../sos/sos.api';
+import { SosButton } from '../sos/SosButton';
 import {
   getShiftExecutionState,
   submitInitialAssessment,
@@ -18,8 +18,17 @@ import {
   respondToExtension,
   rejectInvalidPrescription,
   submitCheckOut,
+  executeQueuedShiftAction,
   PendingExtensionDto,
 } from './active-shift.api';
+import {
+  subscribeQueue,
+  setupQueueAutoSync,
+  processQueue,
+  getPendingQueueCount,
+  isNetworkConnected,
+} from './offline-queue';
+import { shiftRealtime, type ExtensionRequestPayload } from '../../lib/realtime';
 import { DeviceGeoCoords, IS_DEV } from '../../lib/hardware-providers';
 import {
   DEFAULT_TRAVEL_SUPPORT_VND,
@@ -32,7 +41,6 @@ import { CareAndPrescriptionTab, CareActivityItem } from './components/CareAndPr
 import { HandoverCheckoutTab } from './components/HandoverCheckoutTab';
 
 type WorkspaceTab = 'ASSESSMENT' | 'VITALS' | 'CARE' | 'CHECKOUT';
-type SosStatus = 'idle' | 'sending' | 'sent' | 'failed';
 
 const DEFAULT_CARE_ACTIVITIES: CareActivityItem[] = [
   { id: '1', title: 'Đo sinh tồn ban đầu (Mạch, Huyết áp, Thân nhiệt, SpO2)', completed: false },
@@ -71,13 +79,18 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('ASSESSMENT');
 
+  // Network and offline queue states
+  const [isOnline, setIsOnline] = useState<boolean>(true);
+  const [pendingQueueCount, setPendingQueueCount] = useState<number>(0);
+  const [syncingQueue, setSyncingQueue] = useState<boolean>(false);
+
   // Assessment state
   const [assessmentCompleted, setAssessmentCompleted] = useState(false);
   const [mobilityStatus, setMobilityStatus] = useState('PARTIAL');
   const [mismatchReported, setMismatchReported] = useState(false);
   const [savingAssessment, setSavingAssessment] = useState(false);
 
-  // Vitals state (seeded only in DEV preview; real sessions load from server)
+  // Vitals state
   const [vitalsList, setVitalsList] = useState<VitalEntry[]>(
     IS_DEV
       ? [{ id: 'v-0', time: '08:05', hr: 76, sys: 120, dia: 80, temp: 36.8, spo2: 98 }]
@@ -88,17 +101,14 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
   const [activities, setActivities] = useState<CareActivityItem[]>(DEFAULT_CARE_ACTIVITIES);
   const [rejectingRx, setRejectingRx] = useState(false);
 
-  // Extension request loaded from server (never hardcoded on real shifts)
+  // Extension request loaded from server or realtime WebSocket
   const [pendingExtension, setPendingExtension] = useState<PendingExtensionDto | null>(null);
   const [extensionSubmitting, setExtensionSubmitting] = useState(false);
-
-  // SOS dispatch state
-  const [sosStatus, setSosStatus] = useState<SosStatus>('idle');
-  const [sosError, setSosError] = useState<string | null>(null);
 
   // Check-out state
   const [submittingCheckout, setSubmittingCheckout] = useState(false);
 
+  // 1. Initial State Loading from Server
   useEffect(() => {
     let alive = true;
     getShiftExecutionState(bookingId)
@@ -135,7 +145,7 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
         }
       })
       .catch(() => {
-        // Giữ trạng thái cục bộ ban đầu nếu chưa đồng bộ được từ máy chủ
+        // Fallback to local state if server is not reachable
       });
 
     return () => {
@@ -143,82 +153,63 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
     };
   }, [bookingId]);
 
-  const executeSosDispatch = async () => {
-    setSosStatus('sending');
-    setSosError(null);
+  // 2. Realtime WebSocket for Shift Updates (e.g. extension requests from customer)
+  useEffect(() => {
+    shiftRealtime.connect(bookingId);
 
-    let lat = patientLatitude;
-    let lng = patientLongitude;
-    if (onRequestCurrentPosition) {
-      try {
-        const coords = await onRequestCurrentPosition();
-        lat = coords.latitude;
-        lng = coords.longitude;
-      } catch {
-        // Fallback sang tọa độ ca trực nếu cảm biến GPS bận
+    const unsubExtension = shiftRealtime.subscribe<ExtensionRequestPayload>(
+      'EXTENSION_REQUESTED',
+      (payload) => {
+        setPendingExtension({
+          id: payload.extensionId,
+          hours: payload.hours,
+          extraAmount: payload.extraAmount,
+        });
       }
-    }
-
-    const latest = vitalsList[0];
-    try {
-      const res = await triggerSos({
-        bookingId,
-        latitude: lat,
-        longitude: lng,
-        currentVitals: latest
-          ? {
-              heartRate: String(latest.hr),
-              bpSystolic: String(latest.sys),
-              bpDiastolic: String(latest.dia),
-              temp: String(latest.temp),
-              spo2: String(latest.spo2),
-            }
-          : undefined,
-      });
-
-      if (res.success) {
-        setSosStatus('sent');
-        Alert.alert(
-          'Đã phát tín hiệu SOS',
-          'Tọa độ GPS và chỉ số sinh tồn mới nhất đã được gửi tới điều phối viên và gia đình người bệnh.'
-        );
-      } else {
-        const msg = res.error?.message || 'Máy chủ chưa xác nhận cảnh báo SOS.';
-        setSosStatus('failed');
-        setSosError(msg);
-        Alert.alert('Chưa gửi được cảnh báo SOS', msg, [
-          { text: 'Đóng', style: 'cancel' },
-          { text: 'Thử gửi lại', onPress: () => void executeSosDispatch() },
-        ]);
-      }
-    } catch {
-      const msg = 'Lỗi kết nối mạng khi gửi tọa độ và chỉ số sinh tồn khẩn cấp.';
-      setSosStatus('failed');
-      setSosError(msg);
-      Alert.alert('Chưa gửi được cảnh báo SOS', msg, [
-        { text: 'Đóng', style: 'cancel' },
-        { text: 'Thử gửi lại', onPress: () => void executeSosDispatch() },
-      ]);
-    }
-  };
-
-  // Zero-Latency SOS 115 Trigger
-  const handleTriggerSos = () => {
-    Alert.alert(
-      'Gọi cấp cứu SOS 115',
-      'Ứng dụng sẽ mở ngay màn hình quay số 115 và đồng thời gửi tọa độ cùng chỉ số sinh tồn mới nhất cho gia đình và điều phối viên.',
-      [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'Gọi 115 ngay',
-          style: 'destructive',
-          onPress: () => {
-            void Linking.openURL('tel:115').catch(() => {});
-            void executeSosDispatch();
-          },
-        },
-      ]
     );
+
+    return () => {
+      unsubExtension();
+      shiftRealtime.disconnect();
+    };
+  }, [bookingId]);
+
+  // 3. Network Monitoring & Offline Queue Subscription
+  useEffect(() => {
+    void isNetworkConnected().then(setIsOnline);
+    void getPendingQueueCount(bookingId).then(setPendingQueueCount);
+
+    const unsubNetInfo = NetInfo.addEventListener((state) => {
+      const online = Boolean(state.isConnected && state.isInternetReachable !== false);
+      setIsOnline(online);
+    });
+
+    const unsubQueue = subscribeQueue((queue) => {
+      const shiftItems = queue.filter((item) => item.bookingId === bookingId);
+      setPendingQueueCount(shiftItems.length);
+    });
+
+    const unsubAutoSync = setupQueueAutoSync(executeQueuedShiftAction, bookingId);
+
+    return () => {
+      unsubNetInfo();
+      unsubQueue();
+      unsubAutoSync();
+    };
+  }, [bookingId]);
+
+  const handleManualSync = async () => {
+    setSyncingQueue(true);
+    try {
+      const res = await processQueue(executeQueuedShiftAction, bookingId);
+      if (res.processed > 0) {
+        Alert.alert('Đồng bộ thành công', `Đã gửi thành công ${res.processed} mục lên máy chủ.`);
+      } else if (res.remaining > 0) {
+        Alert.alert('Đồng bộ chưa hoàn tất', `Còn ${res.remaining} mục chưa thể gửi. Vui lòng thử lại sau.`);
+      }
+    } finally {
+      setSyncingQueue(false);
+    }
   };
 
   const handleRespondExtension = async (approved: boolean) => {
@@ -295,12 +286,19 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
         return;
       }
 
-      Alert.alert(
-        'Đã lưu đánh giá 30 phút',
-        hasMismatch
-          ? 'Đã gửi đề xuất phụ phí chăm sóc người bệnh nặng tới gia đình.'
-          : 'Đánh giá ban đầu đã được cập nhật lên hệ thống.'
-      );
+      if (res.isOfflineQueued) {
+        Alert.alert(
+          'Đã lưu đánh giá (Ngoại tuyến)',
+          'Đánh giá ban đầu đã được lưu vào thiết bị và sẽ tự động gửi lên hệ thống khi có mạng.'
+        );
+      } else {
+        Alert.alert(
+          'Đã lưu đánh giá 30 phút',
+          hasMismatch
+            ? 'Đã gửi đề xuất phụ phí chăm sóc người bệnh nặng tới gia đình.'
+            : 'Đánh giá ban đầu đã được cập nhật lên hệ thống.'
+        );
+      }
       setActiveTab('VITALS');
     } catch {
       Alert.alert('Lỗi kết nối', 'Không thể gửi đánh giá 30 phút lên máy chủ. Vui lòng thử lại.');
@@ -319,6 +317,7 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
         temperature: entry.temp,
         spo2: entry.spo2,
       });
+
       if (!res.success) {
         Alert.alert(
           'Không thể lưu sinh tồn',
@@ -326,7 +325,16 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
         );
         return false;
       }
+
       setVitalsList((prev) => [entry, ...prev]);
+
+      if (res.isOfflineQueued) {
+        Alert.alert(
+          'Đã lưu sinh tồn (Ngoại tuyến)',
+          'Dữ liệu chỉ số sinh tồn đã được lưu vào hàng đợi thiết bị và sẽ tự động gửi khi có kết nối mạng.'
+        );
+      }
+
       return true;
     } catch {
       Alert.alert('Lỗi kết nối', 'Chưa gửi được chỉ số sinh tồn lên hệ thống. Vui lòng thử lại.');
@@ -403,6 +411,7 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
     const [rawSys, rawDia] = finalBp.split('/').map((part) => Number(part.trim()));
     const latest = vitalsList[0];
     setSubmittingCheckout(true);
+
     try {
       const res = await submitCheckOut(bookingId, {
         checkoutTime: new Date().toISOString(),
@@ -438,6 +447,18 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
     }
   };
 
+  const getLatestVitalsRecord = () => {
+    const latest = vitalsList[0];
+    if (!latest) return undefined;
+    return {
+      heartRate: String(latest.hr),
+      bpSystolic: String(latest.sys),
+      bpDiastolic: String(latest.dia),
+      temp: String(latest.temp),
+      spo2: String(latest.spo2),
+    };
+  };
+
   const completedActivitiesCount = activities.filter((a) => a.completed).length;
 
   return (
@@ -454,44 +475,40 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
             </Text>
           </View>
 
-          <TouchableOpacity
-            style={[styles.sosBtn, sosStatus === 'sending' && { opacity: 0.7 }]}
-            disabled={sosStatus === 'sending'}
-            onPress={handleTriggerSos}
-          >
-            <Text style={styles.sosBtnText}>
-              {sosStatus === 'sending' ? 'Đang gửi...' : 'SOS 115'}
-            </Text>
-          </TouchableOpacity>
+          {/* Unified Zero-Latency SOS Button */}
+          <SosButton
+            bookingId={bookingId}
+            patientLatitude={patientLatitude}
+            patientLongitude={patientLongitude}
+            onRequestCurrentPosition={onRequestCurrentPosition}
+            getLatestVitals={getLatestVitalsRecord}
+          />
         </View>
 
-        {sosStatus === 'failed' && (
-          <View style={styles.sosAlertBanner}>
-            <Text style={styles.sosAlertText}>
-              Chưa gửi được cảnh báo GPS/sinh tồn: {sosError || 'Lỗi kết nối.'}
+        {/* Offline Queue Status Banner */}
+        {(!isOnline || pendingQueueCount > 0) && (
+          <View
+            style={[
+              styles.offlineBanner,
+              !isOnline ? styles.offlineBannerOffline : styles.offlineBannerSyncing,
+            ]}
+          >
+            <Text style={styles.offlineText}>
+              {!isOnline
+                ? `Đang ngoại tuyến — ${pendingQueueCount} mục chờ gửi`
+                : `Có mạng trở lại — ${pendingQueueCount} mục chờ đồng bộ`}
             </Text>
-            <View style={styles.sosAlertActions}>
+            {isOnline && pendingQueueCount > 0 && (
               <TouchableOpacity
-                style={styles.sosRetryBtn}
-                onPress={() => void executeSosDispatch()}
+                style={styles.syncNowBtn}
+                onPress={handleManualSync}
+                disabled={syncingQueue}
               >
-                <Text style={styles.sosRetryText}>Thử gửi lại cảnh báo GPS</Text>
+                <Text style={styles.syncNowText}>
+                  {syncingQueue ? 'Đang gửi...' : 'Gửi ngay'}
+                </Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.sosDialBtn}
-                onPress={() => void Linking.openURL('tel:115').catch(() => {})}
-              >
-                <Text style={styles.sosDialText}>Gọi 115</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
-        {sosStatus === 'sent' && (
-          <View style={styles.sosSentBanner}>
-            <Text style={styles.sosSentText}>
-              Đã gửi cảnh báo SOS kèm tọa độ và sinh tồn tới điều phối viên.
-            </Text>
+            )}
           </View>
         )}
 
@@ -522,7 +539,7 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
 
       {/* Scrollable Workspace Content */}
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        {/* Extension Request Banner */}
+        {/* Real-time Extension Request Banner */}
         {pendingExtension && (
           <View style={styles.extensionBanner}>
             <Text style={styles.extensionTitle}>
@@ -556,11 +573,15 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
           <TouchableOpacity
             style={styles.devExtTrigger}
             onPress={() =>
-              setPendingExtension({ id: 'dev-ext-1', hours: 1, extraAmount: 162500 })
+              shiftRealtime.simulateEvent('EXTENSION_REQUESTED', {
+                extensionId: `ext-${Date.now()}`,
+                hours: 1,
+                extraAmount: 162500,
+              })
             }
           >
             <Text style={styles.devExtTriggerText}>
-              [DEV] Mô phỏng nhận yêu cầu gia hạn 1 giờ từ gia đình
+              [DEV] Mô phỏng WebSocket khách gửi yêu cầu gia hạn 1 giờ
             </Text>
           </TouchableOpacity>
         )}
@@ -636,18 +657,41 @@ const styles = StyleSheet.create({
     color: tokens.colors.inkSecondary,
     marginTop: 2,
   },
-  sosBtn: {
-    backgroundColor: tokens.colors.alertCrimson,
-    paddingHorizontal: 16,
-    height: 44,
-    borderRadius: 10,
+  offlineBanner: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginBottom: 10,
   },
-  sosBtnText: {
+  offlineBannerOffline: {
+    backgroundColor: '#FEE2E2',
+    borderWidth: 1,
+    borderColor: '#FCA5A5',
+  },
+  offlineBannerSyncing: {
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FCD34D',
+  },
+  offlineText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#991B1B',
+    flex: 1,
+  },
+  syncNowBtn: {
+    backgroundColor: tokens.colors.brandJade,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+  },
+  syncNowText: {
     color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '800',
+    fontSize: 12.5,
+    fontWeight: '700',
   },
   tabBar: {
     flexDirection: 'row',
@@ -739,76 +783,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
   },
-  sosAlertBanner: {
-    marginBottom: 10,
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: tokens.colors.alertCrimsonSoft,
-    borderWidth: 1,
-    borderColor: '#FCA5A5',
-  },
-  sosAlertText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: tokens.colors.alertCrimson,
-    marginBottom: 8,
-  },
-  sosAlertActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  sosRetryBtn: {
-    flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    backgroundColor: tokens.colors.alertCrimson,
-    alignItems: 'center',
-  },
-  sosRetryText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  sosDialBtn: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: tokens.colors.paper,
-    borderWidth: 1,
-    borderColor: tokens.colors.alertCrimson,
-    alignItems: 'center',
-  },
-  sosDialText: {
-    color: tokens.colors.alertCrimson,
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  sosSentBanner: {
-    marginBottom: 10,
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: tokens.colors.brandJadeSoft,
-  },
-  sosSentText: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    color: tokens.colors.brandJade,
-  },
   devExtTrigger: {
     marginBottom: 12,
     paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: tokens.colors.accentOchre,
-    backgroundColor: '#FFFBEB',
-    alignItems: 'center',
+    alignSelf: 'center',
   },
   devExtTriggerText: {
-    fontSize: 12.5,
-    fontWeight: '600',
-    color: tokens.colors.accentOchre,
+    fontSize: 13,
+    color: tokens.colors.inkMuted,
+    textDecorationLine: 'underline',
   },
 });
