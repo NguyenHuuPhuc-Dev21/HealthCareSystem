@@ -26,7 +26,7 @@ import {
   mapCredentialView,
   mapStatusToProfile,
 } from '@healthcare-system/shared';
-import { AppButton, StatusBadge } from '../../components';
+import { AppButton, CareNestLogoMark, StatusBadge } from '../../components';
 import { useAuth } from '../auth/AuthContext';
 import { env } from '../../lib/env';
 import { IS_DEV } from '../../lib/hardware-providers';
@@ -115,7 +115,10 @@ export const PendingApprovalScreen: React.FC<Props> = ({ navigation }) => {
       {/* Top Header */}
       <View style={styles.headerBar}>
         <View style={styles.headerInfo}>
-          <Text style={styles.headerTitle}>Hồ sơ chờ phê duyệt</Text>
+          <View style={styles.brandRow}>
+            <CareNestLogoMark size={24} />
+            <Text style={styles.headerTitle}>Hồ sơ chờ phê duyệt</Text>
+          </View>
           <Text style={styles.headerSubtitle}>
             Xin chào {session?.user?.full_name || 'Điều dưỡng'} ({session?.user?.phone})
           </Text>
@@ -314,6 +317,11 @@ const styles = StyleSheet.create({
   },
   headerInfo: {
     flex: 1,
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   headerTitle: {
     fontSize: tokens.typography.fontSizeLarge,

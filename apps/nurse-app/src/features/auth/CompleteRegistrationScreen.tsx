@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AlertCircle, ArrowLeft, UserCheck } from 'lucide-react-native';
+import { AlertCircle, ArrowLeft, ArrowRight, UserCheck } from 'lucide-react-native';
 import { AppButton } from '../../components';
 import type { AuthStackParamList } from '../../navigation/types';
 import { tokens } from '../../styles/tokens';
@@ -133,7 +133,9 @@ export const CompleteRegistrationScreen: React.FC<Props> = ({ navigation, route 
 
             {/* Submit Button */}
             <AppButton
-              label={loading ? 'Đang tạo tài khoản...' : 'Bắt đầu thiết lập hồ sơ →'}
+              label={loading ? 'Đang tạo tài khoản...' : 'Bắt đầu thiết lập hồ sơ'}
+              icon={!loading ? <ArrowRight size={18} color="#FFFFFF" /> : undefined}
+              iconPosition="right"
               onPress={handleSubmit}
               disabled={!isValidFullName || loading}
               loading={loading}

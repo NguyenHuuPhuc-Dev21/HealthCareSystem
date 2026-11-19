@@ -22,9 +22,9 @@ import { CredentialsScreen } from '../features/credentials/CredentialsScreen';
 import { RenewGphnScreen } from '../features/credentials/RenewGphnScreen';
 import { MyShiftsScreen } from '../features/shifts/MyShiftsScreen';
 import { CompletedShiftDetailScreen } from '../features/shifts/CompletedShiftDetailScreen';
+import { AvailabilityScreen } from '../features/availability/AvailabilityScreen';
 import {
   JobsPlaceholderScreen,
-  SchedulePlaceholderScreen,
   ShiftResultScreen,
 } from '../features/placeholders/ZoneScreens';
 import {
@@ -109,7 +109,7 @@ function MainTabsNavigator({
       />
       <MainTab.Screen
         name="ScheduleTab"
-        component={SchedulePlaceholderScreen}
+        component={AvailabilityScreen}
         options={{
           title: 'Lịch rảnh',
           tabBarIcon: ({ color, size }) => <Calendar color={color} size={size} />,

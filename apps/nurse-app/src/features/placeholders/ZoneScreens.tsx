@@ -39,14 +39,6 @@ export const JobsPlaceholderScreen: React.FC = () => (
   />
 );
 
-export const SchedulePlaceholderScreen: React.FC = () => (
-  <RoadmapTabTemplate
-    badge="Giai đoạn M2"
-    title="Lịch rảnh & Ngày nghỉ"
-    description="Cấu hình khung giờ rảnh hằng tuần, ngày nghỉ và phủ lớp ca đã xác nhận."
-  />
-);
-
 type ShiftResultProps = NativeStackScreenProps<ActiveStackParamList, 'ShiftResult'>;
 
 export const ShiftResultScreen: React.FC<ShiftResultProps> = ({ navigation, route }) => {

@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AlertCircle, ShieldCheck } from 'lucide-react-native';
-import { AppButton, StatusBadge } from '../../components';
+import { AlertCircle, ArrowRight } from 'lucide-react-native';
+import { AppButton, CareNestLogo, StatusBadge } from '../../components';
 import { env } from '../../lib/env';
 import { IS_DEV } from '../../lib/hardware-providers';
 import type { AuthStackParamList } from '../../navigation/types';
@@ -78,13 +78,14 @@ export const PhoneLoginScreen: React.FC<Props> = ({ navigation }) => {
           keyboardShouldPersistTaps="handled"
         >
           {/* Header Brand */}
-          <View style={styles.brandHeader}>
-            <View style={styles.logoBadge}>
-              <ShieldCheck size={28} color={tokens.colors.paper} />
-            </View>
-            <Text style={styles.brandTitle}>CareNest</Text>
-            <Text style={styles.appRole}>CỔNG ĐIỀU DƯỠNG VIÊN</Text>
-          </View>
+          <CareNestLogo
+            size={56}
+            layout="vertical"
+            showTagline
+            showRoleBadge
+            roleText="CỔNG ĐIỀU DƯỠNG VIÊN"
+            style={styles.brandHeader}
+          />
 
           {/* Card Form (SH1) */}
           <View style={styles.card}>
@@ -142,7 +143,9 @@ export const PhoneLoginScreen: React.FC<Props> = ({ navigation }) => {
 
             {/* Submit Button */}
             <AppButton
-              label={loading ? 'Đang gửi mã...' : 'Nhận mã OTP →'}
+              label={loading ? 'Đang gửi mã...' : 'Nhận mã OTP'}
+              icon={!loading ? <ArrowRight size={18} color="#FFFFFF" /> : undefined}
+              iconPosition="right"
               onPress={handleRequestOtp}
               disabled={!isValid || loading}
               loading={loading}

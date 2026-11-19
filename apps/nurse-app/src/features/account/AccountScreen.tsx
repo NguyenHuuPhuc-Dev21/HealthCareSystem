@@ -24,7 +24,7 @@ import {
   User,
 } from 'lucide-react-native';
 import { DocType, NurseTier, VerificationStatus } from '@healthcare-system/shared';
-import { AppButton, StatusBadge } from '../../components';
+import { AppButton, CareNestLogoMark, StatusBadge } from '../../components';
 import { useAuth } from '../auth/AuthContext';
 import { formatMaskedPhone } from '../../lib/formatters';
 import { IS_DEV } from '../../lib/hardware-providers';
@@ -105,6 +105,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
       {/* Top Bar per APP-N5 */}
       <View style={styles.appTop}>
         <View style={styles.brandRow}>
+          <CareNestLogoMark size={26} />
           <Text style={styles.brandText}>CareNest</Text>
         </View>
         <View style={styles.topRight}>
@@ -143,7 +144,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
           {ratingAvg > 0 ? (
             <View style={styles.chipAmber}>
               <Star color={tokens.colors.accentOchre} size={14} />
-              <Text style={styles.chipAmberText}>★ {ratingAvg.toFixed(1)}</Text>
+              <Text style={styles.chipAmberText}>{ratingAvg.toFixed(1)}</Text>
             </View>
           ) : null}
           {isRetired ? (
@@ -153,7 +154,8 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
             </View>
           ) : null}
           <View style={styles.chipJade}>
-            <Text style={styles.chipJadeText}>● Sẵn sàng nhận ca</Text>
+            <View style={styles.onlineDot} />
+            <Text style={styles.chipJadeText}>Sẵn sàng nhận ca</Text>
           </View>
         </View>
 
@@ -293,11 +295,13 @@ const styles = StyleSheet.create({
   brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
   },
   brandText: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '800',
     color: tokens.colors.brandJade,
+    letterSpacing: -0.4,
   },
   topRight: {
     flexDirection: 'row',
@@ -369,6 +373,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: tokens.radii.pill,
+  },
+  onlineDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: tokens.colors.brandJade,
   },
   chipJadeText: {
     fontSize: 13,

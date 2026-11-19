@@ -32,6 +32,9 @@ export const env = {
   get useMockShifts(): boolean {
     return nativeConfig.USE_MOCK_SHIFTS !== 'false' && process.env.USE_MOCK_SHIFTS !== 'false';
   },
+  get useMockAvailability(): boolean {
+    return nativeConfig.USE_MOCK_AVAILABILITY !== 'false' && process.env.USE_MOCK_AVAILABILITY !== 'false';
+  },
   get useMockCredentials(): boolean {
     return (
       nativeConfig.USE_MOCK_CREDENTIALS === 'true' ||

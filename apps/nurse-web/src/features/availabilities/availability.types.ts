@@ -10,6 +10,7 @@ export {
   findOverlap,
   formatWindow,
   isOvernight,
+  lockedWindows,
   minutesOf,
   newId,
   segmentsOnStartDay,

@@ -169,7 +169,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         <Text style={styles.infoLine}>
           Ảnh 2 mặt:{' '}
           <Text style={styles.infoValue}>
-            {draft.cccdFrontUri && draft.cccdBackUri ? '✓ Đã chụp đủ 2 mặt' : 'Thiếu ảnh'}
+            {draft.cccdFrontUri && draft.cccdBackUri ? 'Đã chụp đủ 2 mặt' : 'Thiếu ảnh'}
           </Text>
         </Text>
       </View>
@@ -194,7 +194,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         </View>
         <Text style={styles.infoLine}>
           Selfie trực tiếp:{' '}
-          <Text style={styles.infoValue}>{draft.portraitUri ? '✓ Đã chụp thành công' : 'Chưa chụp'}</Text>
+          <Text style={styles.infoValue}>{draft.portraitUri ? 'Đã chụp thành công' : 'Chưa chụp'}</Text>
         </Text>
       </View>
 
@@ -218,7 +218,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         </View>
         <Text style={styles.infoLine}>
           Ảnh bằng cấp:{' '}
-          <Text style={styles.infoValue}>{draft.degreeUri ? '✓ Đã tải lên' : 'Chưa có ảnh'}</Text>
+          <Text style={styles.infoValue}>{draft.degreeUri ? 'Đã tải lên' : 'Chưa có ảnh'}</Text>
         </Text>
         <Text style={styles.infoLine}>
           Kinh nghiệm: <Text style={styles.infoValue}>{draft.yearsOfExp || '0'} năm</Text>
@@ -288,7 +288,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
           <Text style={styles.infoValue}>
             {draft.isRetired
               ? draft.retirementUri
-                ? '✓ Đã chụp quyết định nghỉ hưu'
+                ? 'Đã chụp quyết định nghỉ hưu'
                 : 'Chưa có ảnh quyết định'
               : 'Không đăng ký'}
           </Text>

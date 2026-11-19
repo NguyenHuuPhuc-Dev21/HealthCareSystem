@@ -11,7 +11,7 @@ import {
   type MobileShiftSummary,
 } from '@healthcare-system/shared';
 import { AlertTriangle, ChevronRight, FileText, ShieldAlert } from 'lucide-react-native';
-import { AppButton, StateView, StatusBadge } from '../../components';
+import { AppButton, CareNestLogoMark, StateView, StatusBadge } from '../../components';
 import { useAuth } from '../auth/AuthContext';
 import { getGphnAlertInfo } from '../credentials/credentials.api';
 import { getMyShifts } from '../active-shift/active-shift.api';
@@ -97,7 +97,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.homeHead}>
-          <Text style={styles.brandMark}>CareNest</Text>
+          <View style={styles.brandRow}>
+            <CareNestLogoMark size={24} />
+            <Text style={styles.brandMark}>CareNest</Text>
+          </View>
           <Text style={styles.title}>Lịch trực hôm nay</Text>
           <Text style={styles.subtitle}>
             Kiểm tra hồ sơ người bệnh, điểm danh tại nhà và ghi nhận chăm sóc lâm sàng.
@@ -268,11 +271,17 @@ const styles = StyleSheet.create({
   homeHead: {
     marginBottom: 18,
   },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
   brandMark: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '800',
     color: tokens.colors.brandJade,
-    marginBottom: 4,
+    letterSpacing: -0.3,
   },
   title: {
     fontSize: 25,

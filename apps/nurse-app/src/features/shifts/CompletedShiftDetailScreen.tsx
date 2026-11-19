@@ -254,7 +254,8 @@ export const CompletedShiftDetailScreen: React.FC<CompletedShiftDetailScreenProp
           ) : null}
 
           <AppButton
-            label="★ Đánh giá người bệnh / người nhà"
+            label="Đánh giá người bệnh / người nhà"
+            icon={<Star size={18} color={tokens.colors.brandJade} />}
             variant="secondary"
             onPress={() => {
               Alert.alert(
@@ -267,7 +268,8 @@ export const CompletedShiftDetailScreen: React.FC<CompletedShiftDetailScreenProp
           />
 
           <AppButton
-            label="⚠️ Mở khiếu nại / Phản ánh ca này"
+            label="Mở khiếu nại / Phản ánh ca này"
+            icon={<AlertTriangle size={18} color={tokens.colors.alertCrimson} />}
             variant="secondary"
             onPress={() => {
               Alert.alert(

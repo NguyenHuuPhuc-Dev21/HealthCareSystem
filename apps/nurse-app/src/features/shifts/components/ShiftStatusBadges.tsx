@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { AlertTriangle, Banknote } from 'lucide-react-native';
 import {
   BookingDisputeStatus,
   ExecutionStatus,
@@ -46,9 +47,9 @@ export const ShiftStatusBadges: React.FC<ShiftStatusBadgesProps> = ({
   const getPaymentBadge = () => {
     if (isCash) {
       if (executionStatus === ExecutionStatus.COMPLETED) {
-        return { label: '💵 Tiền mặt · Chờ nộp hoa hồng', style: styles.badgeCrimsonSoft, textStyle: styles.textCrimson };
+        return { label: 'Tiền mặt · Chờ nộp hoa hồng', style: styles.badgeCrimsonSoft, textStyle: styles.textCrimson };
       }
-      return { label: '💵 Tiền mặt tại nhà', style: styles.badgeOchre, textStyle: styles.textOchre };
+      return { label: 'Tiền mặt tại nhà', style: styles.badgeOchre, textStyle: styles.textOchre };
     }
 
     switch (paymentStatus) {
@@ -77,15 +78,17 @@ export const ShiftStatusBadges: React.FC<ShiftStatusBadgesProps> = ({
 
       {/* 2. Trục Thanh toán */}
       {payMeta ? (
-        <View style={[styles.badge, payMeta.style]}>
+        <View style={[styles.badge, payMeta.style, isCash && styles.badgeWithIcon]}>
+          {isCash && <Banknote size={13} color={payMeta.textStyle.color} style={styles.badgeIcon} />}
           <Text style={[styles.badgeText, payMeta.textStyle]}>{payMeta.label}</Text>
         </View>
       ) : null}
 
       {/* 3. Trục Khiếu nại */}
       {hasDispute ? (
-        <View style={[styles.badge, styles.badgeCrimson]}>
-          <Text style={[styles.badgeText, styles.textCrimson]}>⚠️ Đang khiếu nại</Text>
+        <View style={[styles.badge, styles.badgeCrimsonSoft, styles.badgeWithIcon]}>
+          <AlertTriangle size={13} color={tokens.colors.alertCrimson} style={styles.badgeIcon} />
+          <Text style={[styles.badgeText, styles.textCrimson]}>Đang khiếu nại</Text>
         </View>
       ) : null}
     </View>
@@ -108,6 +111,13 @@ const styles = StyleSheet.create({
     borderRadius: tokens.radii.pill,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  badgeWithIcon: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  badgeIcon: {
+    marginRight: 1,
   },
   badgeText: {
     fontSize: 12,
