@@ -15,6 +15,9 @@ import { AppButton, StateView, StatusBadge } from '../../components';
 import { useAuth } from '../auth/AuthContext';
 import { getGphnAlertInfo } from '../credentials/credentials.api';
 import { getMyShifts } from '../active-shift/active-shift.api';
+import { DEV_SAMPLE_SHIFT } from '../shifts/shifts.mock';
+
+export { DEV_SAMPLE_SHIFT };
 import {
   getHardwareCapabilityStatus,
   IS_DEV,
@@ -34,23 +37,6 @@ interface HomeScreenProps {
   onRequestCurrentPosition?: () => Promise<DeviceGeoCoords>;
   onCaptureLivePhoto?: () => Promise<string | null>;
 }
-
-export const DEV_SAMPLE_SHIFT: MobileShiftSummary = {
-  bookingId: 'job-1',
-  bookingCode: 'BK-20261102-001',
-  patientName: 'Bà Nguyễn Thị Mai',
-  patientAge: 78,
-  patientAddress: 'Số 25 Quang Trung, Hải Châu, Đà Nẵng',
-  patientLatitude: 16.0718,
-  patientLongitude: 108.2205,
-  serviceName: 'Chăm sóc vết loét độ 3 và thay băng',
-  timeRange: '08:00 – 12:00 hôm nay',
-  mobilityNote: 'Nằm tại giường, cần hỗ trợ xoay trở nhẹ nhàng',
-  allergies: 'Dị ứng kháng sinh nhóm Penicillin',
-  isInvasive: true,
-  prescriptionSummary:
-    'Đơn thuốc ngày 26/10/2026: Dung dịch sát khuẩn vết loét Povidone Iodine 10%, gạc vô khuẩn và băng ép chuyên dụng.',
-};
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   navigation,

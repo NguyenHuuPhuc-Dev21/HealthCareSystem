@@ -39,5 +39,6 @@ export type ActiveStackParamList = {
   };
   Credentials: undefined;
   RenewGphn: undefined;
+  CompletedShiftDetail: { bookingId: string };
 };
 

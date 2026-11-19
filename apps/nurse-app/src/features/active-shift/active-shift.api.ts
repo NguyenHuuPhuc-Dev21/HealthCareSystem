@@ -1,7 +1,13 @@
 import type { MobileShiftSummary } from '@healthcare-system/shared';
 import { apiClient, ApiResponse } from '../../lib/api-client';
+import { env } from '../../lib/env';
+import { mockGetShiftById, mockGetShifts } from '../shifts/shifts.mock';
 
 export type { MobileShiftSummary };
+
+export interface GetMyShiftsParams {
+  status?: 'upcoming' | 'in_progress' | 'completed';
+}
 
 export interface PendingExtensionDto {
   id: string;
@@ -55,8 +61,27 @@ export interface MobileCheckOutPayload {
   handoverNote: string;
 }
 
-export async function getMyShifts(): Promise<ApiResponse<MobileShiftSummary[]>> {
-  return apiClient<MobileShiftSummary[]>('/nurse/shifts');
+export async function getMyShifts(
+  params?: GetMyShiftsParams
+): Promise<ApiResponse<MobileShiftSummary[]>> {
+  if (env.useMockShifts) {
+    const list = mockGetShifts(params);
+    return { success: true, data: list };
+  }
+
+  const query = params?.status ? `?status=${params.status}` : '';
+  return apiClient<MobileShiftSummary[]>(`/nurse/shifts${query}`);
+}
+
+export async function getShiftState(
+  bookingId: string
+): Promise<ApiResponse<MobileShiftSummary | null>> {
+  if (env.useMockShifts) {
+    const item = mockGetShiftById(bookingId);
+    return { success: true, data: item };
+  }
+
+  return apiClient<MobileShiftSummary>(`/bookings/${bookingId}/shift-state`);
 }
 
 export async function getShiftExecutionState(

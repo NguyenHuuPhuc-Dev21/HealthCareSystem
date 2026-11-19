@@ -39,14 +39,6 @@ export const JobsPlaceholderScreen: React.FC = () => (
   />
 );
 
-export const ShiftsPlaceholderScreen: React.FC = () => (
-  <RoadmapTabTemplate
-    badge="Giai đoạn M4"
-    title="Ca trực của tôi"
-    description="Theo dõi các ca đã nhận và lịch sử thực hiện ca lâm sàng."
-  />
-);
-
 export const SchedulePlaceholderScreen: React.FC = () => (
   <RoadmapTabTemplate
     badge="Giai đoạn M2"
@@ -75,7 +67,7 @@ export const ShiftResultScreen: React.FC<ShiftResultProps> = ({ navigation, rout
           </Text>
           <View style={styles.stack}>
             <AppButton
-              label="Về màn hình chính"
+              label="Về danh sách ca trực"
               onPress={() => navigation.popToTop()}
             />
           </View>

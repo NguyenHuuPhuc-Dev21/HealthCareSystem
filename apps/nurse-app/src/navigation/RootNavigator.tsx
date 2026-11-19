@@ -20,11 +20,12 @@ import { AccountLockedScreen } from '../features/onboarding/AccountLockedScreen'
 import { AccountScreen } from '../features/account/AccountScreen';
 import { CredentialsScreen } from '../features/credentials/CredentialsScreen';
 import { RenewGphnScreen } from '../features/credentials/RenewGphnScreen';
+import { MyShiftsScreen } from '../features/shifts/MyShiftsScreen';
+import { CompletedShiftDetailScreen } from '../features/shifts/CompletedShiftDetailScreen';
 import {
   JobsPlaceholderScreen,
   SchedulePlaceholderScreen,
   ShiftResultScreen,
-  ShiftsPlaceholderScreen,
 } from '../features/placeholders/ZoneScreens';
 import {
   createCameraProvider,
@@ -100,7 +101,7 @@ function MainTabsNavigator({
       />
       <MainTab.Screen
         name="ShiftsTab"
-        component={ShiftsPlaceholderScreen}
+        component={MyShiftsScreen}
         options={{
           title: 'Ca trực',
           tabBarIcon: ({ color, size }) => <ClipboardList color={color} size={size} />,
@@ -256,6 +257,10 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
           <ActiveStack.Screen name="ShiftResult" component={ShiftResultScreen} />
           <ActiveStack.Screen name="Credentials" component={CredentialsScreen} />
           <ActiveStack.Screen name="RenewGphn" component={RenewGphnScreen} />
+          <ActiveStack.Screen
+            name="CompletedShiftDetail"
+            component={CompletedShiftDetailScreen}
+          />
         </ActiveStack.Navigator>
       )}
     </NavigationContainer>
