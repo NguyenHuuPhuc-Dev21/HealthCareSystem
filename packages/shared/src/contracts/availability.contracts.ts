@@ -120,3 +120,41 @@ export function newId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+/**
+ * Khung tuần nào đang bị khóa bởi ca đã CONFIRMED/IN_PROGRESS?
+ * Khóa khi: có ca trong 14 ngày tới rơi đúng thứ của khung và ca BAO TRỌN khung
+ * (ca 07:00–12:00 nằm trong khung 07:00–21:00 thì khung vẫn sửa được).
+ * Trả về Map: id khung -> mã đơn khóa nó.
+ */
+export function lockedWindows(
+  recurring: RecurringWindow[],
+  bookings: ConfirmedBooking[],
+  referenceDate: Date = new Date()
+): Map<string, string> {
+  const locked = new Map<string, string>();
+  const today = referenceDate;
+  const horizon = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 14);
+  const norm = (start: string, end: string): [number, number] => {
+    const s = minutesOf(start);
+    let e = minutesOf(end);
+    if (e <= s) e += 24 * 60;
+    return [s, e];
+  };
+  for (const b of bookings) {
+    const bDate = new Date(`${b.date}T00:00:00`);
+    if (
+      bDate < new Date(today.getFullYear(), today.getMonth(), today.getDate()) ||
+      bDate > horizon
+    ) {
+      continue;
+    }
+    const [bs, be] = norm(b.startTime, b.endTime);
+    for (const w of recurring) {
+      if (w.dayOfWeek !== bDate.getDay()) continue;
+      const [ws, we] = norm(w.startTime, w.endTime);
+      if (bs <= ws && be >= we) locked.set(w.id, b.code);
+    }
+  }
+  return locked;
+}
+
