@@ -205,6 +205,25 @@ describe('A07 — Job Board và lời mời trực tiếp (nurse-app)', () => {
       expect(res.data?.totalAmount).toBe(500000);
     });
 
+    it('ca khách chọn trực tiếp có thể xem chi tiết ca (getJobDetail) đầy đủ trước khi nhận', async () => {
+      const inviteRes = await getDirectInvitations();
+      expect(inviteRes.data).not.toBeNull();
+      const bookingId = inviteRes.data!.bookingId;
+
+      // Điều dưỡng xem chi tiết ca trước khi nhận
+      const detailRes = await getJobDetail(bookingId);
+      expect(detailRes.success).toBe(true);
+      expect(detailRes.data).not.toBeNull();
+      expect(detailRes.data?.id).toBe(bookingId);
+      expect(detailRes.data?.patientName).toBe('Bà Nguyễn Thị Hoa');
+      expect(detailRes.data?.customerName).toBe('Anh Nguyễn Văn An');
+      expect(detailRes.data?.isDirectInvite).toBe(true);
+
+      // Sau khi xem chi tiết, điều dưỡng bấm nhận ca
+      const acceptRes = await acceptDirectInvite(bookingId, 'TIER_1_BASIC');
+      expect(acceptRes.success).toBe(true);
+    });
+
     it('chấp nhận lời mời trực tiếp thành công và tự động xóa khỏi danh sách lời mời', async () => {
       const res = await acceptDirectInvite('job-1048', 'TIER_1_BASIC');
       expect(res.success).toBe(true);

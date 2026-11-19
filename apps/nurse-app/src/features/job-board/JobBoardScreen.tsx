@@ -326,7 +326,12 @@ export const JobBoardScreen: React.FC<JobBoardScreenProps> = ({ navigation }) =>
       {directInvite && (
         <DirectInviteCard
           invite={directInvite}
-          onAccept={handleDirectInviteAccept}
+          onViewDetail={(bookingId) =>
+            navigation.navigate('JobDetail', {
+              jobId: bookingId,
+              isDirectInvite: true,
+            })
+          }
           onDecline={handleDirectInviteDecline}
           onExpire={handleDirectInviteExpire}
         />

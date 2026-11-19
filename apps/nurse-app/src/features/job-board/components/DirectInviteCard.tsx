@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Clock, Star, User } from 'lucide-react-native';
+import { ChevronRight, Clock, Star, User } from 'lucide-react-native';
 import type { DirectInvitation } from '@healthcare-system/shared';
 import { calculateJobNetAmount } from '@healthcare-system/shared';
 import { tokens } from '../../../styles/tokens';
 
 export interface DirectInviteCardProps {
   invite: DirectInvitation;
-  onAccept: (bookingId: string) => void;
+  onViewDetail: (bookingId: string) => void;
   onDecline: (bookingId: string) => void;
   onExpire?: () => void;
 }
 
 export const DirectInviteCard: React.FC<DirectInviteCardProps> = ({
   invite,
-  onAccept,
+  onViewDetail,
   onDecline,
   onExpire,
 }) => {
@@ -71,7 +71,13 @@ export const DirectInviteCard: React.FC<DirectInviteCardProps> = ({
   const netAmount = calculateJobNetAmount(invite.totalAmount);
 
   return (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.9}
+      onPress={() => onViewDetail(invite.bookingId)}
+      accessibilityRole="button"
+      accessibilityLabel={`Lời mời trực tiếp từ ${invite.inviterName}, bấm để xem chi tiết ca`}
+    >
       {/* Top Banner Tag */}
       <View style={styles.badgeRow}>
         <View style={styles.starBadge}>
@@ -103,11 +109,14 @@ export const DirectInviteCard: React.FC<DirectInviteCardProps> = ({
         </Text>
       </View>
 
-      {/* Action Buttons */}
+      {/* Action Buttons: Xem chi tiết trước khi nhận */}
       <View style={styles.actionsRow}>
         <TouchableOpacity
           style={styles.declineButton}
-          onPress={() => onDecline(invite.bookingId)}
+          onPress={(e) => {
+            e.stopPropagation?.();
+            onDecline(invite.bookingId);
+          }}
           activeOpacity={0.7}
           accessibilityRole="button"
           accessibilityLabel="Từ chối lời mời"
@@ -116,16 +125,17 @@ export const DirectInviteCard: React.FC<DirectInviteCardProps> = ({
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.acceptButton}
-          onPress={() => onAccept(invite.bookingId)}
+          style={styles.viewDetailButton}
+          onPress={() => onViewDetail(invite.bookingId)}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel="Nhận ca này"
+          accessibilityLabel="Xem chi tiết và nhận ca"
         >
-          <Text style={styles.acceptButtonText}>Nhận ca này</Text>
+          <Text style={styles.viewDetailButtonText}>Xem chi tiết & Nhận ca</Text>
+          <ChevronRight size={18} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -250,21 +260,23 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: tokens.colors.inkSecondary,
   },
-  acceptButton: {
+  viewDetailButton: {
     flex: 2,
     height: 52,
     borderRadius: 12,
     backgroundColor: tokens.colors.brandJade,
-    justifyContent: 'center',
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
     shadowColor: tokens.colors.brandJade,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 2,
   },
-  acceptButtonText: {
-    fontSize: 16,
+  viewDetailButtonText: {
+    fontSize: 15.5,
     fontWeight: '800',
     color: '#FFFFFF',
   },

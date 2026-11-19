@@ -22,6 +22,7 @@ import {
   Lock,
   MapPin,
   ShieldAlert,
+  Star,
   User,
 } from 'lucide-react-native';
 import {
@@ -36,6 +37,7 @@ import type { ActiveStackParamList } from '../../navigation/types';
 import {
   acceptDirectInvite,
   acceptJob,
+  declineDirectInvite,
   getDepositStatus,
   getJobDetail,
 } from './job-board.api';
@@ -225,6 +227,33 @@ export const JobDetailScreen: React.FC<JobDetailScreenProps> = ({
     );
   };
 
+  const handleDeclineDirectInvite = () => {
+    Alert.alert(
+      'Từ chối lời mời',
+      'Bạn có chắc chắn muốn từ chối lời mời này? Hệ thống sẽ chuyển ca cho điều dưỡng khác.',
+      [
+        { text: 'Hủy', style: 'cancel' },
+        {
+          text: 'Từ chối',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await declineDirectInvite(job.id, 'Điều dưỡng bận');
+              Alert.alert('Đã từ chối', 'Bạn đã từ chối lời mời nhận ca.', [
+                {
+                  text: 'Đóng',
+                  onPress: () => navigation.goBack(),
+                },
+              ]);
+            } catch {
+              Alert.alert('Lỗi', 'Không thể từ chối lời mời lúc này.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Top Bar */}
@@ -242,6 +271,21 @@ export const JobDetailScreen: React.FC<JobDetailScreenProps> = ({
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
+        {/* Direct Invite Banner */}
+        {(isDirectInvite || job.isDirectInvite) && (
+          <View style={styles.directInviteBanner}>
+            <Star size={20} color="#D97706" fill="#D97706" />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.directInviteBannerTitle}>
+                Khách chọn đích danh bạn
+              </Text>
+              <Text style={styles.directInviteBannerDesc}>
+                Lời mời nhận ca trực tiếp từ {job.customerName || job.inviterName || 'khách hàng quen'}. Vui lòng xem kỹ thông tin người bệnh và y lệnh trước khi nhận ca.
+              </Text>
+            </View>
+          </View>
+        )}
+
         {/* Locked warning banner */}
         {isLocked && (
           <View style={styles.lockedBanner}>
@@ -505,6 +549,35 @@ export const JobDetailScreen: React.FC<JobDetailScreenProps> = ({
             <Text style={styles.disabledActionText}>
               Cần Tầng 2 (có GPHN còn hạn) để nhận ca
             </Text>
+          </View>
+        ) : isDirectInvite || job.isDirectInvite ? (
+          <View style={styles.directActionsRow}>
+            <TouchableOpacity
+              style={styles.directDeclineBtn}
+              onPress={handleDeclineDirectInvite}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="Từ chối lời mời"
+            >
+              <Text style={styles.directDeclineBtnText}>Từ chối</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.directAcceptBtn, accepting && styles.buttonDisabled]}
+              onPress={handlePressAccept}
+              disabled={accepting}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={`Đồng ý nhận ca, thu về ${netAmount.toLocaleString('vi-VN')} đồng`}
+            >
+              {accepting ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.directAcceptBtnText}>
+                  Đồng ý nhận ca · {netAmount.toLocaleString('vi-VN')}đ
+                </Text>
+              )}
+            </TouchableOpacity>
           </View>
         ) : (
           <TouchableOpacity
@@ -875,5 +948,64 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: '#9CA3AF',
+  },
+  directInviteBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1.5,
+    borderColor: '#F0C36D',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 16,
+  },
+  directInviteBannerTitle: {
+    fontSize: 15.5,
+    fontWeight: '800',
+    color: '#92400E',
+    marginBottom: 2,
+  },
+  directInviteBannerDesc: {
+    fontSize: 13.5,
+    color: '#78350F',
+    lineHeight: 18,
+  },
+  directActionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  directDeclineBtn: {
+    flex: 1,
+    height: 56,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#D1D5DB',
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  directDeclineBtnText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: tokens.colors.inkSecondary,
+  },
+  directAcceptBtn: {
+    flex: 2,
+    height: 56,
+    borderRadius: 14,
+    backgroundColor: tokens.colors.brandJade,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: tokens.colors.brandJade,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  directAcceptBtnText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
 });
