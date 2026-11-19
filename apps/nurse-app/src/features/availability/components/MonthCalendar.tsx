@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
+import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { tokens } from '../../../styles/tokens';
 import type { ConfirmedBooking, TimeOffException } from '@healthcare-system/shared';
 
@@ -116,7 +117,7 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({
             accessibilityRole="button"
             accessibilityLabel="Tháng trước"
           >
-            <Text style={styles.navBtnText}>‹</Text>
+            <ChevronLeft size={20} color={tokens.colors.inkPrimary} />
           </TouchableOpacity>
           <Text style={styles.monthTitle}>
             Tháng {currentMonth + 1}/{currentYear}
@@ -127,7 +128,7 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({
             accessibilityRole="button"
             accessibilityLabel="Tháng sau"
           >
-            <Text style={styles.navBtnText}>›</Text>
+            <ChevronRight size={20} color={tokens.colors.inkPrimary} />
           </TouchableOpacity>
         </View>
 

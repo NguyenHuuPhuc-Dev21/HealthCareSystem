@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
+import { AlertTriangle, X } from 'lucide-react-native';
 import { tokens } from '../../../styles/tokens';
 import {
   findOverlap,
@@ -95,7 +96,7 @@ export const TimeRangeSheet: React.FC<TimeRangeSheetProps> = ({
               <Text style={styles.sheetSubtitle}>{dayLabel}</Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Text style={styles.closeBtnText}>✕</Text>
+              <X size={20} color={tokens.colors.inkSecondary} />
             </TouchableOpacity>
           </View>
 
@@ -185,16 +186,18 @@ export const TimeRangeSheet: React.FC<TimeRangeSheetProps> = ({
 
               {overlap && (
                 <View style={styles.errorBox}>
+                  <AlertTriangle size={15} color={tokens.colors.alertCrimson} style={styles.errorIcon} />
                   <Text style={styles.errorText}>
-                    ⚠️ Bị trùng với khung giờ đã có ({formatWindow(overlap)}). Vui lòng chọn giờ khác.
+                    Bị trùng với khung giờ đã có ({formatWindow(overlap)}). Vui lòng chọn giờ khác.
                   </Text>
                 </View>
               )}
 
               {startTime === endTime && (
                 <View style={styles.errorBox}>
+                  <AlertTriangle size={15} color={tokens.colors.alertCrimson} style={styles.errorIcon} />
                   <Text style={styles.errorText}>
-                    ⚠️ Giờ kết thúc phải khác giờ bắt đầu.
+                    Giờ kết thúc phải khác giờ bắt đầu.
                   </Text>
                 </View>
               )}
@@ -385,8 +388,15 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 6,
     backgroundColor: tokens.colors.alertCrimsonSoft,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+  },
+  errorIcon: {
+    marginTop: 2,
   },
   errorText: {
+    flex: 1,
     fontSize: 13,
     color: tokens.colors.alertCrimson,
     fontWeight: '600',

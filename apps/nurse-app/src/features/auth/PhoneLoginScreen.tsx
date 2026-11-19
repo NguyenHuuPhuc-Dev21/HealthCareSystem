@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AlertCircle, ShieldCheck } from 'lucide-react-native';
+import { AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react-native';
 import { AppButton, StatusBadge } from '../../components';
 import { env } from '../../lib/env';
 import { IS_DEV } from '../../lib/hardware-providers';
@@ -142,7 +142,9 @@ export const PhoneLoginScreen: React.FC<Props> = ({ navigation }) => {
 
             {/* Submit Button */}
             <AppButton
-              label={loading ? 'Đang gửi mã...' : 'Nhận mã OTP →'}
+              label={loading ? 'Đang gửi mã...' : 'Nhận mã OTP'}
+              icon={!loading ? <ArrowRight size={18} color="#FFFFFF" /> : undefined}
+              iconPosition="right"
               onPress={handleRequestOtp}
               disabled={!isValid || loading}
               loading={loading}

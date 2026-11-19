@@ -13,6 +13,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   AlertTriangle,
   ArrowLeft,
+  ArrowRight,
   Award,
   CheckCircle2,
   Clock,
@@ -203,7 +204,8 @@ export const CredentialsScreen: React.FC<CredentialsScreenProps> = ({ navigation
 
           <View style={styles.heroActionRow}>
             <AppButton
-              label={hasPendingGphn ? 'GPHN đang chờ thẩm định' : '📜 Cập nhật GPHN mới'}
+              label={hasPendingGphn ? 'GPHN đang chờ thẩm định' : 'Cập nhật GPHN mới'}
+              icon={!hasPendingGphn ? <Award size={18} color="#FFFFFF" /> : undefined}
               variant={hasPendingGphn ? 'secondary' : 'primary'}
               onPress={() => navigation.navigate('RenewGphn')}
               style={styles.renewBtn}
@@ -234,7 +236,8 @@ export const CredentialsScreen: React.FC<CredentialsScreenProps> = ({ navigation
                 style={styles.alertActionBtn}
                 activeOpacity={0.8}
               >
-                <Text style={styles.alertActionBtnText}>Nộp GPHN mới ngay →</Text>
+                <Text style={styles.alertActionBtnText}>Nộp GPHN mới ngay</Text>
+                <ArrowRight size={14} color="#FFFFFF" strokeWidth={2.5} />
               </TouchableOpacity>
             </View>
           </View>
@@ -249,7 +252,8 @@ export const CredentialsScreen: React.FC<CredentialsScreenProps> = ({ navigation
                 style={styles.alertActionBtnOchre}
                 activeOpacity={0.8}
               >
-                <Text style={styles.alertActionBtnOchreText}>Gia hạn ngay trước khi hết hạn →</Text>
+                <Text style={styles.alertActionBtnOchreText}>Gia hạn ngay trước khi hết hạn</Text>
+                <ArrowRight size={14} color="#FFFFFF" strokeWidth={2.5} />
               </TouchableOpacity>
             </View>
           </View>
@@ -619,6 +623,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   alertActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     alignSelf: 'flex-start',
     backgroundColor: tokens.colors.alertCrimson,
     paddingVertical: 8,
@@ -631,6 +638,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   alertActionBtnOchre: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     alignSelf: 'flex-start',
     backgroundColor: tokens.colors.accentOchre,
     paddingVertical: 8,

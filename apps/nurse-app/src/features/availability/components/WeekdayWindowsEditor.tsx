@@ -7,6 +7,7 @@ import {
   Alert,
   Modal,
 } from 'react-native';
+import { Lock } from 'lucide-react-native';
 import { tokens } from '../../../styles/tokens';
 import {
   WEEKDAY_ORDER,
@@ -159,8 +160,9 @@ export const WeekdayWindowsEditor: React.FC<WeekdayWindowsEditorProps> = ({
                           )}
                           {isLocked && (
                             <View style={styles.lockedBadge}>
+                              <Lock size={12} color="#1D4ED8" />
                               <Text style={styles.lockedBadgeText}>
-                                🔒 Có ca {bookingCode}
+                                Có ca {bookingCode}
                               </Text>
                             </View>
                           )}
@@ -399,6 +401,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     borderWidth: 1,
     borderColor: '#BFDBFE',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   lockedBadgeText: {
     fontSize: 11.5,

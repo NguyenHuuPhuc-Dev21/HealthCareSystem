@@ -9,6 +9,7 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
+import { X } from 'lucide-react-native';
 import { tokens } from '../../../styles/tokens';
 import { newId, toISODate, type TimeOffException } from '@healthcare-system/shared';
 
@@ -103,7 +104,7 @@ export const TimeOffSheet: React.FC<TimeOffSheetProps> = ({
               </Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Text style={styles.closeBtnText}>✕</Text>
+              <X size={20} color={tokens.colors.inkSecondary} />
             </TouchableOpacity>
           </View>
 
