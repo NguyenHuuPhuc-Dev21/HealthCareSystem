@@ -49,11 +49,11 @@ export const BalanceTiles: React.FC<BalanceTilesProps> = ({
           onPress={onWithdrawPress}
           activeOpacity={0.85}
           accessibilityRole="button"
-          accessibilityLabel={`Rút về ngân hàng ${bankAccountMasked}`}
+          accessibilityLabel="Rút tiền về ngân hàng"
         >
           <ArrowDownToLine size={20} color="#FFFFFF" />
           <Text style={styles.btnWithdrawText}>
-            Rút về ngân hàng {bankAccountMasked}
+            Rút tiền về ngân hàng
           </Text>
         </TouchableOpacity>
       </View>

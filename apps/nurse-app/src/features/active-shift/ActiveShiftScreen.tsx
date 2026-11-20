@@ -709,6 +709,8 @@ const styles = StyleSheet.create({
   },
   tabItemActive: {
     borderBottomColor: tokens.colors.brandJade,
+    backgroundColor: tokens.colors.brandJadeSoft,
+    borderRadius: 8,
   },
   tabLabel: {
     fontSize: 13.5,

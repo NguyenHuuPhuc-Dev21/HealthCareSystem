@@ -114,7 +114,7 @@ export const WalletScreen: React.FC<WalletScreenProps> = ({ navigation }) => {
   const handleWithdrawPress = () => {
     Alert.alert(
       'Rút tiền về ngân hàng',
-      `Tài khoản thụ hưởng: Vietcombank ${bankAccountMasked}.\nTính năng rút tiền chi tiết đang mở qua màn A12.`,
+      'Tính năng rút tiền chi tiết đang mở qua màn A12.',
       [{ text: 'Đóng' }]
     );
   };

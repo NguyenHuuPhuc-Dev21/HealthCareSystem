@@ -71,18 +71,31 @@ function MainTabsNavigator({
     <MainTab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: tokens.colors.brandJade,
+        tabBarActiveTintColor: tokens.colors.brandJadeDark,
         tabBarInactiveTintColor: tokens.colors.inkSecondary,
+        tabBarActiveBackgroundColor: tokens.colors.brandJadeSoft,
+        tabBarInactiveBackgroundColor: 'transparent',
+        tabBarItemStyle: {
+          borderRadius: 14,
+          marginHorizontal: 3,
+          marginVertical: 4,
+          paddingVertical: 4,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
         tabBarStyle: {
-          height: 64,
-          paddingTop: 6,
-          paddingBottom: 8,
+          height: 68,
+          paddingTop: 4,
+          paddingBottom: 6,
+          paddingHorizontal: 6,
           backgroundColor: tokens.colors.paper,
           borderTopColor: tokens.colors.borderHairline,
+          borderTopWidth: 1,
         },
         tabBarLabelStyle: {
-          fontSize: 12.5,
+          fontSize: 12,
           fontWeight: '700',
+          marginTop: 2,
         },
       }}
     >
