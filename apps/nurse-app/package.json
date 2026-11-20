@@ -13,7 +13,10 @@
   },
   "dependencies": {
     "@healthcare-system/shared": "*",
+    "@notifee/react-native": "^7.9.0",
     "@react-native-community/netinfo": "^11.5.2",
+    "@react-native-firebase/app": "^19.3.0",
+    "@react-native-firebase/messaging": "^19.3.0",
     "@react-navigation/bottom-tabs": "^6.6.1",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",

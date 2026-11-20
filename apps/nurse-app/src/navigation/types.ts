@@ -1,4 +1,4 @@
-import type { DocType, MobileShiftSummary } from '@healthcare-system/shared';
+import type { DocType, MobileShiftSummary, RadarJob } from '@healthcare-system/shared';
 
 export type AuthStackParamList = {
   PhoneLogin: undefined;
@@ -41,5 +41,6 @@ export type ActiveStackParamList = {
   RenewGphn: undefined;
   CompletedShiftDetail: { bookingId: string };
   JobDetail: { jobId: string; isDirectInvite?: boolean };
+  Radar: { offerId: string; offer?: RadarJob; notificationId?: string };
 };
 

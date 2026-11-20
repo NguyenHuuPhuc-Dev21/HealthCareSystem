@@ -111,3 +111,4 @@ dependencies {
 }
 
 apply from: new File(resolvedCliPlatformAndroidDir, "native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+apply plugin: "com.google.gms.google-services"
