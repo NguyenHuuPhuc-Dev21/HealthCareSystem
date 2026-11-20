@@ -1,6 +1,9 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  createNavigationContainerRef,
+} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Briefcase, Calendar, ClipboardList, Home, User } from 'lucide-react-native';
@@ -25,6 +28,7 @@ import { CompletedShiftDetailScreen } from '../features/shifts/CompletedShiftDet
 import { AvailabilityScreen } from '../features/availability/AvailabilityScreen';
 import { JobBoardScreen } from '../features/job-board/JobBoardScreen';
 import { JobDetailScreen } from '../features/job-board/JobDetailScreen';
+import { RadarScreen } from '../features/radar/RadarScreen';
 import {
   ShiftResultScreen,
 } from '../features/placeholders/ZoneScreens';
@@ -46,6 +50,10 @@ export interface RootNavigatorProps {
   onRequestCurrentPosition?: () => Promise<DeviceGeoCoords>;
   onCaptureLivePhoto?: () => Promise<string | null>;
 }
+
+export const navigationRef = createNavigationContainerRef<
+  ActiveStackParamList & MainTabParamList & AuthStackParamList
+>();
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const OnboardingStack = createNativeStackNavigator<OnboardingStackParamList>();
@@ -154,7 +162,7 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
   });
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       {zone === 'auth' ? (
         <AuthStack.Navigator screenOptions={{ headerShown: false }}>
           <AuthStack.Screen name="PhoneLogin" component={PhoneLoginScreen} />
@@ -265,6 +273,15 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
           <ActiveStack.Screen
             name="JobDetail"
             component={JobDetailScreen}
+          />
+          <ActiveStack.Screen
+            name="Radar"
+            component={RadarScreen}
+            options={{
+              presentation: 'fullScreenModal',
+              headerShown: false,
+              animation: 'fade',
+            }}
           />
         </ActiveStack.Navigator>
       )}

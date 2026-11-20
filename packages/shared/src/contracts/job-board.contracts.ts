@@ -78,6 +78,7 @@ export interface ClaimJobResult {
   errorCode?:
     | 'ALREADY_CLAIMED'
     | 'JOB_ALREADY_TAKEN'
+    | 'OFFER_EXPIRED'
     | 'TIER_MISMATCH'
     | 'TIER_NOT_ALLOWED'
     | 'DEPOSIT_SHORTFALL'

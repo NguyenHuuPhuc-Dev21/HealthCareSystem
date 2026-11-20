@@ -1,5 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -10,12 +18,14 @@ import {
   VerificationStatus,
   type MobileShiftSummary,
 } from '@healthcare-system/shared';
-import { AlertTriangle, ChevronRight, FileText, ShieldAlert } from 'lucide-react-native';
+import { AlertTriangle, ChevronRight, FileText, ShieldAlert, Zap } from 'lucide-react-native';
 import { AppButton, CareNestLogoMark, StateView, StatusBadge } from '../../components';
 import { useAuth } from '../auth/AuthContext';
 import { getGphnAlertInfo } from '../credentials/credentials.api';
 import { getMyShifts } from '../active-shift/active-shift.api';
 import { DEV_SAMPLE_SHIFT } from '../shifts/shifts.mock';
+import { useRadar } from '../radar/RadarContext';
+import { createSimulatedRadarOffer } from '../radar/radar.mock';
 
 export { DEV_SAMPLE_SHIFT };
 import {
@@ -45,6 +55,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onCaptureLivePhoto,
 }) => {
   const { session } = useAuth();
+  const { isOnline, toggleOnline, triggerRadarOffer } = useRadar();
 
   const [activeShift, setActiveShift] = useState<MobileShiftSummary | null>(
     initialShift ?? (IS_DEV ? DEV_SAMPLE_SHIFT : null)
@@ -107,6 +118,68 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </Text>
         </View>
 
+        {/* Công tắc Sẵn sàng nhận ca (Online / Offline) */}
+        <View style={styles.onlineCard}>
+          <View style={styles.onlineLeft}>
+            <View style={styles.onlineHeaderRow}>
+              <Text style={styles.onlineTitle}>Sẵn sàng nhận ca</Text>
+              <View
+                style={[
+                  styles.statusPill,
+                  isOnline ? styles.statusPillOnline : styles.statusPillOffline,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.statusPillText,
+                    isOnline ? styles.statusPillTextOnline : styles.statusPillTextOffline,
+                  ]}
+                >
+                  {isOnline ? '● Sẵn sàng' : '○ Đang nghỉ'}
+                </Text>
+              </View>
+            </View>
+            <Text style={styles.onlineDesc}>
+              {isOnline
+                ? 'Bật để Radar và khách hàng thấy bạn đang rảnh.'
+                : 'Đã tắt nhận ca. Bạn sẽ không nhận thông báo ca gấp Radar.'}
+            </Text>
+          </View>
+          <Switch
+            value={isOnline}
+            onValueChange={() => void toggleOnline()}
+            trackColor={{ false: '#CBD5E1', true: tokens.colors.brandJade }}
+            thumbColor="#FFFFFF"
+            accessibilityLabel="Công tắc sẵn sàng nhận ca"
+          />
+        </View>
+
+        {/* [DEV] Nút giả lập ca gấp cho kiểm thử không cần Firebase */}
+        {IS_DEV && (
+          <View style={styles.devCard}>
+            <TouchableOpacity
+              style={styles.devBtnRadar}
+              onPress={() => {
+                if (!isOnline) {
+                  Alert.alert(
+                    'Chế độ nghỉ',
+                    'Bạn đang ở chế độ nghỉ (Offline). Hãy bật "Sẵn sàng nhận ca" để nhận Radar!'
+                  );
+                  return;
+                }
+                const simulatedOffer = createSimulatedRadarOffer();
+                triggerRadarOffer(simulatedOffer);
+              }}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="[DEV] Giả lập ca gấp Radar"
+            >
+              <Zap size={16} color="#DC2626" />
+              <Text style={styles.devBtnRadarText}>[DEV] Giả lập ca gấp Radar</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Thẻ GPHN trên trang chủ — Bấm vào mở Credentials */}
         <TouchableOpacity
           style={[
@@ -164,8 +237,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               alertInfo.status === 'EXPIRED'
                 ? tokens.colors.alertCrimson
                 : alertInfo.status === 'EXPIRING_SOON'
-                ? tokens.colors.accentOchre
-                : tokens.colors.inkSecondary
+                  ? tokens.colors.accentOchre
+                  : tokens.colors.inkSecondary
             }
             size={20}
           />
@@ -177,8 +250,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               {!hardwareStatus.hasCameraProvider && !hardwareStatus.hasLocationProvider
                 ? 'Thiếu kết nối Camera và GPS phần cứng cho thao tác điểm danh thực tế.'
                 : !hardwareStatus.hasCameraProvider
-                ? 'Thiếu kết nối Camera phần cứng để chụp ảnh selfie điểm danh.'
-                : 'Thiếu kết nối cảm biến GPS thiết bị.'}
+                  ? 'Thiếu kết nối Camera phần cứng để chụp ảnh selfie điểm danh.'
+                  : 'Thiếu kết nối cảm biến GPS thiết bị.'}
             </Text>
           </View>
         )}
@@ -462,6 +535,78 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '700',
+  },
+  onlineCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: tokens.colors.paper,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: tokens.colors.borderHairline,
+    marginBottom: 12,
+  },
+  onlineLeft: {
+    flex: 1,
+    marginRight: 12,
+  },
+  onlineHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  onlineTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: tokens.colors.inkPrimary,
+  },
+  onlineDesc: {
+    fontSize: 13,
+    color: tokens.colors.inkSecondary,
+    lineHeight: 18,
+  },
+  statusPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  statusPillOnline: {
+    backgroundColor: tokens.colors.brandJadeSoft,
+  },
+  statusPillOffline: {
+    backgroundColor: '#F1F5F9',
+  },
+  statusPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  statusPillTextOnline: {
+    color: tokens.colors.brandJade,
+  },
+  statusPillTextOffline: {
+    color: tokens.colors.inkSecondary,
+  },
+  devCard: {
+    marginBottom: 12,
+  },
+  devBtnRadar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#FEE2E2',
+    borderWidth: 1,
+    borderColor: '#FCA5A5',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+  },
+  devBtnRadarText: {
+    color: '#DC2626',
+    fontWeight: '700',
+    fontSize: 14,
   },
 });
 

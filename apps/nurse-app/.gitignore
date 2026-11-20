@@ -4,6 +4,7 @@ android/app/build/
 android/build/
 android/local.properties
 android/.cxx/
+android/app/google-services.json
 *.apk
 *.aab
 *.keystore
