@@ -24,7 +24,7 @@ export type MainTabParamList = {
   HomeTab: undefined;
   JobsTab: undefined;
   ShiftsTab: undefined;
-  ScheduleTab: undefined;
+  WalletTab: undefined;
   ProfileTab: undefined;
 };
 
@@ -42,5 +42,7 @@ export type ActiveStackParamList = {
   CompletedShiftDetail: { bookingId: string };
   JobDetail: { jobId: string; isDirectInvite?: boolean };
   Radar: { offerId: string; offer?: RadarJob; notificationId?: string };
+  Availability: undefined;
+  TransactionHistory: undefined;
 };
 

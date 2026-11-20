@@ -19,3 +19,4 @@ export * from './contracts/chat.contracts';
 export * from './contracts/notification.contracts';
 export * from './chat/contact-detector';
 export * from './mocks/job-board.mock';
+export * from './mocks/wallet.mock-data';

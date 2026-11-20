@@ -6,7 +6,7 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Briefcase, Calendar, ClipboardList, Home, User } from 'lucide-react-native';
+import { Briefcase, Calendar, ClipboardList, Home, User, Wallet } from 'lucide-react-native';
 import type { MobileShiftSummary } from '@healthcare-system/shared';
 import { StateView } from '../components';
 import { useAuth } from '../features/auth/AuthContext';
@@ -29,6 +29,8 @@ import { AvailabilityScreen } from '../features/availability/AvailabilityScreen'
 import { JobBoardScreen } from '../features/job-board/JobBoardScreen';
 import { JobDetailScreen } from '../features/job-board/JobDetailScreen';
 import { RadarScreen } from '../features/radar/RadarScreen';
+import { WalletScreen } from '../features/wallet/WalletScreen';
+import { TransactionHistoryScreen } from '../features/wallet/TransactionHistoryScreen';
 import {
   ShiftResultScreen,
 } from '../features/placeholders/ZoneScreens';
@@ -117,11 +119,11 @@ function MainTabsNavigator({
         }}
       />
       <MainTab.Screen
-        name="ScheduleTab"
-        component={AvailabilityScreen}
+        name="WalletTab"
+        component={WalletScreen}
         options={{
-          title: 'Lịch rảnh',
-          tabBarIcon: ({ color, size }) => <Calendar color={color} size={size} />,
+          title: 'Ví',
+          tabBarIcon: ({ color, size }) => <Wallet color={color} size={size} />,
         }}
       />
       <MainTab.Screen
@@ -282,6 +284,14 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
               headerShown: false,
               animation: 'fade',
             }}
+          />
+          <ActiveStack.Screen
+            name="Availability"
+            component={AvailabilityScreen}
+          />
+          <ActiveStack.Screen
+            name="TransactionHistory"
+            component={TransactionHistoryScreen}
           />
         </ActiveStack.Navigator>
       )}
