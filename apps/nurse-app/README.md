@@ -4,6 +4,7 @@ React Native `0.74.1` mobile application for CareNest home care nurses:
 - 3-zone React Navigation architecture (`Auth`, `Onboarding / Pending / Locked`, `Active Tabs + Shift Flow`)
 - Pre-visit clinical briefing and patient address view (US-HP-18)
 - Real-time Radar Dispatch modal for urgent bookings (≤ 6 hours) with 45s countdown timer, audio/vibration alert, and Accept/Decline actions (A08, FR-BOOK-03, FR-NOTIF-01)
+- 3-balance nurse wallet dashboard (available, escrow held, deposit) with immutable transaction ledger, 7-day earnings SVG bar chart, upcoming 24h settlements, and pending commission alerts (A09, FR-PAY-02, FR-PAY-04, ADR-0004)
 - Firebase Cloud Messaging (FCM) & Notifee full-screen push notification architecture
 - On-site geofenced check-in (`<= 200m` Haversine, Android `mocked` GPS block, live-only VisionCamera capture)
 - Mandatory initial clinical assessment, vital signs, care checklist, invalid prescription rejection, extension approval, check-out report, and zero-latency SOS `115`

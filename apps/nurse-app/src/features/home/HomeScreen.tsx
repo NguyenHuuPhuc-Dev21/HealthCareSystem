@@ -18,7 +18,15 @@ import {
   VerificationStatus,
   type MobileShiftSummary,
 } from '@healthcare-system/shared';
-import { AlertTriangle, ChevronRight, FileText, ShieldAlert, Zap } from 'lucide-react-native';
+import {
+  AlertTriangle,
+  Calendar,
+  ChevronRight,
+  FileText,
+  ShieldAlert,
+  Wallet,
+  Zap,
+} from 'lucide-react-native';
 import { AppButton, CareNestLogoMark, StateView, StatusBadge } from '../../components';
 import { useAuth } from '../auth/AuthContext';
 import { getGphnAlertInfo } from '../credentials/credentials.api';
@@ -26,6 +34,7 @@ import { getMyShifts } from '../active-shift/active-shift.api';
 import { DEV_SAMPLE_SHIFT } from '../shifts/shifts.mock';
 import { useRadar } from '../radar/RadarContext';
 import { createSimulatedRadarOffer } from '../radar/radar.mock';
+import { useWalletSummary } from '../wallet/useWalletSummary';
 
 export { DEV_SAMPLE_SHIFT };
 import {
@@ -56,6 +65,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 }) => {
   const { session } = useAuth();
   const { isOnline, toggleOnline, triggerRadarOffer } = useRadar();
+  const { summary: walletSummary } = useWalletSummary();
 
   const [activeShift, setActiveShift] = useState<MobileShiftSummary | null>(
     initialShift ?? (IS_DEV ? DEV_SAMPLE_SHIFT : null)
@@ -242,6 +252,96 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             }
             size={20}
           />
+        </TouchableOpacity>
+
+        {/* Bento Tóm tắt Ví & Ký quỹ (APP-N4 & W01/A09) */}
+        <View style={styles.walletBentoRow}>
+          {/* Thẻ Thu nhập & Số dư khả dụng */}
+          <TouchableOpacity
+            style={styles.walletTile}
+            onPress={() => navigation.navigate('WalletTab')}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Mở ví của tôi"
+          >
+            <View style={styles.tileHead}>
+              <Wallet size={17} color={tokens.colors.brandJade} />
+              <Text style={styles.tileTitle}>Khả dụng</Text>
+            </View>
+            <Text style={styles.tileAmount}>
+              {(walletSummary?.availableBalance ?? 3850000).toLocaleString('vi-VN')}đ
+            </Text>
+            <Text style={styles.tileSub}>Xem chi tiết ví →</Text>
+          </TouchableOpacity>
+
+          {/* Thẻ Ký quỹ */}
+          <TouchableOpacity
+            style={[
+              styles.walletTile,
+              walletSummary &&
+                walletSummary.depositBalance < walletSummary.minDeposit &&
+                !walletSummary.depositGraceActive &&
+                styles.walletTileWarning,
+            ]}
+            onPress={() => navigation.navigate('WalletTab')}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Ví ký quỹ"
+          >
+            <View style={styles.tileHead}>
+              <ShieldAlert
+                size={17}
+                color={
+                  walletSummary &&
+                  walletSummary.depositBalance < walletSummary.minDeposit &&
+                  !walletSummary.depositGraceActive
+                    ? tokens.colors.alertCrimson
+                    : tokens.colors.brandJade
+                }
+              />
+              <Text style={styles.tileTitle}>Ví ký quỹ</Text>
+            </View>
+            <Text
+              style={[
+                styles.tileAmount,
+                walletSummary &&
+                  walletSummary.depositBalance < walletSummary.minDeposit &&
+                  !walletSummary.depositGraceActive &&
+                  styles.tileAmountWarning,
+              ]}
+            >
+              {(walletSummary?.depositBalance ?? 300000).toLocaleString('vi-VN')}đ
+            </Text>
+            <Text style={styles.tileSub}>
+              {walletSummary?.depositGraceActive
+                ? 'Đang ân hạn'
+                : walletSummary && walletSummary.depositBalance < walletSummary.minDeposit
+                ? 'Cần nạp thêm'
+                : 'Đã đủ mức chuẩn'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Nút Lịch rảnh trên Trang chủ */}
+        <TouchableOpacity
+          style={styles.scheduleButton}
+          onPress={() => navigation.navigate('Availability')}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Đăng ký lịch rảnh"
+        >
+          <View style={styles.scheduleLeft}>
+            <View style={styles.scheduleIconWrap}>
+              <Calendar size={20} color={tokens.colors.brandJade} />
+            </View>
+            <View style={styles.scheduleTextBox}>
+              <Text style={styles.scheduleTitle}>Lịch rảnh &amp; Ngày nghỉ</Text>
+              <Text style={styles.scheduleSub}>
+                Đăng ký khung giờ trực để hệ thống điều phối ca phù hợp
+              </Text>
+            </View>
+          </View>
+          <ChevronRight size={20} color={tokens.colors.inkSecondary} />
         </TouchableOpacity>
 
         {!IS_DEV && !hardwareStatus.isReadyForRelease && (
@@ -607,6 +707,87 @@ const styles = StyleSheet.create({
     color: '#DC2626',
     fontWeight: '700',
     fontSize: 14,
+  },
+  walletBentoRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 12,
+  },
+  walletTile: {
+    flex: 1,
+    backgroundColor: tokens.colors.paper,
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: tokens.colors.borderHairline,
+  },
+  walletTileWarning: {
+    backgroundColor: '#FFF9F9',
+    borderColor: tokens.colors.alertCrimson,
+  },
+  tileHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 6,
+  },
+  tileTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: tokens.colors.inkSecondary,
+  },
+  tileAmount: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: tokens.colors.inkPrimary,
+    marginBottom: 4,
+  },
+  tileAmountWarning: {
+    color: tokens.colors.alertCrimson,
+  },
+  tileSub: {
+    fontSize: 12,
+    color: tokens.colors.brandJade,
+    fontWeight: '600',
+  },
+  scheduleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: tokens.colors.paper,
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: tokens.colors.borderHairline,
+    marginBottom: 14,
+  },
+  scheduleLeft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  scheduleIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: tokens.colors.brandJadeSoft,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scheduleTextBox: {
+    flex: 1,
+  },
+  scheduleTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: tokens.colors.inkPrimary,
+  },
+  scheduleSub: {
+    fontSize: 12.5,
+    color: tokens.colors.inkSecondary,
+    lineHeight: 16,
+    marginTop: 2,
   },
 });
 

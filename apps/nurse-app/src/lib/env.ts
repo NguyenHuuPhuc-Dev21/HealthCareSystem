@@ -38,6 +38,9 @@ export const env = {
   get useMockJobBoard(): boolean {
     return nativeConfig.USE_MOCK_JOB_BOARD !== 'false' && process.env.USE_MOCK_JOB_BOARD !== 'false';
   },
+  get useMockWallet(): boolean {
+    return nativeConfig.USE_MOCK_WALLET !== 'false' && process.env.USE_MOCK_WALLET !== 'false';
+  },
   get useMockCredentials(): boolean {
     return (
       nativeConfig.USE_MOCK_CREDENTIALS === 'true' ||

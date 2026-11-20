@@ -192,7 +192,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
           {/* 2. Lịch rảnh & ngày nghỉ */}
           <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => navigation.navigate('ScheduleTab')}
+            onPress={() => navigation.navigate('Availability')}
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityLabel="Lịch rảnh và ngày nghỉ"
