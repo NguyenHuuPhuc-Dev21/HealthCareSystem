@@ -28,6 +28,8 @@ import { getNurseAvailabilitiesService } from './modules/nurse-availabilities/nu
 import { createPatientProfilesRouter } from './modules/patient-profiles/patient-profiles.routes';
 import { getPatientProfilesService } from './modules/patient-profiles/patient-profiles.service';
 import { createPrescriptionGateRouter } from './modules/prescription-gate/prescription-gate.routes';
+import { createPrescriptionRejectionRouter } from './modules/prescription-rejection/prescription-rejection.routes';
+import { getPrescriptionRejectionService } from './modules/prescription-rejection/prescription-rejection.service';
 import { getPrescriptionGateService } from './modules/prescription-gate/prescription-gate.service';
 import { createPrivacyConsentRouter } from './modules/privacy-consent/privacy-consent.routes';
 import { getPrivacyConsentService } from './modules/privacy-consent/privacy-consent.service';
@@ -60,6 +62,7 @@ function buildApiRouter(): Router {
   api.use(createGatewayWebhooksRouter(getGatewayWebhooksService())); // BE-3 · Phase 3 · gateway-webhooks (escrow webhook, payment link)
   api.use(createJobBoardRouter(getJobBoardService())); // BE-3 · Phase 3 · job-board (board, direct requests)
   api.use(createPrescriptionGateRouter(getPrescriptionGateService())); // BE-1 · Phase 3 · prescription-gate
+  api.use(createPrescriptionRejectionRouter(getPrescriptionRejectionService())); // BE-1 · Phase 4 · prescription-rejection
 
   return api;
 }
