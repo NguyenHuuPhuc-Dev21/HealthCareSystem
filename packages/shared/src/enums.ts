@@ -60,6 +60,7 @@ export enum VerificationStatus {
 export enum AvailabilityType {
   RECURRING_AVAILABLE = 'RECURRING_AVAILABLE',
   TIME_OFF_EXCEPTION = 'TIME_OFF_EXCEPTION',
+  DATE_AVAILABLE = 'DATE_AVAILABLE', // migration 0008 · BE-2: open hours for one date, replaces that weekday's windows
 }
 
 // ============================================================================
@@ -197,6 +198,26 @@ export enum TxType {
   REFUND = 'REFUND',
   PARTIAL_SETTLE = 'PARTIAL_SETTLE',       // Phase 2 only
   WITHDRAW = 'WITHDRAW',
+  DEPOSIT_WITHHOLD = 'DEPOSIT_WITHHOLD',   // grace period: part of a payout moved into deposit_balance (ADR-0004 D2)
+  DEPOSIT_REFUND = 'DEPOSIT_REFUND',       // deposit paid out on account closure (ADR-0004 D3)
+  PENALTY_REVERSAL = 'PENALTY_REVERSAL',   // upheld appeal credits a penalty back (ADR-0004 D3)
+}
+
+/** Reason of a deposit penalty (deposit_penalty_details.reason, migration 0008) */
+export enum PenaltyReason {
+  NURSE_LATE_CANCEL = 'NURSE_LATE_CANCEL', // SRS §5.2 row 7
+  NURSE_NO_SHOW = 'NURSE_NO_SHOW',         // SRS §5.2 row 8
+  DISPUTE_UPHELD = 'DISPUTE_UPHELD',       // FR-DISP-01, not appealable again
+}
+
+/** Account closure → deposit refund workflow (deposit_refund_requests.status, migration 0008) */
+export enum DepositRefundStatus {
+  REQUESTED = 'REQUESTED',
+  WAITING_HOLD = 'WAITING_HOLD',
+  READY = 'READY',
+  REFUNDED = 'REFUNDED',
+  REJECTED = 'REJECTED',
+  CANCELLED = 'CANCELLED',
 }
 
 export enum TxStatus {

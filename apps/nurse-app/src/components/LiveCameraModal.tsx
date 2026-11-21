@@ -14,6 +14,7 @@ import {
 } from 'react-native-vision-camera';
 import {
   registerCameraCaptureHandler,
+  type CameraCaptureMode,
   type CameraFacing,
   type LiveCameraCaptureOptions,
 } from '../lib/hardware-providers';
@@ -23,12 +24,15 @@ import { AppButton } from './AppButton';
 interface PendingCapture {
   facing: CameraFacing;
   instruction: string;
+  mode: CameraCaptureMode;
   resolve: (uri: string | null) => void;
 }
 
 /**
  * Provides direct-only camera capture via react-native-vision-camera.
- * Gallery selection is intentionally omitted per SRS anti-fraud requirement (FR-SHIFT-01).
+ * Supports 'document' mode (rear camera, card aspect-ratio guide frame)
+ * and 'selfie' mode (front camera, face guide frame).
+ * Gallery selection is intentionally omitted per SRS anti-fraud requirement (FR-AUTH-01 / FR-SHIFT-01).
  */
 export const LiveCameraProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [pending, setPending] = useState<PendingCapture | null>(null);
@@ -40,12 +44,18 @@ export const LiveCameraProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const requestCapture = useCallback((options?: LiveCameraCaptureOptions) => {
     setCameraError(null);
+    const mode = options?.mode ?? (options?.facing === 'back' ? 'document' : 'selfie');
+    const defaultFacing: CameraFacing = mode === 'document' ? 'back' : 'front';
+    const defaultInstruction =
+      mode === 'document'
+        ? 'Đặt giấy tờ ngay ngắn trong khung hình chữ nhật và chụp rõ nét.'
+        : 'Chụp ảnh trực tiếp khuôn mặt của bạn (không hỗ trợ chọn ảnh từ thư viện).';
+
     return new Promise<string | null>((resolve) => {
       setPending({
-        facing: options?.facing ?? 'front',
-        instruction:
-          options?.instruction ??
-          'Chụp ảnh trực tiếp tại nơi làm việc (không hỗ trợ chọn ảnh từ thư viện).',
+        facing: options?.facing ?? defaultFacing,
+        mode,
+        instruction: options?.instruction ?? defaultInstruction,
         resolve,
       });
     });
@@ -87,6 +97,8 @@ export const LiveCameraProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
+  const isDocumentMode = pending?.mode === 'document';
+
   return (
     <>
       {children}
@@ -97,7 +109,9 @@ export const LiveCameraProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       >
         <SafeAreaView style={styles.container}>
           <View style={styles.header}>
-            <Text style={styles.title}>Chụp ảnh xác thực trực tiếp</Text>
+            <Text style={styles.title}>
+              {isDocumentMode ? 'Chụp ảnh tài liệu trực tiếp' : 'Chụp ảnh chân dung trực tiếp'}
+            </Text>
             <Text style={styles.subtitle}>{pending?.instruction}</Text>
           </View>
 
@@ -123,13 +137,31 @@ export const LiveCameraProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 </Text>
               </View>
             ) : (
-              <Camera
-                ref={cameraRef}
-                style={StyleSheet.absoluteFill}
-                device={device}
-                isActive={Boolean(pending)}
-                photo
-              />
+              <>
+                <Camera
+                  ref={cameraRef}
+                  style={StyleSheet.absoluteFill}
+                  device={device}
+                  isActive={Boolean(pending)}
+                  photo
+                />
+                {/* Guide Frame Overlay */}
+                <View style={styles.overlayContainer} pointerEvents="none">
+                  {isDocumentMode ? (
+                    <View style={styles.documentFrame}>
+                      <View style={[styles.corner, styles.topLeft]} />
+                      <View style={[styles.corner, styles.topRight]} />
+                      <View style={[styles.corner, styles.bottomLeft]} />
+                      <View style={[styles.corner, styles.bottomRight]} />
+                      <Text style={styles.frameLabel}>Căn chỉnh giấy tờ vừa khớp khung này</Text>
+                    </View>
+                  ) : (
+                    <View style={styles.selfieFrame}>
+                      <Text style={styles.frameLabel}>Căn chỉnh khuôn mặt vào giữa khung</Text>
+                    </View>
+                  )}
+                </View>
+              </>
             )}
           </View>
 
@@ -184,6 +216,77 @@ const styles = StyleSheet.create({
     backgroundColor: '#1B2E29',
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
+  },
+  overlayContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.28)',
+  },
+  documentFrame: {
+    width: '90%',
+    aspectRatio: 1.58, // Standard ID Card aspect ratio (85.6mm / 53.98mm)
+    borderWidth: 2,
+    borderColor: '#34D399',
+    borderRadius: 12,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingBottom: 12,
+    position: 'relative',
+  },
+  selfieFrame: {
+    width: '74%',
+    aspectRatio: 0.78, // Oval / Portrait aspect ratio
+    borderWidth: 2.5,
+    borderColor: '#34D399',
+    borderRadius: 120,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingBottom: 18,
+  },
+  corner: {
+    position: 'absolute',
+    width: 20,
+    height: 20,
+    borderColor: '#FFFFFF',
+  },
+  topLeft: {
+    top: -2,
+    left: -2,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderTopLeftRadius: 12,
+  },
+  topRight: {
+    top: -2,
+    right: -2,
+    borderTopWidth: 4,
+    borderRightWidth: 4,
+    borderTopRightRadius: 12,
+  },
+  bottomLeft: {
+    bottom: -2,
+    left: -2,
+    borderBottomWidth: 4,
+    borderLeftWidth: 4,
+    borderBottomLeftRadius: 12,
+  },
+  bottomRight: {
+    bottom: -2,
+    right: -2,
+    borderBottomWidth: 4,
+    borderRightWidth: 4,
+    borderBottomRightRadius: 12,
+  },
+  frameLabel: {
+    color: '#FFFFFF',
+    fontSize: 13.5,
+    fontWeight: '600',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
   },
   fallbackBox: {
     padding: 24,

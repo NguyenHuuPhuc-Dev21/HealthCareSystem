@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { Check } from 'lucide-react-native';
 import { tokens } from '../../../styles/tokens';
 import { DEFAULT_SURCHARGE_HEAVY_PATIENT_RATE } from '@healthcare-system/shared';
 
@@ -99,7 +100,7 @@ export const AssessmentTab: React.FC<AssessmentTabProps> = ({
           onPress={() => setHasMismatch((v) => !v)}
         >
           <View style={[styles.checkbox, hasMismatch && styles.checkboxChecked]}>
-            {hasMismatch && <Text style={styles.checkmark}>✓</Text>}
+            {hasMismatch && <Check size={14} color="#FFFFFF" strokeWidth={3} />}
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.mismatchTitle}>Phát hiện thể trạng thực tế nặng hơn mô tả</Text>

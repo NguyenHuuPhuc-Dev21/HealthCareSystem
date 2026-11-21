@@ -25,6 +25,26 @@ export async function loadAccessToken(): Promise<string | null> {
   }
 }
 
+export async function saveRefreshToken(token: string | null): Promise<void> {
+  try {
+    if (token) {
+      await EncryptedStorage.setItem(REFRESH_TOKEN_KEY, token);
+    } else {
+      await EncryptedStorage.removeItem(REFRESH_TOKEN_KEY);
+    }
+  } catch {
+    // Fallback gracefully in Jest / non-native test environments
+  }
+}
+
+export async function loadRefreshToken(): Promise<string | null> {
+  try {
+    return await EncryptedStorage.getItem(REFRESH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
 export async function saveSession(session: SessionData | null): Promise<void> {
   try {
     if (!session) {

@@ -6,3 +6,8 @@ export const USE_MOCK_AVAILABILITY = import.meta.env.VITE_USE_MOCK_AVAILABILITY 
 export const USE_MOCK_JOB_BOARD = import.meta.env.VITE_USE_MOCK_JOB_BOARD !== 'false';
 export const USE_MOCK_SHIFTS = import.meta.env.VITE_USE_MOCK_SHIFTS !== 'false';
 export const USE_MOCK_WALLET = import.meta.env.VITE_USE_MOCK_WALLET !== 'false';
+export const USE_MOCK_TRUST_SCORE = import.meta.env.VITE_USE_MOCK_TRUST_SCORE !== 'false';
+export const USE_MOCK_REVIEWS = import.meta.env.VITE_USE_MOCK_REVIEWS !== 'false';
+export const USE_MOCK_DISPUTES = import.meta.env.VITE_USE_MOCK_DISPUTES !== 'false';
+export const USE_MOCK_CHAT = import.meta.env.VITE_USE_MOCK_CHAT !== 'false';
+export const USE_MOCK_NOTIFICATIONS = import.meta.env.VITE_USE_MOCK_NOTIFICATIONS !== 'false';

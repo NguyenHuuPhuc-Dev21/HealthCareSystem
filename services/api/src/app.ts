@@ -13,8 +13,22 @@ import { createCredentialReviewRouter } from './modules/credential-review/creden
 import { getCredentialReviewService } from './modules/credential-review/credential-review.service';
 import { createNurseOnboardingRouter } from './modules/nurse-onboarding/nurse-onboarding.routes';
 import { getNurseOnboardingService } from './modules/nurse-onboarding/nurse-onboarding.service';
+import { createNurseSearchRouter } from './modules/nurse-search/nurse-search.routes';
+import { getNurseSearchService } from './modules/nurse-search/nurse-search.service';
+import { createGatewayWebhooksRouter } from './modules/gateway-webhooks/gateway-webhooks.routes';
+import { getGatewayWebhooksService } from './modules/gateway-webhooks/gateway-webhooks.service';
+import { createJobBoardRouter } from './modules/job-board/job-board.routes';
+import { getJobBoardService } from './modules/job-board/job-board.service';
+import { createBookingsRouter } from './modules/bookings/bookings.routes';
+import { getBookingsService } from './modules/bookings/bookings.service';
+import { createMatchingRadarRouter } from './modules/matching-radar/matching-radar.routes';
+import { getMatchingRadarService } from './modules/matching-radar/matching-radar.service';
+import { createNurseAvailabilitiesRouter } from './modules/nurse-availabilities/nurse-availabilities.routes';
+import { getNurseAvailabilitiesService } from './modules/nurse-availabilities/nurse-availabilities.service';
 import { createPatientProfilesRouter } from './modules/patient-profiles/patient-profiles.routes';
 import { getPatientProfilesService } from './modules/patient-profiles/patient-profiles.service';
+import { createPrescriptionGateRouter } from './modules/prescription-gate/prescription-gate.routes';
+import { getPrescriptionGateService } from './modules/prescription-gate/prescription-gate.service';
 import { createPrivacyConsentRouter } from './modules/privacy-consent/privacy-consent.routes';
 import { getPrivacyConsentService } from './modules/privacy-consent/privacy-consent.service';
 
@@ -39,6 +53,13 @@ function buildApiRouter(): Router {
   api.use(createCredentialReviewRouter(getCredentialReviewService())); // BE-1 · Phase 1 · credential-review
   api.use(createPrivacyConsentRouter(getPrivacyConsentService())); // BE-3 · Phase 1 · privacy-consent
   api.use(createPatientProfilesRouter(getPatientProfilesService())); // BE-2 · Phase 1 · patient-profiles
+  api.use(createNurseAvailabilitiesRouter(getNurseAvailabilitiesService())); // BE-2 · Phase 2 · nurse-availabilities
+  api.use(createNurseSearchRouter(getNurseSearchService())); // BE-3 · Phase 2 · nurse-search
+  api.use(createBookingsRouter(getBookingsService())); // BE-2 · Phase 3 · bookings + pricing-engine
+  api.use(createMatchingRadarRouter(getMatchingRadarService())); // BE-2 · Phase 3 · matching-radar
+  api.use(createGatewayWebhooksRouter(getGatewayWebhooksService())); // BE-3 · Phase 3 · gateway-webhooks (escrow webhook, payment link)
+  api.use(createJobBoardRouter(getJobBoardService())); // BE-3 · Phase 3 · job-board (board, direct requests)
+  api.use(createPrescriptionGateRouter(getPrescriptionGateService())); // BE-1 · Phase 3 · prescription-gate
 
   return api;
 }

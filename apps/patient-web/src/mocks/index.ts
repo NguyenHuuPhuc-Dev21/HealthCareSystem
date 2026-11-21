@@ -1,7 +1,11 @@
 import { authHandlers } from './auth.handlers';
 import { ekycHandlers } from './ekyc.handlers';
 import { installMockFetch } from './mock-fetch';
+import { bookingHandlers } from './booking.handlers';
+import { nurseSearchHandlers } from './nurse-search.handlers';
 import { patientProfileHandlers } from './patient-profiles.handlers';
+import { refundHandlers } from './refunds.handlers';
+import { trackingHandlers } from './tracking.handlers';
 
 /** Gộp handler của các feature. Feature mới thì thêm file *.handlers.ts và spread vào đây. */
 export function installMockApi(): void {
@@ -9,6 +13,10 @@ export function installMockApi(): void {
     ...authHandlers,
     ...ekycHandlers,
     ...patientProfileHandlers,
+    ...nurseSearchHandlers,
+    ...bookingHandlers,
+    ...trackingHandlers,
+    ...refundHandlers,
   });
   console.info('[mock] Mock API đang bật (VITE_USE_MOCK=true)');
 }

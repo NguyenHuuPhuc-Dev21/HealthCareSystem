@@ -3,6 +3,7 @@ import {
   BookingDisputeStatus,
   ExecutionStatus,
   MobilityStatus,
+  PaymentMethod,
   PaymentStatus,
 } from '../enums';
 
@@ -45,6 +46,7 @@ export interface ShiftExecutionState {
   totalAmount: number;
   executionStatus: ExecutionStatus;
   paymentStatus: PaymentStatus;
+  paymentMethod?: PaymentMethod | string;
   disputeStatus: BookingDisputeStatus;
   checkedInAt?: string;
   checkInDistanceMeters?: number;
@@ -144,5 +146,16 @@ export interface MobileShiftSummary {
   allergies?: string;
   isInvasive: boolean;
   prescriptionSummary?: string;
+  executionStatus?: ExecutionStatus;
+  paymentStatus?: PaymentStatus;
+  disputeStatus?: BookingDisputeStatus;
+  paymentMethod?: PaymentMethod | string;
+  totalAmount?: number;
+  commissionAmount?: number;
+  netAmount?: number;
+  district?: string;
+  startTime?: string;
+  endTime?: string;
+  notes?: string;
 }
 

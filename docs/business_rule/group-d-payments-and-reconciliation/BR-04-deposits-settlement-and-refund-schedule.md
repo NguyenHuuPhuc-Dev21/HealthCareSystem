@@ -26,12 +26,25 @@
 
 ### 2.2 Nurse Upfront Deposit Wallet (FR-PAY-03)
 
-- **Upfront funding:** Before accepting any booking, the nurse must hold `deposit_balance ≥ 300,000 VNĐ` (config `MIN_NURSE_DEPOSIT`). This gate applies to **both** matching mechanisms (FR-BOOK-03). A nurse below the threshold who attempts to accept a booking is blocked (HTTP 403, SRS §10 TC-WALLET-01).
-- **No progressive accrual, no value cap:** The deposit is **not** accumulated from earnings, and there is **no cap** linking booking value to deposit balance.
+- **Upfront funding:** Before accepting any booking, the nurse must hold `deposit_balance ≥ 300,000 VNĐ` (config `MIN_NURSE_DEPOSIT`). This gate applies to **both** matching mechanisms (FR-BOOK-03). A nurse below the threshold who attempts to accept a booking is blocked (HTTP 403, SRS §10 TC-WALLET-01) — **except** in the grace period below.
+- **Grace period and progressive funding (ADR-0004 D2 — replaces the former "no progressive accrual" rule, pending PO sign-off):**
+  - A nurse with `deposit_balance < MIN_NURSE_DEPOSIT` may accept **`BANK_TRANSFER` bookings only**, for at most `DEPOSIT_GRACE_MAX_SHIFTS = 3` completed shifts and within `DEPOSIT_GRACE_DAYS = 30` days of first becoming `ACTIVE`. Cash bookings always require the full deposit, because the platform holds no money on a cash booking.
+  - On each settled transfer shift while the deposit is short, the settlement worker withholds `min(DEPOSIT_WITHHOLD_RATE × net payout, MIN_NURSE_DEPOSIT − deposit_balance)` (rate 0.30) from the 85% share into `deposit_balance` as a `DEPOSIT_WITHHOLD` transaction, in the same ACID transaction as the credit.
+    - *Worked example:* 500,000 VNĐ shift → net 425,000 → withhold 127,500, available +297,500. The deposit reaches 300,000 VNĐ on the third shift (which withholds only the remaining 45,000).
+  - The nurse may top up the remainder at any time; a top-up may not take the balance above `MIN_NURSE_DEPOSIT`.
+  - When the grace period ends with the deposit still short, the normal gate applies (no new jobs); bookings already confirmed are kept.
+  - A penalty during the grace period is taken from `deposit_balance` first, then from the nurse's unsettled escrowed payouts, and any remainder is booked as debt.
+- **No value cap:** There is **no cap** linking booking value to deposit balance.
+- **Custody (ADR-0004 D1):** Deposit money is received into and paid out of a **segregated custody account** — an escrow account at a partner bank or a sub-wallet at a State-Bank-licensed intermediary — never the platform's operating account. `deposit_balance` is a mirror ledger; each real movement stores the partner reference in `wallet_transactions.external_ref`; a daily reconciliation compares the sum of deposit balances with the custody statement and freezes deposit payouts on mismatch. Simulated in the current project scope, like the booking escrow (§2.1).
 - **Single permitted use:** `deposit_balance` is debited **only** for SLA penalties, via transactions of type `PENALTY_DEDUCT` (see BR-18). It is **never** used to collect the 15% commission of cash bookings (BR-05).
 - **Shortfall → debt:** If a penalty exceeds the deposit balance, the shortfall is booked as debt and offset against the nurse's later income.
 - **Below-minimum lock:** After a penalty deduction leaves `deposit_balance < 300,000 VNĐ`, the nurse is locked from new bookings (`profile_status = SUSPENDED`) until the deposit is topped back up (SRS §2.3).
-- **Withdrawal:** Deposit funds are withdrawable in full only when the nurse ends the cooperation and closes the account, after **7 days** with no open dispute (SRS §2.3).
+- **Every deduction is explained:** each `PENALTY_DEDUCT` has one `deposit_penalty_details` row (reason code, SLA rule, booking, dispute, appeal deadline) visible to the nurse. The nurse may appeal within `PENALTY_APPEAL_DAYS = 3` days through the dispute channel; an upheld appeal writes a `PENALTY_REVERSAL` credit — the original row is never edited. Penalties decided by a dispute ruling are not appealable again.
+- **Withdrawal (refund on account closure):** Deposit funds are withdrawable in full only when the nurse ends the cooperation and closes the account, after **7 days** with no open dispute (SRS §2.3). Workflow (ADR-0004 D3, table `deposit_refund_requests`):
+  1. The nurse requests closure → `REQUESTED`; no new jobs are offered from that moment. The nurse may cancel until `READY`.
+  2. A daily job moves the request to `READY` only when there is no `CONFIRMED`/`IN_PROGRESS` booking, `DEPOSIT_REFUND_HOLD_DAYS = 7` days have passed since the last check-out, no dispute is `OPEN`/`UNDER_REVIEW` and no cash commission is unpaid; otherwise it stays `WAITING_HOLD` and the app shows each pending condition and the earliest date it clears.
+  3. Amount = `max(deposit_balance, 0)`; debt is not refunded and is shown as still owed.
+  4. A `READY` request is paid to the nurse's registered bank account within `DEPOSIT_REFUND_SLA_WORKING_DAYS = 5` working days as one `DEPOSIT_REFUND` transaction → `REFUNDED`. Admin may reject only with a written reason (`REJECTED`), which never forfeits the money.
 
 ### 2.3 Settlement (FR-PAY-02)
 

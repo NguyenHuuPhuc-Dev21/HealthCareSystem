@@ -1,5 +1,6 @@
 import {
   ExecutionStatus,
+  PaymentMethod,
   PaymentStatus,
   BookingDisputeStatus,
   MobilityStatus,
@@ -8,6 +9,7 @@ import {
   CHECKIN_MAX_RADIUS_METERS,
   DEFAULT_TRAVEL_SUPPORT_VND,
 } from '@healthcare-system/shared';
+import { mockAddCashCommissionDebt } from '../commission-payment/commission-payment.mock';
 import {
   ShiftExecutionState,
   CheckInRequest,
@@ -93,9 +95,10 @@ function getInitialShiftDatabase(): Record<string, ShiftExecutionState> {
       startTime: '14:00',
       endTime: '18:00',
       scheduledHours: 4,
-      totalAmount: 520000,
+      totalAmount: 500000,
       executionStatus: ExecutionStatus.IN_PROGRESS,
-      paymentStatus: PaymentStatus.ESCROW_HELD,
+      paymentStatus: PaymentStatus.UNPAID,
+      paymentMethod: PaymentMethod.CASH,
       disputeStatus: BookingDisputeStatus.NONE,
       checkedInAt: '2026-11-07T13:58:00.000Z',
       checkInDistanceMeters: 45,
@@ -502,6 +505,16 @@ export async function mockSubmitCheckOut(
   shift.handoverNotes = payload.handoverNote;
   shift.finalVitalSigns = payload.finalVitals;
   shift.vitalSigns.unshift(payload.finalVitals);
+
+  // Ca tiền mặt (CASH) tự động ghi nhận khoản hoa hồng 15% phải nộp trong 24h (FR-PAY-02, BR-05)
+  if (shift.paymentMethod === PaymentMethod.CASH || (shift as any).paymentMethod === 'CASH') {
+    mockAddCashCommissionDebt({
+      bookingId: shift.bookingId,
+      bookingCode: shift.bookingCode,
+      serviceName: shift.serviceName,
+      totalAmount: shift.totalAmount,
+    });
+  }
 
   saveShiftStore(store);
   return {

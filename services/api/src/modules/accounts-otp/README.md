@@ -17,6 +17,7 @@ Phone number + OTP sign-in, first-time registration, and session management for 
 | `accounts-otp.policy.ts` | who may sign in (BANNED blocked, SUSPENDED allowed), Admin needs 2FA |
 | `accounts-otp.schema.ts` | Zod whitelists + Vietnamese phone normalisation (`0xxxxxxxxx`) |
 | `accounts-otp.types.ts` | DTOs and interfaces (`AccountsRepo`, `OtpSender`) |
+| `accounts-otp.senders.ts` | OTP delivery channels: `OTP_CHANNEL` selection, mock inbox (dev/staging), ZNS slot (OD-09) |
 | `accounts-otp.totp.ts` | RFC 6238 TOTP + AES-256-GCM encryption of Admin secrets (node:crypto only) |
 | — `jobs.ts` | not needed: every expiry is a Redis TTL, no business timer |
 
@@ -44,6 +45,8 @@ await revokeAllSessionsForUser(userId); // on BAN / SUSPEND / phone re-binding (
 1. **Admin 2FA backup codes / reset** — SEC-1.5 asks for single-use backup codes; not built yet. A lost
    authenticator is reset by clearing `users.totp_secret_enc` + `totp_enabled_at` (future admin-users action, audited).
    First enrolment relies on the phone OTP only — seed Admin phones must be real, controlled numbers.
-2. **SMS/ZNS provider** (OD-09) — dev uses `DevOtpSender` + `OTP_DEV_ECHO`; production refuses to start without a provider.
+2. **Zalo ZNS sender** (OD-09) — the team chose Zalo ZNS but has no Official Account / approved OTP template yet.
+   `OTP_CHANNEL=mock` (default outside production) keeps codes in a mock inbox read through `GET /auth/dev/otp-inbox`;
+   `OTP_CHANNEL=zns` and production both refuse to start until the sender is written in `accounts-otp.senders.ts`.
 3. **Login audit** — SEC-1.5 asks to record Admin logins (IP, device). `audit_action_enum` has no login action yet (BE-3 owns `core/audit`).
 4. **Web cookies** — tokens are returned in the JSON body (works for mobile + web). HttpOnly cookie delivery for web (SEC-1.7) to agree with FE-1.

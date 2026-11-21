@@ -8,123 +8,8 @@ import {
   DEFAULT_TRAVEL_SUPPORT_VND,
 } from '@healthcare-system/shared';
 import { AppButton, StatusBadge } from '../../components';
-import { useAuth } from '../auth/AuthContext';
-import { env } from '../../lib/env';
-import { IS_DEV } from '../../lib/hardware-providers';
 import { tokens } from '../../styles/tokens';
 import type { ActiveStackParamList } from '../../navigation/types';
-
-export const LoginPlaceholderScreen: React.FC = () => {
-  const { enterDevZone } = useAuth();
-
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.brandMark}>CareNest</Text>
-        <Text style={styles.title}>Đăng nhập điều dưỡng</Text>
-        <Text style={styles.subtitle}>
-          Luồng đăng nhập SĐT + OTP và Onboarding eKYC sẽ được triển khai ở Giai đoạn M1.
-        </Text>
-
-        <View style={styles.card}>
-          <StatusBadge label="Vùng 1 · Chưa đăng nhập" tone="neutral" />
-          <Text style={styles.cardBody}>
-            API đang cấu hình: {env.apiBaseUrl}
-          </Text>
-          {IS_DEV ? (
-            <View style={styles.stack}>
-              <AppButton
-                label="[DEV] Vào thẳng ca mẫu (ACTIVE)"
-                onPress={() => void enterDevZone('active')}
-              />
-              <AppButton
-                label="[DEV] Kiểm thử vùng Onboarding"
-                variant="secondary"
-                onPress={() => void enterDevZone('onboarding')}
-              />
-              <AppButton
-                label="[DEV] Kiểm thử vùng Chờ duyệt"
-                variant="secondary"
-                onPress={() => void enterDevZone('pending')}
-              />
-            </View>
-          ) : null}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
-
-export const OnboardingPlaceholderScreen: React.FC = () => {
-  const { logout, enterDevZone } = useAuth();
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <StatusBadge label="Vùng 2 · Đang thiết lập hồ sơ" tone="ochre" />
-        <Text style={[styles.title, { marginTop: 12 }]}>Hồ sơ eKYC 5 bước</Text>
-        <Text style={styles.subtitle}>
-          Chụp CCCD 2 mặt, selfie chân dung, bằng cấp và GPHN sẽ có ở Giai đoạn M1.
-        </Text>
-        {IS_DEV ? (
-          <View style={styles.stack}>
-            <AppButton
-              label="[DEV] Chuyển sang trạng thái Đã duyệt"
-              onPress={() => void enterDevZone('active')}
-            />
-            <AppButton
-              label="Đăng xuất"
-              variant="secondary"
-              onPress={() => void logout()}
-            />
-          </View>
-        ) : null}
-      </View>
-    </SafeAreaView>
-  );
-};
-
-export const PendingApprovalScreen: React.FC = () => {
-  const { logout, enterDevZone } = useAuth();
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <StatusBadge label="Vùng 2 · Chờ duyệt hồ sơ" tone="ochre" />
-        <Text style={[styles.title, { marginTop: 12 }]}>Hồ sơ đang chờ kiểm duyệt</Text>
-        <Text style={styles.subtitle}>
-          Quản trị viên sẽ kiểm tra CCCD, bằng chuyên môn và GPHN trước khi kích hoạt nhận ca.
-        </Text>
-        <View style={styles.stack}>
-          {IS_DEV ? (
-            <AppButton
-              label="[DEV] Giả lập đã duyệt (ACTIVE)"
-              onPress={() => void enterDevZone('active')}
-            />
-          ) : null}
-          <AppButton label="Đăng xuất" variant="secondary" onPress={() => void logout()} />
-        </View>
-      </View>
-    </SafeAreaView>
-  );
-};
-
-export const AccountLockedScreen: React.FC = () => {
-  const { session, logout } = useAuth();
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <StatusBadge label="Tài khoản đang bị khóa" tone="crimson" />
-        <Text style={[styles.title, { marginTop: 12 }]}>Không thể nhận ca mới</Text>
-        <Text style={styles.subtitle}>
-          {session?.profile?.suspended_reason ||
-            'Tài khoản của bạn đang bị tạm khóa. Vui lòng liên hệ bộ phận hỗ trợ CareNest.'}
-        </Text>
-        <View style={styles.stack}>
-          <AppButton label="Đăng xuất" variant="secondary" onPress={() => void logout()} />
-        </View>
-      </View>
-    </SafeAreaView>
-  );
-};
 
 function RoadmapTabTemplate({
   badge,
@@ -146,75 +31,6 @@ function RoadmapTabTemplate({
   );
 }
 
-export const JobsPlaceholderScreen: React.FC = () => (
-  <RoadmapTabTemplate
-    badge="Giai đoạn M3"
-    title="Bảng việc làm & Radar"
-    description="Danh sách ca đặt trước > 6 giờ, lời mời trực tiếp và Radar ca khẩn cấp sẽ hiển thị tại đây."
-  />
-);
-
-export const ShiftsPlaceholderScreen: React.FC = () => (
-  <RoadmapTabTemplate
-    badge="Giai đoạn M4"
-    title="Ca trực của tôi"
-    description="Theo dõi các ca đã nhận và lịch sử thực hiện ca lâm sàng."
-  />
-);
-
-export const SchedulePlaceholderScreen: React.FC = () => (
-  <RoadmapTabTemplate
-    badge="Giai đoạn M2"
-    title="Lịch rảnh & Ngày nghỉ"
-    description="Cấu hình khung giờ rảnh hằng tuần, ngày nghỉ và phủ lớp ca đã xác nhận."
-  />
-);
-
-export const ProfilePlaceholderScreen: React.FC = () => {
-  const { session, logout, enterDevZone } = useAuth();
-  return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <StatusBadge label="Vùng 3 · Đã duyệt (ACTIVE)" tone="jade" />
-        <Text style={[styles.title, { marginTop: 12 }]}>
-          {session?.user.full_name || 'Điều dưỡng CareNest'}
-        </Text>
-        <Text style={styles.subtitle}>
-          SĐT: {session?.user.phone || 'Chưa cập nhật'} · TrustScore:{' '}
-          {session?.profile?.trust_score ?? 100}
-        </Text>
-
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Kiểm thử chuyển vùng điều hướng</Text>
-          <Text style={styles.cardBody}>Endpoint: {env.apiBaseUrl}</Text>
-          <View style={styles.stack}>
-            {IS_DEV ? (
-              <>
-                <AppButton
-                  label="[DEV] Chuyển vùng Onboarding"
-                  variant="secondary"
-                  onPress={() => void enterDevZone('onboarding')}
-                />
-                <AppButton
-                  label="[DEV] Chuyển vùng Chờ duyệt"
-                  variant="secondary"
-                  onPress={() => void enterDevZone('pending')}
-                />
-                <AppButton
-                  label="[DEV] Chuyển vùng Bị khóa"
-                  variant="secondary"
-                  onPress={() => void enterDevZone('locked')}
-                />
-              </>
-            ) : null}
-            <AppButton label="Đăng xuất" variant="danger" onPress={() => void logout()} />
-          </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
-
 type ShiftResultProps = NativeStackScreenProps<ActiveStackParamList, 'ShiftResult'>;
 
 export const ShiftResultScreen: React.FC<ShiftResultProps> = ({ navigation, route }) => {
@@ -235,7 +51,7 @@ export const ShiftResultScreen: React.FC<ShiftResultProps> = ({ navigation, rout
           </Text>
           <View style={styles.stack}>
             <AppButton
-              label="Về màn hình chính"
+              label="Về danh sách ca trực"
               onPress={() => navigation.popToTop()}
             />
           </View>

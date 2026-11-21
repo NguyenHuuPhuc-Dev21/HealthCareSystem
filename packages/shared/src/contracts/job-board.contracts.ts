@@ -75,6 +75,18 @@ export interface ClaimJobResult {
   success: boolean;
   bookingId?: string;
   message?: string;
-  errorCode?: 'ALREADY_CLAIMED' | 'TIER_MISMATCH' | 'DEPOSIT_SHORTFALL' | 'SCHEDULE_CONFLICT';
+  errorCode?:
+    | 'ALREADY_CLAIMED'
+    | 'JOB_ALREADY_TAKEN'
+    | 'OFFER_EXPIRED'
+    | 'TIER_MISMATCH'
+    | 'TIER_NOT_ALLOWED'
+    | 'DEPOSIT_SHORTFALL'
+    | 'DEPOSIT_BELOW_MIN'
+    | 'DEPOSIT_GRACE_CASH_NOT_ALLOWED'
+    | 'DEPOSIT_GRACE_EXHAUSTED'
+    | 'ACCOUNT_CLOSING'
+    | 'SCHEDULE_CONFLICT'
+    | 'ACCOUNT_SUSPENDED';
 }
 

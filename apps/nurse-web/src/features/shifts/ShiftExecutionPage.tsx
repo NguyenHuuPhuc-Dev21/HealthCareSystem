@@ -7,6 +7,10 @@ import {
   AlertTriangle,
   FileText,
   Lock,
+  MessageSquare,
+  Phone,
+  ShieldCheck,
+  Star,
 } from 'lucide-react';
 import { ShiftExecutionState } from './shift.types';
 import { getShiftExecutionState } from './shift.api';
@@ -16,7 +20,10 @@ import { ShiftExtensionBanner } from './components/ShiftExtensionBanner';
 import { InitialAssessmentModal } from './components/InitialAssessmentModal';
 import { InvalidPrescriptionModal } from './components/InvalidPrescriptionModal';
 import { CheckOutReportModal } from './components/CheckOutReportModal';
+import { RateCustomerModal } from '../reviews/components/RateCustomerModal';
 import { SosEmergencyButton } from './components/SosEmergencyButton';
+import { ChatPanel } from '../chat/ChatPanel';
+import { useConversation } from '../chat/useConversation';
 import {
   ExecutionStatus,
   DEFAULT_SETTLEMENT_COOLING_HOURS,
@@ -35,6 +42,10 @@ export const ShiftExecutionPage: React.FC = () => {
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
   const [showCheckOutModal, setShowCheckOutModal] = useState(false);
   const [showRejectPrescriptionModal, setShowRejectPrescriptionModal] = useState(false);
+  const [showRateCustomerModal, setShowRateCustomerModal] = useState(false);
+  const [showChatPanel, setShowChatPanel] = useState(false);
+  const { unreadCount } = useConversation(id, showChatPanel);
+  const [isCustomerRated, setIsCustomerRated] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -145,15 +156,62 @@ export const ShiftExecutionPage: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            {!isCustomerRated && (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => setShowRateCustomerModal(true)}
+                style={{ minWidth: 170 }}
+              >
+                <Star size={16} aria-hidden="true" />
+                <span>Đánh giá khách hàng</span>
+              </button>
+            )}
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ minWidth: 160, position: 'relative' }}
+              onClick={() => setShowChatPanel(true)}
+            >
+              <MessageSquare size={16} aria-hidden="true" />
+              <span>Lịch sử chat</span>
+              {unreadCount > 0 && <span className="chat-badge">{unreadCount}</span>}
+            </button>
             <Link to="/shifts" className="btn btn-secondary" style={{ minWidth: 160 }}>
               Danh sách ca của tôi
             </Link>
-            <Link to="/" className="btn btn-primary" style={{ minWidth: 160 }}>
+            <Link to="/" className="btn btn-secondary" style={{ minWidth: 160 }}>
               Về Trang chủ
             </Link>
           </div>
         </div>
+
+        {/* Modal đánh giá khách sau check-out */}
+        {showRateCustomerModal && (
+          <RateCustomerModal
+            bookingId={shift.bookingId}
+            bookingCode={shift.bookingCode}
+            customerName={shift.patientName}
+            isOpen={true}
+            onClose={() => setShowRateCustomerModal(false)}
+            onSuccess={() => {
+              setIsCustomerRated(true);
+              setShowRateCustomerModal(false);
+              showToast(
+                'Đánh giá khách hàng thành công! Đánh giá sẽ hiển thị khi khách cũng hoàn tất đánh giá hoặc sau 7 ngày.'
+              );
+            }}
+          />
+        )}
+
+        {/* Chat Drawer Panel */}
+        <ChatPanel
+          bookingId={shift.bookingId}
+          bookingCode={shift.bookingCode}
+          isOpen={showChatPanel}
+          onClose={() => setShowChatPanel(false)}
+        />
       </div>
     );
   }
@@ -237,7 +295,7 @@ export const ShiftExecutionPage: React.FC = () => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0 }}>
           <button
             className="btn btn-primary btn-lg"
             type="button"
@@ -392,6 +450,51 @@ export const ShiftExecutionPage: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {/* Communication & Safety (Liên lạc & An toàn) */}
+            <div className="card" style={{ padding: '18px 20px' }}>
+              <h4
+                style={{
+                  margin: '0 0 8px 0',
+                  fontSize: 16,
+                  color: 'var(--navy)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <ShieldCheck size={18} color="var(--brand-jade)" aria-hidden="true" />
+                <span>Liên lạc &amp; an toàn</span>
+              </h4>
+              <p style={{ fontSize: 13.5, color: 'var(--slate)', margin: '0 0 12px 0', lineHeight: 1.4 }}>
+                Kênh nhắn tin và gọi thoại ẩn danh với người nhà trong suốt ca trực (FR-CHAT-01).
+              </p>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  style={{ flex: 1, position: 'relative' }}
+                  onClick={() => setShowChatPanel(true)}
+                >
+                  <MessageSquare size={16} aria-hidden="true" />
+                  <span>Nhắn tin với khách</span>
+                  {unreadCount > 0 && <span className="chat-badge">{unreadCount}</span>}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  title="Gọi thoại ẩn danh tới người nhà"
+                  onClick={() => {
+                    alert(
+                      'Tính năng gọi thoại ẩn danh CareNest (FR-CHAT-01) bảo mật số điện thoại thực tế. Đang kết nối tổng đài VoIP...'
+                    );
+                  }}
+                  aria-label="Gọi thoại ẩn danh tới người nhà"
+                >
+                  <Phone size={16} aria-hidden="true" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -426,11 +529,38 @@ export const ShiftExecutionPage: React.FC = () => {
             onSuccess={(updated) => {
               setShift(updated);
               setShowCheckOutModal(false);
+              setShowRateCustomerModal(true);
             }}
             onClose={() => setShowCheckOutModal(false)}
           />
         )}
-    </div>
+
+        {/* Modal đánh giá khách */}
+        {showRateCustomerModal && (
+          <RateCustomerModal
+            bookingId={shift.bookingId}
+            bookingCode={shift.bookingCode}
+            customerName={shift.patientName}
+            isOpen={true}
+            onClose={() => setShowRateCustomerModal(false)}
+            onSuccess={() => {
+              setIsCustomerRated(true);
+              setShowRateCustomerModal(false);
+              showToast(
+                'Đánh giá khách hàng thành công! Đánh giá sẽ hiển thị khi khách cũng hoàn tất đánh giá hoặc sau 7 ngày.'
+              );
+            }}
+          />
+        )}
+
+        {/* Chat Drawer Panel */}
+        <ChatPanel
+          bookingId={shift.bookingId}
+          bookingCode={shift.bookingCode}
+          isOpen={showChatPanel}
+          onClose={() => setShowChatPanel(false)}
+        />
+      </div>
   );
 };
 export default ShiftExecutionPage;

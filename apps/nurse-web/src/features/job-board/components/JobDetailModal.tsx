@@ -3,8 +3,6 @@ import {
   Clock,
   MapPin,
   FileText,
-  Phone,
-  MessageSquare,
   AlertTriangle,
   Check,
   CreditCard,
@@ -268,20 +266,23 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
                     <b style={{ color: 'var(--navy)', fontSize: 15.5, display: 'block' }}>
                       {job.customerName || 'Người nhà bệnh nhân'}
                     </b>
-                    <div style={{ color: 'var(--slate)', fontSize: 14, marginTop: 2 }}>
-                      SĐT: {job.customerPhoneMasked || '0905 ••• 123'} (Bảo mật)
+                    <div style={{ color: 'var(--slate)', fontSize: 13.5, marginTop: 2 }}>
+                      Người đặt ca · SĐT được bảo mật cho tới khi nhận ca
                     </div>
                   </div>
                 </div>
-                <div className="contact-person-card__actions">
-                  <button className="btn btn-secondary btn-sm" type="button">
-                    <MessageSquare size={15} aria-hidden="true" />
-                    Chat
-                  </button>
-                  <button className="btn btn-secondary btn-sm" type="button">
-                    <Phone size={15} aria-hidden="true" />
-                    Gọi
-                  </button>
+                <div
+                  style={{
+                    marginTop: 10,
+                    fontSize: 12.5,
+                    color: 'var(--muted)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <Lock size={13} aria-hidden="true" />
+                  <span>Kênh nhắn tin &amp; gọi thoại sẽ mở sau khi bạn nhận ca (FR-CHAT-01).</span>
                 </div>
               </div>
             </div>

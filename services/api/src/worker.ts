@@ -1,7 +1,10 @@
 import 'dotenv/config';
 import { jobs } from './core/jobs';
 import { registerPrivacyConsentJobs } from './modules/privacy-consent/privacy-consent.jobs';
-import { registerRedispatchPlaceholder, registerTierLifecycleJobs } from './modules/tier-lifecycle/tier-lifecycle.jobs';
+import { registerBookingExpiryJobs } from './modules/booking-expiry/booking-expiry.jobs';
+import { registerJobBoardJobs } from './modules/job-board/job-board.jobs';
+import { registerMatchingRadarJobs } from './modules/matching-radar/matching-radar.jobs';
+import { registerTierLifecycleJobs } from './modules/tier-lifecycle/tier-lifecycle.jobs';
 
 async function main() {
   // Phase 1+: các module đăng ký handler tại đây, vd: registerTierLifecycleJobs(jobs)
@@ -12,7 +15,9 @@ async function main() {
 
   await registerPrivacyConsentJobs(jobs); // BE-3 · Phase 1 · privacy.retention-sweep (daily 03:00)
   await registerTierLifecycleJobs(jobs); // BE-2 · Phase 1 · tier-lifecycle.gphn-expiry-sweep (daily 00:05)
-  registerRedispatchPlaceholder(jobs); // BE-2 · Phase 1 → remove in Phase 3 when matching-radar registers it
+  registerMatchingRadarJobs(jobs); // BE-2 · Phase 3 · matching-radar.wave + matching-radar.redispatch
+  await registerBookingExpiryJobs(jobs); // BE-3 · Phase 3 · booking-expiry.payment-timeout + booking-expiry.sweep (every minute)
+  await registerJobBoardJobs(jobs); // BE-3 · Phase 3 · job-board.direct-request-sweep (every minute)
 
   jobs.startWorker();
   console.log('[Worker] Shared job queue worker started');
