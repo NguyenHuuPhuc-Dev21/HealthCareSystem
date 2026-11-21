@@ -64,6 +64,9 @@ export const SYSTEM_CONFIG_KEYS = {
 
   // Booking (prescription-gate — migration 0011)
   PRESCRIPTION_MAX_AGE_DAYS: 'PRESCRIPTION_MAX_AGE_DAYS',             // 7 (FR-BOOK-02)
+
+  // On-site rejection of an invalid medical order (prescription-rejection — migration 0012; proposed, pending PO)
+  PRESCRIPTION_REJECTION_WINDOW_MINUTES: 'PRESCRIPTION_REJECTION_WINDOW_MINUTES', // 60 (FR-BOOK-02 Layer 3)
 } as const;
 
 export type SystemConfigKey = keyof typeof SYSTEM_CONFIG_KEYS;
