@@ -44,6 +44,9 @@ export const SYSTEM_CONFIG_KEYS = {
   // Privacy & medical records (privacy-consent — migration 0006)
   RECORD_ACCESS_GRANT_MAX_HOURS: 'RECORD_ACCESS_GRANT_MAX_HOURS',     // 24 (proposed, pending PO)
   MEDICAL_RECORD_RETENTION_MONTHS: 'MEDICAL_RECORD_RETENTION_MONTHS', // 24 (NFR-PRIV-02)
+
+  // Booking (prescription-gate — migration 0008)
+  PRESCRIPTION_MAX_AGE_DAYS: 'PRESCRIPTION_MAX_AGE_DAYS',             // 7 (FR-BOOK-02)
 } as const;
 
 export type SystemConfigKey = keyof typeof SYSTEM_CONFIG_KEYS;
