@@ -61,6 +61,9 @@ export const SYSTEM_CONFIG_KEYS = {
   UNMATCHED_EXPIRY_LEAD_MINUTES: 'UNMATCHED_EXPIRY_LEAD_MINUTES',     // 30 (unclaimed 30 min before start → EXPIRED + 100% refund)
   URGENT_UNMATCHED_EXPIRY_MINUTES: 'URGENT_UNMATCHED_EXPIRY_MINUTES', // 30 (urgent booking unclaimed 30 min after matching starts → EXPIRED)
   DIRECT_REQUEST_WINDOW_MINUTES: 'DIRECT_REQUEST_WINDOW_MINUTES',     // 15 (invited nurse's exclusive window, BR-08 §2.2)
+
+  // Booking (prescription-gate — migration 0011)
+  PRESCRIPTION_MAX_AGE_DAYS: 'PRESCRIPTION_MAX_AGE_DAYS',             // 7 (FR-BOOK-02)
 } as const;
 
 export type SystemConfigKey = keyof typeof SYSTEM_CONFIG_KEYS;
