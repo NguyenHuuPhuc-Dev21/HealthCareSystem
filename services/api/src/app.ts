@@ -29,6 +29,8 @@ import { createPatientProfilesRouter } from './modules/patient-profiles/patient-
 import { getPatientProfilesService } from './modules/patient-profiles/patient-profiles.service';
 import { createPrescriptionGateRouter } from './modules/prescription-gate/prescription-gate.routes';
 import { createPrescriptionRejectionRouter } from './modules/prescription-rejection/prescription-rejection.routes';
+import { createShiftExtendRouter } from './modules/shift-extend/shift-extend.routes';
+import { getShiftExtendService } from './modules/shift-extend/shift-extend.service';
 import { getPrescriptionRejectionService } from './modules/prescription-rejection/prescription-rejection.service';
 import { getPrescriptionGateService } from './modules/prescription-gate/prescription-gate.service';
 import { createPrivacyConsentRouter } from './modules/privacy-consent/privacy-consent.routes';
@@ -63,6 +65,7 @@ function buildApiRouter(): Router {
   api.use(createJobBoardRouter(getJobBoardService())); // BE-3 · Phase 3 · job-board (board, direct requests)
   api.use(createPrescriptionGateRouter(getPrescriptionGateService())); // BE-1 · Phase 3 · prescription-gate
   api.use(createPrescriptionRejectionRouter(getPrescriptionRejectionService())); // BE-1 · Phase 4 · prescription-rejection
+  api.use(createShiftExtendRouter(getShiftExtendService())); // BE-1 · Phase 4 · shift-extend
 
   return api;
 }

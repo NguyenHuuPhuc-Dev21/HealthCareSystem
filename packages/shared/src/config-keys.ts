@@ -67,6 +67,10 @@ export const SYSTEM_CONFIG_KEYS = {
 
   // On-site rejection of an invalid medical order (prescription-rejection — migration 0012; proposed, pending PO)
   PRESCRIPTION_REJECTION_WINDOW_MINUTES: 'PRESCRIPTION_REJECTION_WINDOW_MINUTES', // 60 (FR-BOOK-02 Layer 3)
+
+  // Shift extension (shift-extend — migration 0013; proposed, pending PO)
+  EXTENSION_REQUEST_DEADLINE_MINUTES: 'EXTENSION_REQUEST_DEADLINE_MINUTES', // 30 (request until scheduled end − 30 min, FR-SHIFT-03)
+  MAX_EXTENSION_HOURS: 'MAX_EXTENSION_HOURS',                               // 4 (per request, 1-hour steps)
 } as const;
 
 export type SystemConfigKey = keyof typeof SYSTEM_CONFIG_KEYS;
