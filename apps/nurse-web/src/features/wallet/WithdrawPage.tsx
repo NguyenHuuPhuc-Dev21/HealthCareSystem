@@ -115,6 +115,12 @@ export const WithdrawPage: React.FC = () => {
     setInputError(validateAmount(balances.available_balance, balances.available_balance));
   };
 
+  const handleSetPresetAmount = (preset: number) => {
+    const target = Math.min(preset, balances.available_balance);
+    setAmountInput(target.toLocaleString('vi-VN'));
+    setInputError(validateAmount(target, balances.available_balance));
+  };
+
   const handleOpenModal = () => {
     if (!numericAmount || numericAmount <= 0) {
       setInputError('Vui lòng nhập số tiền cần rút');
@@ -197,13 +203,13 @@ export const WithdrawPage: React.FC = () => {
           <p>Tiền chỉ rút được từ ngăn Khả dụng — hai ngăn còn lại đang bị khóa theo quy tắc</p>
         </div>
         <Link
-          to="/"
+          to="/wallet"
           className="btn btn-secondary btn-sm"
           style={{ minHeight: 44, padding: '8px 18px', fontSize: 14.5 }}
-          aria-label="Về trang chủ"
+          aria-label="Quay lại ví"
         >
           <ArrowLeft size={16} aria-hidden="true" />
-          <span>Về trang chủ</span>
+          <span>Quay lại ví</span>
         </Link>
       </div>
 
@@ -424,6 +430,53 @@ export const WithdrawPage: React.FC = () => {
                 >
                   ₫
                 </span>
+              </div>
+
+              {/* Phím chọn nhanh mệnh giá tròn (1 chạm tiện lợi) */}
+              <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                {[500000, 1000000, 2000000, 5000000].map((preset) => {
+                  const isExceeded = preset > balances.available_balance;
+                  return (
+                    <button
+                      key={preset}
+                      type="button"
+                      disabled={isExceeded}
+                      onClick={() => handleSetPresetAmount(preset)}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: 8,
+                        fontSize: 13,
+                        fontWeight: 700,
+                        background: isExceeded ? '#F1F5F9' : '#F0FDF4',
+                        color: isExceeded ? '#94A3B8' : '#166534',
+                        border: isExceeded ? '1px solid #E2E8F0' : '1px solid #BBF7D0',
+                        cursor: isExceeded ? 'not-allowed' : 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                      title={isExceeded ? 'Vượt quá số dư khả dụng' : `Điền ${formatVND(preset)}`}
+                    >
+                      {preset >= 1000000 ? `${preset / 1000000} triệu` : `${preset / 1000}k`}
+                    </button>
+                  );
+                })}
+                <button
+                  type="button"
+                  disabled={balances.available_balance <= 0}
+                  onClick={handleWithdrawAll}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: 8,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    background: '#F8FAFC',
+                    color: 'var(--brand-jade, #166B58)',
+                    border: '1px solid #CBD5E1',
+                    cursor: balances.available_balance <= 0 ? 'not-allowed' : 'pointer',
+                  }}
+                  title="Điền 100% số dư khả dụng"
+                >
+                  Rút tất cả
+                </button>
               </div>
 
               {inputError ? (

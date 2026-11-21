@@ -1,22 +1,47 @@
-import { WithdrawalStatus } from '@healthcare-system/shared';
-import type { BankAccountDto, WithdrawalDto } from '@healthcare-system/shared';
+import {
+  BalanceType,
+  INITIAL_TRANSACTIONS,
+  INITIAL_UPCOMING_SETTLEMENTS,
+  TxStatus,
+  TxType,
+  WithdrawalStatus,
+} from '@healthcare-system/shared';
+import type {
+  BankAccountDto,
+  EarningsPointDto,
+  Paged,
+  UpcomingSettlementDto,
+  WalletSummaryDto,
+  WalletTransactionDto,
+  WithdrawalDto,
+} from '@healthcare-system/shared';
 import type { WalletBalancesDto } from './wallet.api';
 
-const WALLET_STORAGE_KEY = 'carenest_mock_wallet_v1';
+const WALLET_STORAGE_KEY = 'carenest_mock_wallet_v2';
 
 interface MockWalletState {
-  balances: WalletBalancesDto;
+  availableBalance: number;
+  escrowLockedBalance: number;
+  depositBalance: number;
+  minDeposit: number;
+  isSuspended: boolean;
+  suspendedReason?: 'DEPOSIT_BELOW_MIN' | 'COMMISSION_OVERDUE' | 'TRUST_SCORE_LOW' | 'ACCOUNT_CLOSING' | null;
+  depositGraceActive: boolean;
   bankAccount: BankAccountDto | null;
   withdrawals: WithdrawalDto[];
-  idempotencyKeys: Record<string, string>; // idempotencyKey -> withdrawal_id
+  transactions: WalletTransactionDto[];
+  upcomingSettlements: UpcomingSettlementDto[];
+  idempotencyKeys: Record<string, string>;
 }
 
 const INITIAL_WALLET_STATE: MockWalletState = {
-  balances: {
-    available_balance: 3850000,
-    escrow_locked_balance: 500000,
-    deposit_balance: 300000,
-  },
+  availableBalance: 3850000,
+  escrowLockedBalance: 425000,
+  depositBalance: 300000,
+  minDeposit: 300000,
+  isSuspended: false,
+  suspendedReason: null,
+  depositGraceActive: false,
   bankAccount: {
     bankName: 'Vietcombank',
     accountMasked: '•••• 6899',
@@ -45,6 +70,8 @@ const INITIAL_WALLET_STATE: MockWalletState = {
       processedAt: '2026-10-18T11:20:00.000Z',
     },
   ],
+  transactions: INITIAL_TRANSACTIONS,
+  upcomingSettlements: INITIAL_UPCOMING_SETTLEMENTS,
   idempotencyKeys: {},
 };
 
@@ -73,10 +100,28 @@ function saveWalletState(state: MockWalletState): void {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export async function mockGetWalletBalances(): Promise<WalletBalancesDto> {
+export async function mockGetWalletSummary(): Promise<WalletSummaryDto> {
   await delay(180);
   const state = loadWalletState();
-  return state.balances;
+  return {
+    availableBalance: state.availableBalance,
+    escrowLockedBalance: state.escrowLockedBalance,
+    depositBalance: state.depositBalance,
+    minDeposit: state.minDeposit,
+    isSuspended: state.isSuspended,
+    suspendedReason: state.suspendedReason,
+    depositGraceActive: state.depositGraceActive,
+  };
+}
+
+export async function mockGetWalletBalances(): Promise<WalletBalancesDto> {
+  await delay(150);
+  const state = loadWalletState();
+  return {
+    available_balance: state.availableBalance,
+    escrow_locked_balance: state.escrowLockedBalance,
+    deposit_balance: state.depositBalance,
+  };
 }
 
 export async function mockGetBankAccount(): Promise<BankAccountDto | null> {
@@ -91,6 +136,96 @@ export async function mockGetWithdrawals(): Promise<WithdrawalDto[]> {
   return state.withdrawals;
 }
 
+export async function mockGetUpcomingSettlements(): Promise<UpcomingSettlementDto[]> {
+  await delay(150);
+  const state = loadWalletState();
+  return state.upcomingSettlements;
+}
+
+export async function mockGetEarnings(range: 'week' | 'month'): Promise<{
+  points: EarningsPointDto[];
+  totalAmount: number;
+  periodLabel: string;
+}> {
+  await delay(180);
+  if (range === 'week') {
+    const points: EarningsPointDto[] = [
+      { label: 'T2', amount: 350000 },
+      { label: 'T3', amount: 500000 },
+      { label: 'T4', amount: 425000 },
+      { label: 'T5', amount: 750000 },
+      { label: 'T6', amount: 850000 },
+      { label: 'T7', amount: 500000 },
+      { label: 'CN', amount: 200000 },
+    ];
+    const totalAmount = points.reduce((acc, p) => acc + p.amount, 0);
+    return {
+      points,
+      totalAmount,
+      periodLabel: 'Tuần này',
+    };
+  }
+
+  const points: EarningsPointDto[] = [
+    { label: 'Tuần 1', amount: 2450000 },
+    { label: 'Tuần 2', amount: 3200000 },
+    { label: 'Tuần 3', amount: 2850000 },
+    { label: 'Tuần 4', amount: 3575000 },
+  ];
+  const totalAmount = points.reduce((acc, p) => acc + p.amount, 0);
+  return {
+    points,
+    totalAmount,
+    periodLabel: 'Tháng 11/2026',
+  };
+}
+
+export async function mockGetWalletTransactions(params?: {
+  type?: string;
+  cursor?: string;
+  pageSize?: number;
+}): Promise<Paged<WalletTransactionDto>> {
+  await delay(200);
+  const state = loadWalletState();
+  const pageSize = params?.pageSize || 6;
+  const startIndex = params?.cursor ? parseInt(params.cursor, 10) : 0;
+
+  let filtered = state.transactions;
+  if (params?.type && params.type !== 'ALL') {
+    if (params.type === 'SETTLE') {
+      filtered = filtered.filter(
+        (tx) => tx.type === TxType.ESCROW_RELEASE || tx.type === TxType.DEPOSIT_WITHHOLD
+      );
+    } else if (params.type === 'PENALTY') {
+      filtered = filtered.filter(
+        (tx) => tx.type === TxType.PENALTY_DEDUCT || tx.type === TxType.PENALTY_REVERSAL
+      );
+    } else if (params.type === 'WITHDRAW') {
+      filtered = filtered.filter((tx) => tx.type === TxType.WITHDRAW);
+    } else if (params.type === 'DEPOSIT') {
+      filtered = filtered.filter(
+        (tx) =>
+          tx.type === TxType.TOPUP ||
+          tx.type === TxType.DEPOSIT_WITHHOLD ||
+          tx.type === TxType.DEPOSIT_REFUND ||
+          tx.type === TxType.PENALTY_DEDUCT ||
+          tx.type === TxType.PENALTY_REVERSAL
+      );
+    } else {
+      filtered = filtered.filter((tx) => tx.type === (params.type as TxType));
+    }
+  }
+
+  const slice = filtered.slice(startIndex, startIndex + pageSize);
+  const nextIndex = startIndex + pageSize;
+  const nextCursor = nextIndex < filtered.length ? String(nextIndex) : null;
+
+  return {
+    items: slice,
+    nextCursor,
+  };
+}
+
 export async function mockRequestWithdrawal(
   amount: number,
   idempotencyKey?: string
@@ -98,13 +233,11 @@ export async function mockRequestWithdrawal(
   await delay(350);
   const state = loadWalletState();
 
-  // Check idempotency key to prevent double submissions
   if (idempotencyKey && state.idempotencyKeys[idempotencyKey]) {
     return { withdrawal_id: state.idempotencyKeys[idempotencyKey] };
   }
 
-  // Validate balance
-  if (amount > state.balances.available_balance) {
+  if (amount > state.availableBalance) {
     const error: any = new Error('Số dư khả dụng không đủ để thực hiện yêu cầu rút tiền');
     error.code = 'INSUFFICIENT_BALANCE';
     throw error;
@@ -124,8 +257,19 @@ export async function mockRequestWithdrawal(
     requestedAt: new Date().toISOString(),
   };
 
-  state.balances.available_balance -= amount;
+  const newTx: WalletTransactionDto = {
+    id: `tx-${Date.now()}`,
+    type: TxType.WITHDRAW,
+    status: TxStatus.COMPLETED,
+    balanceType: BalanceType.AVAILABLE,
+    amount: -amount,
+    description: `Rút tiền về ${state.bankAccount?.bankName || 'ngân hàng'} ${state.bankAccount?.accountMasked || ''}`,
+    createdAt: new Date().toISOString(),
+  };
+
+  state.availableBalance -= amount;
   state.withdrawals = [newWithdrawal, ...state.withdrawals];
+  state.transactions = [newTx, ...state.transactions];
   if (idempotencyKey) {
     state.idempotencyKeys[idempotencyKey] = withdrawalId;
   }
@@ -134,8 +278,31 @@ export async function mockRequestWithdrawal(
   return { withdrawal_id: withdrawalId };
 }
 
+/** Mock helper to switch deposit scenario for manual testing (Test #2) */
+export function mockSetDepositScenario(
+  scenario: 'FULL' | 'SHORTFALL_180K' | 'GRACE_ACTIVE'
+): void {
+  const state = loadWalletState();
+  if (scenario === 'SHORTFALL_180K') {
+    state.depositBalance = 180000;
+    state.depositGraceActive = false;
+    state.isSuspended = false;
+    state.suspendedReason = null;
+  } else if (scenario === 'GRACE_ACTIVE') {
+    state.depositBalance = 180000;
+    state.depositGraceActive = true;
+    state.isSuspended = false;
+    state.suspendedReason = null;
+  } else {
+    state.depositBalance = 300000;
+    state.depositGraceActive = false;
+    state.isSuspended = false;
+    state.suspendedReason = null;
+  }
+  saveWalletState(state);
+}
+
 export function mockResetWallet(): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(WALLET_STORAGE_KEY, JSON.stringify(INITIAL_WALLET_STATE));
 }
-

@@ -35,7 +35,7 @@ export function checkPrescription(
   const now = dateOnlyMs(today);
   if (issued === null || now === null) return 'INVALID_PRESCRIPTION_DATE';
   if (issued > now) return 'PRESCRIPTION_DATE_IN_FUTURE';
-  if ((now - issued) / DAY_MS > maxAgeDays) return 'PRESCRIPTION_TOO_OLD';
+  if ((now - issued) / DAY_MS > maxAgeDays) return 'PRESCRIPTION_EXPIRED';
   return null;
 }
 

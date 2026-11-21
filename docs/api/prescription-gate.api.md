@@ -4,52 +4,32 @@ Base URL: `/api/v1` · every request: `Authorization: Bearer <accessToken>` · F
 
 Invasive services (`is_invasive = true`) can only be booked with a doctor's prescription.
 
-## Flow for the customer (Patient Web)
+## Layer 1 — the customer books (owned by `bookings`)
 
-1. `POST /bookings/prescription/upload-url` → `uploadUrl` + `objectKey`
-2. `PUT <uploadUrl>` with the file as body and the header `Content-Type: <contentType>` (straight to storage, not through the API)
-3. Create the booking with `prescriptionImageKey = objectKey` and `prescriptionIssuedDate` (`bookings`, BE-2)
+Upload and booking creation are `bookings` endpoints — see [`bookings.api.md`](bookings.api.md):
+`POST /bookings/prescription/upload-url` (JPEG/PNG/WebP, ≤ 10 MB), then `POST /bookings` with
+`prescription: { imageKey, issuedDate }`.
 
----
-
-### `POST /bookings/prescription/upload-url` — customer only
-```json
-{ "contentType": "image/jpeg" }
-```
-`contentType`: `image/jpeg` | `image/png` | `image/webp` | `application/pdf`. File size ≤ 10 MB.
-
-`200`
-```json
-{ "success": true, "data": {
-  "objectKey": "prescription/<customerId>/<uuid>.jpg",
-  "uploadUrl": "https://…",
-  "expiresInSeconds": 600,
-  "contentType": "image/jpeg"
-} }
-```
-
-| Error | When |
-|---|---|
-| `400 VALIDATION_ERROR` | unknown field or content type |
-| `403 FORBIDDEN` | not a customer account |
-
-### Errors the booking request returns because of the prescription
-`bookings` calls this module when the booking is created. All are `400`:
+### The prescription rule (errors of `POST /bookings`)
+All are `400`. Until `bookings` delegates to this module it uses its own copy of the rule:
+`INVALID_PRESCRIPTION_DATE` and `details.maxAgeDays` only appear after the switch.
 
 | Code | When |
 |---|---|
-| `PRESCRIPTION_REQUIRED` | invasive service without `prescriptionImageKey` or `prescriptionIssuedDate` |
+| `PRESCRIPTION_REQUIRED` | invasive service without `prescription` |
 | `INVALID_PRESCRIPTION_DATE` | the date is not a real `YYYY-MM-DD` date |
 | `PRESCRIPTION_DATE_IN_FUTURE` | issue date after today (Vietnam time) |
-| `PRESCRIPTION_TOO_OLD` | older than `details.maxAgeDays` days (7 by default, from `system_configs`) |
+| `PRESCRIPTION_EXPIRED` | older than `details.maxAgeDays` days (7 by default, from `system_configs`) |
 | `INVALID_FILE_KEY` | the key is not a prescription upload of this customer |
 | `FILE_NOT_UPLOADED` | step 2 was skipped or failed |
 | `FILE_TOO_LARGE` | empty file or larger than 10 MB |
-| `FILE_TYPE_NOT_ALLOWED` | the file content is not really a JPEG/PNG/WebP/PDF |
+| `FILE_TYPE_NOT_ALLOWED` | the file content is not really a JPEG/PNG/WebP image |
 
 Show the maximum age from `details.maxAgeDays`; do not hardcode 7.
 
 ---
+
+## Layer 2 — reading the prescription (this module)
 
 ### `GET /bookings/:id/prescription`
 A download link for the prescription image, valid for at most 10 minutes. Ask again for a new link; do not store it.

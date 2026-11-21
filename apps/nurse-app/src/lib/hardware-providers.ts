@@ -1,6 +1,6 @@
-import { NativeModules, Platform } from 'react-native';
+import { NativeModules, Platform, Linking } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
-import { PERMISSIONS, RESULTS, check, request } from 'react-native-permissions';
+import { PERMISSIONS, RESULTS, check, request, openSettings } from 'react-native-permissions';
 
 export interface DeviceGeoCoords {
   latitude: number;
@@ -14,10 +14,12 @@ export interface HardwareProviderOverrides {
 }
 
 export type CameraFacing = 'front' | 'back';
+export type CameraCaptureMode = 'selfie' | 'document';
 
 export interface LiveCameraCaptureOptions {
   facing?: CameraFacing;
   instruction?: string;
+  mode?: CameraCaptureMode;
 }
 
 type CameraCaptureHandler = (options?: LiveCameraCaptureOptions) => Promise<string | null>;
@@ -58,18 +60,86 @@ function getNativeCameraBridge(): NativeCameraBridge | undefined {
   return mods.CareNestCamera || mods.CameraModule || mods.ImagePickerManager;
 }
 
-export async function ensureLocationPermission(): Promise<boolean> {
+export async function openAppSettings(): Promise<void> {
+  try {
+    if (typeof openSettings === 'function') {
+      await openSettings();
+      return;
+    }
+  } catch {
+    // fallback if native openSettings throws
+  }
+  try {
+    await Linking.openSettings();
+  } catch {
+    // ignore if device cannot open settings directly
+  }
+}
+
+export async function checkLocationPermission(): Promise<string> {
   const permission =
     Platform.OS === 'android'
       ? PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION
       : PERMISSIONS.IOS.LOCATION_WHEN_IN_USE;
+  try {
+    return await check(permission);
+  } catch {
+    return 'unavailable';
+  }
+}
 
-  const current = await check(permission);
+export async function requestLocationPermission(): Promise<boolean> {
+  const permission =
+    Platform.OS === 'android'
+      ? PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION
+      : PERMISSIONS.IOS.LOCATION_WHEN_IN_USE;
+  try {
+    const res = await request(permission);
+    return res === RESULTS.GRANTED || res === RESULTS.LIMITED;
+  } catch {
+    return false;
+  }
+}
+
+export async function ensureLocationPermission(): Promise<boolean> {
+  const current = await checkLocationPermission();
   if (current === RESULTS.GRANTED || current === RESULTS.LIMITED) {
     return true;
   }
-  const requested = await request(permission);
-  return requested === RESULTS.GRANTED || requested === RESULTS.LIMITED;
+  return requestLocationPermission();
+}
+
+export async function checkCameraPermission(): Promise<string> {
+  const permission =
+    Platform.OS === 'android'
+      ? PERMISSIONS.ANDROID.CAMERA
+      : PERMISSIONS.IOS.CAMERA;
+  try {
+    return await check(permission);
+  } catch {
+    return 'unavailable';
+  }
+}
+
+export async function requestCameraPermission(): Promise<boolean> {
+  const permission =
+    Platform.OS === 'android'
+      ? PERMISSIONS.ANDROID.CAMERA
+      : PERMISSIONS.IOS.CAMERA;
+  try {
+    const res = await request(permission);
+    return res === RESULTS.GRANTED || res === RESULTS.LIMITED;
+  } catch {
+    return false;
+  }
+}
+
+export async function ensureCameraPermission(): Promise<boolean> {
+  const current = await checkCameraPermission();
+  if (current === RESULTS.GRANTED || current === RESULTS.LIMITED) {
+    return true;
+  }
+  return requestCameraPermission();
 }
 
 export function getHardwareCapabilityStatus(overrides?: HardwareProviderOverrides) {
@@ -115,14 +185,19 @@ export function createLocationProvider(
     if (typeof Geolocation?.getCurrentPosition === 'function') {
       return new Promise<DeviceGeoCoords>((resolve, reject) => {
         Geolocation.getCurrentPosition(
-          (pos) =>
+          (pos) => {
+            const isMockLocation = Boolean(
+              pos.mocked ||
+                (pos as { isFromMockProvider?: boolean }).isFromMockProvider ||
+                (pos.coords as { mocked?: boolean }).mocked ||
+                (pos.coords as { isFromMockProvider?: boolean }).isFromMockProvider
+            );
             resolve({
               latitude: pos.coords.latitude,
               longitude: pos.coords.longitude,
-              isMockLocation: Boolean(
-                pos.mocked || (pos.coords as { mocked?: boolean }).mocked
-              ),
-            }),
+              isMockLocation,
+            });
+          },
           (err) => reject(new Error(err?.message || 'Không thể đọc vị trí GPS thiết bị.')),
           {
             enableHighAccuracy: true,

@@ -37,17 +37,17 @@ describe('checkPrescription (Layer 1 policy)', () => {
   it('accepts today and exactly 7 days old, refuses 8 days old', () => {
     expect(checkPrescription(invasive('2026-11-14'), TODAY, 7)).toBeNull();
     expect(checkPrescription(invasive('2026-11-07'), TODAY, 7)).toBeNull();
-    expect(checkPrescription(invasive('2026-11-06'), TODAY, 7)).toBe('PRESCRIPTION_TOO_OLD');
+    expect(checkPrescription(invasive('2026-11-06'), TODAY, 7)).toBe('PRESCRIPTION_EXPIRED');
   });
 
   it('counts calendar days across a month boundary', () => {
     expect(checkPrescription(invasive('2026-10-28'), '2026-11-04', 7)).toBeNull();
-    expect(checkPrescription(invasive('2026-10-27'), '2026-11-04', 7)).toBe('PRESCRIPTION_TOO_OLD');
+    expect(checkPrescription(invasive('2026-10-27'), '2026-11-04', 7)).toBe('PRESCRIPTION_EXPIRED');
   });
 
   it('follows the configured number of days, not a constant', () => {
     expect(checkPrescription(invasive('2026-11-11'), TODAY, 3)).toBeNull();
-    expect(checkPrescription(invasive('2026-11-10'), TODAY, 3)).toBe('PRESCRIPTION_TOO_OLD');
+    expect(checkPrescription(invasive('2026-11-10'), TODAY, 3)).toBe('PRESCRIPTION_EXPIRED');
   });
 
   it('refuses a future date and a date that does not exist', () => {
@@ -80,10 +80,6 @@ describe('candidateDenial (Layer 2 policy)', () => {
 
 class FakeStorage implements PrescriptionStoragePort {
   objects = new Map<string, { sizeBytes: number; head: Buffer }>();
-  buildObjectKey = storage.buildObjectKey;
-  async createUploadUrl(objectKey: string) {
-    return { url: `https://storage.test/put/${objectKey}`, objectKey, expiresInSeconds: 600 };
-  }
   async createDownloadUrl(objectKey: string) {
     return { url: `https://storage.test/get/${objectKey}`, objectKey, expiresInSeconds: 600 };
   }
@@ -151,21 +147,6 @@ async function expectAppError(p: Promise<unknown>, status: number, code: string)
   return err as AppError;
 }
 
-describe('requestUploadUrl', () => {
-  it('returns a presigned PUT for a key under prescription/<customer>/', async () => {
-    const { svc } = setup();
-    const res = await svc.requestUploadUrl(CUSTOMER, 'image/jpeg');
-    expect(res.objectKey.startsWith(`prescription/${CUSTOMER}/`)).toBe(true);
-    expect(res).toMatchObject({ contentType: 'image/jpeg', expiresInSeconds: 600 });
-    expect(res.uploadUrl).toContain(res.objectKey);
-  });
-
-  it('refuses a content type that is not a photo or a PDF', async () => {
-    const { svc } = setup();
-    await expectAppError(svc.requestUploadUrl(CUSTOMER, 'text/html'), 400, 'CONTENT_TYPE_NOT_ALLOWED');
-  });
-});
-
 describe('assertPrescriptionGate (Layer 1)', () => {
   it('returns null for a non-invasive service without reading config or storage', async () => {
     const { svc } = setup({}); // no config at all: must not be read
@@ -190,7 +171,7 @@ describe('assertPrescriptionGate (Layer 1)', () => {
     );
   });
 
-  it('400 PRESCRIPTION_TOO_OLD past the configured age, with the limit in details', async () => {
+  it('400 PRESCRIPTION_EXPIRED past the configured age, with the limit in details', async () => {
     const { svc, store } = setup();
     const err = await expectAppError(
       svc.assertPrescriptionGate({
@@ -200,7 +181,7 @@ describe('assertPrescriptionGate (Layer 1)', () => {
         prescriptionIssuedDate: '2026-11-06',
       }),
       400,
-      'PRESCRIPTION_TOO_OLD',
+      'PRESCRIPTION_EXPIRED',
     );
     expect(err.details).toEqual({ maxAgeDays: 7 });
   });
@@ -217,10 +198,10 @@ describe('assertPrescriptionGate (Layer 1)', () => {
     });
     const input = { customerId: CUSTOMER, isInvasive: true, prescriptionImageKey: store.put(CUSTOMER) };
     await expect(svc.assertPrescriptionGate({ ...input, prescriptionIssuedDate: '2026-11-15' })).resolves.not.toBeNull();
-    await expectAppError(svc.assertPrescriptionGate({ ...input, prescriptionIssuedDate: '2026-11-07' }), 400, 'PRESCRIPTION_TOO_OLD');
+    await expectAppError(svc.assertPrescriptionGate({ ...input, prescriptionIssuedDate: '2026-11-07' }), 400, 'PRESCRIPTION_EXPIRED');
   });
 
-  it('refuses a file of another account, of another category, missing, oversized or not really an image', async () => {
+  it('refuses a file of another account, of another category, missing, oversized, a PDF or not really an image', async () => {
     const { svc, store } = setup();
     const gate = (key: string) =>
       svc.assertPrescriptionGate({ customerId: CUSTOMER, isInvasive: true, prescriptionImageKey: key, prescriptionIssuedDate: TODAY });
@@ -231,6 +212,7 @@ describe('assertPrescriptionGate (Layer 1)', () => {
     await expectAppError(gate(storage.buildObjectKey('prescription', CUSTOMER, 'image/jpeg')), 400, 'FILE_NOT_UPLOADED');
     await expectAppError(gate(store.put(CUSTOMER, JPEG, 11 * 1024 * 1024)), 400, 'FILE_TOO_LARGE');
     await expectAppError(gate(store.put(CUSTOMER, Buffer.from('<html><script>'))), 400, 'FILE_TYPE_NOT_ALLOWED');
+    await expectAppError(gate(store.put(CUSTOMER, Buffer.from('%PDF-1.7 scan'))), 400, 'FILE_TYPE_NOT_ALLOWED');
   });
 });
 

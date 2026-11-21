@@ -70,9 +70,9 @@
 ## Phase 1 — AUTH: Identity, eKYC, Tiers & Privacy [MVP]
 
 ### FE-1
-- [ ] Patient Web — Phone + OTP SMS authentication flow (`features/auth`).
-- [ ] Patient Web — Patient profile creation + mandatory Decree-13 sensitive health data consent checkbox (`features/patient-profiles`).
-- [ ] Patient Web — Customer CCCD identity document upload for eKYC.
+- [x] Patient Web — Phone + OTP SMS authentication flow (`features/auth`).
+- [x] Patient Web — Patient profile creation + mandatory Decree-13 sensitive health data consent checkbox (`features/patient-profiles`).
+- [x] Patient Web — Customer CCCD identity document upload for eKYC.
 - [x] Admin Web — Nurse verification queue: review uploaded credentials, approve/reject, assign professional Tier (`features/nurse-verification`).
 
 ### FE-2
@@ -110,8 +110,8 @@
 ## Phase 2 — SCHED & SEARCH: Availability & Nurse Discovery [MVP]
 
 ### FE-1
-- [ ] Patient Web — Nurse discovery screen: filters by service category, district/location, time slot, Tier, and gender.
-- [ ] Patient Web — Nurse profile summary card: TrustScore, rating average, verified experience, and retired staff honor badge.
+- [x] Patient Web — Nurse discovery screen: filters by service category, district/location, time slot, Tier, and gender.
+- [x] Patient Web — Nurse profile summary card: TrustScore, rating average, verified experience, and retired staff honor badge.
 
 ### FE-2
 - [x] Nurse Web + Mobile App — Availability calendar: configure recurring weekly working time slots.
@@ -123,9 +123,9 @@
 - [ ] Seed representative sample nurse profiles with diverse credentials and locations for search test suites.
 
 ### BE-2 (Phase Lead)
-- [ ] `nurse-availabilities` (FR-SCHED-01): `PUT /api/v1/nurse/availabilities` — updates recurring windows and time-off exceptions in a single atomic transaction.
-- [ ] `availability-engine`: Effective availability = declared schedule − confirmed/in-progress bookings − **60-minute travel buffer**.
-- [ ] `availability-engine` serves as the single source of truth for both nurse search and automated matching (no divergent availability logic).
+- [x] `nurse-availabilities` (FR-SCHED-01): `PUT /api/v1/nurse/availabilities` — updates recurring windows and time-off exceptions in a single atomic transaction.
+- [x] `availability-engine`: Effective availability = declared schedule − confirmed/in-progress bookings − **60-minute travel buffer**.
+- [x] `availability-engine` serves as the single source of truth for both nurse search and automated matching (no divergent availability logic).
 
 ### BE-3
 - [ ] `nurse-search`: `GET /api/v1/nurses/search` implementing all FR-SEARCH-01 query filters.
@@ -141,13 +141,13 @@
 ## Phase 3 — BOOK: Booking, Pricing, Prescription Gate & Matching [MVP]
 
 ### FE-1
-- [ ] Patient Web — End-to-end booking flow: select service → choose patient profile → select time slot → confirm booking.
-- [ ] Patient Web — Mandatory prescription photo upload interface when selecting invasive services (`is_invasive = true`).
-- [ ] Patient Web — Transparent pricing breakdown card: base amount, night surcharge, holiday surcharge, heavy patient surcharge, platform fee, total amount.
-- [ ] Patient Web — Payment method selector: Prepaid Bank Transfer (Escrow) vs On-site Cash.
-- [ ] Patient Web — Pending payment countdown screen with real-time 15-minute expiration timer.
-- [ ] Patient Web — Direct nurse invitation action from profile discovery screen.
-- [ ] Patient Web — My Bookings dashboard presenting independent 3-axis status badges (`execution`, `payment`, `dispute`).
+- [x] Patient Web — End-to-end booking flow: select service → choose patient profile → select time slot → confirm booking.
+- [x] Patient Web — Mandatory prescription photo upload interface when selecting invasive services (`is_invasive = true`).
+- [x] Patient Web — Transparent pricing breakdown card: base amount, night surcharge, holiday surcharge, heavy patient surcharge, platform fee, total amount.
+- [x] Patient Web — Payment method selector: Prepaid Bank Transfer (Escrow) vs On-site Cash.
+- [x] Patient Web — Pending payment countdown screen with real-time 15-minute expiration timer.
+- [x] Patient Web — Direct nurse invitation action from profile discovery screen.
+- [x] Patient Web — My Bookings dashboard presenting independent 3-axis status badges (`execution`, `payment`, `dispute`).
 
 ### FE-2
 - [x] Nurse Web + Mobile App — Job Board interface for advance bookings (> 6 hours).
@@ -160,13 +160,13 @@
 - [ ] `prescription-gate` Layer 2: Tier 2 nurse is granted authorized read access to review the prescription image prior to shift acceptance.
 
 ### BE-2 (Phase Lead)
-- [ ] `pricing-engine` (FR-BOOK-01): Price calculation = base price + segment-based night surcharge (22:00–06:00, +20%) + holiday surcharges (+300% Tết / +200% holiday) + heavy patient surcharge (+15%); all surcharges calculate strictly on base price without compounding.
-- [ ] `pricing-engine`: Boundary test suite passing all SRS worked examples (night shift 580,000 VND; Tết shift 500,000 VND → 2,000,000 VND).
-- [ ] `pricing-engine`: Persists authoritative price snapshot onto booking record (`base_amount`, `surcharge_amount`, `platform_fee`, `total_amount`).
-- [ ] `bookings`: `POST /api/v1/bookings` — validates Decree-13 consent, customer eKYC, prescription gate, blocks prohibited services (Group 3), stores `payment_method`, initializes `DRAFT` booking with 15-minute payment hold.
-- [ ] `matching-radar` (FR-BOOK-03): Urgent bookings $\le 6\text{h}$ — broadcasts 5 km radius for minutes 0–5, expands to 10 km thereafter.
-- [ ] `matching-radar`: Concurrency control — first accept wins enforced via Redis Distributed Lock / `SELECT … FOR UPDATE`.
-- [ ] `matching-radar`: Backend re-validates `profile_status = ACTIVE`, Tier qualification, `deposit_balance ≥ 300,000` VND, and effective availability at the exact moment of acceptance.
+- [x] `pricing-engine` (FR-BOOK-01): Price calculation = base price + segment-based night surcharge (22:00–06:00, +20%) + holiday surcharges (+300% Tết / +200% holiday) + heavy patient surcharge (+15%); all surcharges calculate strictly on base price without compounding.
+- [x] `pricing-engine`: Boundary test suite passing all SRS worked examples (night shift 580,000 VND; Tết shift 500,000 VND → 2,000,000 VND).
+- [x] `pricing-engine`: Persists authoritative price snapshot onto booking record (`base_amount`, `surcharge_amount`, `platform_fee`, `total_amount`).
+- [x] `bookings`: `POST /api/v1/bookings` — validates Decree-13 consent, customer eKYC, prescription gate, blocks prohibited services (Group 3), stores `payment_method`, initializes `DRAFT` booking with 15-minute payment hold.
+- [x] `matching-radar` (FR-BOOK-03): Urgent bookings $\le 6\text{h}$ — broadcasts 5 km radius for minutes 0–5, expands to 10 km thereafter.
+- [x] `matching-radar`: Concurrency control — first accept wins enforced via Redis Distributed Lock / `SELECT … FOR UPDATE`.
+- [x] `matching-radar`: Backend re-validates `profile_status = ACTIVE`, Tier qualification, deposit rule (`≥ MIN_NURSE_DEPOSIT`, or ADR-0004 grace for bank-transfer bookings), no closure request, and effective availability at the exact moment of acceptance.
 
 ### BE-3
 - [ ] `job-board`: Advance bookings $> 6\text{h}$ published to Job Board for eligible nurses.
@@ -186,10 +186,10 @@
 ## Phase 4 — SHIFT: Shift Execution, Anti-Fraud Check-In & SOS [MVP]
 
 ### FE-1
-- [ ] Patient Web — Real-time shift tracking: live status, check-in selfie photo for visual identity verification.
-- [ ] Patient Web — Real-time vital signs and clinical care log viewer.
-- [ ] Patient Web — Shift extension request: select 1-hour increments, top up escrow for bank-transfer bookings.
-- [ ] Patient Web — Real-time emergency SOS broadcast banner for active family bookings.
+- [x] Patient Web — Real-time shift tracking: live status, check-in selfie photo for visual identity verification.
+- [x] Patient Web — Real-time vital signs and clinical care log viewer.
+- [x] Patient Web — Shift extension request: select 1-hour increments, top up escrow for bank-transfer bookings.
+- [x] Patient Web — Real-time emergency SOS broadcast banner for active family bookings.
 
 ### FE-2 (Frontend Lead)
 - [x] Nurse Mobile App — Dual check-in: mock location detection blocked, direct hardware camera selfie capture, photo gallery upload disabled.
@@ -230,17 +230,17 @@
 ## Phase 5 — PAY: Wallets, Escrow, Settlement, Deposit & Withdrawals [MVP]
 
 ### FE-1
-- [ ] Patient Web — Prepaid bank transfer flow: displays VietQR/checkout link with 15-minute countdown.
-- [ ] Patient Web — Platform escrow holding indicator for prepaid bookings.
-- [ ] Patient Web — Transparent refund tracking view mapped to §5.2 SLA cancellation matrix scenarios.
+- [x] Patient Web — Prepaid bank transfer flow: displays VietQR/checkout link with 15-minute countdown.
+- [x] Patient Web — Platform escrow holding indicator for prepaid bookings.
+- [x] Patient Web — Transparent refund tracking view mapped to §5.2 SLA cancellation matrix scenarios.
 
 ### FE-2
-- [ ] Nurse Web + Mobile App — Wallet dashboard displaying 3 strictly segregated balances: Available (`available_balance`), Escrow Locked (`escrow_locked_balance`), Deposit (`deposit_balance`).
-- [ ] Nurse Web + Mobile App — Deposit top-up flow maintaining the 300,000 VND requirement.
-- [ ] Nurse Web + Mobile App — Cash booking 15% platform commission payment: generates VietQR link, 24h countdown, overdue suspension warning banner.
+- [x] Nurse Web + Mobile App — Wallet dashboard displaying 3 strictly segregated balances: Available (`available_balance`), Escrow Locked (`escrow_locked_balance`), Deposit (`deposit_balance`) (Nurse Web: [x], Mobile: [x]).
+- [ ] Nurse Web + Mobile App — Deposit top-up flow maintaining the 300,000 VND requirement (Nurse Web: [x], Mobile: [ ]).
+- [ ] Nurse Web + Mobile App — Cash booking 15% platform commission payment: generates VietQR link, 24h countdown, overdue suspension warning banner (Nurse Web: [x], Mobile: [ ]).
 - [x] Nurse Web — Earnings withdrawal request interface.
 - [ ] Nurse Mobile App — Earnings withdrawal request interface.
-- [ ] Nurse Web + Mobile App — Immutable wallet transaction ledger history.
+- [x] Nurse Web + Mobile App — Immutable wallet transaction ledger history (Nurse Web: [x], Mobile: [x]).
 
 ### BE-1
 - [ ] `cancellation-policy`: Implements the §5.2 SLA matrix as a centralized data-driven policy engine — 9 scenarios, each with dedicated unit tests.
@@ -286,10 +286,16 @@
 - [ ] Shared in-app chat component (FE-1 leads development; FE-2 integrates for nurse surfaces).
 
 ### FE-2
-- [ ] Nurse Web + Mobile App — Dispute notification and rebuttal submission interface.
-- [ ] Nurse Web + Mobile App — Post-shift customer rating form.
-- [ ] Nurse Web + Mobile App — In-app chat interface with customer (reusing FE-1 component).
-- [ ] Nurse Web + Mobile App — Personal TrustScore dashboard: current score, deduction/recovery history, suspension warning near 60.
+- [x] Nurse Web — In-app notification center with read/unread, direct routing to relevant booking, dispute, or commission action.
+- [ ] Nurse Mobile App — In-app notification center (FCM client + in-app tray).
+- [x] Nurse Web — Dispute notification and rebuttal submission interface.
+- [ ] Nurse Mobile App — Dispute notification and rebuttal submission interface.
+- [x] Nurse Web — Post-shift customer rating form.
+- [ ] Nurse Mobile App — Post-shift customer rating form.
+- [x] Nurse Web — In-app chat interface with customer (reusing FE-1 component).
+- [ ] Nurse Mobile App — In-app chat interface with customer (reusing FE-1 component).
+- [x] Nurse Web — Personal TrustScore dashboard: current score, deduction/recovery history, suspension warning near 60.
+- [ ] Nurse Mobile App — Personal TrustScore dashboard: current score, deduction/recovery history, suspension warning near 60.
 
 ### BE-1
 - [ ] `reviews-trustscore` (FR-RATE-01): `POST /api/v1/bookings/:id/reviews` — opens immediately upon `COMPLETED` execution status, independent of financial settlement.

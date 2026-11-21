@@ -1,26 +1,38 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  createNavigationContainerRef,
+} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Briefcase, Calendar, ClipboardList, Home, User } from 'lucide-react-native';
+import { Briefcase, Calendar, ClipboardList, Home, User, Wallet } from 'lucide-react-native';
 import type { MobileShiftSummary } from '@healthcare-system/shared';
 import { StateView } from '../components';
 import { useAuth } from '../features/auth/AuthContext';
+import { PhoneLoginScreen } from '../features/auth/PhoneLoginScreen';
+import { OtpScreen } from '../features/auth/OtpScreen';
+import { CompleteRegistrationScreen } from '../features/auth/CompleteRegistrationScreen';
 import { HomeScreen } from '../features/home/HomeScreen';
 import { ShiftBriefingScreen } from '../features/shift-briefing/ShiftBriefingScreen';
 import { CheckInScreen } from '../features/check-in/CheckInScreen';
 import { ActiveShiftScreen } from '../features/active-shift/ActiveShiftScreen';
+import { OnboardingWizardScreen } from '../features/onboarding/OnboardingWizardScreen';
+import { PendingApprovalScreen } from '../features/onboarding/PendingApprovalScreen';
+import { AccountLockedScreen } from '../features/onboarding/AccountLockedScreen';
+import { AccountScreen } from '../features/account/AccountScreen';
+import { CredentialsScreen } from '../features/credentials/CredentialsScreen';
+import { RenewGphnScreen } from '../features/credentials/RenewGphnScreen';
+import { MyShiftsScreen } from '../features/shifts/MyShiftsScreen';
+import { CompletedShiftDetailScreen } from '../features/shifts/CompletedShiftDetailScreen';
+import { AvailabilityScreen } from '../features/availability/AvailabilityScreen';
+import { JobBoardScreen } from '../features/job-board/JobBoardScreen';
+import { JobDetailScreen } from '../features/job-board/JobDetailScreen';
+import { RadarScreen } from '../features/radar/RadarScreen';
+import { WalletScreen } from '../features/wallet/WalletScreen';
+import { TransactionHistoryScreen } from '../features/wallet/TransactionHistoryScreen';
 import {
-  AccountLockedScreen,
-  JobsPlaceholderScreen,
-  LoginPlaceholderScreen,
-  OnboardingPlaceholderScreen,
-  PendingApprovalScreen,
-  ProfilePlaceholderScreen,
-  SchedulePlaceholderScreen,
   ShiftResultScreen,
-  ShiftsPlaceholderScreen,
 } from '../features/placeholders/ZoneScreens';
 import {
   createCameraProvider,
@@ -41,6 +53,10 @@ export interface RootNavigatorProps {
   onCaptureLivePhoto?: () => Promise<string | null>;
 }
 
+export const navigationRef = createNavigationContainerRef<
+  ActiveStackParamList & MainTabParamList & AuthStackParamList
+>();
+
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const OnboardingStack = createNativeStackNavigator<OnboardingStackParamList>();
 const MainTab = createBottomTabNavigator<MainTabParamList>();
@@ -55,18 +71,31 @@ function MainTabsNavigator({
     <MainTab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: tokens.colors.brandJade,
+        tabBarActiveTintColor: tokens.colors.brandJadeDark,
         tabBarInactiveTintColor: tokens.colors.inkSecondary,
+        tabBarActiveBackgroundColor: tokens.colors.brandJadeSoft,
+        tabBarInactiveBackgroundColor: 'transparent',
+        tabBarItemStyle: {
+          borderRadius: 14,
+          marginHorizontal: 3,
+          marginVertical: 4,
+          paddingVertical: 4,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
         tabBarStyle: {
-          height: 64,
-          paddingTop: 6,
-          paddingBottom: 8,
+          height: 68,
+          paddingTop: 4,
+          paddingBottom: 6,
+          paddingHorizontal: 6,
           backgroundColor: tokens.colors.paper,
           borderTopColor: tokens.colors.borderHairline,
+          borderTopWidth: 1,
         },
         tabBarLabelStyle: {
-          fontSize: 12.5,
+          fontSize: 12,
           fontWeight: '700',
+          marginTop: 2,
         },
       }}
     >
@@ -88,7 +117,7 @@ function MainTabsNavigator({
       </MainTab.Screen>
       <MainTab.Screen
         name="JobsTab"
-        component={JobsPlaceholderScreen}
+        component={JobBoardScreen}
         options={{
           title: 'Việc làm',
           tabBarIcon: ({ color, size }) => <Briefcase color={color} size={size} />,
@@ -96,23 +125,23 @@ function MainTabsNavigator({
       />
       <MainTab.Screen
         name="ShiftsTab"
-        component={ShiftsPlaceholderScreen}
+        component={MyShiftsScreen}
         options={{
           title: 'Ca trực',
           tabBarIcon: ({ color, size }) => <ClipboardList color={color} size={size} />,
         }}
       />
       <MainTab.Screen
-        name="ScheduleTab"
-        component={SchedulePlaceholderScreen}
+        name="WalletTab"
+        component={WalletScreen}
         options={{
-          title: 'Lịch rảnh',
-          tabBarIcon: ({ color, size }) => <Calendar color={color} size={size} />,
+          title: 'Ví',
+          tabBarIcon: ({ color, size }) => <Wallet color={color} size={size} />,
         }}
       />
       <MainTab.Screen
         name="ProfileTab"
-        component={ProfilePlaceholderScreen}
+        component={AccountScreen}
         options={{
           title: 'Hồ sơ',
           tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
@@ -148,10 +177,15 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
   });
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       {zone === 'auth' ? (
         <AuthStack.Navigator screenOptions={{ headerShown: false }}>
-          <AuthStack.Screen name="Login" component={LoginPlaceholderScreen} />
+          <AuthStack.Screen name="PhoneLogin" component={PhoneLoginScreen} />
+          <AuthStack.Screen name="Otp" component={OtpScreen} />
+          <AuthStack.Screen
+            name="CompleteRegistration"
+            component={CompleteRegistrationScreen}
+          />
         </AuthStack.Navigator>
       ) : zone === 'onboarding' || zone === 'pending' || zone === 'locked' ? (
         <OnboardingStack.Navigator
@@ -164,7 +198,7 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
               : 'OnboardingWizard'
           }
         >
-          <OnboardingStack.Screen name="OnboardingWizard" component={OnboardingPlaceholderScreen} />
+          <OnboardingStack.Screen name="OnboardingWizard" component={OnboardingWizardScreen} />
           <OnboardingStack.Screen name="PendingApproval" component={PendingApprovalScreen} />
           <OnboardingStack.Screen name="AccountLocked" component={AccountLockedScreen} />
         </OnboardingStack.Navigator>
@@ -245,6 +279,33 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
             }}
           </ActiveStack.Screen>
           <ActiveStack.Screen name="ShiftResult" component={ShiftResultScreen} />
+          <ActiveStack.Screen name="Credentials" component={CredentialsScreen} />
+          <ActiveStack.Screen name="RenewGphn" component={RenewGphnScreen} />
+          <ActiveStack.Screen
+            name="CompletedShiftDetail"
+            component={CompletedShiftDetailScreen}
+          />
+          <ActiveStack.Screen
+            name="JobDetail"
+            component={JobDetailScreen}
+          />
+          <ActiveStack.Screen
+            name="Radar"
+            component={RadarScreen}
+            options={{
+              presentation: 'fullScreenModal',
+              headerShown: false,
+              animation: 'fade',
+            }}
+          />
+          <ActiveStack.Screen
+            name="Availability"
+            component={AvailabilityScreen}
+          />
+          <ActiveStack.Screen
+            name="TransactionHistory"
+            component={TransactionHistoryScreen}
+          />
         </ActiveStack.Navigator>
       )}
     </NavigationContainer>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, Alert } from 'react-native';
+import { Check } from 'lucide-react-native';
 import { tokens } from '../../../styles/tokens';
 import { IS_DEV } from '../../../lib/hardware-providers';
 import { DEFAULT_TRAVEL_SUPPORT_VND } from '@healthcare-system/shared';
@@ -110,7 +111,7 @@ export const CareAndPrescriptionTab: React.FC<CareAndPrescriptionTabProps> = ({
             onPress={() => onToggleActivity(item.id)}
           >
             <View style={[styles.checkbox, item.completed && styles.checkboxChecked]}>
-              {item.completed && <Text style={styles.checkmark}>✓</Text>}
+              {item.completed && <Check size={14} color="#FFFFFF" strokeWidth={3} />}
             </View>
             <Text style={[styles.checkLabel, item.completed && styles.checkLabelDone]}>
               {item.title}

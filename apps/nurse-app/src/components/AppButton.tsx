@@ -4,6 +4,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  View,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
@@ -13,6 +14,8 @@ export type AppButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
 
 interface AppButtonProps {
   label: string;
+  icon?: React.ReactNode;
+  iconPosition?: 'left' | 'right';
   onPress: () => void;
   variant?: AppButtonVariant;
   disabled?: boolean;
@@ -24,6 +27,8 @@ interface AppButtonProps {
 
 export const AppButton: React.FC<AppButtonProps> = ({
   label,
+  icon,
+  iconPosition = 'left',
   onPress,
   variant = 'primary',
   disabled = false,
@@ -67,7 +72,11 @@ export const AppButton: React.FC<AppButtonProps> = ({
           color={variant === 'secondary' || variant === 'ghost' ? tokens.colors.brandJade : '#FFFFFF'}
         />
       ) : (
-        <Text style={[styles.textBase, textVariant]}>{label}</Text>
+        <View style={styles.contentRow}>
+          {icon && iconPosition === 'left' ? <View style={styles.iconWrapLeft}>{icon}</View> : null}
+          <Text style={[styles.textBase, textVariant]}>{label}</Text>
+          {icon && iconPosition === 'right' ? <View style={styles.iconWrapRight}>{icon}</View> : null}
+        </View>
       )}
     </TouchableOpacity>
   );
@@ -82,6 +91,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
+  },
+  contentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconWrapLeft: {
+    marginRight: 8,
+  },
+  iconWrapRight: {
+    marginLeft: 8,
   },
   primary: {
     backgroundColor: tokens.colors.brandJade,

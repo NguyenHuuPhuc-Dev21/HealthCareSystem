@@ -14,7 +14,6 @@ import {
     X,
 } from 'lucide-react';
 import { getAvailabilities, updateAvailabilities } from './availabilities.api';
-import { lockedWindows } from './availabilities.mock';
 import { DEFAULT_TRAVEL_BUFFER_MINUTES } from '@healthcare-system/shared';
 import type {
     ConfirmedBooking,
@@ -27,6 +26,7 @@ import {
     findOverlap,
     formatWindow,
     isOvernight,
+    lockedWindows,
     minutesOf,
     newId,
     toISODate,

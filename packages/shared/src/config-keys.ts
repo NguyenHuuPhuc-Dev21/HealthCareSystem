@@ -45,7 +45,24 @@ export const SYSTEM_CONFIG_KEYS = {
   RECORD_ACCESS_GRANT_MAX_HOURS: 'RECORD_ACCESS_GRANT_MAX_HOURS',     // 24 (proposed, pending PO)
   MEDICAL_RECORD_RETENTION_MONTHS: 'MEDICAL_RECORD_RETENTION_MONTHS', // 24 (NFR-PRIV-02)
 
-  // Booking (prescription-gate — migration 0008)
+  // Nurse deposit: grace period, refund, appeal (migration 0008, ADR-0004; proposed values, OD-15/OD-16 pending PO)
+  DEPOSIT_GRACE_MAX_SHIFTS: 'DEPOSIT_GRACE_MAX_SHIFTS',               // 3 transfer-paid shifts
+  DEPOSIT_GRACE_DAYS: 'DEPOSIT_GRACE_DAYS',                           // 30 days from first ACTIVE
+  DEPOSIT_WITHHOLD_RATE: 'DEPOSIT_WITHHOLD_RATE',                     // 0.30 of each net payout
+  DEPOSIT_REFUND_HOLD_DAYS: 'DEPOSIT_REFUND_HOLD_DAYS',               // 7 days after last check-out (SRS §2.3)
+  DEPOSIT_REFUND_SLA_WORKING_DAYS: 'DEPOSIT_REFUND_SLA_WORKING_DAYS', // 5 working days
+  PENALTY_APPEAL_DAYS: 'PENALTY_APPEAL_DAYS',                         // 3 days
+
+  // Booking & matching (BE-2 Phase 3 — migration 0009)
+  URGENT_BOOKING_LEAD_HOURS: 'URGENT_BOOKING_LEAD_HOURS',     // 6 (start within <= 6h → Radar Dispatch, FR-BOOK-03)
+  RADAR_WINDOW_MINUTES: 'RADAR_WINDOW_MINUTES',               // 15 (Radar offers end 15 min after dispatch starts)
+
+  // Booking expiry & Job Board direct request (BE-3 Phase 3 — migration 0010)
+  UNMATCHED_EXPIRY_LEAD_MINUTES: 'UNMATCHED_EXPIRY_LEAD_MINUTES',     // 30 (unclaimed 30 min before start → EXPIRED + 100% refund)
+  URGENT_UNMATCHED_EXPIRY_MINUTES: 'URGENT_UNMATCHED_EXPIRY_MINUTES', // 30 (urgent booking unclaimed 30 min after matching starts → EXPIRED)
+  DIRECT_REQUEST_WINDOW_MINUTES: 'DIRECT_REQUEST_WINDOW_MINUTES',     // 15 (invited nurse's exclusive window, BR-08 §2.2)
+
+  // Booking (prescription-gate — migration 0011)
   PRESCRIPTION_MAX_AGE_DAYS: 'PRESCRIPTION_MAX_AGE_DAYS',             // 7 (FR-BOOK-02)
 } as const;
 

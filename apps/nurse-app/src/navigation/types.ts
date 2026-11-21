@@ -1,11 +1,21 @@
-import type { MobileShiftSummary } from '@healthcare-system/shared';
+import type { DocType, MobileShiftSummary, RadarJob } from '@healthcare-system/shared';
 
 export type AuthStackParamList = {
-  Login: undefined;
+  PhoneLogin: undefined;
+  Otp: {
+    phone: string;
+    requestId: string;
+    resendAfterSeconds: number;
+    devOtp?: string;
+  };
+  CompleteRegistration: {
+    registrationToken: string;
+    phone: string;
+  };
 };
 
 export type OnboardingStackParamList = {
-  OnboardingWizard: undefined;
+  OnboardingWizard: { fixDocType?: DocType } | undefined;
   PendingApproval: undefined;
   AccountLocked: undefined;
 };
@@ -14,7 +24,7 @@ export type MainTabParamList = {
   HomeTab: undefined;
   JobsTab: undefined;
   ShiftsTab: undefined;
-  ScheduleTab: undefined;
+  WalletTab: undefined;
   ProfileTab: undefined;
 };
 
@@ -27,5 +37,12 @@ export type ActiveStackParamList = {
     outcomeType: 'COMPLETED' | 'CANCELLED_SAFE';
     note?: string;
   };
+  Credentials: undefined;
+  RenewGphn: undefined;
+  CompletedShiftDetail: { bookingId: string };
+  JobDetail: { jobId: string; isDirectInvite?: boolean };
+  Radar: { offerId: string; offer?: RadarJob; notificationId?: string };
+  Availability: undefined;
+  TransactionHistory: undefined;
 };
 

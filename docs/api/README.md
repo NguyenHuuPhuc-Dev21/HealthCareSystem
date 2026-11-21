@@ -25,7 +25,8 @@ This catalogue lists the core endpoints defined by SRS v2.0 §8, grouped by doma
 |---|---|---|
 | `PATCH /api/v1/admin/nurses/:id/verify` | ADMIN | Approve a nurse's GPHN (stores `reviewed_by = admin_id`) and assign `TIER_1_BASIC` or `TIER_2_SPECIALIST` — including the automatic re-upgrade to `TIER_2_SPECIALIST` when approving a renewed GPHN (FR-AUTH-02). |
 | `PUT /api/v1/nurse/credentials/gphn` | NURSE (Web/App) | Nurse uploads a new GPHN after the previous one expired; once an Admin approves it, the nurse is automatically re-upgraded to `TIER_2_SPECIALIST` (FR-AUTH-02). |
-| `PUT /api/v1/nurse/availabilities` | NURSE | Nurse updates recurring availability windows and registers time-off days (FR-SCHED-01). |
+| `PUT /api/v1/nurse/availabilities` | NURSE | Nurse updates recurring availability windows and registers time-off days (FR-SCHED-01). Detail: [`nurse-availabilities.api.md`](./nurse-availabilities.api.md). |
+| `GET /api/v1/nurse/availabilities` | NURSE | Nurse reads the saved schedule plus confirmed / in-progress shifts for the calendar (board N13). |
 
 ## 3. Nurse Search
 
@@ -37,7 +38,11 @@ This catalogue lists the core endpoints defined by SRS v2.0 §8, grouped by doma
 
 | Method & Endpoint | Role | Description |
 |---|---|---|
-| `POST /api/v1/bookings` | PATIENT | Create a booking: validates Decree 13/2023 data consent, validates customer eKYC (mandatory for home-care), records `payment_method (BANK_TRANSFER \| CASH)`, and computes the price from `system_configs` (FR-BOOK-01). |
+| `POST /api/v1/bookings` | PATIENT | Create a booking: validates Decree 13/2023 data consent, validates customer eKYC (mandatory for home-care), records `payment_method (BANK_TRANSFER \| CASH)`, and computes the price from `system_configs` (FR-BOOK-01). Detail: [`bookings.api.md`](./bookings.api.md). |
+| `POST /api/v1/bookings/quote` | PATIENT | Price breakdown computed by the backend (base, night, holiday, heavy patient, platform fee) — stores nothing. |
+| `GET /api/v1/bookings` · `GET /api/v1/bookings/:id` | PATIENT | The customer's bookings with the three independent status axes. |
+| `GET /api/v1/nurse/radar` | NURSE | Current open Radar Dispatch offer for the nurse, or `null` (FR-BOOK-03). |
+| `POST /api/v1/bookings/:id/claim-radar` | NURSE | Accept a Radar offer — first accept wins; ACTIVE / Tier / deposit / availability re-checked at that moment. `POST …/dismiss-radar` declines it. |
 | `POST /api/v1/bookings/:id/check-in` | NURSE | Check-in: verifies the anti-mock-GPS flag, distance ≤ 200 m, uploads the live selfie and confirms the on-site medical-order cross-check (FR-SHIFT-01). |
 | `POST /api/v1/bookings/:id/reject-invalid-prescription` | NURSE (Tier 2) | Nurse rejects a shift on site because the medical order is forged / the medication does not match, without penalty (FR-BOOK-02). |
 | `POST /api/v1/bookings/:id/check-out` | NURSE | Check-out and submission of the minimum shift report; records `checkout_time`, starts the 24-hour dispute window and the 12-hour medical-record access closure timer (FR-SHIFT-04). |
@@ -61,9 +66,14 @@ FR-CHAT-01 requires in-app chat/calling with masked phone numbers, opened once a
 
 | Method & Endpoint | Role | Description |
 |---|---|---|
-| `POST /api/v1/bookings/:id/disputes` | PATIENT / NURSE | Open a dispute within 24 hours after check-out, upload evidence; escrowed funds are frozen immediately (FR-DISP-01). |
+| `POST /api/v1/bookings/:id/disputes` | PATIENT / NURSE | Open a dispute within 24 hours after check-out, upload evidence; escrowed funds are frozen immediately (FR-DISP-01). Detail: [`disputes.api.md`](./disputes.api.md). |
+| `GET /api/v1/nurse/disputes` | NURSE | Get list of disputes involving the authenticated nurse. Detail: [`disputes.api.md`](./disputes.api.md). |
+| `GET /api/v1/disputes/:id` | PATIENT / NURSE | Get dispute details, timeline, evidences, and resolution outcome. Detail: [`disputes.api.md`](./disputes.api.md). |
+| `POST /api/v1/disputes/:id/rebuttal` | NURSE | Submit rebuttal counter-statement and evidence before deadline. Detail: [`disputes.api.md`](./disputes.api.md). |
 | `PATCH /api/v1/admin/disputes/:id/resolve` | ADMIN | Admin adjudicates a dispute: refund 100%, release 100%, or partial release (Phase 2) (FR-DISP-01, FR-DISP-02). |
-| `POST /api/v1/bookings/:id/reviews` | PATIENT / NURSE | Two-way review once the shift has ended (`execution_status = COMPLETED`, per FR-RATE-01 — reviews do not wait for money settlement); automatically applies the TrustScore recovery rule. |
+| `POST /api/v1/bookings/:id/reviews` | PATIENT / NURSE | Two-way review once the shift has ended (`execution_status = COMPLETED`, per FR-RATE-01 — reviews do not wait for money settlement); automatically applies the TrustScore recovery rule. Detail: [`reviews.api.md`](./reviews.api.md). |
+| `GET /api/v1/nurse/reviews/pending` | NURSE | Get pending completed shifts waiting for nurse review. Detail: [`reviews.api.md`](./reviews.api.md). |
+| `GET /api/v1/nurse/reviews/sent` | NURSE | Get list of reviews submitted by nurse (with 7-day blind review status). Detail: [`reviews.api.md`](./reviews.api.md). |
 
 ## 8. SOS / Emergency
 

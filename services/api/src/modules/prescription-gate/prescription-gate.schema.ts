@@ -1,9 +1,7 @@
-/** Request validation for prescription-gate (strict whitelist). */
-import { z } from 'zod';
+/**
+ * prescription-gate has no request body of its own: the upload link is
+ * POST /bookings/prescription/upload-url, owned by `bookings` (BE-2), which accepts these same types.
+ */
 
-/** A prescription is a photo or a scan. */
-export const PRESCRIPTION_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'] as const;
-
-export const prescriptionUploadUrlSchema = z.object({ contentType: z.enum(PRESCRIPTION_CONTENT_TYPES) }).strict();
-
-export type PrescriptionUploadUrlBody = z.infer<typeof prescriptionUploadUrlSchema>;
+/** A prescription is a photo (same list as bookings' prescriptionUploadSchema). */
+export const PRESCRIPTION_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;

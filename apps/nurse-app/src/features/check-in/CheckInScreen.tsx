@@ -12,22 +12,26 @@ import {
 import { tokens } from '../../styles/tokens';
 import { haversineDistanceMeters, CHECKIN_MAX_RADIUS_METERS } from '@healthcare-system/shared';
 import { submitCheckIn } from './check-in.api';
-
-interface GeoCoords {
-  latitude: number;
-  longitude: number;
-  isMockLocation?: boolean;
-}
+import {
+  ensureLocationPermission,
+  ensureCameraPermission,
+  openAppSettings,
+  checkLocationPermission,
+  type DeviceGeoCoords,
+  IS_DEV,
+} from '../../lib/hardware-providers';
 
 interface GeolocationLike {
   getCurrentPosition?: (
-    success: (pos: { coords: { latitude: number; longitude: number; mocked?: boolean } }) => void,
+    success: (pos: {
+      coords: { latitude: number; longitude: number; mocked?: boolean; isFromMockProvider?: boolean };
+      mocked?: boolean;
+      isFromMockProvider?: boolean;
+    }) => void,
     error?: (err: { message?: string }) => void,
     options?: { enableHighAccuracy?: boolean; timeout?: number }
   ) => void;
 }
-
-const IS_DEV = (globalThis as { __DEV__?: boolean }).__DEV__ === true;
 
 interface CheckInScreenProps {
   bookingId: string;
@@ -35,7 +39,7 @@ interface CheckInScreenProps {
   patientAddress: string;
   patientLatitude: number;
   patientLongitude: number;
-  onRequestCurrentPosition?: () => Promise<GeoCoords>;
+  onRequestCurrentPosition?: () => Promise<DeviceGeoCoords>;
   onCaptureLivePhoto?: () => Promise<string | null>;
   onCheckInSuccess: (checkedInAt: string) => void;
   onCancel: () => void;
@@ -57,12 +61,46 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
   const [gpsStatusText, setGpsStatusText] = useState<string>('Đang đọc tín hiệu GPS thực tế từ thiết bị...');
   const [gpsLoading, setGpsLoading] = useState<boolean>(false);
   const [isMockLocation, setIsMockLocation] = useState<boolean>(false);
+  const [permissionDenied, setPermissionDenied] = useState<boolean>(false);
   const [selfieUri, setSelfieUri] = useState<string | null>(null);
   const [capturedTime, setCapturedTime] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [showSimulator, setShowSimulator] = useState<boolean>(false);
 
+  // Request & check permissions on initial mount
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const locGranted = await ensureLocationPermission();
+      if (!alive) return;
+      if (!locGranted) {
+        setPermissionDenied(true);
+        setGpsStatusText('Quyền vị trí đã bị từ chối.');
+      } else {
+        setPermissionDenied(false);
+      }
+      // Warm up camera permission check
+      void ensureCameraPermission();
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   const refreshDeviceLocation = useCallback(async () => {
+    // If permission is known denied, recheck permission first
+    const permStatus = await checkLocationPermission();
+    if (permStatus !== 'granted' && permStatus !== 'limited') {
+      const granted = await ensureLocationPermission();
+      if (!granted) {
+        setPermissionDenied(true);
+        setGpsStatusText('Quyền vị trí chưa được cấp. Vui lòng mở Cài đặt để cho phép.');
+        return;
+      }
+    }
+    setPermissionDenied(false);
+
     setGpsLoading(true);
     setGpsStatusText('Đang xác định tọa độ GPS thiết bị...');
 
@@ -73,8 +111,8 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
         setDeviceLng(coords.longitude);
         setIsMockLocation(Boolean(coords.isMockLocation));
         setGpsStatusText('Đã cập nhật tọa độ từ cảm biến định vị.');
-      } catch {
-        setGpsStatusText('Không thể đọc vị trí GPS. Vui lòng bật quyền Vị trí và thử lại.');
+      } catch (err: any) {
+        setGpsStatusText(err?.message || 'Không thể đọc vị trí GPS. Vui lòng thử lại.');
       } finally {
         setGpsLoading(false);
       }
@@ -87,7 +125,13 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
         (pos) => {
           setDeviceLat(pos.coords.latitude);
           setDeviceLng(pos.coords.longitude);
-          setIsMockLocation(Boolean(pos.coords.mocked));
+          const isMock = Boolean(
+            pos.mocked ||
+            pos.isFromMockProvider ||
+            pos.coords.mocked ||
+            pos.coords.isFromMockProvider
+          );
+          setIsMockLocation(isMock);
           setGpsStatusText('Đã đồng bộ tọa độ GPS thiết bị.');
           setGpsLoading(false);
         },
@@ -104,17 +148,42 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
     setGpsStatusText('Thiết bị chưa có mô-đun GPS khả dụng.');
   }, [onRequestCurrentPosition]);
 
+  // Periodic location refresh every 5 seconds (5000ms) while screen is open
   useEffect(() => {
-    refreshDeviceLocation();
+    void refreshDeviceLocation();
+
+    const intervalId = setInterval(() => {
+      void refreshDeviceLocation();
+    }, 5000);
+
+    return () => clearInterval(intervalId);
   }, [refreshDeviceLocation]);
 
   const distanceMeters =
     deviceLat !== null && deviceLng !== null
       ? Math.round(haversineDistanceMeters(deviceLat, deviceLng, patientLatitude, patientLongitude))
       : null;
+
   const isWithinRadius = distanceMeters !== null && distanceMeters <= CHECKIN_MAX_RADIUS_METERS;
 
+  const handleOpenSettings = async () => {
+    await openAppSettings();
+  };
+
   const handleLaunchHardwareCamera = async () => {
+    const camPerm = await ensureCameraPermission();
+    if (!camPerm) {
+      Alert.alert(
+        'Quyền Camera bị từ chối',
+        'Ứng dụng cần quyền Camera để chụp ảnh xác thực trực tiếp tại nhà người bệnh. Vui lòng mở Cài đặt để cấp quyền.',
+        [
+          { text: 'Hủy', style: 'cancel' },
+          { text: 'Mở Cài đặt', onPress: () => void handleOpenSettings() },
+        ]
+      );
+      return;
+    }
+
     if (onCaptureLivePhoto) {
       try {
         const uri = await onCaptureLivePhoto();
@@ -147,8 +216,8 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
   const handlePerformCheckIn = async () => {
     if (isMockLocation) {
       Alert.alert(
-        'Vị trí không hợp lệ',
-        'Hệ thống phát hiện thiết bị đang dùng phần mềm giả lập GPS. Hãy tắt định vị giả lập để điểm danh vào ca.'
+        'Vị trí không hợp lệ (Fake GPS)',
+        'Hệ thống phát hiện thiết bị đang bật phần mềm định vị giả lập. Vui lòng tắt ứng dụng Fake GPS trong Tùy chọn nhà phát triển để điểm danh vào ca.'
       );
       return;
     }
@@ -164,7 +233,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
     if (!isWithinRadius) {
       Alert.alert(
         'Bạn chưa tới gần nhà người bệnh',
-        `Khoảng cách hiện tại là ${distanceMeters}m (quy định trong vòng ${CHECKIN_MAX_RADIUS_METERS}m). Hãy di chuyển lại gần địa chỉ ca trực.`
+        `Bạn đang cách điểm hẹn ${distanceMeters}m (quy định trong vòng ${CHECKIN_MAX_RADIUS_METERS}m). Vui lòng di chuyển lại gần địa chỉ ca trực.`
       );
       return;
     }
@@ -208,22 +277,64 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
         Xác nhận vị trí trong phạm vi {CHECKIN_MAX_RADIUS_METERS}m quanh nhà người bệnh và chụp ảnh trực tiếp.
       </Text>
 
+      {/* Permission Denied Banner with Open Settings Button */}
+      {permissionDenied && (
+        <View style={styles.permissionCard}>
+          <Text style={styles.permissionTitle}>Cần cấp quyền Vị trí chính xác</Text>
+          <Text style={styles.permissionText}>
+            Hệ thống cần quyền GPS chính xác để kiểm tra khoảng cách tới nhà người bệnh (≤ {CHECKIN_MAX_RADIUS_METERS}m).
+            Vui lòng mở Cài đặt thiết bị và cho phép quyền Vị trí.
+          </Text>
+          <TouchableOpacity
+            style={styles.openSettingsBtn}
+            onPress={handleOpenSettings}
+            accessibilityRole="button"
+            accessibilityLabel="Mở Cài đặt thiết bị để cấp quyền vị trí"
+          >
+            <Text style={styles.openSettingsBtnText}>Mở Cài đặt</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Bước 1: Định vị GPS */}
       <View
         style={[
           styles.ledgerCard,
-          { borderColor: isWithinRadius && !isMockLocation ? tokens.colors.brandJade : tokens.colors.alertCrimson },
+          {
+            borderColor:
+              isWithinRadius && !isMockLocation && !permissionDenied
+                ? tokens.colors.brandJade
+                : tokens.colors.alertCrimson,
+          },
         ]}
       >
         <Text style={styles.sectionHeader}>1. Xác thực vị trí tại nhà</Text>
         <Text style={styles.infoText}>{patientAddress}</Text>
+
+        {/* Distance Display as required by N6: "Bạn đang cách điểm hẹn 480 m" */}
+        {distanceMeters !== null && !permissionDenied && (
+          <View style={styles.distanceBox}>
+            <Text style={styles.distanceLabel}>
+              {distanceMeters <= CHECKIN_MAX_RADIUS_METERS
+                ? `Bạn đang ở điểm hẹn (cách ${distanceMeters} m)`
+                : `Bạn đang cách điểm hẹn ${distanceMeters} m`}
+            </Text>
+            <Text style={styles.distanceSub}>
+              {distanceMeters <= CHECKIN_MAX_RADIUS_METERS
+                ? `Hợp lệ: trong bán kính cho phép ${CHECKIN_MAX_RADIUS_METERS}m`
+                : `Không hợp lệ: vượt quá bán kính quy định ${CHECKIN_MAX_RADIUS_METERS}m`}
+            </Text>
+          </View>
+        )}
 
         <View
           style={[
             styles.statusPill,
             {
               backgroundColor:
-                isWithinRadius && !isMockLocation ? tokens.colors.brandJadeSoft : tokens.colors.alertCrimsonSoft,
+                isWithinRadius && !isMockLocation && !permissionDenied
+                  ? tokens.colors.brandJadeSoft
+                  : tokens.colors.alertCrimsonSoft,
             },
           ]}
         >
@@ -231,12 +342,17 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
             style={[
               styles.statusPillText,
               {
-                color: isWithinRadius && !isMockLocation ? tokens.colors.brandJade : tokens.colors.alertCrimson,
+                color:
+                  isWithinRadius && !isMockLocation && !permissionDenied
+                    ? tokens.colors.brandJade
+                    : tokens.colors.alertCrimson,
               },
             ]}
           >
             {isMockLocation
               ? 'Phát hiện định vị giả lập — Bị chặn điểm danh'
+              : permissionDenied
+              ? 'Chưa cấp quyền vị trí'
               : distanceMeters === null
               ? gpsStatusText
               : isWithinRadius
@@ -253,7 +369,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
           accessibilityLabel="Cập nhật vị trí GPS hiện tại"
         >
           <Text style={styles.gpsRefreshText}>
-            {gpsLoading ? 'Đang lấy GPS...' : 'Cập nhật vị trí GPS hiện tại'}
+            {gpsLoading ? 'Đang lấy GPS...' : 'Cập nhật vị trí GPS ngay'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -312,13 +428,13 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
         <TouchableOpacity
           style={[
             styles.submitBtn,
-            (!isWithinRadius || isMockLocation || !selfieUri || loading) && styles.btnDisabled,
+            (!isWithinRadius || isMockLocation || permissionDenied || !selfieUri || loading) && styles.btnDisabled,
           ]}
-          disabled={!isWithinRadius || isMockLocation || !selfieUri || loading}
+          disabled={!isWithinRadius || isMockLocation || permissionDenied || !selfieUri || loading}
           onPress={handlePerformCheckIn}
           accessibilityRole="button"
           accessibilityLabel="Xác nhận vào ca"
-          accessibilityState={{ disabled: !isWithinRadius || isMockLocation || !selfieUri || loading }}
+          accessibilityState={{ disabled: !isWithinRadius || isMockLocation || permissionDenied || !selfieUri || loading }}
         >
           {loading ? (
             <ActivityIndicator color="#fff" />
@@ -348,18 +464,22 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({
                   onPress={() => {
                     setDeviceLat(patientLatitude + 0.0003);
                     setDeviceLng(patientLongitude + 0.0003);
+                    setIsMockLocation(false);
+                    setPermissionDenied(false);
                   }}
                 >
-                  <Text style={styles.devBtnText}>Tại chỗ (khoảng 35m)</Text>
+                  <Text style={styles.devBtnText}>Tại chỗ (~35m)</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.devBtn}
                   onPress={() => {
                     setDeviceLat(patientLatitude + 0.004);
                     setDeviceLng(patientLongitude + 0.004);
+                    setIsMockLocation(false);
+                    setPermissionDenied(false);
                   }}
                 >
-                  <Text style={styles.devBtnText}>Ở xa (khoảng 450m)</Text>
+                  <Text style={styles.devBtnText}>Ở xa (~480m)</Text>
                 </TouchableOpacity>
               </View>
               <TouchableOpacity
@@ -405,6 +525,38 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 18,
   },
+  permissionCard: {
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1.5,
+    borderColor: '#F87171',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 16,
+  },
+  permissionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: tokens.colors.alertCrimson,
+    marginBottom: 6,
+  },
+  permissionText: {
+    fontSize: 14,
+    color: tokens.colors.inkPrimary,
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  openSettingsBtn: {
+    backgroundColor: tokens.colors.alertCrimson,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  openSettingsBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
+  },
   ledgerCard: {
     backgroundColor: tokens.colors.paper,
     borderRadius: 14,
@@ -422,8 +574,26 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 15,
     color: tokens.colors.inkSecondary,
-    marginBottom: 12,
+    marginBottom: 10,
     lineHeight: 21,
+  },
+  distanceBox: {
+    backgroundColor: tokens.colors.subtle,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 10,
+    borderLeftWidth: 4,
+    borderLeftColor: tokens.colors.brandJade,
+  },
+  distanceLabel: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: tokens.colors.inkPrimary,
+    marginBottom: 2,
+  },
+  distanceSub: {
+    fontSize: 13,
+    color: tokens.colors.inkSecondary,
   },
   statusPill: {
     paddingHorizontal: 12,

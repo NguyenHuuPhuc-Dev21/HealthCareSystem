@@ -4,7 +4,8 @@
  *
  *  Layer 1 (customer books): an invasive service needs a prescription photo that this customer
  *    uploaded, plus its issue date, no older than PRESCRIPTION_MAX_AGE_DAYS (system_configs).
- *    `bookings` (BE-2) calls `assertPrescriptionGate` inside POST /bookings.
+ *    The upload link is bookings' POST /bookings/prescription/upload-url; `bookings` (BE-2)
+ *    calls `assertPrescriptionGate` inside POST /bookings.
  *  Layer 2 (nurse checks before accepting): the prescription is private; a short-lived download
  *    link is given only to the booking's customer, an Admin, the assigned nurse (inside BE-3's
  *    medical-record window) or a Tier 2 nurse holding a live offer for the booking.
@@ -28,7 +29,6 @@ import type {
   PrescriptionGateInput,
   PrescriptionProblem,
   PrescriptionStoragePort,
-  PrescriptionUploadUrl,
   PrescriptionViewBasis,
   PrescriptionViewUrl,
   PrescriptionViewer,
@@ -42,7 +42,7 @@ const PROBLEM_MESSAGES: Record<PrescriptionProblem, string> = {
   PRESCRIPTION_REQUIRED: "This service needs a photo of the doctor's prescription and its issue date",
   INVALID_PRESCRIPTION_DATE: 'The prescription issue date must be a real date (YYYY-MM-DD)',
   PRESCRIPTION_DATE_IN_FUTURE: 'The prescription issue date cannot be in the future',
-  PRESCRIPTION_TOO_OLD: 'The prescription is too old. Ask the doctor for a new one.',
+  PRESCRIPTION_EXPIRED: 'The prescription is too old. Ask the doctor for a new one.',
 };
 
 export interface PrescriptionGateDeps {
@@ -63,16 +63,6 @@ export class PrescriptionGateService {
     return (this.deps.now ?? Date.now)();
   }
 
-  /** POST /bookings/prescription/upload-url — presigned PUT; the client never chooses the key. */
-  async requestUploadUrl(customerId: string, contentType: string): Promise<PrescriptionUploadUrl> {
-    if (!ACCEPTED_TYPES.includes(contentType)) {
-      throw badRequest('CONTENT_TYPE_NOT_ALLOWED', `A prescription accepts ${ACCEPTED_TYPES.join(', ')}`);
-    }
-    const objectKey = this.deps.storage.buildObjectKey(CATEGORY, customerId, contentType);
-    const url = await this.deps.storage.createUploadUrl(objectKey, contentType);
-    return { objectKey, uploadUrl: url.url, expiresInSeconds: url.expiresInSeconds, contentType };
-  }
-
   /**
    * Layer 1. Throws a 400 with a specific code when the booking must be refused.
    * @returns what to store on the booking, or null for a non-invasive service (store nothing).
@@ -88,7 +78,7 @@ export class PrescriptionGateService {
       maxAgeDays,
     );
     if (problem) {
-      throw badRequest(problem, PROBLEM_MESSAGES[problem], problem === 'PRESCRIPTION_TOO_OLD' ? { maxAgeDays } : undefined);
+      throw badRequest(problem, PROBLEM_MESSAGES[problem], problem === 'PRESCRIPTION_EXPIRED' ? { maxAgeDays } : undefined);
     }
 
     const key = input.prescriptionImageKey!;
@@ -110,7 +100,7 @@ export class PrescriptionGateService {
     const head = await this.deps.storage.readObjectHead(key);
     const realType = head ? storage.detectContentType(head) : null;
     if (!realType || !ACCEPTED_TYPES.includes(realType)) {
-      throw badRequest('FILE_TYPE_NOT_ALLOWED', 'The prescription file content is not an accepted type', details);
+      throw badRequest('FILE_TYPE_NOT_ALLOWED', 'The prescription must be a JPEG, PNG or WebP image', details);
     }
   }
 
@@ -178,8 +168,6 @@ export function getPrescriptionGateService(): PrescriptionGateService {
     const pool = getPool();
     singleton = new PrescriptionGateService({
       storage: {
-        buildObjectKey: storage.buildObjectKey,
-        createUploadUrl: (key, type) => storage.createUploadUrl(key, type),
         createDownloadUrl: (key) => storage.createDownloadUrl(key),
         statObject: storage.statObject,
         readObjectHead: (key) => storage.readObjectHead(key),

@@ -1,9 +1,11 @@
-import { UserRole } from '@healthcare-system/shared';
+import {
+  buildSessionFromAuth as buildSharedSession,
+  type BeVerifyAuthenticated,
+} from '@healthcare-system/shared';
 import { apiClient } from '../../lib/api-client';
 import type { ApiResponse } from '../../lib/api-client';
 import { USE_MOCK_AUTH } from '../../lib/mock-flags';
 import { getOnboardingStatus } from '../onboarding/onboarding.api';
-import { mapCredentialView, mapStatusToProfile } from '../onboarding/onboarding.types';
 import { mockRequestOtp, mockVerifyOtp } from './auth.mock';
 import type { RequestOtpData, SessionData } from './auth.types';
 
@@ -13,24 +15,6 @@ export type VerifyOutcome =
   | { status: 'AUTHENTICATED'; session: SessionData }
   | { status: 'REGISTRATION_REQUIRED'; registrationToken: string }
   | { status: 'SECOND_FACTOR_REQUIRED' };
-
-interface BeVerifyAuthenticated {
-  status: 'AUTHENTICATED';
-  user: {
-    id: string;
-    phone: string;
-    fullName: string;
-    role: UserRole;
-    kycStatus: string;
-  };
-  tokens: {
-    tokenType: string;
-    accessToken: string;
-    accessTokenExpiresIn: number;
-    refreshToken: string;
-    refreshTokenExpiresIn: number;
-  };
-}
 
 interface BeVerifyRegistration {
   status: 'REGISTRATION_REQUIRED';
@@ -77,31 +61,16 @@ export async function requestOtp(phone: string): Promise<ApiResponse<RequestOtpD
 }
 
 async function buildSessionFromAuth(data: BeVerifyAuthenticated): Promise<ApiResponse<SessionData>> {
-  if (data.user.role !== UserRole.NURSE) {
-    return fail('ROLE_MISMATCH', 'Tài khoản này không phải là điều dưỡng. Vui lòng sử dụng đúng cổng đăng nhập.');
-  }
-
   localStorage.setItem('access_token', data.tokens.accessToken);
   localStorage.setItem('refresh_token', data.tokens.refreshToken);
 
   const statusRes = await getOnboardingStatus();
-  const profile = statusRes.success ? mapStatusToProfile(statusRes.data, data.user.id) : null;
-  const credentials = statusRes.success ? statusRes.data.credentials.map((c) => mapCredentialView(c, data.user.id)) : [];
-
-  const session: SessionData = {
-    token: data.tokens.accessToken,
-    refreshToken: data.tokens.refreshToken,
-    profileSource: 'API',
-    user: {
-      id: data.user.id,
-      phone: data.user.phone,
-      full_name: data.user.fullName,
-      role: data.user.role,
-    },
-    profile,
-    credentials,
-  };
-  return { success: true, data: session };
+  const onboardingStatus = statusRes.success ? statusRes.data : null;
+  const result = buildSharedSession(data, onboardingStatus);
+  if (!result.success) {
+    return fail(result.error!.code, result.error!.message);
+  }
+  return { success: true, data: result.data! };
 }
 
 export async function verifyOtp(phone: string, otp: string): Promise<ApiResponse<VerifyOutcome>> {

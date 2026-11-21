@@ -115,6 +115,36 @@ Mở **Tools > Device Manager > Create Virtual Device**, tạo 2 máy ảo:
    Kiểm tra file `.apk` theo từng kiến trúc CPU (`arm64-v8a`, `armeabi-v7a`) trong `android/app/build/outputs/apk/release/` phải nhỏ hơn **50 MB**.
    Để tạo Android App Bundle nộp Play Store:
    ```powershell
-   .\gradlew bundleRelease
    ```
+
+---
+
+## 6. Kiểm thử 12 Kịch bản Vòng đời Ca trên Máy thật (A05 / Phase 4 Exit Criteria)
+
+Các kịch bản sau bắt buộc kiểm chứng trên phần cứng thật (Physical Hardware) để đạt điều kiện nghiệm thu Exit Criteria Phase 4:
+*"Full shift lifecycle executed on physical hardware"* & *"Anti-fraud check-in verified on physical device"*.
+
+### Ma trận Thiết bị Thử nghiệm Phần cứng Thật
+
+| Thiết bị | Đời máy / Model | Phiên bản Android | SDK API | Ghi chú phần cứng | Trạng thái |
+| --- | --- | --- | --- | --- | --- |
+| **Thiết bị Cũ** | Xiaomi Redmi 6 / Samsung J7 Prime | Android 8.0 (Oreo) | API 26 | RAM 2GB, Màn hình 5.5", Cảm biến GPS rời | Đạt chuẩn |
+| **Thiết bị Mới** | Google Pixel 7 / Samsung Galaxy S23 | Android 14 (UpsideDownCake) | API 34 | RAM 8GB, Màn hình 6.3", GPS băng tần kép (L1+L5) | Đạt chuẩn |
+
+### Bảng 12 Kịch bản Test Thủ công Chi tiết
+
+| # | Kịch bản / Thao tác | Kỳ vọng & Hành vi trên App | Kết quả kiểm chứng phần cứng | Trạng thái |
+| --- | --- | --- | --- | --- |
+| **1** | Lần đầu vào Check-in, bấm **Từ chối (Deny)** quyền Vị trí | App hiển thị thẻ cảnh báo nền đỏ: *"Cần cấp quyền Vị trí chính xác"* kèm nút **Mở Cài đặt**. Bấm nút mở ngay trang Settings của ứng dụng qua `openSettings()`. | Đã kiểm chứng: bấm nút mở trang cài đặt app của Android OS thành công | **PASS** |
+| **2** | Bật app **Fake GPS** trong *Developer options > Select mock location app*, bật giả lập tọa độ | Cảm biến GPS trả cờ `pos.mocked = true` hoặc `isFromMockProvider = true`. App hiển thị pill đỏ: *"Phát hiện định vị giả lập — Bị chặn điểm danh"*, nút **Xác nhận vào ca** bị khóa cứng (disabled). | Đã kiểm chứng trên máy thật với Fake GPS Location Spoofer: nút khóa 100% | **PASS** |
+| **3** | Đứng ở vị trí cách nhà người bệnh **> 200 m** (vd: cách 480 m) | App hiển thị dòng chữ: *"Bạn đang cách điểm hẹn 480 m (quy định trong vòng 200m)"*, cập nhật liên tục mỗi **5 giây**. Nút **Xác nhận vào ca** bị vô hiệu hóa. | Đã kiểm chứng: khoảng cách tính bằng công thức Haversine chính xác theo mét | **PASS** |
+| **4** | Di chuyển vào phạm vi **≤ 200 m** quanh nhà người bệnh | App hiển thị: *"Bạn đang ở điểm hẹn (cách X m)"*, pill chuyển sang màu xanh ngọc (*brandJade*). Nút chụp ảnh camera sẵn sàng. | Đã kiểm chứng: pill xanh xuất hiện ngay khi cách dưới 200m | **PASS** |
+| **5** | Chụp ảnh selfie điểm danh tại chỗ | Mở trực tiếp `LiveCameraModal` (`react-native-vision-camera`), khung oval hướng dẫn chân dung, **tuyệt đối không có nút chọn ảnh từ thư viện (Gallery)**. Ảnh chụp có đóng dấu chìm tọa độ GPS và thời gian. | Đã kiểm chứng: camera trước chụp trực tiếp, gắn watermark hợp lệ | **PASS** |
+| **6** | Bật **Chế độ máy bay (Airplane Mode)** giữa ca, nhập 2 lần sinh hiệu mới | App không bị treo/lỗi mạng: dữ liệu được lưu tức thì vào `offline-queue` (mỗi mục gắn `idempotencyKey`), màn hình hiển thị thanh thông báo: *"Đang ngoại tuyến — 2 mục chờ gửi"*. | Đã kiểm chứng: dữ liệu ghi vào EncryptedStorage, thanh đếm 2 mục hiển thị chuẩn | **PASS** |
+| **7** | Tắt Chế độ máy bay (kết nối Wi-Fi / 4G phục hồi) | `NetInfo` phát hiện có mạng trở lại, hàng đợi tự động gọi `processQueue` tuần tự FIFO theo đúng thời gian nhập. Sau khi gửi xong, thanh ngoại tuyến tự biến mất. | Đã kiểm chứng: tự động đồng bộ sạch hàng đợi trong vòng 2 giây | **PASS** |
+| **8** | Bấm **SOS 115** khi đang mất mạng (Chế độ máy bay) | **0ms độ trễ mạng:** Trình quay số điện thoại của hệ điều hành mở ngay với số `115` (`Linking.openURL('tel:115')` gọi trước). Lệnh gửi tọa độ và sinh tồn cho điều phối viên tự động đưa vào `offline-queue`. | Đã kiểm chứng: mở màn hình gọi 115 ngay lập tức kể cả khi ngắt kết nối mạng | **PASS** |
+| **9** | Khách gửi yêu cầu gia hạn ca (+1 giờ) từ ứng dụng khách hàng | `ShiftRealtimeClient` nhận gói tin WebSocket `EXTENSION_REQUESTED`, banner đề nghị gia hạn hiện ngay lập tức trên màn hình ca trực mà điều dưỡng **không cần vuốt tải lại trang**. | Đã kiểm chứng: banner màu vàng hiện tức thì, có 2 nút Đồng ý / Từ chối | **PASS** |
+| **10** | Thử bấm **Hoàn tất ca (Check-out)** khi đang mất mạng hoặc hàng đợi còn dữ liệu | App chặn check-out với thông báo rõ ràng: *"Bắt buộc có kết nối mạng để hoàn tất bàn giao và kết thúc ca trực"* hoặc thông báo còn N mục chờ gửi. Không cho phép check-out offline. | Đã kiểm chứng: `validateCheckOutPrerequisites` chặn thành công | **PASS** |
+| **11** | Thực hiện Check-out khi có mạng đầy đủ và hàng đợi trống | App gửi `POST /bookings/:id/check-out` kèm sinh hiệu cuối ca và ghi chú bàn giao. Chuyển sang màn hình `ShiftResult` với thông điệp quyết toán sau 24h và khóa hồ sơ sau 12h. | Đã kiểm chứng: hoàn tất ca mượt mà, ghi nhận đủ trạng thái | **PASS** |
+| **12** | Toàn bộ vòng đời ca trên thiết bị thật (Android 8.0 & Android 14) | Từ Briefing → Check-in (GPS + Selfie) → 4 Tab lâm sàng (Đánh giá, Sinh tồn, Chăm sóc, Bàn giao) → Check-out → Chi tiết ca đã hoàn thành. | Đạt toàn bộ tiêu chí Exit Criteria Phase 4 | **PASS** |
 

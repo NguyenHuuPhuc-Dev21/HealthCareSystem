@@ -1,60 +1,96 @@
 /**
- * Mock eKYC khách hàng.
- *   GET  /customers/me/ekyc  → UNVERIFIED (user mới) · VERIFIED (u-patient-verified)
- *   POST /customers/me/ekyc  → cần đủ cccd_front, cccd_back, selfie → PENDING
+ * Mock eKYC khách hàng — mô phỏng contract backend (docs/api/patient-profiles.api.md §2).
+ *   POST /patient/ekyc/upload-urls → trả link tải lên giả
+ *   PUT  /mock-upload/:key         → nhận ảnh (không lưu)
+ *   POST /patient/ekyc             → cần số CCCD 12 số + 3 object key → PENDING
+ *   GET  /patient/ekyc             → UNVERIFIED (user mới) · VERIFIED (u-patient-verified)
  */
 
-import type { CustomerKyc, KycDocType } from '../features/ekyc/ekyc.types';
-import { KYC_FORM_FIELD } from '../features/ekyc/ekyc.types';
 import { fail, ok } from './mock-fetch';
 import type { MockHandler } from './mock-fetch';
 import { getUserData, setUserData, userIdFromHeaders } from './mock-db';
 
-const VERIFIED_SAMPLE: CustomerKyc = {
-  kyc_status: 'VERIFIED',
-  full_name: 'Nguyễn Văn An',
-  cccd_number_masked: '001092 ••• •88',
-  documents: [
-    { doc_type: 'CCCD_FRONT', file_name: 'can_cuoc_truoc.jpg', uploaded_at: '2026-10-12T02:41:00Z' },
-    { doc_type: 'CCCD_BACK', file_name: 'can_cuoc_sau.jpg', uploaded_at: '2026-10-12T02:41:00Z' },
-    { doc_type: 'SELFIE', file_name: 'selfie.jpg', uploaded_at: '2026-10-12T02:41:00Z' },
-  ],
-};
-
-const EMPTY: CustomerKyc = { kyc_status: 'UNVERIFIED', documents: [] };
-
-function initial(userId: string): CustomerKyc {
-  return userId === 'u-patient-verified' ? VERIFIED_SAMPLE : EMPTY;
+export interface MockEkycStatus {
+  kycStatus: 'UNVERIFIED' | 'PENDING' | 'VERIFIED';
+  cccdNumberMasked: string | null;
+  submittedAt: string | null;
+  reviewedAt: string | null;
+  rejectionReason: string | null;
 }
 
+const VERIFIED_SAMPLE: MockEkycStatus = {
+  kycStatus: 'VERIFIED',
+  cccdNumberMasked: '********1288',
+  submittedAt: '2026-10-12T02:41:00Z',
+  reviewedAt: '2026-10-12T05:00:00Z',
+  rejectionReason: null,
+};
+
+const EMPTY: MockEkycStatus = {
+  kycStatus: 'UNVERIFIED',
+  cccdNumberMasked: null,
+  submittedAt: null,
+  reviewedAt: null,
+  rejectionReason: null,
+};
+
+export const initialKyc = (userId: string) => (userId === 'u-patient-verified' ? VERIFIED_SAMPLE : EMPTY);
+
+const PURPOSES = ['CCCD_FRONT', 'CCCD_BACK', 'PORTRAIT'];
+
 export const ekycHandlers: Record<string, MockHandler> = {
-  'GET /api/v1/customers/me/ekyc': (_body, { headers }) => {
+  'GET /api/v1/patient/ekyc': (_body, { headers }) => {
     const userId = userIdFromHeaders(headers);
     if (!userId) return fail(401, 'UNAUTHORIZED', 'Phiên đăng nhập đã hết hạn');
-    return ok(getUserData(userId, 'ekyc', initial(userId)));
+    return ok(getUserData(userId, 'ekyc', initialKyc(userId)));
   },
 
-  'POST /api/v1/customers/me/ekyc': (body, { headers }) => {
+  'POST /api/v1/patient/ekyc/upload-urls': (body: { files?: Array<{ purpose: string; contentType: string }> }, { headers }) => {
     const userId = userIdFromHeaders(headers);
     if (!userId) return fail(401, 'UNAUTHORIZED', 'Phiên đăng nhập đã hết hạn');
-    if (!(body instanceof FormData)) return fail(400, 'INVALID_BODY', 'Cần gửi multipart/form-data');
-
-    const now = new Date().toISOString();
-    const documents = (Object.keys(KYC_FORM_FIELD) as KycDocType[]).map((type) => {
-      const file = body.get(KYC_FORM_FIELD[type]);
-      return file instanceof File ? { doc_type: type, file_name: file.name, uploaded_at: now } : null;
-    });
-    if (documents.some((d) => d === null)) {
-      return fail(400, 'KYC_MISSING_DOCUMENT', 'Vui lòng tải đủ CCCD 2 mặt và ảnh chân dung.');
+    const files = body?.files ?? [];
+    if (!files.length || files.some((f) => !PURPOSES.includes(f.purpose))) {
+      return fail(400, 'VALIDATION_ERROR', 'Yêu cầu không hợp lệ.');
     }
+    return ok({
+      files: files.map((f) => {
+        const objectKey = `kyc-mock/${userId}/${f.purpose}-${Date.now()}`;
+        return {
+          purpose: f.purpose,
+          objectKey,
+          uploadUrl: `/api/v1/mock-upload/${encodeURIComponent(objectKey)}`,
+          expiresInSeconds: 600,
+          contentType: f.contentType,
+        };
+      }),
+    });
+  },
 
-    const kyc: CustomerKyc = {
-      kyc_status: 'PENDING',
-      full_name: null,
-      cccd_number_masked: null,
-      documents: documents as CustomerKyc['documents'],
+  'PUT /api/v1/mock-upload/:key': () => ({ status: 200, body: {} }),
+
+  'POST /api/v1/patient/ekyc': (
+    body: { cccdNumber?: string; identity?: { cccdFrontKey?: string; cccdBackKey?: string; portraitKey?: string } },
+    { headers },
+  ) => {
+    const userId = userIdFromHeaders(headers);
+    if (!userId) return fail(401, 'UNAUTHORIZED', 'Phiên đăng nhập đã hết hạn');
+    if (!/^\d{12}$/.test(body?.cccdNumber ?? '')) return fail(400, 'VALIDATION_ERROR', 'Số CCCD phải gồm 12 chữ số.');
+    const id = body?.identity;
+    if (!id?.cccdFrontKey || !id.cccdBackKey || !id.portraitKey) {
+      return fail(400, 'FILE_NOT_UPLOADED', 'Vui lòng tải đủ CCCD 2 mặt và ảnh chân dung.');
+    }
+    const current = getUserData<MockEkycStatus>(userId, 'ekyc', initialKyc(userId));
+    if (current.kycStatus === 'VERIFIED') return fail(409, 'EKYC_ALREADY_VERIFIED', 'Tài khoản đã xác thực.');
+    if (current.kycStatus === 'PENDING') return fail(409, 'EKYC_ALREADY_SUBMITTED', 'Hồ sơ đang chờ duyệt.');
+
+    const status: MockEkycStatus = {
+      kycStatus: 'PENDING',
+      cccdNumberMasked: `********${body.cccdNumber!.slice(-4)}`,
+      submittedAt: new Date().toISOString(),
+      reviewedAt: null,
+      rejectionReason: null,
     };
-    setUserData(userId, 'ekyc', kyc);
-    return ok(kyc);
+    setUserData(userId, 'ekyc', status);
+    return { status: 201, body: { success: true, data: status } };
   },
 };

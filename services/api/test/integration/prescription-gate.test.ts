@@ -40,8 +40,6 @@ describe('prescription-gate — prescription access (integration)', () => {
 
     service = new PrescriptionGateService({
       storage: {
-        buildObjectKey: storage.buildObjectKey,
-        createUploadUrl: async (objectKey) => ({ url: `https://storage.test/put/${objectKey}`, objectKey, expiresInSeconds: 600 }),
         createDownloadUrl: async (objectKey) => ({ url: `https://storage.test/get/${objectKey}`, objectKey, expiresInSeconds: 600 }),
         statObject: async () => null,
         readObjectHead: async () => null,
