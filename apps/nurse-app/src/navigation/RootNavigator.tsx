@@ -49,6 +49,7 @@ import { DepositScreen } from '../features/wallet/DepositScreen';
 import { PenaltyDetailScreen } from '../features/wallet/PenaltyDetailScreen';
 import { AppealPenaltyScreen } from '../features/wallet/AppealPenaltyScreen';
 import { AccountClosureScreen } from '../features/wallet/AccountClosureScreen';
+import { WithdrawScreen } from '../features/wallet/WithdrawScreen';
 import { CommissionPaymentScreen } from '../features/commission-payment/CommissionPaymentScreen';
 import { getDepositStatus, getRefundRequest } from '../features/wallet/deposit.api';
 import { getCommissionDebts } from '../features/commission-payment/commission-payment.api';
@@ -416,6 +417,11 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
           <ActiveStack.Screen
             name="CommissionPayment"
             component={CommissionPaymentScreen}
+            options={{ headerShown: false }}
+          />
+          <ActiveStack.Screen
+            name="Withdraw"
+            component={WithdrawScreen}
             options={{ headerShown: false }}
           />
         </ActiveStack.Navigator>

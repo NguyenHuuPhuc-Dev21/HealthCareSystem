@@ -112,11 +112,7 @@ export const WalletScreen: React.FC<WalletScreenProps> = ({ navigation }) => {
   };
 
   const handleWithdrawPress = () => {
-    Alert.alert(
-      'Rút tiền về ngân hàng',
-      'Tính năng rút tiền chi tiết đang mở qua màn A12.',
-      [{ text: 'Đóng' }]
-    );
+    navigation.navigate('Withdraw');
   };
 
   const handleTopUpPress = () => {
