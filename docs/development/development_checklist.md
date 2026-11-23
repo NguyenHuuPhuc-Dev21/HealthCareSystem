@@ -239,7 +239,7 @@
 - [x] Nurse Web + Mobile App — Deposit top-up flow maintaining the 300,000 VND requirement (Nurse Web: [x], Mobile: [x]).
 - [x] Nurse Web + Mobile App — Cash booking 15% platform commission payment: generates VietQR link, 24h countdown, overdue suspension warning banner (Nurse Web: [x], Mobile: [x]).
 - [x] Nurse Web — Earnings withdrawal request interface.
-- [ ] Nurse Mobile App — Earnings withdrawal request interface.
+- [x] Nurse Mobile App — Earnings withdrawal request interface.
 - [x] Nurse Web + Mobile App — Immutable wallet transaction ledger history (Nurse Web: [x], Mobile: [x]).
 
 ### BE-1
