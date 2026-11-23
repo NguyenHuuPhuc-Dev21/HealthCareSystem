@@ -43,13 +43,20 @@ jest.mock('@react-native-firebase/messaging', () => mockMessaging);
 jest.mock('@notifee/react-native', () => ({
   createChannel: jest.fn().mockResolvedValue('radar'),
   displayNotification: jest.fn().mockResolvedValue('notif-id-1'),
+  createTriggerNotification: jest.fn().mockResolvedValue('trigger-notif-1'),
   cancelNotification: jest.fn().mockResolvedValue(undefined),
+  cancelTriggerNotification: jest.fn().mockResolvedValue(undefined),
+  getTriggerNotificationIds: jest.fn().mockResolvedValue([]),
   getInitialNotification: jest.fn().mockResolvedValue(null),
   onForegroundEvent: jest.fn(() => () => {}),
   onBackgroundEvent: jest.fn(),
   AndroidImportance: {
     DEFAULT: 3,
     HIGH: 4,
+  },
+  TriggerType: {
+    TIMESTAMP: 0,
+    INTERVAL: 1,
   },
   EventType: {
     DISMISSED: 0,

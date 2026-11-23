@@ -17,6 +17,7 @@ import {
 } from 'lucide-react-native';
 import {
   DepositRefundStatus,
+  type CommissionDebtDto,
   type DepositRefundRequestDto,
   type DepositStatusDto,
 } from '@healthcare-system/shared';
@@ -30,7 +31,34 @@ export interface DepositBannerMeta {
   title: string;
   message: string;
   actionLabel?: string;
-  actionRoute?: 'Deposit' | 'AccountClosure';
+  actionRoute?: 'Deposit' | 'AccountClosure' | 'CommissionPayment';
+}
+
+export type AppBannerMeta = DepositBannerMeta;
+
+/**
+ * Deterministic helper to decide commission overdue banner state from CommissionDebtDto[]
+ * Quá hạn thì banner đỏ "tài khoản tạm khóa nhận ca" cho tới khi nộp (N11, ADR-0004)
+ */
+export function getCommissionBannerMeta(
+  debts?: CommissionDebtDto[] | null
+): AppBannerMeta | null {
+  if (!debts || debts.length === 0) return null;
+  const overdueDebts = debts.filter((d) => d.status === 'OVERDUE');
+  if (overdueDebts.length === 0) return null;
+
+  const count = overdueDebts.length;
+  return {
+    show: true,
+    kind: 'danger',
+    title: 'Quá hạn nộp hoa hồng — Tạm khóa nhận ca',
+    message:
+      count === 1
+        ? `Đơn ${overdueDebts[0].bookingCode} đã quá hạn nộp hoa hồng 15%. Vui lòng nộp ngay để mở lại quyền nhận ca.`
+        : `Có ${count} ca tiền mặt quá hạn nộp hoa hồng 15%. Vui lòng nộp ngay để mở lại quyền nhận ca.`,
+    actionLabel: 'Nộp ngay',
+    actionRoute: 'CommissionPayment',
+  };
 }
 
 /**

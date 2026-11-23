@@ -124,13 +124,9 @@ export const WalletScreen: React.FC<WalletScreenProps> = ({ navigation }) => {
   };
 
   const handlePayCommissionPress = () => {
-    Alert.alert(
-      'Nộp hoa hồng sàn',
-      `Đơn ${pendingCommission.bookingCode || 'HC-2026-1057'}: ${pendingCommission.amount?.toLocaleString(
-        'vi-VN'
-      )}đ.\nMở màn hình nộp hoa hồng (A11).`,
-      [{ text: 'Đóng' }]
-    );
+    navigation.navigate('CommissionPayment', {
+      bookingId: (pendingCommission as any).bookingId || pendingCommission.bookingCode,
+    });
   };
 
   if (loadingSummary && !summary) {

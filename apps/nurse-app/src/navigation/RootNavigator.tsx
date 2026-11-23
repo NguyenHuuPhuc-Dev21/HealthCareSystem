@@ -12,11 +12,17 @@ import {
 } from '@react-navigation/bottom-tabs';
 import { Briefcase, Calendar, ClipboardList, Home, User, Wallet } from 'lucide-react-native';
 import type {
+  CommissionDebtDto,
   DepositRefundRequestDto,
   DepositStatusDto,
   MobileShiftSummary,
 } from '@healthcare-system/shared';
-import { AppBanner, getDepositBannerMeta, StateView } from '../components';
+import {
+  AppBanner,
+  getCommissionBannerMeta,
+  getDepositBannerMeta,
+  StateView,
+} from '../components';
 import { useAuth } from '../features/auth/AuthContext';
 import { PhoneLoginScreen } from '../features/auth/PhoneLoginScreen';
 import { OtpScreen } from '../features/auth/OtpScreen';
@@ -43,7 +49,9 @@ import { DepositScreen } from '../features/wallet/DepositScreen';
 import { PenaltyDetailScreen } from '../features/wallet/PenaltyDetailScreen';
 import { AppealPenaltyScreen } from '../features/wallet/AppealPenaltyScreen';
 import { AccountClosureScreen } from '../features/wallet/AccountClosureScreen';
+import { CommissionPaymentScreen } from '../features/commission-payment/CommissionPaymentScreen';
 import { getDepositStatus, getRefundRequest } from '../features/wallet/deposit.api';
+import { getCommissionDebts } from '../features/commission-payment/commission-payment.api';
 import {
   ShiftResultScreen,
 } from '../features/placeholders/ZoneScreens';
@@ -78,15 +86,21 @@ const ActiveStack = createNativeStackNavigator<ActiveStackParamList>();
 function MainTabsWithBannerTabBar(props: BottomTabBarProps) {
   const [depositStatus, setDepositStatus] = React.useState<DepositStatusDto | null>(null);
   const [refundRequest, setRefundRequest] = React.useState<DepositRefundRequestDto | null>(null);
+  const [commissionDebts, setCommissionDebts] = React.useState<CommissionDebtDto[]>([]);
   const [dismissed, setDismissed] = React.useState(false);
 
   React.useEffect(() => {
     let active = true;
     const fetchStatus = async () => {
       try {
-        const [stRes, refRes] = await Promise.all([getDepositStatus(), getRefundRequest()]);
+        const [stRes, refRes, commRes] = await Promise.all([
+          getDepositStatus(),
+          getRefundRequest(),
+          getCommissionDebts(),
+        ]);
         if (active && stRes.success) setDepositStatus(stRes.data);
         if (active && refRes.success) setRefundRequest(refRes.data);
+        if (active && commRes.success) setCommissionDebts(commRes.data);
       } catch {
         // ignore
       }
@@ -101,7 +115,10 @@ function MainTabsWithBannerTabBar(props: BottomTabBarProps) {
     };
   }, []);
 
-  const bannerMeta = getDepositBannerMeta(depositStatus, refundRequest);
+  const commissionBanner = getCommissionBannerMeta(commissionDebts);
+  const depositBanner = getDepositBannerMeta(depositStatus, refundRequest);
+  // Overdue commission takes highest precedence as it locks new shift assignments
+  const bannerMeta = commissionBanner || depositBanner;
 
   return (
     <View style={styles.tabBarWrap}>
@@ -331,6 +348,11 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
                   patientLongitude={shift.patientLongitude}
                   serviceName={shift.serviceName}
                   isInvasive={shift.isInvasive}
+                  paymentMethod={shift.paymentMethod === 'BANK_TRANSFER' ? 'BANK_TRANSFER' : 'CASH'}
+                  bookingAmount={shift.totalAmount}
+                  onPayCommissionNow={(bookingId) =>
+                    navigation.replace('CommissionPayment', { bookingId })
+                  }
                   onRequestCurrentPosition={locationProvider}
                   onCaptureLivePhoto={backCameraProvider}
                   onShiftCompleted={(outcome) =>
@@ -389,6 +411,11 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
           <ActiveStack.Screen
             name="AccountClosure"
             component={AccountClosureScreen}
+            options={{ headerShown: false }}
+          />
+          <ActiveStack.Screen
+            name="CommissionPayment"
+            component={CommissionPaymentScreen}
             options={{ headerShown: false }}
           />
         </ActiveStack.Navigator>

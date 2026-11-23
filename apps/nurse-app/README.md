@@ -59,3 +59,14 @@ Trong môi trường development (`IS_DEV = true`), điều dưỡng có thể k
    - Nút **"✓ NHẬN CA"** (≥ 64dp) và **"Bỏ qua"**.
    - Kiểm tra logic ký quỹ theo ADR-0004 và tự động chuyển đến màn tóm tắt ca trực (`ShiftBriefing`) khi nhận thành công.
 
+## Quản lý Nộp hoa hồng ca tiền mặt (A11 — Commission Payment)
+
+Tuân thủ quy định **FR-PAY-01, FR-PAY-02, BR-05**:
+- Khi hoàn tất check-out một ca trực thu tiền mặt (`CASH`), điều dưỡng thu 100% từ khách hàng và tự nộp 15% hoa hồng nền tảng (`commissionAmount = Math.floor(bookingAmount * 0.15)`) trong vòng 24 giờ sau check-out.
+- Màn hình **Nộp hoa hồng** (`CommissionPaymentScreen`) hiển thị danh sách các khoản nợ theo thứ tự: Quá hạn (`OVERDUE`) -> Sắp hết hạn (`UNPAID`) -> Đã nộp (`PAID`).
+- Tích hợp thanh toán **VietQR** với nội dung chuyển khoản chứa mã ca trực (ví dụ: `HOAHONG HC20261057`), tự động thăm dò giao dịch mỗi 5 giây và khi điều dưỡng quay lại app (`AppState.active`).
+- Đặt lịch nhắc nhở cục bộ bằng Notifee (`local-reminders.ts`) trước hạn chót 2 giờ cho các khoản chưa thanh toán; tự động hủy nhắc nhở khi khoản nợ đã thanh toán.
+- **Banner cảnh báo đỏ trên Tab bar** (`AppBanner.tsx`): Khi có bất kỳ khoản nợ nào quá hạn 24 giờ, banner màu đỏ hiển thị thông báo tạm khóa nhận ca cho tới khi nộp đủ.
+- Hoa hồng được thanh toán độc lập qua chuyển khoản ngân hàng VietQR, không tự động cấn trừ vào ví khả dụng hay ký quỹ; tiền tip của người bệnh không tính hoa hồng.
+
+

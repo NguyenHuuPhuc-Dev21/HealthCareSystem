@@ -324,6 +324,25 @@ export function handleDepositNotificationNavigation(
   }
 }
 
+/**
+ * Route commission payment push notifications (A11 / FR-PAY-01, FR-PAY-02)
+ * TODO (A17): move to notification-navigation.ts when A17 notification center is implemented.
+ */
+export function handleCommissionNotificationNavigation(
+  payload: { type?: string; bookingId?: string; bookingCode?: string },
+  navigate: (route: string, params?: any) => void
+): boolean {
+  switch (payload.type) {
+    case 'COMMISSION_DUE':
+    case 'COMMISSION_OVERDUE':
+    case 'COMMISSION_PAID':
+      navigate('CommissionPayment', { bookingId: payload.bookingId });
+      return true;
+    default:
+      return false;
+  }
+}
+
 export async function unregisterPushOnLogout(): Promise<void> {
   try {
     if (activePushToken) {

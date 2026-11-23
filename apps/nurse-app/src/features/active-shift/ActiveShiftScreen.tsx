@@ -34,7 +34,9 @@ import {
   DEFAULT_TRAVEL_SUPPORT_VND,
   DEFAULT_SETTLEMENT_COOLING_HOURS,
   DEFAULT_RECORD_ACCESS_EXPIRY_HOURS,
+  DEFAULT_PLATFORM_COMMISSION_RATE,
 } from '@healthcare-system/shared';
+import { addCashCommissionDebtMock } from '../commission-payment/commission-payment.api';
 import { AssessmentTab } from './components/AssessmentTab';
 import { VitalsTab, VitalEntry } from './components/VitalsTab';
 import { CareAndPrescriptionTab, CareActivityItem } from './components/CareAndPrescriptionTab';
@@ -59,6 +61,9 @@ interface ActiveShiftScreenProps {
   patientLongitude: number;
   serviceName: string;
   isInvasive: boolean;
+  paymentMethod?: 'CASH' | 'BANK_TRANSFER';
+  bookingAmount?: number;
+  onPayCommissionNow?: (bookingId: string) => void;
   onRequestCurrentPosition?: () => Promise<DeviceGeoCoords>;
   onCaptureLivePhoto?: () => Promise<string | null>;
   onShiftCompleted: (outcome?: { type: 'COMPLETED' | 'CANCELLED_SAFE'; note?: string }) => void;
@@ -69,10 +74,14 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
   bookingCode,
   patientName,
   patientAge,
+  patientAddress,
   patientLatitude,
   patientLongitude,
   serviceName,
   isInvasive,
+  paymentMethod = 'CASH',
+  bookingAmount = 500000,
+  onPayCommissionNow,
   onRequestCurrentPosition,
   onCaptureLivePhoto,
   onShiftCompleted,
@@ -435,6 +444,39 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
         return;
       }
 
+      if (paymentMethod === 'CASH') {
+        const commAmt = Math.floor((bookingAmount || 500000) * DEFAULT_PLATFORM_COMMISSION_RATE);
+        void addCashCommissionDebtMock(
+          bookingId,
+          bookingCode,
+          serviceName,
+          bookingAmount || 500000
+        );
+
+        Alert.alert(
+          'Hoàn tất ca trực tiền mặt',
+          `Khách trả tiền mặt ${(bookingAmount || 500000).toLocaleString('vi-VN')}đ — nộp ${commAmt.toLocaleString('vi-VN')}đ hoa hồng trong 24 giờ.`,
+          [
+            {
+              text: 'Nộp hoa hồng ngay',
+              onPress: () => {
+                if (onPayCommissionNow) {
+                  onPayCommissionNow(bookingId);
+                } else {
+                  onShiftCompleted({ type: 'COMPLETED', note: handoverNote });
+                }
+              },
+            },
+            {
+              text: 'Để sau và về trang chủ',
+              style: 'cancel',
+              onPress: () => onShiftCompleted({ type: 'COMPLETED', note: handoverNote }),
+            },
+          ]
+        );
+        return;
+      }
+
       Alert.alert(
         'Hoàn tất ca trực',
         `Đã lưu báo cáo bàn giao lên hệ thống. Thù lao sẽ quyết toán sau ${DEFAULT_SETTLEMENT_COOLING_HOURS} giờ và quyền xem bệnh án sẽ khóa sau ${DEFAULT_RECORD_ACCESS_EXPIRY_HOURS} giờ.`,
@@ -617,6 +659,11 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
             completedActivitiesCount={completedActivitiesCount}
             totalActivitiesCount={activities.length}
             submitting={submittingCheckout}
+            paymentMethod={paymentMethod}
+            bookingAmount={bookingAmount}
+            bookingCode={bookingCode}
+            bookingId={bookingId}
+            onPayCommissionNow={onPayCommissionNow}
             onSubmitCheckOut={handleSubmitCheckOut}
           />
         )}

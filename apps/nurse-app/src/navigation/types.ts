@@ -48,5 +48,6 @@ export type ActiveStackParamList = {
   PenaltyDetail: { transactionId: string };
   AppealPenalty: { transactionId: string };
   AccountClosure: undefined;
+  CommissionPayment: { bookingId?: string } | undefined;
 };
 
