@@ -12,7 +12,15 @@ export type WebhookOutcome =
   | 'AMOUNT_MISMATCH' // amount differs from the booking total → nothing moved, Admin follows up
   | 'NOT_TRANSFER_BOOKING' // a cash booking received a transfer → nothing moved, Admin follows up
   | 'UNKNOWN_BOOKING' // no booking with this code
-  | 'NOT_SUCCESS'; // gateway reported a failed / cancelled payment
+  | 'NOT_SUCCESS' // gateway reported a failed / cancelled payment
+  | 'EXTENSION_PAID' // shift extension paid → held in escrow and in effect (shift-extend, BE-1)
+  | 'UNKNOWN_EXTENSION'; // `<code>-GH<n>` that matches no extension
+
+/** What shift-extend's confirmExtensionPayment answers, plus the booking it belongs to (for the event row). */
+export interface ExtensionPaymentResult {
+  outcome: 'EXTENSION_PAID' | 'DUPLICATE' | 'UNKNOWN_EXTENSION' | 'AMOUNT_MISMATCH' | 'LATE_PAYMENT_REFUNDED';
+  bookingId: string | null;
+}
 
 /** Booking as the webhook reads it (locked FOR UPDATE). */
 export type PaymentBookingRow = {

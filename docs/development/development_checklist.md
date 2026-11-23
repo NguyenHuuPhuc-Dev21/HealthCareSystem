@@ -94,9 +94,9 @@
 - [ ] `patient-profiles` (FR-AUTH-03): Patient profile management + customer eKYC; blocks home-care booking creation when customer eKYC is not `VERIFIED`; blocks profile creation if consent is missing.
 
 ### BE-3
-- [ ] `privacy-consent` (FR-PRIV-01): Consent event capture recording timestamp + client IP + device metadata.
-- [ ] `privacy-consent`: Medical record access authorization policy — restricted to assigned nurse, valid from `CONFIRMED` until check-out +12h; time-boxed Admin temporary re-grant with audit log.
-- [ ] `privacy-consent`: 24-month medical data retention enforcement; account deletion/anonymization request handler.
+- [x] `privacy-consent` (FR-PRIV-01): Consent event capture recording timestamp + client IP + device metadata.
+- [x] `privacy-consent`: Medical record access authorization policy — restricted to assigned nurse, valid from `CONFIRMED` until check-out +12h; time-boxed Admin temporary re-grant with audit log.
+- [x] `privacy-consent`: 24-month medical data retention enforcement; account deletion/anonymization request handler.
 - [x] Support BE-1: 10-minute Presigned URL minting pipeline for sensitive identity and credential documents.
 
 ### Phase 1 Exit Criteria
@@ -128,8 +128,8 @@
 - [x] `availability-engine` serves as the single source of truth for both nurse search and automated matching (no divergent availability logic).
 
 ### BE-3
-- [ ] `nurse-search`: `GET /api/v1/nurses/search` implementing all FR-SEARCH-01 query filters.
-- [ ] `nurse-search`: Surfaces only `ACTIVE` nurses with `deposit_balance ≥ 300,000` VND and qualifying Tier for the requested service; consumes `availability-engine`.
+- [x] `nurse-search`: `GET /api/v1/nurses/search` implementing all FR-SEARCH-01 query filters.
+- [x] `nurse-search`: Surfaces only `ACTIVE` nurses (no closure request) meeting the deposit rule — `deposit_balance ≥ MIN_NURSE_DEPOSIT`, or ADR-0004 grace for bank-transfer bookings (`cashAllowed = false`) — and a Tier valid on the shift date; consumes `availability-engine` (same gate as matching).
 
 ### Phase 2 Exit Criteria
 - [ ] A nurse with a `TIME_OFF_EXCEPTION` is strictly excluded from search results and candidate dispatch pools for that window.
@@ -169,11 +169,11 @@
 - [x] `matching-radar`: Backend re-validates `profile_status = ACTIVE`, Tier qualification, deposit rule (`≥ MIN_NURSE_DEPOSIT`, or ADR-0004 grace for bank-transfer bookings), no closure request, and effective availability at the exact moment of acceptance.
 
 ### BE-3
-- [ ] `job-board`: Advance bookings $> 6\text{h}$ published to Job Board for eligible nurses.
-- [ ] `job-board`: Direct nurse invitation — falls back to broad dispatch if unanswered after 15 minutes.
-- [ ] `booking-expiry`: Expiration worker — unpaid booking transitions to `EXPIRED` at 15 minutes.
-- [ ] `booking-expiry`: Unmatched booking within 30 minutes of scheduled start transitions to `EXPIRED` + triggers 100% refund if funds are `ESCROW_HELD`.
-- [ ] `gateway-webhooks` (minimal scope): Bank transfer webhook processes payment to `ESCROW_HELD` to activate the matching engine.
+- [x] `job-board`: Advance bookings $> 6\text{h}$ published to Job Board for eligible nurses.
+- [x] `job-board`: Direct nurse invitation — falls back to broad dispatch if unanswered after 15 minutes.
+- [x] `booking-expiry`: Expiration worker — unpaid booking transitions to `EXPIRED` at 15 minutes.
+- [x] `booking-expiry`: Unmatched booking within 30 minutes of scheduled start transitions to `EXPIRED` + triggers 100% refund if funds are `ESCROW_HELD`.
+- [x] `gateway-webhooks` (minimal scope): Bank transfer webhook processes payment to `ESCROW_HELD` to activate the matching engine.
 
 ### Phase 3 Exit Criteria
 - [ ] Both matching mechanisms (Radar Dispatch and Job Board) successfully pair a shift on staging.
@@ -262,8 +262,8 @@
 - [ ] `wallets-ledger`: Strict separation of 3 ledger balances in `wallets` table.
 - [ ] `wallets-ledger`: Append-only `wallet_transactions` table; every entry records unique `idempotency_key`, `balance_before`, and `balance_after`; zero UPDATE/DELETE grants.
 - [ ] `wallets-ledger`: All balance adjustments execute inside ACID transactions with row-level locks (`SELECT … FOR UPDATE`) or Redis locks.
-- [ ] `gateway-webhooks` (FR-PAY-01): `POST /api/v1/payments/escrow-webhook` — verifies raw HMAC-SHA256 signature first; invalid signature returns HTTP 401 with zero state mutation.
-- [ ] `gateway-webhooks`: Replayed webhooks handled idempotently (HTTP 200, no duplicate ledger entry).
+- [x] `gateway-webhooks` (FR-PAY-01): `POST /api/v1/payments/escrow-webhook` — verifies raw HMAC-SHA256 signature first; invalid signature returns HTTP 401 with zero state mutation.
+- [x] `gateway-webhooks`: Replayed webhooks handled idempotently (HTTP 200, no duplicate ledger entry).
 - [ ] `settlements` (FR-PAY-02): Bank-transfer bookings — customer early confirmation **or** check-out +24h with `dispute_status = NONE` → deducts 15% platform fee, credits 85% to nurse `available_balance`.
 - [ ] `settlements`: Active dispute (`OPEN`) atomically freezes settlement payout.
 - [ ] `withdrawals` (FR-PAY-04): `POST /api/v1/wallets/withdraw` — amount exceeding `available_balance` returns HTTP 400; initializes `WITHDRAW_REQUESTED` approval flow.

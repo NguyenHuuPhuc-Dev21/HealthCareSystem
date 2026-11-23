@@ -14,6 +14,8 @@ Prepaid bank transfer → escrow → matching, and the escrow ledger.
 | `gateway-webhooks.repo.ts` / `.schema.ts` / `.routes.ts` / `.types.ts` | SQL, validation, HTTP, shapes |
 
 ## Rules
+- `<booking code>-GH<n>` with a matching extension = shift-extension payment → shift-extend `confirmExtensionPayment`
+  (BE-1) in the webhook transaction (`EXTENSION_PAID`, `DUPLICATE`, `AMOUNT_MISMATCH`, `LATE_PAYMENT_REFUNDED`).
 - Signature first: a wrong signature changes nothing (401). Everything verified answers 200 so the gateway stops retrying.
 - One transaction under the booking lock: ledger + `ESCROW_HELD` + `activateMatching` (BE-2). Radar starts after COMMIT.
 - Money that arrives too late (or twice) is booked and refunded 100% in the same transaction — never silently kept.
