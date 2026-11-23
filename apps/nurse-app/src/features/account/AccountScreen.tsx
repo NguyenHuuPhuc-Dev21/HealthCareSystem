@@ -16,6 +16,7 @@ import {
   Award,
   Calendar,
   ChevronRight,
+  Coins,
   FileText,
   LogOut,
   Shield,
@@ -231,7 +232,27 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
             <ChevronRight color={tokens.colors.inkSecondary} size={20} />
           </TouchableOpacity>
 
-          {/* 4. Ngừng hợp tác & hoàn ký quỹ (A10 / ADR-0004) */}
+          {/* 4. Nộp hoa hồng ca tiền mặt (A11) */}
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('CommissionPayment')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Nộp hoa hồng ca tiền mặt"
+          >
+            <View style={styles.menuIconBox}>
+              <Coins color={tokens.colors.brandJade} size={22} />
+            </View>
+            <View style={styles.menuTextBox}>
+              <Text style={[styles.menuTitle, largeFont && styles.menuTitleLarge]}>
+                Nộp hoa hồng ca tiền mặt
+              </Text>
+              <Text style={styles.menuSub}>Nộp 15% hoa hồng ca thu tiền mặt trong 24 giờ</Text>
+            </View>
+            <ChevronRight color={tokens.colors.inkSecondary} size={20} />
+          </TouchableOpacity>
+
+          {/* 5. Ngừng hợp tác & hoàn ký quỹ (A10 / ADR-0004) */}
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => navigation.navigate('AccountClosure')}

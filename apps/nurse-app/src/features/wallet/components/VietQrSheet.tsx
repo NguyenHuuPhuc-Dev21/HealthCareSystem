@@ -50,6 +50,7 @@ export interface VietQrSheetProps {
   onSuccess: () => void;
   onClose: () => void;
   onRecreate?: () => void;
+  onCheckStatus?: () => Promise<boolean>;
 }
 
 function formatCountdown(expiresAt: string): { text: string; isExpired: boolean } {
@@ -73,6 +74,7 @@ export const VietQrSheet: React.FC<VietQrSheetProps> = ({
   onSuccess,
   onClose,
   onRecreate,
+  onCheckStatus,
 }) => {
   const data: GenericVietQrLink = paymentLink || {
     id: topupLink?.topupId,
@@ -93,24 +95,34 @@ export const VietQrSheet: React.FC<VietQrSheetProps> = ({
 
   const topupId = data.id;
 
-  // Function to poll topup status
+  // Function to poll topup or commission status
   const checkStatus = useCallback(async () => {
-    if (!topupId || status === TxStatus.COMPLETED || countdown.isExpired) return;
+    if (status === TxStatus.COMPLETED || countdown.isExpired) return;
     try {
       setChecking(true);
-      const res = await getTopupStatus(topupId);
-      if (res.success && res.data.status === TxStatus.COMPLETED) {
-        setStatus(TxStatus.COMPLETED);
-        setTimeout(() => {
-          onSuccess();
-        }, 1500);
+      if (onCheckStatus) {
+        const isPaid = await onCheckStatus();
+        if (isPaid) {
+          setStatus(TxStatus.COMPLETED);
+          setTimeout(() => {
+            onSuccess();
+          }, 1500);
+        }
+      } else if (topupId) {
+        const res = await getTopupStatus(topupId);
+        if (res.success && res.data.status === TxStatus.COMPLETED) {
+          setStatus(TxStatus.COMPLETED);
+          setTimeout(() => {
+            onSuccess();
+          }, 1500);
+        }
       }
     } catch {
       // ignore transient polling errors
     } finally {
       setChecking(false);
     }
-  }, [topupId, status, countdown.isExpired, onSuccess]);
+  }, [topupId, status, countdown.isExpired, onSuccess, onCheckStatus]);
 
   // Timer countdown 1s
   useEffect(() => {
@@ -127,23 +139,23 @@ export const VietQrSheet: React.FC<VietQrSheetProps> = ({
 
   // Polling loop every 5s while visible and not expired
   useEffect(() => {
-    if (!visible || !topupId || status === TxStatus.COMPLETED || countdown.isExpired) return;
+    if (!visible || (!topupId && !onCheckStatus) || status === TxStatus.COMPLETED || countdown.isExpired) return;
     const pollInterval = setInterval(() => {
       void checkStatus();
     }, 5000);
     return () => clearInterval(pollInterval);
-  }, [visible, topupId, status, countdown.isExpired, checkStatus]);
+  }, [visible, topupId, onCheckStatus, status, countdown.isExpired, checkStatus]);
 
   // AppState listener: when coming back to app, check immediately
   useEffect(() => {
-    if (!visible || !topupId || status === TxStatus.COMPLETED || countdown.isExpired) return;
+    if (!visible || (!topupId && !onCheckStatus) || status === TxStatus.COMPLETED || countdown.isExpired) return;
     const subscription = AppState.addEventListener('change', (nextAppState) => {
       if (nextAppState === 'active') {
         void checkStatus();
       }
     });
     return () => subscription.remove();
-  }, [visible, topupId, status, countdown.isExpired, checkStatus]);
+  }, [visible, topupId, onCheckStatus, status, countdown.isExpired, checkStatus]);
 
   const handleCopy = (field: string, text: string) => {
     Clipboard.setString(text);
