@@ -14,7 +14,11 @@ export type WebhookOutcome =
   | 'UNKNOWN_BOOKING' // no booking with this code
   | 'NOT_SUCCESS' // gateway reported a failed / cancelled payment
   | 'EXTENSION_PAID' // shift extension paid → held in escrow and in effect (shift-extend, BE-1)
-  | 'UNKNOWN_EXTENSION'; // `<code>-GH<n>` that matches no extension
+  | 'UNKNOWN_EXTENSION' // `<code>-GH<n>` that matches no extension
+  | 'TOPUP_CREDITED' // nurse deposit top-up ("KQ…") credited in full (deposits, ADR-0004)
+  | 'TOPUP_EXCESS_RETURNED' // shortfall credited, the rest returned by the custody partner
+  | 'TOPUP_RETURNED' // deposit already full / link already paid: everything returned
+  | 'UNKNOWN_TOPUP'; // "KQ…" that matches no top-up
 
 /** What shift-extend's confirmExtensionPayment answers, plus the booking it belongs to (for the event row). */
 export interface ExtensionPaymentResult {
