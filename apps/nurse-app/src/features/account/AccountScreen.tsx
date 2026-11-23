@@ -18,10 +18,12 @@ import {
   ChevronRight,
   FileText,
   LogOut,
+  Shield,
   ShieldCheck,
   Star,
   Type,
   User,
+  UserX,
 } from 'lucide-react-native';
 import { DocType, NurseTier, VerificationStatus } from '@healthcare-system/shared';
 import { AppButton, CareNestLogoMark, StatusBadge } from '../../components';
@@ -209,7 +211,47 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
             <ChevronRight color={tokens.colors.inkSecondary} size={20} />
           </TouchableOpacity>
 
-          {/* 3. Cỡ chữ lớn Toggle */}
+          {/* 3. Ký quỹ điều dưỡng (A10 / ADR-0004) */}
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('Deposit')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Ví ký quỹ điều dưỡng"
+          >
+            <View style={styles.menuIconBox}>
+              <Shield color={tokens.colors.brandJade} size={22} />
+            </View>
+            <View style={styles.menuTextBox}>
+              <Text style={[styles.menuTitle, largeFont && styles.menuTitleLarge]}>
+                Ví ký quỹ &amp; Quyền lợi
+              </Text>
+              <Text style={styles.menuSub}>Quản lý ký quỹ 300.000đ, nạp bù &amp; ân hạn</Text>
+            </View>
+            <ChevronRight color={tokens.colors.inkSecondary} size={20} />
+          </TouchableOpacity>
+
+          {/* 4. Ngừng hợp tác & hoàn ký quỹ (A10 / ADR-0004) */}
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('AccountClosure')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Ngừng hợp tác và hoàn ký quỹ"
+          >
+            <View style={styles.menuIconBox}>
+              <UserX color={tokens.colors.alertCrimson} size={22} />
+            </View>
+            <View style={styles.menuTextBox}>
+              <Text style={[styles.menuTitle, largeFont && styles.menuTitleLarge]}>
+                Ngừng hợp tác &amp; hoàn ký quỹ
+              </Text>
+              <Text style={styles.menuSub}>Thủ tục tất toán &amp; hoàn tiền sau 7 ngày</Text>
+            </View>
+            <ChevronRight color={tokens.colors.inkSecondary} size={20} />
+          </TouchableOpacity>
+
+          {/* 5. Cỡ chữ lớn Toggle */}
           <View style={styles.menuItem}>
             <View style={styles.menuIconBox}>
               <Type color={tokens.colors.brandJade} size={22} />
