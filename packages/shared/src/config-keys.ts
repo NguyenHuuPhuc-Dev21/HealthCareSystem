@@ -85,6 +85,14 @@ export const SYSTEM_CONFIG_KEYS = {
   TRUST_PENALTY_NURSE_CANCEL_EARLY: 'TRUST_PENALTY_NURSE_CANCEL_EARLY', // 5 (row 6)
   TRUST_PENALTY_NURSE_CANCEL_LATE: 'TRUST_PENALTY_NURSE_CANCEL_LATE', // 20 (row 7)
   MIN_BILLABLE_HOURS: 'MIN_BILLABLE_HOURS',                           // 1 (row 4)
+
+  // Reviews & TrustScore (reviews-trustscore — migration 0015)
+  REVIEW_BLIND_DAYS: 'REVIEW_BLIND_DAYS',                                   // 7 (hidden until both sides reviewed or 7 days, FR-RATE-01)
+  REVIEW_WINDOW_DAYS: 'REVIEW_WINDOW_DAYS',                                 // 7 (proposed, pending PO: reviews close 7 days after the shift)
+  TRUST_PENALTY_DISPUTE_UPHELD: 'TRUST_PENALTY_DISPUTE_UPHELD',             // 25 (dispute upheld against the nurse)
+  TRUST_RECOVERY_GOOD_RATING: 'TRUST_RECOVERY_GOOD_RATING',                 // 2 (per shift rated ≥ TRUST_RECOVERY_MIN_STARS)
+  TRUST_RECOVERY_MIN_STARS: 'TRUST_RECOVERY_MIN_STARS',                     // 4
+  TRUST_SUSPEND_BELOW: 'TRUST_SUSPEND_BELOW',                               // 60 (ACTIVE nurse below 60 → SUSPENDED)
 } as const;
 
 export type SystemConfigKey = keyof typeof SYSTEM_CONFIG_KEYS;
