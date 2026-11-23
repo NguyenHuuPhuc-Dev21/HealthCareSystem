@@ -3,6 +3,8 @@
  * Contract: docs/api/gateway-webhooks.api.md
  *
  *  POST /payments/escrow-webhook   (gateway) HMAC-SHA256 verified, idempotent on the gateway reference.
+ *      An orderCode `<booking code>-GH<n>` is a shift-extension payment: it goes to shift-extend's
+ *      confirmExtensionPayment (BE-1) in the same transaction — escrow hold + extension in effect, or 100% refund.
  *      One transaction under the booking lock:
  *        ESCROW_HOLD in the customer's escrow → payment_status ESCROW_HELD → activateMatching (BE-2)
  *      and, after COMMIT, startRadar for urgent bookings. A payment that arrives after the 15-minute
@@ -13,15 +15,31 @@
  * Nurse deposit (ADR-0004) is not touched here; escrow and deposit are separate balances.
  */
 import { ExecutionStatus, PaymentMethod, PaymentStatus } from '@healthcare-system/shared';
+import { getConfigNumber } from '../../core/config';
 import { query, withTransaction, type Queryable } from '../../core/database';
 import { AppError, badRequest, forbidden } from '../../core/errors';
 import { markExpired } from '../booking-expiry/booking-expiry.repo';
 import { activateMatching, getMatchingRadarService } from '../matching-radar/matching-radar.service';
+import { isExtensionPaymentCode } from '../shift-extend/shift-extend.policy';
+import { findBookingIdByPaymentCode } from '../shift-extend/shift-extend.repo';
+import { confirmExtensionPayment } from '../shift-extend/shift-extend.service';
 import { holdEscrow, ledgerEntryExists, ledgerKeys, refundEscrow } from './gateway-webhooks.ledger';
 import { decideWebhookAction, signData, verifySignature, vietQrImageUrl } from './gateway-webhooks.policy';
 import * as repo from './gateway-webhooks.repo';
 import { escrowWebhookSchema, type WebhookData } from './gateway-webhooks.schema';
-import type { PaymentLinkDto, ReceivingAccount, WebhookOutcome, WebhookResult } from './gateway-webhooks.types';
+import type { ExtensionPaymentResult, PaymentLinkDto, ReceivingAccount, WebhookOutcome, WebhookResult } from './gateway-webhooks.types';
+
+type ExtensionPayment = { paymentCode: string; amount: number; providerRef: string };
+
+/**
+ * Default handler for `<code>-GH<n>` payments: shift-extend's confirmExtensionPayment (BE-1), run in the webhook's
+ * transaction. The booking id is read first only to label the payment_webhook_events row.
+ */
+export async function defaultExtensionPayment(db: Queryable, p: ExtensionPayment, nowMs: number): Promise<ExtensionPaymentResult> {
+  const bookingId = await findBookingIdByPaymentCode(db, p.paymentCode);
+  const outcome = await confirmExtensionPayment(db, p, { nowMs, bufferMinutes: await getConfigNumber('TRAVEL_BUFFER_MINUTES') });
+  return { outcome, bookingId };
+}
 
 export interface GatewayWebhooksDeps {
   read: Queryable;
@@ -32,6 +50,8 @@ export interface GatewayWebhooksDeps {
   receivingAccount: () => ReceivingAccount | null;
   /** BE-2 matching-radar startRadar — called after COMMIT for urgent bookings. */
   startRadar: (bookingId: string) => Promise<void>;
+  /** Shift-extension payments (`<code>-GH<n>`); defaults to defaultExtensionPayment. */
+  confirmExtensionPayment?: (db: Queryable, p: ExtensionPayment, nowMs: number) => Promise<ExtensionPaymentResult>;
   now?: () => number;
 }
 
@@ -58,6 +78,18 @@ export class GatewayWebhooksService {
         repo
           .insertWebhookEvent(db, { providerRef: data.reference, orderCode: data.orderCode, bookingId, amount: data.amount, outcome, payload: parsed.data })
           .then(() => ({ outcome, bookingId, startRadar: false }));
+
+      // `<code>-GH<n>` AND a real extension with that code: a booking code that happens to end in -GH<digits>
+      // (random suffix) still goes the booking way.
+      if (isExtensionPaymentCode(data.orderCode) && (await findBookingIdByPaymentCode(db, data.orderCode)) !== null) {
+        if (!parsed.data.success || parsed.data.code !== '00') return event('NOT_SUCCESS', null);
+        const r = await (this.deps.confirmExtensionPayment ?? defaultExtensionPayment)(
+          db,
+          { paymentCode: data.orderCode, amount: data.amount, providerRef: data.reference },
+          nowMs,
+        );
+        return event(r.outcome, r.bookingId);
+      }
 
       const b = await repo.lockBookingByCode(db, data.orderCode);
       if (!parsed.data.success || parsed.data.code !== '00') return event('NOT_SUCCESS', b?.id ?? null);

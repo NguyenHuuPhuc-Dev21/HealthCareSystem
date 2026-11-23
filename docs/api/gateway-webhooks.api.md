@@ -83,6 +83,20 @@ PayOS-style envelope:
 | `UNKNOWN_BOOKING` | no booking with `orderCode` | none |
 | `NOT_SUCCESS` | `success = false` or `code ≠ "00"` | none |
 
+### Shift-extension payments (`<booking code>-GH<n>`, FR-SHIFT-03)
+
+A bank-transfer extension (BE-1 `shift-extend`) is paid to the **same webhook** with its own transfer content
+`<booking code>-GH<n>`. When an extension with that code exists, the webhook hands the payment to shift-extend's
+`confirmExtensionPayment` in the same transaction (a booking code that merely ends in `-GH<digits>` still goes the booking way):
+
+| outcome | Effect |
+|---|---|
+| `EXTENSION_PAID` | `ESCROW_HOLD` in the customer's escrow; extension in effect (`end_time` and amounts updated) |
+| `DUPLICATE` | same `reference` already booked |
+| `AMOUNT_MISMATCH` | amount ≠ extension price → nothing moves |
+| `LATE_PAYMENT_REFUNDED` | payment window over / no longer usable → `ESCROW_HOLD` + `REFUND` 100% |
+| `UNKNOWN_EXTENSION` | extension disappeared between lookup and lock |
+
 Idempotency keys: `escrow-hold:<reference>`, `escrow-refund:<reference>`, `escrow-refund:unmatched:<bookingId>` (UNIQUE in `wallet_transactions`).
 
 ### `POST /payments/dev/simulate-escrow` — PATIENT (owner), dev / demo only
