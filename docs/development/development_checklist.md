@@ -259,9 +259,9 @@
 - [ ] `cash-commission`: Absolute invariant — cash commission is **never** deducted from `deposit_balance` or `available_balance`.
 
 ### BE-3 (Phase Lead)
-- [ ] `wallets-ledger`: Strict separation of 3 ledger balances in `wallets` table.
-- [ ] `wallets-ledger`: Append-only `wallet_transactions` table; every entry records unique `idempotency_key`, `balance_before`, and `balance_after`; zero UPDATE/DELETE grants.
-- [ ] `wallets-ledger`: All balance adjustments execute inside ACID transactions with row-level locks (`SELECT … FOR UPDATE`) or Redis locks.
+- [x] `wallets-ledger`: Strict separation of 3 ledger balances in `wallets` table.
+- [x] `wallets-ledger`: Append-only `wallet_transactions` table; every entry records unique `idempotency_key`, `balance_before`, and `balance_after`; zero UPDATE/DELETE grants.
+- [x] `wallets-ledger`: All balance adjustments execute inside ACID transactions with row-level locks (`SELECT … FOR UPDATE`) or Redis locks.
 - [x] `gateway-webhooks` (FR-PAY-01): `POST /api/v1/payments/escrow-webhook` — verifies raw HMAC-SHA256 signature first; invalid signature returns HTTP 401 with zero state mutation.
 - [x] `gateway-webhooks`: Replayed webhooks handled idempotently (HTTP 200, no duplicate ledger entry).
 - [ ] `settlements` (FR-PAY-02): Bank-transfer bookings — customer early confirmation **or** check-out +24h with `dispute_status = NONE` → deducts 15% platform fee, credits 85% to nurse `available_balance`.
