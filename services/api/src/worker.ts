@@ -6,6 +6,7 @@ import { registerJobBoardJobs } from './modules/job-board/job-board.jobs';
 import { registerMatchingRadarJobs } from './modules/matching-radar/matching-radar.jobs';
 import { registerTierLifecycleJobs } from './modules/tier-lifecycle/tier-lifecycle.jobs';
 import { registerReviewsTrustScoreJobs } from './modules/reviews-trustscore/reviews-trustscore.jobs';
+import { registerWalletsLedgerJobs } from './modules/wallets-ledger/wallets-ledger.jobs';
 
 async function main() {
   // Phase 1+: các module đăng ký handler tại đây, vd: registerTierLifecycleJobs(jobs)
@@ -20,6 +21,7 @@ async function main() {
   await registerBookingExpiryJobs(jobs); // BE-3 · Phase 3 · booking-expiry.payment-timeout + booking-expiry.sweep (every minute)
   await registerJobBoardJobs(jobs); // BE-3 · Phase 3 · job-board.direct-request-sweep (every minute)
   await registerReviewsTrustScoreJobs(jobs); // BE-1 · Phase 6 · reviews-trustscore.reveal-sweep (hourly :07)
+  await registerWalletsLedgerJobs(jobs); // BE-3 · Phase 5 · wallets-ledger.travel-support-sweep (every 5 minutes)
 
   jobs.startWorker();
   console.log('[Worker] Shared job queue worker started');

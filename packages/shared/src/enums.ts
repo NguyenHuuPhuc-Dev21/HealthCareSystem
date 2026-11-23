@@ -201,6 +201,7 @@ export enum TxType {
   DEPOSIT_WITHHOLD = 'DEPOSIT_WITHHOLD',   // grace period: part of a payout moved into deposit_balance (ADR-0004 D2)
   DEPOSIT_REFUND = 'DEPOSIT_REFUND',       // deposit paid out on account closure (ADR-0004 D3)
   PENALTY_REVERSAL = 'PENALTY_REVERSAL',   // upheld appeal credits a penalty back (ADR-0004 D3)
+  TRAVEL_SUPPORT = 'TRAVEL_SUPPORT',       // travel support for an on-site rejected invalid prescription, from the operations fund (FR-BOOK-02 L3)
 }
 
 /** Reason of a deposit penalty (deposit_penalty_details.reason, migration 0008) */

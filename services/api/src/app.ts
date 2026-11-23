@@ -35,6 +35,8 @@ import { getCancellationPolicyService } from './modules/cancellation-policy/canc
 import { getShiftExtendService } from './modules/shift-extend/shift-extend.service';
 import { createReviewsRouter } from './modules/reviews-trustscore/reviews-trustscore.routes';
 import { getReviewsService } from './modules/reviews-trustscore/reviews-trustscore.service';
+import { createWalletsLedgerRouter } from './modules/wallets-ledger/wallets-ledger.routes';
+import { getWalletsLedgerService } from './modules/wallets-ledger/wallets-ledger.service';
 import { getPrescriptionRejectionService } from './modules/prescription-rejection/prescription-rejection.service';
 import { getPrescriptionGateService } from './modules/prescription-gate/prescription-gate.service';
 import { createPrivacyConsentRouter } from './modules/privacy-consent/privacy-consent.routes';
@@ -72,6 +74,7 @@ function buildApiRouter(): Router {
   api.use(createShiftExtendRouter(getShiftExtendService())); // BE-1 · Phase 4 · shift-extend
   api.use(createCancellationPolicyRouter(getCancellationPolicyService())); // BE-1 · Phase 5 · cancellation-policy
   api.use(createReviewsRouter(getReviewsService())); // BE-1 · Phase 6 · reviews-trustscore
+  api.use(createWalletsLedgerRouter(getWalletsLedgerService())); // BE-3 · Phase 5 · wallets-ledger (balances, history, earnings, upcoming settlements)
 
   return api;
 }
