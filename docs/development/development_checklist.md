@@ -252,8 +252,8 @@
 
 ### BE-2
 - [ ] `deposits` (FR-PAY-03): Upfront 300,000 VND deposit gate required to accept shifts; zero progressive accumulation, zero shift value cap.
-- [ ] `deposits`: SLA penalty deductions exceeding balance are booked as debt (negative balance), blocking new shift acceptance until replenished.
-- [ ] `deposits`: Full deposit refund permitted only upon account closure after 7 dispute-free days.
+- [x] `deposits`: SLA penalty deductions exceeding balance are booked as debt (negative balance), blocking new shift acceptance until replenished.
+- [x] `deposits`: Full deposit refund permitted only upon account closure after 7 dispute-free days.
 - [ ] `cash-commission`: `POST /api/v1/bookings/:id/commission-payment-link` — generates VietQR link for exactly 15% of in-app booking price for cash orders.
 - [ ] `cash-commission`: Gateway webhook confirms payment → transitions booking `payment_status` to `SETTLED`; unpaid after 24h → nurse transitions to `SUSPENDED`.
 - [ ] `cash-commission`: Absolute invariant — cash commission is **never** deducted from `deposit_balance` or `available_balance`.

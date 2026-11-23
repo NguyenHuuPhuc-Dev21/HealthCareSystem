@@ -12,13 +12,19 @@
  *  GET  /bookings/:id/payment-link (customer) VietQR + transfer details for the pending payment.
  *  POST /payments/dev/simulate-escrow (customer, dev only) signs and sends a fake successful webhook.
  *
- * Nurse deposit (ADR-0004) is not touched here; escrow and deposit are separate balances.
+ *      An orderCode "KQ…" is a nurse deposit top-up (ADR-0004): it goes to deposits' confirmTopup in the same
+ *      transaction — TOPUP of at most the shortfall, the rest returned by the custody partner.
+ *
+ * Escrow and deposit stay separate balances: this file books only escrow; the deposit is booked by deposits.
  */
 import { ExecutionStatus, PaymentMethod, PaymentStatus } from '@healthcare-system/shared';
 import { getConfigNumber } from '../../core/config';
 import { query, withTransaction, type Queryable } from '../../core/database';
 import { AppError, badRequest, forbidden } from '../../core/errors';
 import { markExpired } from '../booking-expiry/booking-expiry.repo';
+import { confirmTopup } from '../deposits/deposits.ledger';
+import { isDepositTopupCode } from '../deposits/deposits.policy';
+import { topupCodeExists } from '../deposits/deposits.repo';
 import { activateMatching, getMatchingRadarService } from '../matching-radar/matching-radar.service';
 import { isExtensionPaymentCode } from '../shift-extend/shift-extend.policy';
 import { findBookingIdByPaymentCode } from '../shift-extend/shift-extend.repo';
@@ -78,6 +84,13 @@ export class GatewayWebhooksService {
         repo
           .insertWebhookEvent(db, { providerRef: data.reference, orderCode: data.orderCode, bookingId, amount: data.amount, outcome, payload: parsed.data })
           .then(() => ({ outcome, bookingId, startRadar: false }));
+
+      // "KQ…" AND a real top-up with that code: nurse deposit (ADR-0004), never a booking.
+      if (isDepositTopupCode(data.orderCode) && (await topupCodeExists(db, data.orderCode))) {
+        if (!parsed.data.success || parsed.data.code !== '00') return event('NOT_SUCCESS', null);
+        const r = await confirmTopup(db, { paymentCode: data.orderCode, amount: data.amount, providerRef: data.reference }, nowMs);
+        return event(r.outcome, null);
+      }
 
       // `<code>-GH<n>` AND a real extension with that code: a booking code that happens to end in -GH<digits>
       // (random suffix) still goes the booking way.
