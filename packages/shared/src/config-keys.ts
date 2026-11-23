@@ -71,6 +71,14 @@ export const SYSTEM_CONFIG_KEYS = {
   // Shift extension (shift-extend — migration 0013; proposed, pending PO)
   EXTENSION_REQUEST_DEADLINE_MINUTES: 'EXTENSION_REQUEST_DEADLINE_MINUTES', // 30 (request until scheduled end − 30 min, FR-SHIFT-03)
   MAX_EXTENSION_HOURS: 'MAX_EXTENSION_HOURS',                               // 4 (per request, 1-hour steps)
+
+  // Reviews & TrustScore (reviews-trustscore — migration 0015)
+  REVIEW_BLIND_DAYS: 'REVIEW_BLIND_DAYS',                                   // 7 (hidden until both sides reviewed or 7 days, FR-RATE-01)
+  REVIEW_WINDOW_DAYS: 'REVIEW_WINDOW_DAYS',                                 // 7 (proposed, pending PO: reviews close 7 days after the shift)
+  TRUST_PENALTY_DISPUTE_UPHELD: 'TRUST_PENALTY_DISPUTE_UPHELD',             // 25 (dispute upheld against the nurse)
+  TRUST_RECOVERY_GOOD_RATING: 'TRUST_RECOVERY_GOOD_RATING',                 // 2 (per shift rated ≥ TRUST_RECOVERY_MIN_STARS)
+  TRUST_RECOVERY_MIN_STARS: 'TRUST_RECOVERY_MIN_STARS',                     // 4
+  TRUST_SUSPEND_BELOW: 'TRUST_SUSPEND_BELOW',                               // 60 (ACTIVE nurse below 60 → SUSPENDED)
 } as const;
 
 export type SystemConfigKey = keyof typeof SYSTEM_CONFIG_KEYS;

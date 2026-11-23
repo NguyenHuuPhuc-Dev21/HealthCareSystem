@@ -31,6 +31,8 @@ import { createPrescriptionGateRouter } from './modules/prescription-gate/prescr
 import { createPrescriptionRejectionRouter } from './modules/prescription-rejection/prescription-rejection.routes';
 import { createShiftExtendRouter } from './modules/shift-extend/shift-extend.routes';
 import { getShiftExtendService } from './modules/shift-extend/shift-extend.service';
+import { createReviewsRouter } from './modules/reviews-trustscore/reviews-trustscore.routes';
+import { getReviewsService } from './modules/reviews-trustscore/reviews-trustscore.service';
 import { getPrescriptionRejectionService } from './modules/prescription-rejection/prescription-rejection.service';
 import { getPrescriptionGateService } from './modules/prescription-gate/prescription-gate.service';
 import { createPrivacyConsentRouter } from './modules/privacy-consent/privacy-consent.routes';
@@ -66,6 +68,7 @@ function buildApiRouter(): Router {
   api.use(createPrescriptionGateRouter(getPrescriptionGateService())); // BE-1 · Phase 3 · prescription-gate
   api.use(createPrescriptionRejectionRouter(getPrescriptionRejectionService())); // BE-1 · Phase 4 · prescription-rejection
   api.use(createShiftExtendRouter(getShiftExtendService())); // BE-1 · Phase 4 · shift-extend
+  api.use(createReviewsRouter(getReviewsService())); // BE-1 · Phase 6 · reviews-trustscore
 
   return api;
 }
