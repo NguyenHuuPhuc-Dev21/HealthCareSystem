@@ -48,6 +48,13 @@ export const env = {
       this.useMockOnboarding
     );
   },
+  get mockDepositScenario(): 'full' | 'grace' | 'expired' | 'closing' {
+    const s = nativeConfig.MOCK_DEPOSIT_SCENARIO || process.env.MOCK_DEPOSIT_SCENARIO;
+    if (s === 'full' || s === 'grace' || s === 'expired' || s === 'closing') {
+      return s;
+    }
+    return 'grace';
+  },
   get supportHotline(): string {
     return nativeConfig.SUPPORT_HOTLINE?.trim() || process.env.SUPPORT_HOTLINE || '1900 6868';
   },

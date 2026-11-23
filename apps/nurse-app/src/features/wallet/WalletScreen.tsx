@@ -120,11 +120,7 @@ export const WalletScreen: React.FC<WalletScreenProps> = ({ navigation }) => {
   };
 
   const handleTopUpPress = () => {
-    Alert.alert(
-      'Nạp ký quỹ',
-      'Mở màn hình Nạp ký quỹ qua VietQR (A10).',
-      [{ text: 'Đóng' }]
-    );
+    navigation.navigate('Deposit');
   };
 
   const handlePayCommissionPress = () => {

@@ -48,6 +48,9 @@ Thumbs.db
 # Docker volumes
 docker-data/
 postgres-data/
+
+# Scratch & temporary
+scratch/
 redis-data/
 
 # Playwright

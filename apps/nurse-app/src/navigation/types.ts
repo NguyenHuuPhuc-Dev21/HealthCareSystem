@@ -44,5 +44,9 @@ export type ActiveStackParamList = {
   Radar: { offerId: string; offer?: RadarJob; notificationId?: string };
   Availability: undefined;
   TransactionHistory: undefined;
+  Deposit: undefined;
+  PenaltyDetail: { transactionId: string };
+  AppealPenalty: { transactionId: string };
+  AccountClosure: undefined;
 };
 

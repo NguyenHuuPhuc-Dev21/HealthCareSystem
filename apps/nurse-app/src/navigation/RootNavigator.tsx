@@ -5,10 +5,18 @@ import {
   createNavigationContainerRef,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import {
+  createBottomTabNavigator,
+  BottomTabBar,
+  type BottomTabBarProps,
+} from '@react-navigation/bottom-tabs';
 import { Briefcase, Calendar, ClipboardList, Home, User, Wallet } from 'lucide-react-native';
-import type { MobileShiftSummary } from '@healthcare-system/shared';
-import { StateView } from '../components';
+import type {
+  DepositRefundRequestDto,
+  DepositStatusDto,
+  MobileShiftSummary,
+} from '@healthcare-system/shared';
+import { AppBanner, getDepositBannerMeta, StateView } from '../components';
 import { useAuth } from '../features/auth/AuthContext';
 import { PhoneLoginScreen } from '../features/auth/PhoneLoginScreen';
 import { OtpScreen } from '../features/auth/OtpScreen';
@@ -31,6 +39,11 @@ import { JobDetailScreen } from '../features/job-board/JobDetailScreen';
 import { RadarScreen } from '../features/radar/RadarScreen';
 import { WalletScreen } from '../features/wallet/WalletScreen';
 import { TransactionHistoryScreen } from '../features/wallet/TransactionHistoryScreen';
+import { DepositScreen } from '../features/wallet/DepositScreen';
+import { PenaltyDetailScreen } from '../features/wallet/PenaltyDetailScreen';
+import { AppealPenaltyScreen } from '../features/wallet/AppealPenaltyScreen';
+import { AccountClosureScreen } from '../features/wallet/AccountClosureScreen';
+import { getDepositStatus, getRefundRequest } from '../features/wallet/deposit.api';
 import {
   ShiftResultScreen,
 } from '../features/placeholders/ZoneScreens';
@@ -62,6 +75,57 @@ const OnboardingStack = createNativeStackNavigator<OnboardingStackParamList>();
 const MainTab = createBottomTabNavigator<MainTabParamList>();
 const ActiveStack = createNativeStackNavigator<ActiveStackParamList>();
 
+function MainTabsWithBannerTabBar(props: BottomTabBarProps) {
+  const [depositStatus, setDepositStatus] = React.useState<DepositStatusDto | null>(null);
+  const [refundRequest, setRefundRequest] = React.useState<DepositRefundRequestDto | null>(null);
+  const [dismissed, setDismissed] = React.useState(false);
+
+  React.useEffect(() => {
+    let active = true;
+    const fetchStatus = async () => {
+      try {
+        const [stRes, refRes] = await Promise.all([getDepositStatus(), getRefundRequest()]);
+        if (active && stRes.success) setDepositStatus(stRes.data);
+        if (active && refRes.success) setRefundRequest(refRes.data);
+      } catch {
+        // ignore
+      }
+    };
+    void fetchStatus();
+    const timer = setInterval(() => {
+      void fetchStatus();
+    }, 15000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, []);
+
+  const bannerMeta = getDepositBannerMeta(depositStatus, refundRequest);
+
+  return (
+    <View style={styles.tabBarWrap}>
+      {bannerMeta && !dismissed ? (
+        <View style={styles.tabBannerContainer}>
+          <AppBanner
+            kind={bannerMeta.kind}
+            title={bannerMeta.title}
+            message={bannerMeta.message}
+            actionLabel={bannerMeta.actionLabel}
+            onAction={() => {
+              if (bannerMeta.actionRoute) {
+                navigationRef.navigate(bannerMeta.actionRoute as any);
+              }
+            }}
+            onClose={() => setDismissed(true)}
+          />
+        </View>
+      ) : null}
+      <BottomTabBar {...props} />
+    </View>
+  );
+}
+
 function MainTabsNavigator({
   initialShift,
   onRequestCurrentPosition,
@@ -69,6 +133,7 @@ function MainTabsNavigator({
 }: RootNavigatorProps) {
   return (
     <MainTab.Navigator
+      tabBar={(props) => <MainTabsWithBannerTabBar {...props} />}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: tokens.colors.brandJadeDark,
@@ -306,6 +371,26 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
             name="TransactionHistory"
             component={TransactionHistoryScreen}
           />
+          <ActiveStack.Screen
+            name="Deposit"
+            component={DepositScreen}
+            options={{ headerShown: false }}
+          />
+          <ActiveStack.Screen
+            name="PenaltyDetail"
+            component={PenaltyDetailScreen}
+            options={{ headerShown: false }}
+          />
+          <ActiveStack.Screen
+            name="AppealPenalty"
+            component={AppealPenaltyScreen}
+            options={{ headerShown: false }}
+          />
+          <ActiveStack.Screen
+            name="AccountClosure"
+            component={AccountClosureScreen}
+            options={{ headerShown: false }}
+          />
         </ActiveStack.Navigator>
       )}
     </NavigationContainer>
@@ -318,6 +403,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
     backgroundColor: tokens.colors.canvas,
+  },
+  tabBarWrap: {
+    backgroundColor: tokens.colors.paper,
+  },
+  tabBannerContainer: {
+    paddingHorizontal: 12,
+    paddingTop: 8,
+    paddingBottom: 4,
+    backgroundColor: tokens.colors.canvas,
+    borderTopWidth: 1,
+    borderTopColor: tokens.colors.borderHairline,
   },
 });
 

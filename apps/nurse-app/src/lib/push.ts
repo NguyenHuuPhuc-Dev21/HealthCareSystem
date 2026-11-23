@@ -290,6 +290,40 @@ function handleNotificationOpen(notification?: NotifeeNotification): void {
   }
 }
 
+/**
+ * Route deposit push notifications (A10 / ADR-0004)
+ * TODO (A17): move to notification-navigation.ts when A17 notification center is implemented.
+ */
+export function handleDepositNotificationNavigation(
+  payload: { type?: string; transactionId?: string; refundRequestId?: string },
+  navigate: (route: string, params?: any) => void
+): boolean {
+  switch (payload.type) {
+    case 'DEPOSIT_WITHHELD':
+      navigate('Deposit');
+      return true;
+    case 'DEPOSIT_PENALTY':
+      if (payload.transactionId) {
+        navigate('PenaltyDetail', { transactionId: payload.transactionId });
+      } else {
+        navigate('Deposit');
+      }
+      return true;
+    case 'PENALTY_REVERSED':
+      if (payload.transactionId) {
+        navigate('PenaltyDetail', { transactionId: payload.transactionId });
+      } else {
+        navigate('Deposit');
+      }
+      return true;
+    case 'DEPOSIT_REFUND_STATUS':
+      navigate('AccountClosure');
+      return true;
+    default:
+      return false;
+  }
+}
+
 export async function unregisterPushOnLogout(): Promise<void> {
   try {
     if (activePushToken) {
