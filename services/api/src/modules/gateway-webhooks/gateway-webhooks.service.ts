@@ -14,6 +14,8 @@
  *
  *      An orderCode "KQ…" is a nurse deposit top-up (ADR-0004): it goes to deposits' confirmTopup in the same
  *      transaction — TOPUP of at most the shortfall, the rest returned by the custody partner.
+ *      An orderCode "HH…" is a cash-booking commission self-paid by the nurse: cash-commission's
+ *      confirmCommissionPayment, same transaction — COMMISSION_PAYMENT (no balance moves), booking SETTLED.
  *
  * Escrow and deposit stay separate balances: this file books only escrow; the deposit is booked by deposits.
  */
@@ -22,6 +24,9 @@ import { getConfigNumber } from '../../core/config';
 import { query, withTransaction, type Queryable } from '../../core/database';
 import { AppError, badRequest, forbidden } from '../../core/errors';
 import { markExpired } from '../booking-expiry/booking-expiry.repo';
+import { confirmCommissionPayment } from '../cash-commission/cash-commission.ledger';
+import { isCommissionCode } from '../cash-commission/cash-commission.policy';
+import { codeExists as commissionCodeExists } from '../cash-commission/cash-commission.repo';
 import { confirmTopup } from '../deposits/deposits.ledger';
 import { isDepositTopupCode } from '../deposits/deposits.policy';
 import { topupCodeExists } from '../deposits/deposits.repo';
@@ -90,6 +95,13 @@ export class GatewayWebhooksService {
         if (!parsed.data.success || parsed.data.code !== '00') return event('NOT_SUCCESS', null);
         const r = await confirmTopup(db, { paymentCode: data.orderCode, amount: data.amount, providerRef: data.reference }, nowMs);
         return event(r.outcome, null);
+      }
+
+      // "HH…" AND a real commission code: cash-booking commission (FR-PAY-02), never escrow.
+      if (isCommissionCode(data.orderCode) && (await commissionCodeExists(db, data.orderCode))) {
+        if (!parsed.data.success || parsed.data.code !== '00') return event('NOT_SUCCESS', null);
+        const r = await confirmCommissionPayment(db, { paymentCode: data.orderCode, amount: data.amount, providerRef: data.reference }, nowMs);
+        return event(r.outcome, r.bookingId);
       }
 
       // `<code>-GH<n>` AND a real extension with that code: a booking code that happens to end in -GH<digits>
