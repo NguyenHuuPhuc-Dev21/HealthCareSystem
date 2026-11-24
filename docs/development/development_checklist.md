@@ -266,7 +266,7 @@
 - [x] `gateway-webhooks`: Replayed webhooks handled idempotently (HTTP 200, no duplicate ledger entry).
 - [x] `settlements` (FR-PAY-02): Bank-transfer bookings — customer early confirmation **or** check-out +24h with `dispute_status = NONE` → deducts 15% platform fee, credits 85% to nurse `available_balance`.
 - [x] `settlements`: Active dispute (`OPEN`) atomically freezes settlement payout.
-- [ ] `withdrawals` (FR-PAY-04): `POST /api/v1/wallets/withdraw` — amount exceeding `available_balance` returns HTTP 400; initializes `WITHDRAW_REQUESTED` approval flow.
+- [x] `withdrawals` (FR-PAY-04): `POST /api/v1/wallets/withdraw` — amount exceeding `available_balance` returns HTTP 400; initializes `WITHDRAW_REQUESTED` approval flow.
 
 ### Phase 5 Exit Criteria
 - [ ] A 500,000 VND bank-transfer shift settles with exactly 425,000 VND credited to nurse and 75,000 VND platform fee.
