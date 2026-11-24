@@ -136,3 +136,32 @@ Submit counter-explanation and evidence files before deadline.
   }
 }
 ```
+
+---
+
+## 3. Implementation notes (BE-3 · Phase 6 — `services/api/src/modules/disputes`)
+
+Additional endpoints and the exact rules as implemented:
+
+| Method | Path | Role | Data |
+|---|---|---|---|
+| POST | `/disputes/:id/evidence-upload-urls` `{ "file_names": ["a.jpg"] }` | party | `PresignedUploadUrlDto[]` — `fileId` = `publicUrl` = storage key to send back as evidence |
+| GET | `/patient/disputes` | PATIENT | `DisputeDto[]` (booking disputes on her bookings) |
+| GET | `/admin/disputes?status=` | ADMIN | `DisputeDto[]`, open ones first (oldest first) |
+| PATCH | `/admin/disputes/:id/resolve` `{ "resolution", "notes", "depositDeduction"? }` | ADMIN | `{ updated, outcome, refunded, released, trustScoreDelta, depositDeducted, penaltyReversed }` |
+
+- `POST /bookings/:id/disputes` accepts `{ category?, description, evidenceUrls? }` (nurse-web) or
+  `{ reason, evidence_urls? }` (patient-web). Window: while `IN_PROGRESS`, or ≤ `SETTLEMENT_COOLING_HOURS` (24 h) after
+  check-out, not settled. One open dispute per booking (`409 DISPUTE_EXISTS`); outsiders `403`; late
+  `409 DISPUTE_WINDOW_CLOSED`. Opening sets `bookings.dispute_status = OPEN` under the booking lock (settlement frozen).
+- Evidence: ≤ 5 files per party, JPG / PNG / WEBP / PDF (video not supported by storage yet), keys must have been
+  uploaded by the same user (`400 INVALID_EVIDENCE`). Detail responses return presigned download URLs.
+- Rebuttal `{ rebuttal | content, evidence_urls | evidenceUrls }`: only the counter-party (`403 NOT_COUNTER_PARTY`), once
+  (`409 ALREADY_SUBMITTED`), before `rebuttalDueAt` = opened + `DISPUTE_REBUTTAL_HOURS` (`409 REBUTTAL_WINDOW_CLOSED`).
+  A penalty appeal has no rebuttal (`409 NOT_APPLICABLE`).
+- Resolve (audited `RESOLVE_DISPUTE`; `409 DISPUTE_CLOSED` when already resolved; `notes` ≥ 10 characters):
+  - `RESOLVED_NURSE`: freeze lifted, the 85% is released now when the shift is checked out, otherwise by the settlement
+    sweep after check-out. Penalty appeal → `PENALTY_REVERSAL`.
+  - `RESOLVED_CUSTOMER`: whatever the escrow holds is refunded 100%; TrustScore −`TRUST_PENALTY_DISPUTE_UPHELD` (25);
+    optional `depositDeduction` → deposit penalty `DISPUTE_UPHELD` (not appealable). Penalty appeal → rejected, nothing moves.
+

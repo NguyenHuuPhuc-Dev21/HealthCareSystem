@@ -45,6 +45,8 @@ import { createWithdrawalsRouter } from './modules/withdrawals/withdrawals.route
 import { getWithdrawalsService } from './modules/withdrawals/withdrawals.service';
 import { createCashCommissionRouter } from './modules/cash-commission/cash-commission.routes';
 import { getCashCommissionService } from './modules/cash-commission/cash-commission.service';
+import { createDisputesRouter } from './modules/disputes/disputes.routes';
+import { getDisputesService } from './modules/disputes/disputes.service';
 import { getPrescriptionRejectionService } from './modules/prescription-rejection/prescription-rejection.service';
 import { getPrescriptionGateService } from './modules/prescription-gate/prescription-gate.service';
 import { createPrivacyConsentRouter } from './modules/privacy-consent/privacy-consent.routes';
@@ -87,6 +89,7 @@ function buildApiRouter(): Router {
   api.use(createSettlementsRouter(getSettlementsService())); // BE-3 · Phase 5 · settlements (85/15 payout, customer confirm-completion)
   api.use(createWithdrawalsRouter(getWithdrawalsService())); // BE-3 · Phase 5 · withdrawals (FR-PAY-04)
   api.use(createCashCommissionRouter(getCashCommissionService())); // BE-3 · Phase 5 · cash-commission (FR-PAY-02 cash part)
+  api.use(createDisputesRouter(getDisputesService())); // BE-3 · Phase 6 · disputes (open/freeze, rebuttal, admin resolve, penalty appeals)
 
   return api;
 }

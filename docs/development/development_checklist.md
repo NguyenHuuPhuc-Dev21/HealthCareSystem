@@ -310,15 +310,15 @@
 - [ ] `chat`: Conversation history permanently retained as dispute evidence (no hard deletion); chat closes upon shift completion; Admin access audit-logged.
 
 ### BE-3 (Phase Lead)
-- [ ] `disputes` (FR-DISP-01): `POST /api/v1/bookings/:id/disputes` — window open from `IN_PROGRESS` until check-out +24h; maximum 5 evidence files.
-- [ ] `disputes`: Filing a dispute atomically freezes the scheduled settlement job for that booking.
-- [ ] `disputes`: `PATCH /api/v1/admin/disputes/:id/resolve` — MVP outcomes: 100% customer refund or 100% nurse settlement release.
-- [ ] `disputes`: Upheld dispute on cash booking deducts compensation from violating nurse's deposit.
+- [x] `disputes` (FR-DISP-01): `POST /api/v1/bookings/:id/disputes` — window open from `IN_PROGRESS` until check-out +24h; maximum 5 evidence files.
+- [x] `disputes`: Filing a dispute atomically freezes the scheduled settlement job for that booking.
+- [x] `disputes`: `PATCH /api/v1/admin/disputes/:id/resolve` — MVP outcomes: 100% customer refund or 100% nurse settlement release.
+- [x] `disputes`: Upheld dispute on cash booking deducts compensation from violating nurse's deposit.
 - [ ] `notifications` (FR-NOTIF-01): Concurrent high-priority FCM push + in-app notification center + real-time WebSocket.
 - [ ] `notifications`: Automatic SMS/ZNS fallback triggered when urgent notification remains unacknowledged after 60 seconds.
 
 ### Phase 6 Exit Criteria
-- [ ] A dispute filed at hour 20 post-check-out successfully freezes settlement release scheduled for hour 24.
+- [x] A dispute filed at hour 20 post-check-out successfully freezes settlement release scheduled for hour 24.
 - [ ] Two-way blind rating lifecycle verified: reviews become visible only when both submit or 7 days elapse.
 - [ ] SMS fallback notification fires reliably when FCM push delivery is unacknowledged after 60 seconds.
 - [ ] In-app chat is strictly disabled prior to `CONFIRMED` status.

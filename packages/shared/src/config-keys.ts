@@ -93,6 +93,9 @@ export const SYSTEM_CONFIG_KEYS = {
   TRUST_RECOVERY_GOOD_RATING: 'TRUST_RECOVERY_GOOD_RATING',                 // 2 (per shift rated ≥ TRUST_RECOVERY_MIN_STARS)
   TRUST_RECOVERY_MIN_STARS: 'TRUST_RECOVERY_MIN_STARS',                     // 4
   TRUST_SUSPEND_BELOW: 'TRUST_SUSPEND_BELOW',                               // 60 (ACTIVE nurse below 60 → SUSPENDED)
+
+  // Disputes (disputes — migration 0022)
+  DISPUTE_REBUTTAL_HOURS: 'DISPUTE_REBUTTAL_HOURS',                         // 24 (counter-party rebuttal window, FR-DISP-01)
 } as const;
 
 export type SystemConfigKey = keyof typeof SYSTEM_CONFIG_KEYS;
