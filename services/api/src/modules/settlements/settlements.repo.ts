@@ -86,7 +86,7 @@ export async function listDueShiftIds(db: Queryable, checkoutBefore: Date, limit
     `SELECT b.id
        FROM bookings b JOIN shift_logs l ON l.booking_id = b.id
       WHERE b.payment_method = 'BANK_TRANSFER' AND b.payment_status = 'ESCROW_HELD' AND b.settled_at IS NULL
-        AND b.nurse_id IS NOT NULL AND b.execution_status = 'COMPLETED' AND b.dispute_status = 'NONE'
+        AND b.nurse_id IS NOT NULL AND b.execution_status = 'COMPLETED' AND b.dispute_status IN ('NONE', 'RESOLVED_NURSE')
         AND l.checkout_time IS NOT NULL AND l.checkout_time <= $1
         AND NOT EXISTS (SELECT 1 FROM cancellation_outcomes c WHERE c.booking_id = b.id)
         AND NOT EXISTS (SELECT 1 FROM settlement_holds h WHERE h.booking_id = b.id AND h.resolved_at IS NULL)

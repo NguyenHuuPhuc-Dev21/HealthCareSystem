@@ -113,7 +113,7 @@ export async function settleCancellationShare(db: Queryable, bookingId: string, 
   if (!b.nurse_id) return { settled: false, reason: 'NO_NURSE' };
   const worked = c.scenario === 'CUSTOMER_STOP_AFTER_CHECKIN';
   if (worked) {
-    if (b.dispute_status !== 'NONE') return { settled: false, reason: 'DISPUTE_OPEN' };
+    if (b.dispute_status !== 'NONE' && b.dispute_status !== 'RESOLVED_NURSE') return { settled: false, reason: 'DISPUTE_OPEN' };
     if (!b.checkout_time) return { settled: false, reason: 'NOT_CHECKED_OUT' };
     const cooling = await cfg('SETTLEMENT_COOLING_HOURS');
     if (new Date(b.checkout_time).getTime() + cooling * 3_600_000 > nowMs) return { settled: false, reason: 'COOLING' };

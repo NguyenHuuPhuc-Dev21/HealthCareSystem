@@ -27,7 +27,8 @@ export function shiftSettleBlocker(
   if (!b.checkout_time) return 'NOT_CHECKED_OUT';
   if (b.execution_status !== 'COMPLETED') return 'NOT_COMPLETED';
   if (trigger === 'DISPUTE_RELEASED') return b.dispute_status === 'RESOLVED_NURSE' ? null : 'DISPUTE_OPEN';
-  if (b.dispute_status !== 'NONE') return 'DISPUTE_OPEN';
+  // NONE, or a dispute already resolved for the nurse (released when it could not be paid at resolution time).
+  if (b.dispute_status !== 'NONE' && b.dispute_status !== 'RESOLVED_NURSE') return 'DISPUTE_OPEN';
   if (trigger === 'COOLING_ELAPSED' && new Date(b.checkout_time).getTime() + coolingHours * 3_600_000 > nowMs) return 'COOLING';
   return null;
 }
