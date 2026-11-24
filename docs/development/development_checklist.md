@@ -254,9 +254,9 @@
 - [ ] `deposits` (FR-PAY-03): Upfront 300,000 VND deposit gate required to accept shifts; zero progressive accumulation, zero shift value cap.
 - [x] `deposits`: SLA penalty deductions exceeding balance are booked as debt (negative balance), blocking new shift acceptance until replenished.
 - [x] `deposits`: Full deposit refund permitted only upon account closure after 7 dispute-free days.
-- [ ] `cash-commission`: `POST /api/v1/bookings/:id/commission-payment-link` — generates VietQR link for exactly 15% of in-app booking price for cash orders.
-- [ ] `cash-commission`: Gateway webhook confirms payment → transitions booking `payment_status` to `SETTLED`; unpaid after 24h → nurse transitions to `SUSPENDED`.
-- [ ] `cash-commission`: Absolute invariant — cash commission is **never** deducted from `deposit_balance` or `available_balance`.
+- [x] `cash-commission`: `POST /api/v1/bookings/:id/commission-payment-link` — generates VietQR link for exactly 15% of in-app booking price for cash orders.
+- [x] `cash-commission`: Gateway webhook confirms payment → transitions booking `payment_status` to `SETTLED`; unpaid after 24h → nurse transitions to `SUSPENDED`.
+- [x] `cash-commission`: Absolute invariant — cash commission is **never** deducted from `deposit_balance` or `available_balance`.
 
 ### BE-3 (Phase Lead)
 - [x] `wallets-ledger`: Strict separation of 3 ledger balances in `wallets` table.
@@ -270,7 +270,7 @@
 
 ### Phase 5 Exit Criteria
 - [ ] A 500,000 VND bank-transfer shift settles with exactly 425,000 VND credited to nurse and 75,000 VND platform fee.
-- [ ] Cash-job commission payment leaves `deposit_balance` completely unaffected.
+- [x] Cash-job commission payment leaves `deposit_balance` completely unaffected.
 - [ ] Duplicate gateway webhook delivery creates exactly one transaction record in the ledger.
 - [ ] Both payment methods complete full lifecycles on staging with zero ledger discrepancy.
 - [ ] Refunds apply strictly to bank-transfer orders (cash orders were never prepaid to the platform).
