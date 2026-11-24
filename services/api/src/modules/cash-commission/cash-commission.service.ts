@@ -18,6 +18,9 @@ import { signData, vietQrImageUrl } from '../gateway-webhooks/gateway-webhooks.p
 import { getGatewayWebhooksService, receivingAccountFromEnv, simulatorEnabled } from '../gateway-webhooks/gateway-webhooks.service';
 import type { ReceivingAccount } from '../gateway-webhooks/gateway-webhooks.types';
 import { commissionStatus, makeCommissionCode, sortDebts } from './cash-commission.policy';
+import { commissionOverdue } from '../notifications/notifications.notices';
+import { notifyUser, sendNotices } from '../notifications/notifications.service';
+import type { Notify } from '../notifications/notifications.types';
 import * as repo from './cash-commission.repo';
 import type { CommissionPaymentRow, OverdueSweepResult } from './cash-commission.types';
 
@@ -30,6 +33,8 @@ export interface CashCommissionDeps {
   deliverWebhook?: (orderCode: string, amount: number, reference: string) => Promise<unknown>;
   now?: () => number;
   random?: (n: number) => Uint8Array;
+  /** notifications (Phase 6): COMMISSION_OVERDUE (HIGH) to each nurse the sweep suspends. Absent = none. */
+  notify?: Notify;
 }
 
 export class CashCommissionService {
@@ -99,6 +104,7 @@ export class CashCommissionService {
 
   async runOverdueSweep(): Promise<OverdueSweepResult> {
     const suspended = await this.deps.withTx((db) => repo.suspendOverdueNurses(db, new Date(this.nowMs())));
+    await sendNotices(this.deps.notify, suspended.map((nurseId) => commissionOverdue(nurseId)));
     return { suspended: suspended.length };
   }
 }
@@ -111,6 +117,7 @@ export function getCashCommissionService(): CashCommissionService {
       read: { query },
       withTx: (fn) => withTransaction((client) => fn(client)),
       receivingAccount: () => receivingAccountFromEnv(),
+      notify: notifyUser,
       deliverWebhook: simulatorEnabled()
         ? (orderCode, amount, reference) => {
             const data = { orderCode, amount, reference, description: orderCode, transactionDateTime: new Date().toISOString() };

@@ -22,6 +22,9 @@ import { buildObjectKey, createDownloadUrl, createUploadUrl, objectKeyBelongsTo 
 import { deductPenalty, reversePenalty } from '../deposits/deposits.ledger';
 import { refundEscrow } from '../gateway-webhooks/gateway-webhooks.ledger';
 import { applyTrustScoreChange } from '../reviews-trustscore/reviews-trustscore.service';
+import { disputeOpened, disputeRebutted, disputeResolved, penaltyAppealResolved } from '../notifications/notifications.notices';
+import { notifyUser, sendNotices } from '../notifications/notifications.service';
+import type { Notify } from '../notifications/notifications.types';
 import { settleShift } from '../settlements/settlements.service';
 import { contentTypeOf, isParty, openError, rebuttalError } from './disputes.policy';
 import * as repo from './disputes.repo';
@@ -45,6 +48,8 @@ export interface DisputesDeps {
   downloadUrl?: (key: string) => Promise<string>;
   /** Presigned PUT for a new evidence key. */
   uploadUrl?: (key: string, contentType: string) => Promise<string>;
+  /** notifications (Phase 6): sent after the transaction committed. Absent = no notifications. */
+  notify?: Notify;
 }
 
 export class DisputesService {
@@ -96,6 +101,7 @@ export class DisputesService {
         await repo.setBookingDisputeStatus(db, bookingId, 'OPEN'); // freezes the settlement (same lock)
         return disputeId;
       });
+      await this.notifyOpened(id, rebuttalHours);
       return { dispute_id: id };
     } catch (e) {
       if ((e as { code?: string }).code === UNIQUE_VIOLATION) throw conflict('DISPUTE_EXISTS', 'A dispute is already open for this booking');
@@ -138,6 +144,7 @@ export class DisputesService {
       await repo.saveRebuttal(db, d.id, { by: actorId, text: text.trim(), evidence: evidenceKeys, at: new Date(nowMs) });
       await repo.setBookingDisputeStatus(db, d.booking_id, 'UNDER_REVIEW');
     });
+    await this.notifyRebutted(disputeId);
     return { updated: true };
   }
 
@@ -171,7 +178,7 @@ export class DisputesService {
     const nowMs = this.nowMs();
     const at = new Date(nowMs);
 
-    return this.deps.withTx(async (db) => {
+    const resolved = await this.deps.withTx(async (db) => {
       const d = await repo.lockDispute(db, disputeId);
       if (!d) throw notFound('DISPUTE_NOT_FOUND', 'Dispute not found');
       if (d.status !== 'OPEN' && d.status !== 'UNDER_REVIEW') throw conflict('DISPUTE_CLOSED', 'This dispute is already resolved');
@@ -255,6 +262,55 @@ export class DisputesService {
       });
       return result;
     });
+    await this.notifyResolved(disputeId, resolved);
+    return resolved;
+  }
+
+  // ---- notifications (Phase 6, after commit) ----------------------------------------------------
+
+  private async notifyOpened(disputeId: string, rebuttalHours: number): Promise<void> {
+    if (!this.deps.notify) return;
+    const d = await repo.findDispute(this.deps.read, disputeId);
+    if (!d || d.reason_code === PENALTY_APPEAL) return;
+    const to = d.raised_by_id === d.customer_id ? d.nurse_id : d.customer_id;
+    if (!to) return;
+    await sendNotices(this.deps.notify, [
+      disputeOpened({ userId: to, isNurse: to === d.nurse_id }, { disputeId: d.id, bookingId: d.booking_id, bookingCode: d.booking_code, rebuttalHours }),
+    ]);
+  }
+
+  private async notifyRebutted(disputeId: string): Promise<void> {
+    if (!this.deps.notify) return;
+    const d = await repo.findDispute(this.deps.read, disputeId);
+    if (!d) return;
+    await sendNotices(this.deps.notify, [
+      disputeRebutted({ userId: d.raised_by_id, isNurse: d.raised_by_id === d.nurse_id }, { disputeId: d.id, bookingId: d.booking_id, bookingCode: d.booking_code }),
+    ]);
+  }
+
+  private async notifyResolved(disputeId: string, r: ResolveResult): Promise<void> {
+    if (!this.deps.notify) return;
+    const d = await repo.findDispute(this.deps.read, disputeId);
+    if (!d) return;
+    if (d.reason_code === PENALTY_APPEAL) {
+      const amount = d.penalty_amount === null ? null : Number(d.penalty_amount);
+      await sendNotices(this.deps.notify, [penaltyAppealResolved(d.raised_by_id, { disputeId: d.id, bookingId: d.booking_id, upheld: r.penaltyReversed, amount })]);
+      return;
+    }
+    if (!d.nurse_id) return;
+    await sendNotices(
+      this.deps.notify,
+      disputeResolved(d.nurse_id, d.customer_id, {
+        disputeId: d.id,
+        bookingId: d.booking_id,
+        bookingCode: d.booking_code,
+        outcome: r.outcome,
+        refunded: r.refunded,
+        released: Number(d.release_amount ?? 0),
+        trustScoreDelta: r.trustScoreDelta,
+        depositDeducted: r.depositDeducted,
+      }),
+    );
   }
 
   // ---- DTO ---------------------------------------------------------------------------
@@ -318,6 +374,6 @@ function checkEvidence(keys: string[], userId: string): void {
 let singleton: DisputesService | null = null;
 
 export function getDisputesService(): DisputesService {
-  if (!singleton) singleton = new DisputesService({ read: { query }, withTx: (fn) => withTransaction((c) => fn(c)) });
+  if (!singleton) singleton = new DisputesService({ read: { query }, withTx: (fn) => withTransaction((c) => fn(c)), notify: notifyUser });
   return singleton;
 }

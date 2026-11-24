@@ -10,6 +10,9 @@ import { checkConnection, closePool } from './core/database';
 import { assertAllConfigKeysPresent } from './core/config';
 import { closeKeyValueStore } from './core/redis';
 import { describeError } from './core/errors';
+import { getAccountsOtpService } from './modules/accounts-otp/accounts-otp.service';
+import { startRealtimeSubscriber } from './modules/notifications/notifications.realtime';
+import { attachNotificationSocket } from './modules/notifications/notifications.socket';
 
 export async function bootstrap(): Promise<void> {
   await checkConnection();
@@ -19,11 +22,16 @@ export async function bootstrap(): Promise<void> {
   const server = createApp().listen(port, () => {
     console.log(`[Bootstrap] API listening on :${port}${process.env.API_PREFIX ?? '/api/v1'}`);
   });
+  // BE-3 · Phase 6 · notifications: /ws/notifications + events published by the worker (Redis pub/sub).
+  const auth = getAccountsOtpService();
+  const notificationSocket = attachNotificationSocket(server, { verify: (token) => auth.sessions.verifyAccessToken(token) });
+  const stopRealtime = startRealtimeSubscriber();
 
   const shutdown = (signal: string) => {
     console.log(`[Bootstrap] ${signal} received, shutting down…`);
+    void notificationSocket.close();
     server.close(() => {
-      Promise.all([closePool(), closeKeyValueStore()])
+      Promise.all([closePool(), closeKeyValueStore(), stopRealtime()])
         .catch((err: Error) => console.error('[Bootstrap] Pool close error:', err.message))
         .finally(() => process.exit(0));
     });
