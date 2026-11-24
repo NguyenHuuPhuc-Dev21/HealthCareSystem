@@ -18,7 +18,10 @@ export type WebhookOutcome =
   | 'TOPUP_CREDITED' // nurse deposit top-up ("KQ…") credited in full (deposits, ADR-0004)
   | 'TOPUP_EXCESS_RETURNED' // shortfall credited, the rest returned by the custody partner
   | 'TOPUP_RETURNED' // deposit already full / link already paid: everything returned
-  | 'UNKNOWN_TOPUP'; // "KQ…" that matches no top-up
+  | 'UNKNOWN_TOPUP' // "KQ…" that matches no top-up
+  | 'COMMISSION_PAID' // cash-booking commission ("HH…") self-paid by the nurse (cash-commission, FR-PAY-02)
+  | 'COMMISSION_RETURNED' // commission already paid: the second transfer goes back
+  | 'UNKNOWN_COMMISSION'; // "HH…" that matches no commission
 
 /** What shift-extend's confirmExtensionPayment answers, plus the booking it belongs to (for the event row). */
 export interface ExtensionPaymentResult {

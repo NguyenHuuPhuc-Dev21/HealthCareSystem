@@ -143,8 +143,9 @@ export interface SuspensionInput {
 export function suspensionOf(s: SuspensionInput): { isSuspended: boolean; suspendedReason: SuspendedReason | null } {
   if (s.closureRequested) return { isSuspended: true, suspendedReason: 'ACCOUNT_CLOSING' };
   if (s.profileStatus === 'SUSPENDED') {
-    const trust = s.profileSuspendedReason === 'TRUST_SCORE_BELOW_THRESHOLD';
-    return { isSuspended: true, suspendedReason: trust ? 'TRUST_SCORE_LOW' : null };
+    if (s.profileSuspendedReason === 'TRUST_SCORE_BELOW_THRESHOLD') return { isSuspended: true, suspendedReason: 'TRUST_SCORE_LOW' };
+    if (s.profileSuspendedReason === 'COMMISSION_OVERDUE') return { isSuspended: true, suspendedReason: 'COMMISSION_OVERDUE' }; // cash-commission
+    return { isSuspended: true, suspendedReason: null };
   }
   if (s.commissionOverdue) return { isSuspended: true, suspendedReason: 'COMMISSION_OVERDUE' };
   if (s.depositShort && !s.graceActive) return { isSuspended: true, suspendedReason: 'DEPOSIT_BELOW_MIN' };
