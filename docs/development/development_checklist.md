@@ -264,8 +264,8 @@
 - [x] `wallets-ledger`: All balance adjustments execute inside ACID transactions with row-level locks (`SELECT … FOR UPDATE`) or Redis locks.
 - [x] `gateway-webhooks` (FR-PAY-01): `POST /api/v1/payments/escrow-webhook` — verifies raw HMAC-SHA256 signature first; invalid signature returns HTTP 401 with zero state mutation.
 - [x] `gateway-webhooks`: Replayed webhooks handled idempotently (HTTP 200, no duplicate ledger entry).
-- [ ] `settlements` (FR-PAY-02): Bank-transfer bookings — customer early confirmation **or** check-out +24h with `dispute_status = NONE` → deducts 15% platform fee, credits 85% to nurse `available_balance`.
-- [ ] `settlements`: Active dispute (`OPEN`) atomically freezes settlement payout.
+- [x] `settlements` (FR-PAY-02): Bank-transfer bookings — customer early confirmation **or** check-out +24h with `dispute_status = NONE` → deducts 15% platform fee, credits 85% to nurse `available_balance`.
+- [x] `settlements`: Active dispute (`OPEN`) atomically freezes settlement payout.
 - [ ] `withdrawals` (FR-PAY-04): `POST /api/v1/wallets/withdraw` — amount exceeding `available_balance` returns HTTP 400; initializes `WITHDRAW_REQUESTED` approval flow.
 
 ### Phase 5 Exit Criteria
