@@ -23,6 +23,9 @@ import { ledgerKeys, releaseEscrow } from '../gateway-webhooks/gateway-webhooks.
 import { lockNurseWallet, postNurseEntry } from '../wallets-ledger/wallets-ledger.ledger';
 import { cancellationGross, shiftSettleBlocker, splitSettlement } from './settlements.policy';
 import * as repo from './settlements.repo';
+import { settlementDone } from '../notifications/notifications.notices';
+import { notifyUser, sendNotices } from '../notifications/notifications.service';
+import type { Notify } from '../notifications/notifications.types';
 import {
   SETTLEMENT_BATCH_SIZE,
   type ConfirmCompletionResult,
@@ -129,6 +132,8 @@ export interface SettlementsDeps {
   withTx<T>(fn: (db: Queryable) => Promise<T>): Promise<T>;
   now?: () => number;
   configNumber?: ConfigReader;
+  /** notifications (Phase 6): SETTLEMENT_DONE / DEPOSIT_WITHHELD after commit. Absent = none. */
+  notify?: Notify;
 }
 
 export class SettlementsService {
@@ -149,6 +154,7 @@ export class SettlementsService {
     }
     const nowMs = this.nowMs();
     const r = await this.deps.withTx((db) => settleShift(db, bookingId, 'CUSTOMER_CONFIRMED', nowMs, this.cfg));
+    await this.notifySettled(bookingId, r);
     if (!r.settled && r.reason !== 'ALREADY_SETTLED') {
       if (r.reason === 'NOT_TRANSFER_BOOKING') throw badRequest('NOT_TRANSFER_BOOKING', 'A cash booking is paid on site');
       if (r.reason === 'DISPUTE_OPEN') throw conflict('DISPUTE_OPEN', 'A dispute is open on this booking');
@@ -167,7 +173,9 @@ export class SettlementsService {
   /** For disputes (Phase 6): a dispute resolved for the nurse releases the frozen settlement. */
   async releaseAfterDispute(bookingId: string): Promise<SettleOutcome> {
     const nowMs = this.nowMs();
-    return this.deps.withTx((db) => settleShift(db, bookingId, 'DISPUTE_RELEASED', nowMs, this.cfg));
+    const r = await this.deps.withTx((db) => settleShift(db, bookingId, 'DISPUTE_RELEASED', nowMs, this.cfg));
+    await this.notifySettled(bookingId, r);
+    return r;
   }
 
   /** Admin (admin-finance, Phase 7): the escrow was corrected / explained — the sweep may settle the booking again. */
@@ -189,6 +197,7 @@ export class SettlementsService {
         const r = await this.deps.withTx(fn);
         if (r.settled) out[kind] += 1;
         else out.skipped += 1;
+        await this.notifySettled(id, r);
       } catch (err) {
         out.failed += 1;
         console.error(`[settlements] booking ${id} could not be settled:`, err);
@@ -200,13 +209,25 @@ export class SettlementsService {
     for (const id of shares) await run(id, (db) => settleCancellationShare(db, id, nowMs, this.cfg), 'cancellations');
     return out;
   }
+
+  /** After commit: the nurse sees the payout and, separately, any part withheld for the deposit (ADR-0004). */
+  private async notifySettled(bookingId: string, r: SettleOutcome): Promise<void> {
+    if (!this.deps.notify || !r.settled) return;
+    const { rows } = await this.deps.read.query<{ nurse_id: string | null; booking_code: string }>(
+      `SELECT nurse_id, booking_code FROM bookings WHERE id = $1`,
+      [bookingId],
+    );
+    const b = rows[0];
+    if (!b?.nurse_id) return;
+    await sendNotices(this.deps.notify, settlementDone(b.nurse_id, { bookingId, bookingCode: b.booking_code, payout: r.split.payout, withheld: r.split.withheld }));
+  }
 }
 
 let singleton: SettlementsService | null = null;
 
 export function getSettlementsService(): SettlementsService {
   if (!singleton) {
-    singleton = new SettlementsService({ read: { query }, withTx: (fn) => withTransaction((client) => fn(client)) });
+    singleton = new SettlementsService({ read: { query }, withTx: (fn) => withTransaction((client) => fn(client)), notify: notifyUser });
   }
   return singleton;
 }

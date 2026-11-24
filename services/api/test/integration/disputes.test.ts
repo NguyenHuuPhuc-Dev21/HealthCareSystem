@@ -10,6 +10,7 @@ import { DisputesService } from '../../src/modules/disputes/disputes.service';
 import { holdEscrow } from '../../src/modules/gateway-webhooks/gateway-webhooks.ledger';
 import { settleShift } from '../../src/modules/settlements/settlements.service';
 import { postNurseEntry } from '../../src/modules/wallets-ledger/wallets-ledger.ledger';
+import type { Notice } from '../../src/modules/notifications/notifications.types';
 import { createTestPool, createTestUser, findOrCreateAdmin } from './helpers';
 
 /**
@@ -217,5 +218,30 @@ describe('disputes (integration)', () => {
     expect((await nurseOf(nurse)).dep).toBe(300_000);
     expect((await deposits.listPenalties(nurse))[0]).toMatchObject({ reversed: true });
     expect(await bookingOf(b.id)).toMatchObject({ d: 'NONE' }); // an appeal never touches the booking's dispute status
+  });
+
+  it('notifications (Phase 6): the other side on open, the opener on rebuttal, both sides on the decision — after commit', async () => {
+    const sent: Notice[] = [];
+    const notifying = new DisputesService({ ...deps, notify: async (n) => void sent.push(n) });
+    const nurse = await createNurse();
+    const b = await shift(nurse);
+    const { dispute_id } = await notifying.open(customer.id, b.id, { category: 'UNPROFESSIONAL_CONDUCT', description: 'Điều dưỡng đến muộn 40 phút.', evidenceKeys: [] });
+    expect(sent).toEqual([expect.objectContaining({ userId: nurse, type: 'DISPUTE_OPENED', priority: 'HIGH', bookingId: b.id, data: expect.objectContaining({ disputeId: dispute_id, bookingCode: b.code }) })]);
+
+    await notifying.rebut(nurse, dispute_id, 'Tôi báo trễ do kẹt xe và đã xin phép gia đình.', []);
+    expect(sent[1]).toMatchObject({ userId: customer.id, type: 'DISPUTE_UPDATED' });
+
+    await notifying.resolve(admin, dispute_id, { resolution: 'RESOLVED_CUSTOMER', notes: 'Đến muộn quá 15 phút không báo trước.', depositDeduction: 20_000 });
+    expect(sent.slice(2).map((n) => [n.userId, n.type])).toEqual([
+      [nurse, 'DISPUTE_RESOLVED'],
+      [customer.id, 'DISPUTE_RESOLVED'],
+      [nurse, 'DEPOSIT_PENALTY'],
+    ]);
+    expect(sent[3].body).toContain('500.000đ');
+
+    // A refused request sends nothing.
+    sent.length = 0;
+    await expect(notifying.open(customer.id, b.id, { description: 'Mở lần hai cho cùng ca.', evidenceKeys: [] })).rejects.toBeTruthy();
+    expect(sent).toEqual([]);
   });
 });

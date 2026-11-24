@@ -33,6 +33,11 @@ export interface RealtimeEvent {
   body: string | null;
   priority: NotificationPriority;
   bookingId: string | null;
+  /** notifications.type (0023); null for untyped notifications. */
+  type?: string | null;
+  /** Need-to-know routing ids (bookingId, disputeId…). */
+  data?: Record<string, string>;
+  createdAt?: string;
 }
 
 export interface PushProvider {

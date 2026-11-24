@@ -50,6 +50,9 @@ import {
   vnDateString,
 } from './deposits.policy';
 import * as repo from './deposits.repo';
+import { depositRefundStatus } from '../notifications/notifications.notices';
+import { notifyUser, sendNotices } from '../notifications/notifications.service';
+import type { Notify } from '../notifications/notifications.types';
 import {
   MAX_RECONCILIATION_DETAILS,
   PENALTY_APPEAL_REASON_CODE,
@@ -81,6 +84,8 @@ export interface DepositsDeps {
   now?: () => number;
   configNumber?: (key: SystemConfigKey) => Promise<number>;
   random?: (n: number) => Uint8Array;
+  /** notifications (Phase 6): DEPOSIT_REFUND_STATUS after commit (ADR-0004: every change is notified). */
+  notify?: Notify;
 }
 
 export class DepositsService {
@@ -271,14 +276,14 @@ export class DepositsService {
   async evaluateRefund(requestId: string): Promise<'READY' | 'WAITING_HOLD' | 'SKIPPED'> {
     const nowMs = this.nowMs();
     const [holdDays, slaDays] = await Promise.all([this.cfg('DEPOSIT_REFUND_HOLD_DAYS'), this.cfg('DEPOSIT_REFUND_SLA_WORKING_DAYS')]);
-    return this.deps.withTx(async (db) => {
+    const out = await this.deps.withTx(async (db): Promise<{ status: 'READY' | 'WAITING_HOLD' | 'SKIPPED'; nurseId?: string; changed?: boolean }> => {
       const r = await repo.lockRefundRequest(db, requestId);
-      if (!r || !OPEN_REFUND_STATUSES.has(r.status)) return 'SKIPPED';
+      if (!r || !OPEN_REFUND_STATUSES.has(r.status)) return { status: 'SKIPPED' };
       const e = refundEligibility(await repo.refundFacts(db, r.user_id), holdDays, nowMs);
       const at = new Date(nowMs);
       if (e.pendingReasons.length > 0) {
         await repo.saveRefundEvaluation(db, r.id, { status: 'WAITING_HOLD', pending: e.pendingReasons, eligibleAt: e.eligibleAt, refundAmount: null, dueBy: null, at });
-        return 'WAITING_HOLD';
+        return { status: 'WAITING_HOLD', nurseId: r.user_id, changed: r.status !== 'WAITING_HOLD' };
       }
       const wallet = await lockNurseWallet(db, r.user_id);
       // Enough calendar room for N working days even across Tết.
@@ -291,8 +296,13 @@ export class DepositsService {
         dueBy: addWorkingDays(nowMs, slaDays, holidays),
         at,
       });
-      return 'READY';
+      return { status: 'READY', nurseId: r.user_id, changed: true };
     });
+    // Only a change of status is notified: the daily sweep re-evaluates WAITING_HOLD requests.
+    if (out.nurseId && out.changed && out.status !== 'SKIPPED') {
+      await sendNotices(this.deps.notify, [depositRefundStatus(out.nurseId, { requestId, status: out.status })]);
+    }
+    return out.status;
   }
 
   async runRefundEligibilitySweep(): Promise<RefundSweepResult> {
@@ -314,7 +324,7 @@ export class DepositsService {
   /** Admin: pay a READY refund (one DEPOSIT_REFUND row with the custody partner reference). Frozen by a reconciliation mismatch. */
   async payoutRefund(adminId: string, requestId: string, externalRef: string | null): Promise<DepositRefundRequestDto> {
     const at = new Date(this.nowMs());
-    const nurseId = await this.deps.withTx(async (db) => {
+    const paid = await this.deps.withTx(async (db) => {
       if (await repo.hasUnresolvedMismatch(db)) {
         throw conflict('RECONCILIATION_MISMATCH', 'Deposit payouts are frozen until the reconciliation mismatch is resolved');
       }
@@ -335,9 +345,10 @@ export class DepositsService {
       });
       if (!posted) throw conflict('REFUND_ALREADY_PAID', 'This refund was already paid');
       await repo.setRefundStatus(db, r.id, { status: 'REFUNDED', at, reviewedBy: adminId, transactionId: posted.transactionId, refundAmount: amount });
-      return r.user_id;
+      return { nurseId: r.user_id, amount };
     });
-    return (await this.getRefundRequest(nurseId))!;
+    await sendNotices(this.deps.notify, [depositRefundStatus(paid.nurseId, { requestId, status: 'REFUNDED', amount: paid.amount })]);
+    return (await this.getRefundRequest(paid.nurseId))!;
   }
 
   /** Admin: reject with a written reason (e.g. bank account mismatch). The money is never forfeited. */
@@ -352,6 +363,7 @@ export class DepositsService {
       await repo.setRefundStatus(db, r.id, { status: 'REJECTED', at, reviewedBy: adminId, rejectReason: text });
       return r.user_id;
     });
+    await sendNotices(this.deps.notify, [depositRefundStatus(nurseId, { requestId, status: 'REJECTED', reason: text })]);
     return (await this.getRefundRequest(nurseId))!;
   }
 
@@ -433,6 +445,7 @@ export function getDepositsService(): DepositsService {
       read: { query },
       withTx: (fn) => withTransaction((client) => fn(client)),
       custodyAccount: () => custodyAccountFromEnv(),
+      notify: notifyUser,
       deliverWebhook: simulatorEnabled()
         ? (orderCode, amount, reference) => {
             const data = { orderCode, amount, reference, description: orderCode, transactionDateTime: new Date().toISOString() };

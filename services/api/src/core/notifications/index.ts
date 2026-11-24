@@ -11,6 +11,7 @@
  *  - acknowledge(): sets `acked_at`; only the notification's owner can ack.
  */
 
+import { randomUUID } from 'node:crypto';
 import {
   DeliveryStatus,
   NotificationChannel,
@@ -49,8 +50,10 @@ export interface DispatchInput {
   priority?: NotificationPriority;
   /** Defaults to both PUSH_FCM and IN_APP. */
   channels?: DeliverableChannel[];
-  /** Need-to-know routing data for the push payload. No clinical detail. */
+  /** Need-to-know routing data (push payload + in-app centre). No clinical detail. */
   data?: Record<string, string>;
+  /** What happened (e.g. DISPUTE_OPENED); the apps route on it. Stored in notifications.type. */
+  type?: string | null;
 }
 
 export interface DispatchedNotification {
@@ -91,23 +94,27 @@ export class NotificationValidationError extends Error {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX_TITLE_LENGTH = 200; // notifications.title VARCHAR(200)
+const MAX_TYPE_LENGTH = 40; // notifications.type VARCHAR(40) (0023)
 
 const INSERT_NOTIFICATION_SQL = `
-  INSERT INTO notifications (user_id, booking_id, title, body, channel, priority)
-  VALUES ($1, $2, $3, $4, $5::notification_channel_enum, $6::notification_priority_enum)
-  RETURNING id`;
+  INSERT INTO notifications (user_id, booking_id, title, body, channel, priority, type, data, event_id)
+  VALUES ($1, $2, $3, $4, $5::notification_channel_enum, $6::notification_priority_enum, $7, COALESCE($8::jsonb, '{}'::jsonb), $9)
+  RETURNING id, created_at`;
 
 const SET_STATUS_SQL = `
   UPDATE notifications SET delivery_status = $2::delivery_status_enum WHERE id = $1`;
 
+// Acknowledges the whole event (0023 event_id): opening the in-app row also stops the SMS fallback
+// watching the push row of the same dispatch, and the other way round.
 const ACK_SQL = `
   UPDATE notifications
-     SET acked_at = COALESCE(acked_at, now()), is_read = TRUE
-   WHERE id = $1 AND user_id = $2
+     SET acked_at = COALESCE(acked_at, now()), is_read = TRUE, read_at = COALESCE(read_at, now())
+   WHERE user_id = $2
+     AND (id = $1 OR event_id = (SELECT event_id FROM notifications WHERE id = $1 AND user_id = $2))
   RETURNING id`;
 
 const LOCK_SOURCE_SQL = `
-  SELECT n.id, n.user_id, n.booking_id, n.title, n.body, n.priority, n.acked_at, u.phone
+  SELECT n.id, n.user_id, n.booking_id, n.title, n.body, n.priority, n.acked_at, n.type, n.data, n.event_id, u.phone
     FROM notifications n
     JOIN users u ON u.id = n.user_id
    WHERE n.id = $1
@@ -138,6 +145,9 @@ function validateDispatch(input: DispatchInput): void {
   }
   if (input.channels && input.channels.length === 0) {
     throw new NotificationValidationError('channels must not be empty');
+  }
+  if (input.type != null && (input.type.length === 0 || input.type.length > MAX_TYPE_LENGTH)) {
+    throw new NotificationValidationError(`type must be 1..${MAX_TYPE_LENGTH} characters`);
   }
 }
 
@@ -189,6 +199,9 @@ export class NotificationService {
     ];
     const bookingId = input.bookingId ?? null;
     const body = input.body ?? null;
+    const type = input.type ?? null;
+    const data = input.data ?? {};
+    const eventId = randomUUID(); // one event, one row per channel (0023)
     const delivered: DispatchedNotification[] = [];
 
     for (const channel of new Set(channels)) {
@@ -199,15 +212,19 @@ export class NotificationService {
         body,
         channel,
         priority,
+        type,
+        JSON.stringify(data),
+        eventId,
       ]);
       const id: string = rows[0].id;
+      const createdAt = new Date(rows[0].created_at).toISOString();
 
       let status = DeliveryStatus.SENT;
       try {
         if (channel === NotificationChannel.PUSH_FCM) {
           await this.deps.push.send({ userId: input.userId, notificationId: id, title: input.title, body, priority, data: input.data });
         } else {
-          await this.deps.realtime.emitToUser(input.userId, 'notification', { notificationId: id, title: input.title, body, priority, bookingId });
+          await this.deps.realtime.emitToUser(input.userId, 'notification', { notificationId: id, title: input.title, body, priority, bookingId, type, data, createdAt });
         }
       } catch (err) {
         status = DeliveryStatus.FAILED;
@@ -236,14 +253,15 @@ export class NotificationService {
   }
 
   /**
-   * Marks a notification acknowledged (and read) by its owner.
+   * Marks a notification acknowledged (and read) by its owner, together with the other channel rows
+   * of the same event (0023 event_id).
    * Idempotent: acknowledging twice keeps the first acked_at.
    * Returns false when the notification does not exist or belongs to someone else.
    */
   async acknowledge(notificationId: string, userId: string): Promise<boolean> {
     if (!UUID_RE.test(notificationId) || !UUID_RE.test(userId)) return false;
     const { rows } = await this.deps.db.query(ACK_SQL, [notificationId, userId]);
-    return rows.length === 1;
+    return rows.length > 0;
   }
 
   /**
@@ -268,6 +286,9 @@ export class NotificationService {
         source.body,
         NotificationChannel.SMS_FALLBACK,
         NotificationPriority.HIGH,
+        source.type ?? null,
+        JSON.stringify(source.data ?? {}),
+        source.event_id ?? null,
       ]);
       return { outcome: 'SEND' as const, smsId: inserted.rows[0].id as string, source };
     });

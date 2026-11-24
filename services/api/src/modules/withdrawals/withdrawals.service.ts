@@ -17,6 +17,9 @@ import { query, withTransaction, type Queryable } from '../../core/database';
 import { AppError, badRequest, conflict, notFound } from '../../core/errors';
 import { findBankAccount } from '../deposits/deposits.repo';
 import { InsufficientBalanceError, lockNurseWallet, postNurseEntry } from '../wallets-ledger/wallets-ledger.ledger';
+import { withdrawalUpdate } from '../notifications/notifications.notices';
+import { notifyUser, sendNotices } from '../notifications/notifications.service';
+import type { Notify } from '../notifications/notifications.types';
 import * as repo from './withdrawals.repo';
 import type { WithdrawalRow, WithdrawResult } from './withdrawals.types';
 
@@ -33,6 +36,8 @@ export interface WithdrawalsDeps {
   read: Queryable;
   withTx<T>(fn: (db: Queryable) => Promise<T>): Promise<T>;
   now?: () => number;
+  /** notifications (Phase 6): WITHDRAWAL_UPDATE after commit. Absent = none. */
+  notify?: Notify;
 }
 
 export class WithdrawalsService {
@@ -92,13 +97,15 @@ export class WithdrawalsService {
   /** Admin: the bank transfer was made. */
   async markWithdrawn(adminId: string, withdrawalId: string, payoutRef: string | null): Promise<WithdrawalDto> {
     const at = new Date(this.nowMs());
-    return this.deps.withTx(async (db) => {
+    const done = await this.deps.withTx(async (db) => {
       const w = await repo.lockWithdrawal(db, withdrawalId);
       if (!w) throw notFound('WITHDRAWAL_NOT_FOUND', 'Withdrawal not found');
       if (w.status !== WithdrawalStatus.WITHDRAW_REQUESTED) throw conflict('WITHDRAWAL_CLOSED', 'This withdrawal was already processed');
       await repo.markWithdrawn(db, w.id, adminId, payoutRef, at);
-      return toDto((await repo.lockWithdrawal(db, w.id))!);
+      return { nurseId: w.user_id, dto: toDto((await repo.lockWithdrawal(db, w.id))!) };
     });
+    await sendNotices(this.deps.notify, [withdrawalUpdate(done.nurseId, { withdrawalId: done.dto.id, amount: done.dto.amount, status: 'WITHDRAWN' })]);
+    return done.dto;
   }
 
   /** Admin: refused with a written reason — the money goes back to the available balance. */
@@ -106,7 +113,7 @@ export class WithdrawalsService {
     const text = reason.trim();
     if (text.length < 10) throw badRequest('VALIDATION_ERROR', 'A rejection needs a written reason');
     const at = new Date(this.nowMs());
-    return this.deps.withTx(async (db) => {
+    const done = await this.deps.withTx(async (db) => {
       const w = await repo.lockWithdrawal(db, withdrawalId);
       if (!w) throw notFound('WITHDRAWAL_NOT_FOUND', 'Withdrawal not found');
       if (w.status !== WithdrawalStatus.WITHDRAW_REQUESTED) throw conflict('WITHDRAWAL_CLOSED', 'This withdrawal was already processed');
@@ -120,8 +127,10 @@ export class WithdrawalsService {
         externalRef: null,
       });
       await repo.markRejected(db, w.id, adminId, text, posted!.transactionId, at);
-      return toDto((await repo.lockWithdrawal(db, w.id))!);
+      return { nurseId: w.user_id, dto: toDto((await repo.lockWithdrawal(db, w.id))!) };
     });
+    await sendNotices(this.deps.notify, [withdrawalUpdate(done.nurseId, { withdrawalId: done.dto.id, amount: done.dto.amount, status: 'REJECTED', reason: text })]);
+    return done.dto;
   }
 }
 
@@ -139,6 +148,6 @@ function toDto(w: WithdrawalRow): WithdrawalDto {
 let singleton: WithdrawalsService | null = null;
 
 export function getWithdrawalsService(): WithdrawalsService {
-  if (!singleton) singleton = new WithdrawalsService({ read: { query }, withTx: (fn) => withTransaction((c) => fn(c)) });
+  if (!singleton) singleton = new WithdrawalsService({ read: { query }, withTx: (fn) => withTransaction((c) => fn(c)), notify: notifyUser });
   return singleton;
 }
