@@ -41,6 +41,8 @@ import { createDepositsRouter } from './modules/deposits/deposits.routes';
 import { getDepositsService } from './modules/deposits/deposits.service';
 import { createSettlementsRouter } from './modules/settlements/settlements.routes';
 import { getSettlementsService } from './modules/settlements/settlements.service';
+import { createWithdrawalsRouter } from './modules/withdrawals/withdrawals.routes';
+import { getWithdrawalsService } from './modules/withdrawals/withdrawals.service';
 import { getPrescriptionRejectionService } from './modules/prescription-rejection/prescription-rejection.service';
 import { getPrescriptionGateService } from './modules/prescription-gate/prescription-gate.service';
 import { createPrivacyConsentRouter } from './modules/privacy-consent/privacy-consent.routes';
@@ -81,6 +83,7 @@ function buildApiRouter(): Router {
   api.use(createWalletsLedgerRouter(getWalletsLedgerService())); // BE-3 · Phase 5 · wallets-ledger (balances, history, earnings, upcoming settlements)
   api.use(createDepositsRouter(getDepositsService())); // BE-3 · Phase 5 · deposits (ADR-0004: top-up, penalties, appeal, closure refund, bank account)
   api.use(createSettlementsRouter(getSettlementsService())); // BE-3 · Phase 5 · settlements (85/15 payout, customer confirm-completion)
+  api.use(createWithdrawalsRouter(getWithdrawalsService())); // BE-3 · Phase 5 · withdrawals (FR-PAY-04)
 
   return api;
 }
