@@ -298,6 +298,7 @@ export enum AuditAction {
   GRANT_RECORD_ACCESS = 'GRANT_RECORD_ACCESS',
   TIER_DEMOTION = 'TIER_DEMOTION',             // migration 0007 · BE-2 tier-lifecycle (system actor)
   REVIEW_CUSTOMER_KYC = 'REVIEW_CUSTOMER_KYC', // migration 0007 · BE-2 patient-profiles (Admin actor)
+  VIEW_CHAT_HISTORY = 'VIEW_CHAT_HISTORY',     // migration 0026 · BE-2 chat (Admin reads a conversation, FR-CHAT-01)
 }
 
 // ============================================================================

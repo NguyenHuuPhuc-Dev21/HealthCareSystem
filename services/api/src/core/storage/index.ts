@@ -28,7 +28,8 @@ export type StorageCategory =
   | 'prescription'
   | 'checkin-selfie'
   | 'prescription-rejection'
-  | 'dispute-evidence';
+  | 'dispute-evidence'
+  | 'chat-image';
 
 /** Content types accepted for upload (images + PDF scans). */
 export const ALLOWED_UPLOAD_CONTENT_TYPES: ReadonlySet<string> = new Set([

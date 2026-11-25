@@ -58,6 +58,8 @@ import { getCheckInService } from './modules/check-in/check-in.service';
 import { createShiftLogsRouter } from './modules/shift-logs/shift-logs.routes';
 import { getShiftLogsService } from './modules/shift-logs/shift-logs.service';
 import { createCheckOutRouter } from './modules/check-out/check-out.routes';
+import { createChatRouter } from './modules/chat/chat.routes';
+import { getChatService } from './modules/chat/chat.service';
 import { getCheckOutService } from './modules/check-out/check-out.service';
 
 function buildApiRouter(): Router {
@@ -93,6 +95,7 @@ function buildApiRouter(): Router {
   api.use(createCheckInRouter(getCheckInService())); // BE-2 · Phase 4 · check-in (anti mock GPS, ≤ 200 m, live selfie)
   api.use(createShiftLogsRouter(getShiftLogsService())); // BE-2 · Phase 4 · shift-logs (assessment, vitals, checklist, tracking)
   api.use(createCheckOutRouter(getCheckOutService())); // BE-2 · Phase 4 · check-out (care report, 24h/12h clocks)
+  api.use(createChatRouter(getChatService())); // BE-2 · Phase 6 · chat (masked in-app chat & call logs, FR-CHAT-01)
   api.use(createCancellationPolicyRouter(getCancellationPolicyService())); // BE-1 · Phase 5 · cancellation-policy
   api.use(createReviewsRouter(getReviewsService())); // BE-1 · Phase 6 · reviews-trustscore
   api.use(createWalletsLedgerRouter(getWalletsLedgerService())); // BE-3 · Phase 5 · wallets-ledger (balances, history, earnings, upcoming settlements)

@@ -103,6 +103,9 @@ export const SYSTEM_CONFIG_KEYS = {
   CONDITION_MISMATCH_WINDOW_MINUTES: 'CONDITION_MISMATCH_WINDOW_MINUTES',   // 30 (condition discrepancy reported in the first 30 min, FR-SHIFT-02)
   CHECKOUT_EARLY_TOLERANCE_MINUTES: 'CHECKOUT_EARLY_TOLERANCE_MINUTES',     // 15 (shift-based bookings: check-out from scheduled end − 15 min)
   CASH_COMMISSION_DUE_HOURS: 'CASH_COMMISSION_DUE_HOURS',                   // 24 (cash booking: commission due check-out + 24h, FR-PAY-02)
+
+  // In-app chat & call (BE-2 Phase 6 — migration 0026; proposed value, pending PO)
+  CHAT_CALL_RING_TIMEOUT_SECONDS: 'CHAT_CALL_RING_TIMEOUT_SECONDS',         // 45 (unanswered in-app call → missed, FR-CHAT-01)
 } as const;
 
 export type SystemConfigKey = keyof typeof SYSTEM_CONFIG_KEYS;
