@@ -251,7 +251,7 @@
 - [ ] `cancellation-policy`: Nurse no-show results in permanent account ban (`BANNED`) + 50,000 VND deposit penalty converted to customer apology voucher.
 
 ### BE-2
-- [ ] `deposits` (FR-PAY-03): Upfront 300,000 VND deposit gate required to accept shifts; zero progressive accumulation, zero shift value cap.
+- [x] `deposits` (FR-PAY-03): Upfront 300,000 VND deposit gate required to accept shifts; zero progressive accumulation, zero shift value cap. _(BE-2: gate in matching-radar `depositAllows` for Radar, Job Board, direct requests and nurse search; amended by ADR-0004 D2 — grace for bank-transfer bookings only, never over a debt; a penalty below the minimum suspends the profile `DEPOSIT_SHORTFALL` and a top-up reactivates it, migration 0025)_
 - [x] `deposits`: SLA penalty deductions exceeding balance are booked as debt (negative balance), blocking new shift acceptance until replenished.
 - [x] `deposits`: Full deposit refund permitted only upon account closure after 7 dispute-free days.
 - [x] `cash-commission`: `POST /api/v1/bookings/:id/commission-payment-link` — generates VietQR link for exactly 15% of in-app booking price for cash orders.

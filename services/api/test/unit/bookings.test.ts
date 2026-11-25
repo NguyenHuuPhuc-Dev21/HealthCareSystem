@@ -173,6 +173,11 @@ describe('eligibility gate re-checked at claim time (BR-08 §2.3, ADR-0004)', ()
       expect(gate(inGrace(), basicTransfer)).toBeNull();
     });
 
+    it('a debt (negative deposit after a penalty) is never covered by grace (BR-04, FR-PAY-03)', () => {
+      expect(gate(inGrace({ deposit_balance: '-50000' }), basicTransfer)).toBe('DEPOSIT_SHORTFALL');
+      expect(gate(inGrace({ deposit_balance: '-1' }), basicTransfer)).toBe('DEPOSIT_SHORTFALL');
+    });
+
     it('cash bookings always need the full deposit', () => {
       expect(gate(inGrace(), basic)).toBe('DEPOSIT_SHORTFALL');
     });

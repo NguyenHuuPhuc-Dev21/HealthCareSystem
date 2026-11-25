@@ -127,7 +127,7 @@ First accept wins. One transaction locks the nurse row, then the booking row, an
 | 403 | `NURSE_NOT_ACTIVE` | profile or account not `ACTIVE` |
 | 403 | `ACCOUNT_CLOSING` | the nurse asked to close the account (`wallets.closure_requested_at`, ADR-0004 D3) |
 | 403 | `TIER_MISMATCH` | service needs Tier 2 with a GPHN valid on the shift date |
-| 403 | `DEPOSIT_SHORTFALL` | deposit below `MIN_NURSE_DEPOSIT` and no usable grace period (`details.minDeposit`, `details.paymentMethod`) |
+| 403 | `DEPOSIT_SHORTFALL` | deposit below `MIN_NURSE_DEPOSIT` and no usable grace period — a negative deposit (debt) is never covered by grace (`details.minDeposit`, `details.paymentMethod`) |
 | 409 | `SCHEDULE_CONFLICT` | not free for the slot (`details.reason`: `NO_DECLARED_AVAILABILITY` / `TIME_OFF` / `BOOKING_CONFLICT` / `TRAVEL_BUFFER`) |
 | 409 | `PAYMENT_NOT_SECURED` | bank-transfer booking not in `ESCROW_HELD` |
 | 404 | `BOOKING_NOT_FOUND` | |
