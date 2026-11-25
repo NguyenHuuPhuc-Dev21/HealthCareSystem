@@ -26,6 +26,7 @@ import {
   User,
 } from 'lucide-react-native';
 import {
+  canOpenDisputeAfterCheckout,
   DEFAULT_PLATFORM_COMMISSION_RATE,
   ExecutionStatus,
   PaymentMethod,
@@ -280,19 +281,17 @@ export const CompletedShiftDetailScreen: React.FC<CompletedShiftDetailScreenProp
             />
           ) : null}
 
-          <AppButton
-            label="Mở khiếu nại / Phản ánh ca này"
-            icon={<AlertTriangle size={18} color={tokens.colors.alertCrimson} />}
-            variant="secondary"
-            onPress={() => {
-              Alert.alert(
-                'Mở khiếu nại',
-                `Khiếu nại ca trực ${shift.bookingCode} sẽ khả dụng ở phân hệ A15.`,
-                [{ text: 'Đóng' }]
-              );
-            }}
-            style={styles.actionBtn}
-          />
+          {canOpenDisputeAfterCheckout(shift.endTime) ? (
+            <AppButton
+              label="Mở khiếu nại / Phản ánh ca này"
+              icon={<AlertTriangle size={18} color={tokens.colors.alertCrimson} />}
+              variant="secondary"
+              onPress={() =>
+                navigation.navigate('OpenDispute', { bookingId: shift.bookingId })
+              }
+              style={styles.actionBtn}
+            />
+          ) : null}
         </View>
       </ScrollView>
 

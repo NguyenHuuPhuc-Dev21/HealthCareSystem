@@ -127,6 +127,12 @@ export const ShiftResultScreen: React.FC<ShiftResultProps> = ({
           customerName={reviewTarget.customerName}
           onClose={() => setRateSheetVisible(false)}
           onSuccess={handleReviewSuccess}
+          onOpenDispute={() => {
+            setRateSheetVisible(false);
+            navigation.navigate('OpenDispute', {
+              bookingId: reviewTarget.bookingId,
+            });
+          }}
         />
       ) : null}
     </SafeAreaView>
