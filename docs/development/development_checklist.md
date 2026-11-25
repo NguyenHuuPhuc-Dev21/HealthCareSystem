@@ -304,10 +304,10 @@
 - [ ] `reviews-trustscore`: TrustScore dropping below 60 automatically transitions nurse to `SUSPENDED`.
 
 ### BE-2
-- [ ] `chat` (FR-CHAT-01): In-app messaging and call logs on `conversations_messages`, activated once booking reaches `CONFIRMED`.
-- [ ] `chat`: Masked identity — real phone numbers never exposed in any UI component or API response.
-- [ ] `chat`: Automated content regex scanning for phone numbers or external payment links; issues warning and logs security event.
-- [ ] `chat`: Conversation history permanently retained as dispute evidence (no hard deletion); chat closes upon shift completion; Admin access audit-logged.
+- [x] `chat` (FR-CHAT-01): In-app messaging, photos and call logs on `conversations_messages`, activated once booking reaches `CONFIRMED`; in-app WebRTC call signalling over `/ws/chat` (no phone number dialled).
+- [x] `chat`: Masked identity — real phone numbers never exposed in any UI component or API response.
+- [x] `chat`: Automated content regex scanning for phone numbers or external payment links; issues warning and logs security event.
+- [x] `chat`: Conversation history permanently retained as dispute evidence (no hard deletion); chat closes upon shift completion; Admin access audit-logged.
 
 ### BE-3 (Phase Lead)
 - [x] `disputes` (FR-DISP-01): `POST /api/v1/bookings/:id/disputes` — window open from `IN_PROGRESS` until check-out +24h; maximum 5 evidence files.
@@ -321,7 +321,7 @@
 - [x] A dispute filed at hour 20 post-check-out successfully freezes settlement release scheduled for hour 24.
 - [ ] Two-way blind rating lifecycle verified: reviews become visible only when both submit or 7 days elapse.
 - [x] SMS fallback notification fires reliably when FCM push delivery is unacknowledged after 60 seconds.
-- [ ] In-app chat is strictly disabled prior to `CONFIRMED` status.
+- [x] In-app chat is strictly disabled prior to `CONFIRMED` status.
 
 ---
 

@@ -56,7 +56,16 @@ This catalogue lists the core endpoints defined by SRS v2.0 §8, grouped by doma
 
 FR-CHAT-01 requires in-app chat/calling with masked phone numbers, opened once a booking is `CONFIRMED`, with message scanning for leaked phone numbers/external links and full history retained in `conversations_messages` as dispute evidence.
 
-- Chat/call endpoints: **[Not specified in SRS v2.0 — open item]** (SRS §8 lists no chat endpoints; see the Open Decisions Register).
+| Method & Endpoint | Role | Description |
+|---|---|---|
+| `GET /api/v1/bookings/:id/conversation` | PATIENT / NURSE | The booking's conversation (id = booking id), counterpart name, fully masked phone, open/closed. Detail: [`chat.api.md`](./chat.api.md). |
+| `POST /api/v1/bookings/:id/messages` | PATIENT / NURSE | Send a text or a photo (`{ type: "IMAGE", imageKey }`) — only while `CONFIRMED` / `IN_PROGRESS` (409 `CONVERSATION_CLOSED`); texts scanned for phone numbers / links / off-platform payment → flagged, warned, logged. |
+| `POST /api/v1/bookings/:id/messages/image-upload-url` | PATIENT / NURSE | Presigned PUT for a chat photo; the server re-encodes it without EXIF / GPS. |
+| `GET /api/v1/bookings/:id/call-config` | PATIENT / NURSE | ICE servers + ring timeout for the in-app WebRTC call (no phone number involved). |
+| `POST /api/v1/bookings/:id/calls` | PATIENT / NURSE | Log an in-app call (`VOICE_CALL_LOG`). |
+| `POST /api/v1/conversations/:id/read` | PATIENT / NURSE | Read receipt. |
+| `GET /api/v1/admin/bookings/:id/conversation` | ADMIN | Evidence view with flags; audit-logged `VIEW_CHAT_HISTORY`. |
+| `GET /ws/chat?conversationId=` | PATIENT / NURSE / ADMIN | WebSocket: `NEW_MESSAGE`, `READ`; call signalling `CALL_SIGNAL` relayed to the other participant only (`CALL_ERROR` on refusal). |
 
 ## 6. Wallet & Payments
 

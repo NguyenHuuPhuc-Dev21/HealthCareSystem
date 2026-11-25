@@ -15,6 +15,9 @@ import { startRealtimeSubscriber } from './modules/notifications/notifications.r
 import { attachNotificationSocket } from './modules/notifications/notifications.socket';
 import { attachShiftSocket, startShiftSubscriber } from './modules/shift-logs/shift-logs.realtime';
 import { canWatch } from './modules/shift-logs/shift-logs.repo';
+import { attachChatSocket, startChatSubscriber } from './modules/chat/chat.realtime';
+import { canWatch as canWatchChat } from './modules/chat/chat.repo';
+import { getChatService } from './modules/chat/chat.service';
 import { getPool } from './core/database';
 
 export async function bootstrap(): Promise<void> {
@@ -35,13 +38,21 @@ export async function bootstrap(): Promise<void> {
     canWatch: (bookingId, user) => canWatch(getPool(), bookingId, user),
   });
   const stopShiftRealtime = startShiftSubscriber();
+  // BE-2 · Phase 6 · chat: /ws/chat?conversationId= (customer, assigned nurse, Admin).
+  const chatSocket = attachChatSocket(server, {
+    verify: (token) => auth.sessions.verifyAccessToken(token),
+    canWatch: (bookingId, user) => canWatchChat(getPool(), bookingId, user),
+    onSignal: (bookingId, user, raw) => getChatService().handleSocketSignal(user, bookingId, raw), // in-app call (WebRTC)
+  });
+  const stopChatRealtime = startChatSubscriber();
 
   const shutdown = (signal: string) => {
     console.log(`[Bootstrap] ${signal} received, shutting down…`);
     void notificationSocket.close();
     void shiftSocket.close();
+    void chatSocket.close();
     server.close(() => {
-      Promise.all([closePool(), closeKeyValueStore(), stopRealtime(), stopShiftRealtime()])
+      Promise.all([closePool(), closeKeyValueStore(), stopRealtime(), stopShiftRealtime(), stopChatRealtime()])
         .catch((err: Error) => console.error('[Bootstrap] Pool close error:', err.message))
         .finally(() => process.exit(0));
     });
