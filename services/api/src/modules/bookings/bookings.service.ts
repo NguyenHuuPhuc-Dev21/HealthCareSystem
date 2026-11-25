@@ -153,6 +153,11 @@ export class BookingsService {
     let created: { id: string; startRadar: boolean };
     try {
       created = await this.deps.withTx(async (db) => {
+        // Admin-locked customer (admin-users, FR-ADMIN-01): no new bookings while SUSPENDED / BANNED.
+        const accountStatus = await repo.lockCustomerStatus(db, customerId);
+        if (accountStatus === 'SUSPENDED' || accountStatus === 'BANNED') {
+          throw forbidden('ACCOUNT_SUSPENDED', 'Your account is locked and cannot create new bookings; please contact support');
+        }
         // Ownership + Decree-13 consent + eKYC for home care (403 FORBIDDEN / CONSENT_REQUIRED / EKYC_REQUIRED).
         const profile = await assertCanBookForProfile(db, customerId, body.patientProfileId);
         if (body.invitedNurseId && !(await repo.isInvitableNurse(db, body.invitedNurseId))) {

@@ -16,6 +16,7 @@ export * from './contracts/trust-score.contracts';
 export * from './contracts/review.contracts';
 export * from './contracts/dispute.contracts';
 export * from './contracts/chat.contracts';
+export * from './contracts/admin-users.contracts';
 export * from './contracts/notification.contracts';
 export * from './labels/deposit';
 export * from './labels/trust-score';
