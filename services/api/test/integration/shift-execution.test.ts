@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Pool } from 'pg';
+import sharp from 'sharp';
 import { closePool, runInTransaction } from '../../src/core/database';
 import { getConfigNumber } from '../../src/core/config';
 import { AppError } from '../../src/core/errors';
@@ -40,8 +41,9 @@ describe('check-in + shift-logs + check-out (integration)', () => {
 
   const notices: ShiftNotice[] = [];
   const events: { bookingId: string; change: string; status: string }[] = [];
-  const objects = new Map<string, { size: number; head: Buffer }>();
-  const JPEG = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0x10, 0x4a, 0x46, 0x49, 0x46, 0, 1, 1, 0, 0, 1]);
+  const objects = new Map<string, { size: number; head: Buffer; body?: Buffer; contentType?: string }>();
+  let JPEG: Buffer; // a real camera-sized photo, made in beforeAll
+  const BROKEN_JPEG = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(200, 7)]); // JPEG magic, not a photo
   const PDF = Buffer.from('%PDF-1.7 fake...');
 
   let serviceShift4h: string;
@@ -124,9 +126,9 @@ describe('check-in + shift-logs + check-out (integration)', () => {
   }
 
   /** Issues a selfie URL and "uploads" a JPEG to the fake storage. */
-  async function freshSelfie(nurseId: string, bookingId: string, head = JPEG): Promise<string> {
+  async function freshSelfie(nurseId: string, bookingId: string, body = JPEG): Promise<string> {
     const u = await checkIn.requestSelfieUploadUrl(nurseId, bookingId, 'image/jpeg');
-    objects.set(u.objectKey, { size: 120_000, head });
+    objects.set(u.objectKey, { size: body.length, head: body.subarray(0, 16), body });
     return u.objectKey;
   }
 
@@ -151,6 +153,7 @@ describe('check-in + shift-logs + check-out (integration)', () => {
   const wallet = async (userId: string) => (await pool.query('SELECT * FROM wallets WHERE user_id = $1', [userId])).rows[0] as Record<string, any>;
 
   beforeAll(async () => {
+    JPEG = await sharp({ create: { width: 1200, height: 1600, channels: 3, background: '#c8d8e8' } }).jpeg().toBuffer();
     pool = createTestPool();
     const withTx = <T>(fn: (db: any) => Promise<T>) => runInTransaction(pool, fn);
     const now = () => clock;
@@ -180,6 +183,10 @@ describe('check-in + shift-logs + check-out (integration)', () => {
         createUploadUrl: async (key) => ({ url: `https://upload.test/${key}`, expiresInSeconds: 600 }),
         statObject: async (key) => (objects.has(key) ? { sizeBytes: objects.get(key)!.size, contentType: 'image/jpeg' } : null),
         readObjectHead: async (key) => objects.get(key)?.head ?? null,
+        readObject: async (key) => objects.get(key)?.body ?? null,
+        putObject: async (key, body, contentType) => {
+          objects.set(key, { size: body.length, head: body.subarray(0, 16), body, contentType });
+        },
       },
       maxUploadBytes: storage.MAX_UPLOAD_BYTES,
       shifts,
@@ -257,7 +264,7 @@ describe('check-in + shift-logs + check-out (integration)', () => {
       const at = { latitude: AT_DOOR.lat, longitude: AT_DOOR.lng, isMockLocation: false };
       // a key the API never handed out (e.g. a gallery photo uploaded another way)
       const foreign = storage.buildObjectKey('checkin-selfie', b.nurseId, 'image/jpeg');
-      objects.set(foreign, { size: 1000, head: JPEG });
+      objects.set(foreign, { size: JPEG.length, head: JPEG.subarray(0, 16), body: JPEG });
       await rejectsWith(checkIn.checkIn(b.nurseId, b.id, { ...at, selfieKey: foreign }), 400, 'SELFIE_NOT_ISSUED');
       // issued 11 minutes ago
       const old = await freshSelfie(b.nurseId, b.id);
@@ -269,8 +276,11 @@ describe('check-in + shift-logs + check-out (integration)', () => {
       // not an image
       const pdf = await freshSelfie(b.nurseId, b.id, PDF);
       await rejectsWith(checkIn.checkIn(b.nurseId, b.id, { ...at, selfieKey: pdf }), 400, 'FILE_TYPE_NOT_ALLOWED');
+      // JPEG magic bytes but not a decodable photo
+      const broken = await freshSelfie(b.nurseId, b.id, BROKEN_JPEG);
+      await rejectsWith(checkIn.checkIn(b.nurseId, b.id, { ...at, selfieKey: broken }), 400, 'SELFIE_UNREADABLE');
       const outcomes = (await pool.query('SELECT outcome FROM checkin_attempts WHERE booking_id = $1', [b.id])).rows.map((r: any) => r.outcome);
-      expect(outcomes).toEqual(['INVALID_SELFIE', 'INVALID_SELFIE', 'INVALID_SELFIE', 'INVALID_SELFIE']);
+      expect(outcomes).toEqual(['INVALID_SELFIE', 'INVALID_SELFIE', 'INVALID_SELFIE', 'INVALID_SELFIE', 'INVALID_SELFIE']);
       expect((await row(b.id)).execution_status).toBe('CONFIRMED');
     });
 
@@ -289,7 +299,19 @@ describe('check-in + shift-logs + check-out (integration)', () => {
       expect(state.checkInDistanceMeters).toBeGreaterThan(100);
       expect(state.checkInDistanceMeters).toBeLessThan(120);
       expect(state.checkInWatermark).toBe('2026-11-16 07:58:00 · 10.77790, 106.70090');
-      expect(state.checkInSelfieUrl).toBe(`https://signed.test/${selfieKey}`);
+      // the stamped copy (server time + GPS burnt into the pixels) is what is stored and shown; the upload stays as evidence
+      const stampedKey = (await log(b.id)).checkin_selfie_url as string;
+      expect(stampedKey).not.toBe(selfieKey);
+      expect(stampedKey.startsWith(`checkin-selfie/${b.nurseId}/`)).toBe(true);
+      expect(state.checkInSelfieUrl).toBe(`https://signed.test/${stampedKey}`);
+      const stamped = objects.get(stampedKey)!;
+      expect(stamped.contentType).toBe('image/jpeg');
+      const meta = await sharp(stamped.body!).metadata();
+      expect([meta.width, meta.height, meta.exif]).toEqual([1080, 1440, undefined]); // scaled, metadata stripped
+      const band = await sharp(await sharp(stamped.body!).extract({ left: 0, top: 1422, width: 1080, height: 15 }).toBuffer()).stats();
+      const photo = await sharp(await sharp(stamped.body!).extract({ left: 0, top: 100, width: 1080, height: 15 }).toBuffer()).stats();
+      expect(band.channels[0].mean).toBeLessThan(photo.channels[0].mean - 60); // dark stamp band at the bottom
+      expect(objects.has(selfieKey)).toBe(true);
       expect(state.careActivities.map((a) => [a.id, a.mandatory, a.completed])).toEqual([
         ['INITIAL_VITALS', true, false],
         ['CARE_PROCEDURE', true, false],
@@ -297,13 +319,12 @@ describe('check-in + shift-logs + check-out (integration)', () => {
       ]);
       const l = await log(b.id);
       expect(new Date(l.checkin_time).getTime()).toBe(vn('07:58'));
-      expect(l.checkin_selfie_url).toBe(selfieKey);
       expect((await row(b.id)).execution_status).toBe('IN_PROGRESS');
       expect(events.at(-1)).toEqual({ bookingId: b.id, change: 'CHECKED_IN', status: 'IN_PROGRESS' });
       expect(notices.at(-1)).toMatchObject({ userId: b.customerId, type: 'SHIFT_CHECKED_IN' });
       // the family sees the stamped selfie
       const t = await shifts.tracking(b.customerId, b.id);
-      expect(t.checkIn).toMatchObject({ selfieUrl: `https://signed.test/${selfieKey}`, watermark: '2026-11-16 07:58:00 · 10.77790, 106.70090' });
+      expect(t.checkIn).toMatchObject({ selfieUrl: `https://signed.test/${stampedKey}`, watermark: '2026-11-16 07:58:00 · 10.77790, 106.70090' });
       // the same photo cannot check in again; a second check-in is refused
       await rejectsWith(
         checkIn.checkIn(b.nurseId, b.id, { latitude: AT_DOOR.lat, longitude: AT_DOOR.lng, isMockLocation: false, selfieKey }),
@@ -487,9 +508,18 @@ describe('check-in + shift-logs + check-out (integration)', () => {
       expect(Number((await wallet(b.customerId)).escrow_locked_balance)).toBe(0);
       const refund = await pool.query(`SELECT tx_type, amount FROM wallet_transactions WHERE idempotency_key = $1`, [`escrow-refund:condition-mismatch:${b.id}`]);
       expect(refund.rows.map((r: any) => [r.tx_type, Number(r.amount)])).toEqual([['REFUND', 400_000]]);
+      // no penalty: deposit untouched; travel support ICU_TRAVEL_SUPPORT (50,000) credited once, like FR-BOOK-02 rule 3
       const nurseWallet = await wallet(b.nurseId);
-      expect(Number(nurseWallet.deposit_balance)).toBe(300_000);
-      expect((await pool.query(`SELECT 1 FROM wallet_transactions WHERE wallet_id = $1`, [nurseWallet.id])).rows).toHaveLength(0);
+      expect([Number(nurseWallet.deposit_balance), Number(nurseWallet.available_balance)]).toEqual([300_000, 50_000]);
+      const nurseRows = await pool.query(`SELECT tx_type, balance_type, amount, idempotency_key FROM wallet_transactions WHERE wallet_id = $1`, [nurseWallet.id]);
+      expect(nurseRows.rows.map((r: any) => [r.tx_type, r.balance_type, Number(r.amount), r.idempotency_key])).toEqual([
+        ['TRAVEL_SUPPORT', 'AVAILABLE', 50_000, `travel-support:condition-mismatch:${b.id}`],
+      ]);
+      expect(s.travelSupportAmount).toBe(50_000);
+      expect(notices.slice(-2).map((n) => [n.userId, n.type])).toEqual([
+        [b.nurseId, 'BOOKING_CANCELLED'],
+        [b.customerId, 'BOOKING_CANCELLED'],
+      ]);
       expect((await log(b.id)).mismatch_option).toBe('REFUSE');
       expect(notices.at(-1)).toMatchObject({ userId: b.customerId, type: 'BOOKING_CANCELLED' });
       // the slot is free again for the nurse (exclusion constraint only covers CONFIRMED / IN_PROGRESS)
@@ -508,7 +538,9 @@ describe('check-in + shift-logs + check-out (integration)', () => {
         initialVitals: vitals(),
       });
       expect(s.executionStatus).toBe('CANCELLED');
+      expect(s.travelSupportAmount).toBe(50_000);
       expect((await row(b.id)).payment_status).toBe('UNPAID');
+      expect(Number((await wallet(b.nurseId)).available_balance)).toBe(50_000);
     });
   });
 

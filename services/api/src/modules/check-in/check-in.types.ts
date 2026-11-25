@@ -37,7 +37,12 @@ export interface SelfieStoragePort {
   createUploadUrl(key: string, contentType: string): Promise<{ url: string; expiresInSeconds: number }>;
   statObject(key: string): Promise<ObjectInfo | null>;
   readObjectHead(key: string): Promise<Buffer | null>;
+  readObject(key: string): Promise<Buffer | null>;
+  putObject(key: string, body: Buffer, contentType: string): Promise<void>;
 }
+
+/** Burns the stamp lines into the photo (check-in.watermark.ts; tests may pass a fake). */
+export type SelfieStamper = (image: Buffer, lines: string[]) => Promise<Buffer>;
 
 /** Live camera photos only: JPEG (all phone cameras), plus PNG/WebP for web capture. No PDF. */
 export const SELFIE_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;

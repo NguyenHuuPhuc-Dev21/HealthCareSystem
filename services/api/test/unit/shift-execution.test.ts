@@ -22,6 +22,8 @@ import {
 } from '../../src/modules/shift-logs/shift-logs.policy';
 import { ShiftHub, ShiftPublisher, attachShiftSocket } from '../../src/modules/shift-logs/shift-logs.realtime';
 import { assessmentSchema, vitalsSchema } from '../../src/modules/shift-logs/shift-logs.schema';
+import { SelfieUnreadableError, stampSelfie, stampSvg } from '../../src/modules/check-in/check-in.watermark';
+import sharp from 'sharp';
 
 const MIN = 60_000;
 const HOUR = 60 * MIN;
@@ -71,6 +73,39 @@ describe('check-in policy (FR-SHIFT-01)', () => {
     expect(checkInSchema.safeParse({ latitude: 10.7, longitude: 106.7, isMockLocation: false }).success).toBe(false);
     expect(checkInSchema.safeParse({ latitude: 10.7, longitude: 106.7, isMockLocation: false, selfieKey: 'k', selfieImageBase64: 'xx' }).success).toBe(false);
     expect(checkInSchema.safeParse({ latitude: 91, longitude: 106.7, isMockLocation: false, selfieKey: 'k' }).success).toBe(false);
+  });
+});
+
+describe('selfie stamp (SRS RISK-05 / NFR-SEC-01: server time + GPS burnt into the photo)', () => {
+  it('the band text is XML-escaped and sized to the photo', () => {
+    const { svg, height } = stampSvg(1080, ['A & B <x>', '2026-11-16 07:58:00 · 10.77790, 106.70090 (GMT+7)']);
+    const text = svg.toString();
+    expect(text).toContain('A &amp; B &lt;x&gt;');
+    expect(text).toContain('2026-11-16 07:58:00 · 10.77790, 106.70090 (GMT+7)');
+    expect(height).toBeGreaterThan(80);
+  });
+
+  it('re-encodes as JPEG ≤ 1080×1440, applies EXIF rotation, drops metadata, darkens the bottom band', async () => {
+    const photo = await sharp({ create: { width: 3000, height: 4000, channels: 3, background: '#d0d0d0' } })
+      .jpeg()
+      .withMetadata({ exif: { IFD0: { Make: 'PhoneCam' } } })
+      .toBuffer();
+    const out = await stampSelfie(photo, ['HealthCareSystem · Check-in HC-261116-AB12CD', '2026-11-16 07:58:00 · 10.77790, 106.70090 (GMT+7)']);
+    const meta = await sharp(out).metadata();
+    expect([meta.format, meta.width, meta.height, meta.exif]).toEqual(['jpeg', 1080, 1440, undefined]);
+    const mean = async (top: number) =>
+      (await sharp(await sharp(out).extract({ left: 0, top, width: 1080, height: 10 }).toBuffer()).stats()).channels[0].mean;
+    expect(await mean(1428)).toBeLessThan((await mean(50)) - 60);
+  });
+
+  it('bytes that are not a photo → SelfieUnreadableError', async () => {
+    let err: unknown;
+    try {
+      await stampSelfie(Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(100, 1)]), ['x']);
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(SelfieUnreadableError);
   });
 });
 

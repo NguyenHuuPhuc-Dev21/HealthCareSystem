@@ -9,8 +9,10 @@
  *         the attempt is logged and shift_logs.is_mock_location_detected stays TRUE (security alert for Admin);
  *       - Haversine distance to the care address > CHECKIN_MAX_RADIUS_METERS → 403 OUT_OF_RADIUS (logged);
  *       - the selfie must exist in storage, be a real image (magic bytes) within the size limit;
- *       - then, under the booking lock: CONFIRMED → IN_PROGRESS, shift_logs written with the SERVER time and the GPS
- *         position (the selfie's watermark = that time + position), the care checklist created.
+ *       - the server burns its time + the GPS position into the photo (SRS RISK-05, NFR-SEC-01 "đóng dấu Server
+ *         Timestamp + tọa độ lên ảnh") and stores the stamped copy; the original upload stays as evidence;
+ *       - then, under the booking lock: CONFIRMED → IN_PROGRESS, shift_logs written with that same server time and
+ *         position and the stamped photo, the care checklist created.
  *     The family is notified and receives the selfie (GET /bookings/:id/tracking) — FR-SHIFT-01 step 3.
  */
 import { ExecutionStatus, type CheckInSelfieUploadUrl, type ShiftExecutionState, type SystemConfigKey } from '@healthcare-system/shared';
@@ -24,7 +26,15 @@ import { defaultShiftDeps, getShiftLogsService, notFoundBooking, sendShiftNotice
 import { SHIFT_NOTICE, type ShiftNotify, type ShiftPublish, type ShiftRow } from '../shift-logs/shift-logs.types';
 import { checkInOpensAt, checkInProblem, distanceToCare, selfieProblem, withinRadius } from './check-in.policy';
 import * as repo from './check-in.repo';
-import { SELFIE_CONTENT_TYPES, type AttemptOutcome, type CheckInInput, type CheckInProblem, type SelfieStoragePort } from './check-in.types';
+import {
+  SELFIE_CONTENT_TYPES,
+  type AttemptOutcome,
+  type CheckInInput,
+  type CheckInProblem,
+  type SelfieStamper,
+  type SelfieStoragePort,
+} from './check-in.types';
+import { SelfieUnreadableError, stampSelfie } from './check-in.watermark';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CATEGORY = 'checkin-selfie' as const;
@@ -44,6 +54,8 @@ export interface CheckInDeps {
   getNumber: (key: SystemConfigKey) => Promise<number>;
   storage: SelfieStoragePort;
   maxUploadBytes: number;
+  /** Burns server time + GPS into the selfie; defaults to the sharp implementation. */
+  stamp?: SelfieStamper;
   /** Builds the returned ShiftExecutionState (same view as GET /shift-state). */
   shifts: Pick<ShiftLogsService, 'stateOf'>;
   notify?: ShiftNotify;
@@ -126,14 +138,17 @@ export class CheckInService {
         maxRadiusMeters: radius,
       });
     }
+    // One server time for everything: the stamp on the photo, checkin_time, the attempt row.
+    const now = new Date(this.nowMs());
+    let stampedKey: string;
     try {
       await this.verifySelfie(nurseId, row.id, input.selfieKey, maxAge);
+      stampedKey = await this.stampAndStore(nurseId, row, input, now);
     } catch (err) {
       await this.logRefusal(row, nurseId, input, 'INVALID_SELFIE', distanceM);
       throw err;
     }
 
-    const now = new Date(this.nowMs());
     await this.deps.withTx(async (db) => {
       const locked = this.assertAllowed(await shiftRepo.lockShift(db, bookingId), nurseId, opensBefore);
       if (!(await repo.markSelfieUsed(db, input.selfieKey, now))) {
@@ -148,7 +163,7 @@ export class CheckInService {
         lat: input.latitude,
         lng: input.longitude,
         distanceM,
-        selfieKey: input.selfieKey,
+        selfieKey: stampedKey,
         checklist: defaultChecklist(locked.is_invasive),
       });
       await repo.insertAttempt(db, {
@@ -180,6 +195,29 @@ export class CheckInService {
       },
     ]);
     return this.deps.shifts.stateOf(this.deps.read, fresh);
+  }
+
+  /**
+   * Burns "booking code" + "server time · lat, lng" into the photo and stores the stamped JPEG under a new key
+   * (checkin-selfie/<nurse>/<uuid>.jpg) — the one shown to the family and kept as evidence.
+   */
+  private async stampAndStore(nurseId: string, row: ShiftRow, input: CheckInInput, now: Date): Promise<string> {
+    const details = { purpose: 'CHECKIN_SELFIE', key: input.selfieKey };
+    const original = await this.deps.storage.readObject(input.selfieKey);
+    if (!original) throw badRequest('FILE_NOT_UPLOADED', 'The selfie was not uploaded', details);
+    let stamped: Buffer;
+    try {
+      stamped = await (this.deps.stamp ?? stampSelfie)(original, [
+        `HealthCareSystem · Check-in ${row.booking_code}`,
+        `${watermarkText(now.getTime(), input.latitude, input.longitude)} (GMT+7)`,
+      ]);
+    } catch (err) {
+      if (err instanceof SelfieUnreadableError) throw badRequest('SELFIE_UNREADABLE', 'The selfie cannot be read as a photo; take a new one', details);
+      throw err;
+    }
+    const key = this.deps.storage.buildObjectKey(CATEGORY, nurseId, 'image/jpeg');
+    await this.deps.storage.putObject(key, stamped, 'image/jpeg');
+    return key;
   }
 
   /** Issued for this booking + nurse, fresh, unused; exists; real image; within the size limit. */
@@ -219,6 +257,8 @@ export function getCheckInService(): CheckInService {
         createUploadUrl: (key, type) => storage.createUploadUrl(key, type),
         statObject: storage.statObject,
         readObjectHead: (key) => storage.readObjectHead(key),
+        readObject: storage.readObject,
+        putObject: storage.putObject,
       },
       maxUploadBytes: storage.MAX_UPLOAD_BYTES,
       shifts: getShiftLogsService(),

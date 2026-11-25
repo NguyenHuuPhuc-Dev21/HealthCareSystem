@@ -207,7 +207,7 @@
 ### BE-2 (Phase Lead)
 - [x] `check-in` (FR-SHIFT-01): `POST /api/v1/bookings/:id/check-in` — blocks OS mock locations.
 - [x] `check-in`: Haversine distance verification $\le 200\text{ m}$ against booking location coordinates.
-- [x] `check-in`: Server-stamped timestamp and GPS coordinates embedded on live selfie → transitions `execution_status` to `IN_PROGRESS`. _(BE-2: the stamp is the server time + GPS stored with the photo and shown as `watermark`; burning it into the pixels needs an image library — open item in `check-in/README.md`)_
+- [x] `check-in`: Server-stamped timestamp and GPS coordinates embedded on live selfie → transitions `execution_status` to `IN_PROGRESS`. _(BE-2: burnt into the pixels server-side with sharp; the stamped JPEG is the photo the family sees)_
 - [x] `shift-logs` (FR-SHIFT-02): Structured clinical logging + initial condition mismatch flow (surcharge addition request or no-penalty cancellation).
 - [x] `shift-logs`: Real-time shift log synchronization via WebSocket.
 - [x] `check-out` (FR-SHIFT-04): `POST /api/v1/bookings/:id/check-out` — strictly blocks check-out if minimal care report is absent (final vitals, care activities, handover notes).

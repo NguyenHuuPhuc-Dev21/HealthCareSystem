@@ -82,6 +82,8 @@ export interface ShiftExecutionState {
   checkout?: CheckOutSummary | null;
   /** Last write to the shift log (ISO). */
   updatedAt?: string;
+  /** Refused for a condition mismatch: travel support paid to the nurse (ICU_TRAVEL_SUPPORT, VND). */
+  travelSupportAmount?: number;
 }
 
 export type ConditionSurchargeStatus = 'AWAITING_FAMILY' | 'AWAITING_PAYMENT' | 'IN_EFFECT' | 'DECLINED' | 'EXPIRED';

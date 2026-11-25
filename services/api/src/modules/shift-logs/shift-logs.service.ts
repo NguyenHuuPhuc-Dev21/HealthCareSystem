@@ -6,6 +6,7 @@
  *                                                reported only in the first CONDITION_MISMATCH_WINDOW_MINUTES:
  *                                                  SURCHARGE → the family is asked for the extra price (pricing-engine)
  *                                                  REFUSE    → the shift is cancelled, no penalty, transfer refunded 100%
+ *                                                              + travel support ICU_TRAVEL_SUPPORT paid to the nurse at once
  *    POST  /bookings/:id/condition-mismatch/refuse   refuse later (e.g. the family declined the surcharge)
  *    POST  /bookings/:id/vitals                  append a reading (idempotent on the client id: offline queue)
  *    PATCH /bookings/:id/activities/:activityId  tick / untick a care-checklist item
@@ -26,6 +27,7 @@ import {
   ExecutionStatus,
   PaymentMethod,
   PaymentStatus,
+  TxType,
   UserRole,
   type ConditionSurchargeView,
   type ShiftExecutionState,
@@ -44,6 +46,7 @@ import { loadRates, quotePrice } from '../pricing-engine/pricing-engine.service'
 import { toSnapshot } from '../pricing-engine/pricing-engine.policy';
 import type { PricingRates } from '../pricing-engine/pricing-engine.types';
 import { getShiftExtendService } from '../shift-extend/shift-extend.service';
+import { postNurseEntry } from '../wallets-ledger/wallets-ledger.ledger';
 import {
   CHECKLIST,
   buildShiftState,
@@ -84,6 +87,9 @@ export const notFoundBooking = () => notFound('BOOKING_NOT_FOUND', 'Booking not 
 
 /** Refund key of a condition-mismatch refusal — one per booking. */
 export const refusalRefundKey = (bookingId: string) => `escrow-refund:condition-mismatch:${bookingId}`;
+
+/** Travel support of a condition-mismatch refusal — one per booking (prescription-rejection uses travel-support:<id>). */
+export const refusalTravelSupportKey = (bookingId: string) => `travel-support:condition-mismatch:${bookingId}`;
 
 /** The assigned nurse, or 403 NOT_ASSIGNED_NURSE (404 when the booking does not exist). */
 export function assertAssignedNurse(row: ShiftRow | null, nurseId: string): ShiftRow {
@@ -194,21 +200,24 @@ export class ShiftLogsService {
     });
   }
 
-  /** ShiftExecutionState of a row (selfie link, surcharge, pending extension, check-out clocks). */
+  /** ShiftExecutionState of a row (selfie link, surcharge, pending extension, check-out clocks, refusal travel support). */
   async stateOf(db: Queryable, row: ShiftRow): Promise<ShiftExecutionState> {
-    const [surcharge, ext, selfieUrl, checkout] = await Promise.all([
+    const refused = row.cancellation_reason === 'CONDITION_MISMATCH';
+    const [surcharge, ext, selfieUrl, checkout, travelSupport] = await Promise.all([
       repo.latestSurcharge(db, row.id),
       repo.pendingExtension(db, row.id),
       row.checkin_selfie_url ? this.deps.selfieUrl(row.checkin_selfie_url) : Promise.resolve(null),
       this.checkoutSummary(row),
+      refused ? repo.ledgerAmount(db, refusalTravelSupportKey(row.id)) : Promise.resolve(null),
     ]);
-    return buildShiftState(row, {
+    const state = buildShiftState(row, {
       nowMs: this.nowMs(),
       surcharge: surcharge ? this.surchargeView(row, surcharge) : null,
       pendingExtension: ext,
       selfieUrl,
       checkout,
     });
+    return refused ? { ...state, travelSupportAmount: travelSupport ?? 0 } : state;
   }
 
   /** Clocks started by the check-out (FR-SHIFT-04): settlement / commission, record window, reviews. */
@@ -390,6 +399,9 @@ export class ShiftLogsService {
   /**
    * Cancels the running shift for a condition mismatch, under the booking lock. The nurse is never penalised
    * (no deposit deduction, no TrustScore change); the family's prepayment — incl. paid extensions — is refunded 100%.
+   * The nurse came to the address for nothing through no fault of hers, so she receives the fixed travel support
+   * ICU_TRAVEL_SUPPORT from the operations fund, like an invalid medical order (SRS FR-BOOK-02 rule 3, RISK-01) and an
+   * ICU transfer (§5.2 row 5): ONE TRAVEL_SUPPORT ledger row into available_balance, in this transaction.
    */
   private async refuseLocked(db: Queryable, row: ShiftRow, nurseId: string, reason: string | null, now: Date): Promise<ShiftNotice[]> {
     const s = await repo.latestSurcharge(db, row.id);
@@ -415,7 +427,30 @@ export class ShiftLogsService {
         await repo.setPaymentStatus(db, row.id, PaymentStatus.REFUNDED);
       }
     }
+    const travelSupport = await this.deps.getNumber('ICU_TRAVEL_SUPPORT');
+    if (travelSupport > 0) {
+      await postNurseEntry(db, {
+        userId: nurseId,
+        bookingId: row.id,
+        txType: TxType.TRAVEL_SUPPORT,
+        balance: 'AVAILABLE',
+        delta: travelSupport,
+        idempotencyKey: refusalTravelSupportKey(row.id),
+        externalRef: null, // operations fund → nurse wallet is internal in the simulated scope (same as prescription-rejection)
+      });
+    }
     return [
+      {
+        userId: nurseId,
+        bookingId: row.id,
+        type: SHIFT_NOTICE.CANCELLED,
+        title: `Ca ${row.booking_code} đã dừng, không bị phạt`,
+        body:
+          travelSupport > 0
+            ? `Bạn được hỗ trợ ${vnd(travelSupport)} phí đi lại, đã cộng vào số dư khả dụng. Không trừ ký quỹ, không trừ điểm uy tín.`
+            : 'Không trừ ký quỹ, không trừ điểm uy tín.',
+        data: { bookingId: row.id, bookingCode: row.booking_code },
+      },
       {
         userId: row.customer_id,
         bookingId: row.id,

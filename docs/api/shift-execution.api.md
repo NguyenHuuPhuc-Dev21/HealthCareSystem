@@ -74,6 +74,12 @@ accepted and ignored. → `200` `ShiftExecutionState` (`executionStatus: "IN_PRO
 `checkInDistanceMeters`, `checkInWatermark: "2026-11-16 07:58:00 · 10.77790, 106.70090"`, `checkInSelfieUrl` 10-min link,
 `careActivities`).
 
+**Stamp on the photo** (SRS RISK-05, NFR-SEC-01: "đóng dấu Server Timestamp + tọa độ lên ảnh"): the server reads the
+upload, burns a band at the bottom with `HealthCareSystem · Check-in <booking code>` and
+`<server time> · <lat>, <lng> (GMT+7)` into the pixels, re-encodes it as JPEG (≤ 1080 × 1440, EXIF orientation applied,
+all metadata removed) and stores it under a new key. `checkInSelfieUrl` / tracking `selfieUrl` point to the stamped
+photo; the original upload is kept as evidence. The stamp time is exactly `checkedInAt`.
+
 | Status | Code | When |
 |---|---|---|
 | 403 | `NOT_ASSIGNED_NURSE` | another nurse |
@@ -84,6 +90,7 @@ accepted and ignored. → `200` `ShiftExecutionState` (`executionStatus: "IN_PRO
 | 409 | `BOOKING_LOCATION_MISSING` | the care address has no GPS position |
 | 400 | `SELFIE_NOT_ISSUED` / `SELFIE_EXPIRED` / `SELFIE_ALREADY_USED` | key not issued for this shift, older than 10 min, or reused — logged |
 | 400 | `INVALID_FILE_KEY` / `FILE_NOT_UPLOADED` / `FILE_TOO_LARGE` / `FILE_TYPE_NOT_ALLOWED` | storage checks (magic bytes) — logged |
+| 400 | `SELFIE_UNREADABLE` | the file cannot be decoded as a photo (stamping failed) — logged |
 
 On success: booking → `IN_PROGRESS`, `shift_logs` row with the server time + position, the family is notified
 (`SHIFT_CHECKED_IN`) and sees the selfie in `GET /bookings/:id/tracking`.
@@ -117,7 +124,11 @@ systolic, temperature 30–45 °C, SpO2 50–100, respiratory rate 4–60, gluco
 - **`REFUSE`** — the shift is cancelled **without penalty** for the nurse (no deposit deduction, no TrustScore change):
   booking `CANCELLED`, `cancellation_reason = CONDITION_MISMATCH`, every open extension/surcharge expired, a
   bank-transfer prepayment (incl. paid extensions) refunded 100% from escrow (`payment_status = REFUNDED`).
-  The family is notified (`BOOKING_CANCELLED`). Refusing is closed once a surcharge is in effect (`409 SURCHARGE_IN_EFFECT`).
+  The nurse came for nothing through no fault of hers: she receives the fixed **travel support `ICU_TRAVEL_SUPPORT`
+  (50,000 VND)** from the operations fund — one `TRAVEL_SUPPORT` ledger row into `available_balance`
+  (key `travel-support:condition-mismatch:<bookingId>`), in the same transaction, as for an invalid medical order
+  (SRS FR-BOOK-02 rule 3, RISK-01) and an ICU transfer (§5.2 row 5). The state then carries `travelSupportAmount`.
+  Both sides are notified (`BOOKING_CANCELLED`). Refusing is closed once a surcharge is in effect (`409 SURCHARGE_IN_EFFECT`).
 
 `conditionSurcharge` in the state / tracking:
 

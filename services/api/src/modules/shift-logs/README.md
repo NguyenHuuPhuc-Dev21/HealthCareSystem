@@ -29,7 +29,9 @@ Also hosts what the three shift modules share: the shift row (`repo.findShift` /
   (contagious disease, aggressive environment) get `SURCHARGE_NOT_APPLICABLE` and go to `REFUSE`.
 - Family answer: CASH → applied at once; BANK_TRANSFER → `-PT<n>` transfer within `PAYMENT_TIMEOUT_MINUTES`, applied by
   the webhook; a late transfer is refunded 100%.
-- `REFUSE`: booking `CANCELLED` (`CONDITION_MISMATCH`), no penalty, open requests expired, escrow refunded 100%.
+- `REFUSE`: booking `CANCELLED` (`CONDITION_MISMATCH`), no penalty, open requests expired, escrow refunded 100%, and the
+  nurse paid the fixed travel support `ICU_TRAVEL_SUPPORT` at once (`TRAVEL_SUPPORT` ledger row,
+  `travel-support:condition-mismatch:<bookingId>`) — same rule as FR-BOOK-02 rule 3 / §5.2 row 5.
 
 ## Notes for the team
 
@@ -44,5 +46,4 @@ Also hosts what the three shift modules share: the shift row (`repo.findShift` /
 ## Open items
 
 1. Per-service care checklists (catalogue, Phase 7 admin-catalog) — today one default checklist (+ order check for invasive).
-2. PO: travel support for a nurse who refuses a mismatched shift (today: no payment, customer refunded 100%).
-3. PO values: 30 min window (SRS), checkout tolerance 15 min, check-in opens 30 min before.
+2. PO values: 30 min window (SRS), checkout tolerance 15 min, check-in opens 30 min before.

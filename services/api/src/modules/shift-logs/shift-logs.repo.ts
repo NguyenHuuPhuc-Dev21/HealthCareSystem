@@ -339,3 +339,9 @@ export async function canWatch(db: Queryable, bookingId: string, user: { id: str
   const { rows } = await db.query(`SELECT 1 FROM bookings WHERE id = $1 AND (customer_id = $2 OR nurse_id = $2)`, [bookingId, user.id]);
   return rows.length > 0;
 }
+
+/** Amount of one ledger row by its idempotency key (e.g. the refusal travel support), null when none. */
+export async function ledgerAmount(db: Queryable, idempotencyKey: string): Promise<number | null> {
+  const { rows } = await db.query<{ amount: string }>(`SELECT amount FROM wallet_transactions WHERE idempotency_key = $1`, [idempotencyKey]);
+  return rows[0] ? Number(rows[0].amount) : null;
+}
