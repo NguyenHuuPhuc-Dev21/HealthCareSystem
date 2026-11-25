@@ -62,7 +62,7 @@ Gates, in this order — nothing is written unless all pass:
 | 1 | service exists · not prohibited (Group 3) · active | `404 SERVICE_NOT_FOUND` · **`403 SERVICE_PROHIBITED`** · `400 SERVICE_NOT_AVAILABLE` |
 | 2 | slot: starts in the future; shifts last 4 / 8 / 12 / 24 h; a `PER_TIME` visit ≤ 4 h | `400 START_IN_PAST` · `400 END_BEFORE_START` · `400 INVALID_DURATION` |
 | 3 | invasive: medical order photo, issued ≤ 7 days ago, uploaded by this customer | `400 PRESCRIPTION_REQUIRED` · `PRESCRIPTION_EXPIRED` · `PRESCRIPTION_DATE_IN_FUTURE` · `INVALID_FILE_KEY` · `FILE_NOT_UPLOADED` · `FILE_TYPE_NOT_ALLOWED` · `FILE_TOO_LARGE` |
-| 4 | profile is the caller's · Decree-13 consent active · home care needs eKYC `VERIFIED` | `403 FORBIDDEN` · `403 CONSENT_REQUIRED` · `403 EKYC_REQUIRED` |
+| 4 | account not locked by an Admin (`users.status` not `SUSPENDED` / `BANNED`, admin-users Phase 7) · profile is the caller's · Decree-13 consent active · home care needs eKYC `VERIFIED` | `403 ACCOUNT_SUSPENDED` · `403 FORBIDDEN` · `403 CONSENT_REQUIRED` · `403 EKYC_REQUIRED` |
 | 5 | invited nurse is ACTIVE | `400 INVITED_NURSE_NOT_AVAILABLE` |
 
 Prohibited services are also refused by a **database trigger** (`trg_bookings_no_prohibited_service`, migration 0009), so

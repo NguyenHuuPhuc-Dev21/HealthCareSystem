@@ -344,7 +344,7 @@
 - [ ] `admin-configs`: Dynamic configuration updates (§5.1) without code redeployment; every mutation writes an `audit_logs` record with `updated_by`.
 
 ### BE-2
-- [ ] `admin-users`: User search and management; account locking/unlocking across `ACTIVE`, `SUSPENDED`, `BANNED`, strictly respecting `profile_status` as the sole authority for shift eligibility.
+- [x] `admin-users`: User search and management; account locking/unlocking across `ACTIVE`, `SUSPENDED`, `BANNED`, strictly respecting `profile_status` as the sole authority for shift eligibility.
 
 ### BE-3
 - [ ] `admin-finance` (CT-15): Reconciliation engine: total escrow held, total 15% platform commission, total payouts, total refunds, pending withdrawal requests.

@@ -59,6 +59,8 @@ import { createShiftLogsRouter } from './modules/shift-logs/shift-logs.routes';
 import { getShiftLogsService } from './modules/shift-logs/shift-logs.service';
 import { createCheckOutRouter } from './modules/check-out/check-out.routes';
 import { createChatRouter } from './modules/chat/chat.routes';
+import { createAdminUsersRouter } from './modules/admin-users/admin-users.routes';
+import { getAdminUsersService } from './modules/admin-users/admin-users.service';
 import { getChatService } from './modules/chat/chat.service';
 import { getCheckOutService } from './modules/check-out/check-out.service';
 
@@ -96,6 +98,7 @@ function buildApiRouter(): Router {
   api.use(createShiftLogsRouter(getShiftLogsService())); // BE-2 · Phase 4 · shift-logs (assessment, vitals, checklist, tracking)
   api.use(createCheckOutRouter(getCheckOutService())); // BE-2 · Phase 4 · check-out (care report, 24h/12h clocks)
   api.use(createChatRouter(getChatService())); // BE-2 · Phase 6 · chat (masked in-app chat & call logs, FR-CHAT-01)
+  api.use(createAdminUsersRouter(getAdminUsersService())); // BE-2 · Phase 7 · admin-users (search, lock / unlock accounts, FR-ADMIN-01)
   api.use(createCancellationPolicyRouter(getCancellationPolicyService())); // BE-1 · Phase 5 · cancellation-policy
   api.use(createReviewsRouter(getReviewsService())); // BE-1 · Phase 6 · reviews-trustscore
   api.use(createWalletsLedgerRouter(getWalletsLedgerService())); // BE-3 · Phase 5 · wallets-ledger (balances, history, earnings, upcoming settlements)

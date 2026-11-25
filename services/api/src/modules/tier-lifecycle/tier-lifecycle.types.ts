@@ -21,7 +21,8 @@ export const GPHN_EXPIRY_SWEEP_SCHEDULE = { pattern: '5 0 * * *', tz: TIMEZONE_D
  */
 export const REDISPATCH_JOB = 'matching-radar.redispatch';
 
-export type RedispatchReason = 'NURSE_TIER_DEMOTED';
+/** NURSE_SUSPENDED / NURSE_BANNED: an Admin locked the nurse (admin-users, BE-2 Phase 7). */
+export type RedispatchReason = 'NURSE_TIER_DEMOTED' | 'NURSE_SUSPENDED' | 'NURSE_BANNED';
 
 export interface RedispatchPayload {
   bookingId: string;

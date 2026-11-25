@@ -94,6 +94,16 @@ The SOS behaviour is specified functionally (FR-SHIFT-05): the Nurse App opens t
 
 - A dedicated SOS API endpoint: **[Not specified in SRS v2.0 — open item]** (SRS §8 lists no SOS endpoint; see the Open Decisions Register).
 
+## 9. Admin — User Management
+
+FR-ADMIN-01 "Quản lý Người dùng": search, view, lock / unlock customer and nurse accounts. For a nurse, `nurse_profiles.profile_status` stays the only source of truth for taking shifts. Detail: [`admin-users.api.md`](./admin-users.api.md).
+
+| Method & Endpoint | Role | Description |
+|---|---|---|
+| `GET /api/v1/admin/users` | ADMIN | Search customers and nurses (name / email, phone, id), filter `role` / `status`, paginated. |
+| `GET /api/v1/admin/users/:id` | ADMIN | Detail: account, nurse profile, deposit / commission / TrustScore standing, reactivation blockers, status history. |
+| `PATCH /api/v1/admin/users/:id/status` | ADMIN | `ACTIVE` / `SUSPENDED` / `BANNED` with a reason; nurse shifts re-dispatched; sessions revoked on ban; audit `CHANGE_ACCOUNT_STATUS`. |
+
 ---
 
 ## Cross-Cutting Rules (SRS §9)

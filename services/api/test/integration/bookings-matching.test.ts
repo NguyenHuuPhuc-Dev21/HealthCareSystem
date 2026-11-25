@@ -280,6 +280,16 @@ describe('bookings + pricing-engine + matching-radar (integration)', () => {
       expect(rows[0].n).toBe(0);
     });
 
+    it('a customer locked by an Admin (admin-users, Phase 7) cannot create bookings; unlocked again → can', async () => {
+      const c = await createCustomer();
+      await pool.query(`UPDATE users SET status = 'SUSPENDED' WHERE id = $1`, [c.id]);
+      await rejectsWith(bookings.create(c.id, body(c)), 403, 'ACCOUNT_SUSPENDED');
+      await pool.query(`UPDATE users SET status = 'BANNED' WHERE id = $1`, [c.id]);
+      await rejectsWith(bookings.create(c.id, body(c)), 403, 'ACCOUNT_SUSPENDED');
+      await pool.query(`UPDATE users SET status = 'ACTIVE' WHERE id = $1`, [c.id]);
+      expect((await bookings.create(c.id, body(c))).id).toBeTruthy();
+    });
+
     it('invasive service: medical order required and at most 7 days old', async () => {
       const c = await createCustomer();
       const invasive = { serviceCode: 'SRV_IV_INJECTION' };
