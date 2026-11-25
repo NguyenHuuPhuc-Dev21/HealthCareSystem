@@ -52,6 +52,9 @@ import { AccountClosureScreen } from '../features/wallet/AccountClosureScreen';
 import { WithdrawScreen } from '../features/wallet/WithdrawScreen';
 import { CommissionPaymentScreen } from '../features/commission-payment/CommissionPaymentScreen';
 import { TrustScoreScreen } from '../features/trust-score/TrustScoreScreen';
+import { DisputeListScreen } from '../features/disputes/DisputeListScreen';
+import { DisputeDetailScreen } from '../features/disputes/DisputeDetailScreen';
+import { OpenDisputeScreen } from '../features/disputes/OpenDisputeScreen';
 import { getDepositStatus, getRefundRequest } from '../features/wallet/deposit.api';
 import { getCommissionDebts } from '../features/commission-payment/commission-payment.api';
 import { ShiftResultScreen } from '../features/active-shift/ShiftResultScreen';
@@ -353,6 +356,9 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
                   onPayCommissionNow={(bookingId) =>
                     navigation.replace('CommissionPayment', { bookingId })
                   }
+                  onOpenDispute={(bookingId) =>
+                    navigation.navigate('OpenDispute', { bookingId })
+                  }
                   onRequestCurrentPosition={locationProvider}
                   onCaptureLivePhoto={backCameraProvider}
                   onShiftCompleted={(outcome) =>
@@ -429,6 +435,21 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
           <ActiveStack.Screen
             name="TrustScore"
             component={TrustScoreScreen}
+            options={{ headerShown: false }}
+          />
+          <ActiveStack.Screen
+            name="DisputeList"
+            component={DisputeListScreen}
+            options={{ headerShown: false }}
+          />
+          <ActiveStack.Screen
+            name="DisputeDetail"
+            component={DisputeDetailScreen}
+            options={{ headerShown: false }}
+          />
+          <ActiveStack.Screen
+            name="OpenDispute"
+            component={OpenDisputeScreen}
             options={{ headerShown: false }}
           />
         </ActiveStack.Navigator>

@@ -64,6 +64,7 @@ interface ActiveShiftScreenProps {
   paymentMethod?: 'CASH' | 'BANK_TRANSFER';
   bookingAmount?: number;
   onPayCommissionNow?: (bookingId: string) => void;
+  onOpenDispute?: (bookingId: string) => void;
   onRequestCurrentPosition?: () => Promise<DeviceGeoCoords>;
   onCaptureLivePhoto?: () => Promise<string | null>;
   onShiftCompleted: (outcome?: { type: 'COMPLETED' | 'CANCELLED_SAFE'; note?: string }) => void;
@@ -82,6 +83,7 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
   paymentMethod = 'CASH',
   bookingAmount = 500000,
   onPayCommissionNow,
+  onOpenDispute,
   onRequestCurrentPosition,
   onCaptureLivePhoto,
   onShiftCompleted,
@@ -518,13 +520,25 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
           </View>
 
           {/* Unified Zero-Latency SOS Button */}
-          <SosButton
-            bookingId={bookingId}
-            patientLatitude={patientLatitude}
-            patientLongitude={patientLongitude}
-            onRequestCurrentPosition={onRequestCurrentPosition}
-            getLatestVitals={getLatestVitalsRecord}
-          />
+          <View style={styles.headerActions}>
+            {onOpenDispute ? (
+              <TouchableOpacity
+                style={styles.disputeBtn}
+                onPress={() => onOpenDispute(bookingId)}
+                accessibilityRole="button"
+                accessibilityLabel="Mở khiếu nại ca trực"
+              >
+                <Text style={styles.disputeBtnText}>Khiếu nại</Text>
+              </TouchableOpacity>
+            ) : null}
+            <SosButton
+              bookingId={bookingId}
+              patientLatitude={patientLatitude}
+              patientLongitude={patientLongitude}
+              onRequestCurrentPosition={onRequestCurrentPosition}
+              getLatestVitals={getLatestVitalsRecord}
+            />
+          </View>
         </View>
 
         {/* Offline Queue Status Banner */}
@@ -683,6 +697,24 @@ const styles = StyleSheet.create({
     borderBottomColor: tokens.colors.borderHairline,
     paddingTop: 12,
     paddingHorizontal: 16,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  disputeBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: tokens.radii.sm,
+    borderWidth: 1,
+    borderColor: tokens.colors.alertCrimson,
+    backgroundColor: tokens.colors.alertCrimsonSoft,
+  },
+  disputeBtnText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: tokens.colors.alertCrimson,
   },
   headerMeta: {
     flexDirection: 'row',

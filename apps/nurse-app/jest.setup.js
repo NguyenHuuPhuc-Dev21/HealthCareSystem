@@ -97,3 +97,13 @@ jest.mock('react-native-svg', () => {
   };
 });
 
+jest.mock('react-native-image-picker', () => ({
+  launchCamera: jest.fn().mockResolvedValue({ assets: [] }),
+  launchImageLibrary: jest.fn().mockResolvedValue({ assets: [] }),
+}));
+
+jest.mock('react-native-video', () => {
+  const React = require('react');
+  return (props) => React.createElement('Video', props, props.children);
+});
+

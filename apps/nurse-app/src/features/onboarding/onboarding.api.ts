@@ -6,6 +6,7 @@ import {
 import { apiClient } from '../../lib/api-client';
 import { env } from '../../lib/env';
 import { loadSession } from '../../lib/storage';
+import { putFileToPresignedUrl as sharedPutFileToPresignedUrl } from '../../lib/upload';
 import {
   mockGetOnboardingStatus,
   mockGetUploadUrls,
@@ -54,28 +55,12 @@ export async function putFileToPresignedUrl(
   fileUri: string,
   contentType: string = 'image/jpeg'
 ): Promise<boolean> {
-  // Trong môi trường mock hoặc URL mock
-  if (env.useMockOnboarding || url.startsWith('mock://') || fileUri.startsWith('mock://')) {
-    await new Promise((r) => setTimeout(r, 100));
-    return true;
-  }
-
-  try {
-    const fileResponse = await fetch(fileUri);
-    const blob = await fileResponse.blob();
-
-    const uploadRes = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': contentType,
-      },
-      body: blob,
-    });
-
-    return uploadRes.ok;
-  } catch {
-    return false;
-  }
+  return sharedPutFileToPresignedUrl(
+    url,
+    fileUri,
+    contentType,
+    env.useMockOnboarding
+  );
 }
 
 /**
