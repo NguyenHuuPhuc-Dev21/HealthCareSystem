@@ -26,9 +26,10 @@ import {
   User,
   UserX,
 } from 'lucide-react-native';
-import { DocType, NurseTier, VerificationStatus } from '@healthcare-system/shared';
+import { DocType, DisputeStatus, NurseTier, VerificationStatus } from '@healthcare-system/shared';
 import { AppButton, CareNestLogoMark, StatusBadge } from '../../components';
 import { useAuth } from '../auth/AuthContext';
+import { getMyDisputes } from '../disputes/disputes.api';
 import { formatMaskedPhone } from '../../lib/formatters';
 import { IS_DEV } from '../../lib/hardware-providers';
 import { tokens } from '../../styles/tokens';
@@ -51,6 +52,35 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
   const credentials = session?.credentials ?? [];
 
   const [largeFont, setLargeFont] = useState(false);
+  const [needsRebuttalCount, setNeedsRebuttalCount] = useState(0);
+
+  React.useEffect(() => {
+    let active = true;
+    const loadDisputeBadge = async () => {
+      try {
+        const res = await getMyDisputes();
+        if (active && res.success) {
+          const count = res.data.filter(
+            (d) =>
+              d.status === DisputeStatus.OPEN &&
+              d.openedBy === 'PATIENT' &&
+              !d.nurseRebuttal
+          ).length;
+          setNeedsRebuttalCount(count);
+        }
+      } catch {
+        // ignore
+      }
+    };
+    void loadDisputeBadge();
+    const unsub = navigation.addListener('focus', () => {
+      void loadDisputeBadge();
+    });
+    return () => {
+      active = false;
+      unsub();
+    };
+  }, [navigation]);
 
   const isTier2 = profile?.tier === NurseTier.TIER_2_SPECIALIST;
   const isRetired = Boolean(profile?.is_retired_medical_staff);
@@ -280,7 +310,29 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
             <ChevronRight color={tokens.colors.inkSecondary} size={20} />
           </TouchableOpacity>
 
-          {/* 6. Ngừng hợp tác & hoàn ký quỹ (A10 / ADR-0004) */}
+          {/* 6. Khiếu nại & phản hồi (A15) */}
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('DisputeList')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Khiếu nại và phản hồi"
+          >
+            <View style={styles.menuIconBox}>
+              <Shield color={tokens.colors.accentOchre} size={22} />
+            </View>
+            <View style={styles.menuTextBox}>
+              <Text style={[styles.menuTitle, largeFont && styles.menuTitleLarge]}>
+                Khiếu nại{needsRebuttalCount > 0 ? ` (${needsRebuttalCount} cần phản hồi)` : ''}
+              </Text>
+              <Text style={styles.menuSub}>
+                Phản hồi bằng chứng &amp; theo dõi phân xử
+              </Text>
+            </View>
+            <ChevronRight color={tokens.colors.inkSecondary} size={20} />
+          </TouchableOpacity>
+
+          {/* 7. Ngừng hợp tác & hoàn ký quỹ (A10 / ADR-0004) */}
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => navigation.navigate('AccountClosure')}

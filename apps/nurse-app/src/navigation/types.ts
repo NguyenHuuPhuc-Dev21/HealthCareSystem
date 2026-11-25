@@ -54,4 +54,7 @@ export type ActiveStackParamList = {
   CommissionPayment: { bookingId?: string } | undefined;
   Withdraw: undefined;
   TrustScore: undefined;
+  DisputeList: undefined;
+  DisputeDetail: { disputeId: string };
+  OpenDispute: { bookingId: string };
 };
