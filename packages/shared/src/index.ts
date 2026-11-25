@@ -18,6 +18,8 @@ export * from './contracts/dispute.contracts';
 export * from './contracts/chat.contracts';
 export * from './contracts/notification.contracts';
 export * from './labels/deposit';
+export * from './labels/trust-score';
+export * from './labels/trust-score';
 export * from './chat/contact-detector';
 export * from './mocks/job-board.mock';
 export * from './mocks/wallet.mock-data';

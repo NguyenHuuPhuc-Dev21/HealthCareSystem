@@ -30,6 +30,7 @@ export const DEFAULT_CANCELLATION_PENALTY_RATE = 0.20;   // 20% cancellation pen
 
 export const TRUST_SCORE_SUSPEND_THRESHOLD = 60; // < 60 điểm: tạm khóa nhận ca (SRS §5.1, FR-RATE-01)
 export const TRUST_SCORE_WARNING_THRESHOLD = 70; // 60–69 điểm: ngưỡng cảnh báo vàng
+export const TRUST_SCORE_GOOD_THRESHOLD = 80; // >= 80 điểm: mức rất tốt, ưu tiên gợi ý ca
 
 export const TIMEZONE_DISPLAY = 'Asia/Ho_Chi_Minh';    // Canonical timezone
 

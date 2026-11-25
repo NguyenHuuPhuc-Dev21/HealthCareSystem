@@ -41,6 +41,12 @@ export const env = {
   get useMockWallet(): boolean {
     return nativeConfig.USE_MOCK_WALLET !== 'false' && process.env.USE_MOCK_WALLET !== 'false';
   },
+  get useMockTrustScore(): boolean {
+    return (
+      nativeConfig.USE_MOCK_TRUST_SCORE !== 'false' &&
+      process.env.USE_MOCK_TRUST_SCORE !== 'false'
+    );
+  },
   get useMockCredentials(): boolean {
     return (
       nativeConfig.USE_MOCK_CREDENTIALS === 'true' ||
@@ -59,4 +65,3 @@ export const env = {
     return nativeConfig.SUPPORT_HOTLINE?.trim() || process.env.SUPPORT_HOTLINE || '1900 6868';
   },
 };
-

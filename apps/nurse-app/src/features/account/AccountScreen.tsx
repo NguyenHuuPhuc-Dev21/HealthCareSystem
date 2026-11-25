@@ -140,10 +140,16 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
             label={isTier2 ? 'Cấp 2' : 'Cấp 1'}
             tone={isTier2 ? 'jade' : 'neutral'}
           />
-          <View style={styles.chipJade}>
+          <TouchableOpacity
+            style={styles.chipJade}
+            onPress={() => navigation.navigate('TrustScore')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Xem chi tiết điểm TrustScore"
+          >
             <ShieldCheck color={tokens.colors.brandJade} size={14} />
             <Text style={styles.chipJadeText}>TrustScore {trustScore}/100</Text>
-          </View>
+          </TouchableOpacity>
           {ratingAvg > 0 ? (
             <View style={styles.chipAmber}>
               <Star color={tokens.colors.accentOchre} size={14} />
@@ -252,7 +258,29 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
             <ChevronRight color={tokens.colors.inkSecondary} size={20} />
           </TouchableOpacity>
 
-          {/* 5. Ngừng hợp tác & hoàn ký quỹ (A10 / ADR-0004) */}
+          {/* 5. Đánh giá & TrustScore (A13) */}
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('TrustScore')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Đánh giá và điểm TrustScore"
+          >
+            <View style={styles.menuIconBox}>
+              <ShieldCheck color={tokens.colors.brandJade} size={22} />
+            </View>
+            <View style={styles.menuTextBox}>
+              <Text style={[styles.menuTitle, largeFont && styles.menuTitleLarge]}>
+                Đánh giá &amp; TrustScore
+              </Text>
+              <Text style={styles.menuSub}>
+                Điểm uy tín {trustScore}/100 · Lịch sử &amp; đánh giá khách hàng
+              </Text>
+            </View>
+            <ChevronRight color={tokens.colors.inkSecondary} size={20} />
+          </TouchableOpacity>
+
+          {/* 6. Ngừng hợp tác & hoàn ký quỹ (A10 / ADR-0004) */}
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => navigation.navigate('AccountClosure')}
