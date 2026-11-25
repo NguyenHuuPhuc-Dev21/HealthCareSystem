@@ -24,12 +24,15 @@ export function needsTier2(service: { is_invasive: boolean; required_tier: Nurse
  *  - otherwise the GRACE PERIOD: only BANK_TRANSFER bookings (100% already in escrow, so a penalty can be taken
  *    from the shift money), while now < deposit_grace_expires_at and
  *    (grace shifts completed + transfer shifts currently held) < DEPOSIT_GRACE_MAX_SHIFTS;
- *  - cash bookings always need the full deposit.
+ *  - cash bookings always need the full deposit;
+ *  - a debt (deposit_balance < 0 after a penalty) is never covered by grace (BR-04, FR-PAY-03).
  * Counting held shifts as well caps the exposure: a nurse in grace can never hold more than the cap at once.
  */
 export function depositAllows(nurse: NurseGateRow, paymentMethod: PaymentMethod | string, rule: DepositRule, nowMs: number): boolean {
   if (Number(nurse.deposit_balance) >= rule.minDeposit) return true;
   if (paymentMethod !== PaymentMethod.BANK_TRANSFER) return false;
+  // A debt (negative deposit after a penalty) is never covered by grace: BR-04 / FR-PAY-03 unchanged by ADR-0004.
+  if (Number(nurse.deposit_balance) < 0) return false;
   if (!nurse.deposit_grace_expires_at || new Date(nurse.deposit_grace_expires_at).getTime() <= nowMs) return false;
   return Number(nurse.deposit_grace_shifts_used) + Number(nurse.held_transfer_shifts) < rule.graceMaxShifts;
 }

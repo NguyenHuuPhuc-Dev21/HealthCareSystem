@@ -17,6 +17,13 @@ Contract: [`docs/api/deposits.api.md`](../../../../../docs/api/deposits.api.md) 
 Migration `0017_deposits.sql`: grace-start trigger, `nurse_bank_accounts`, `deposit_topups`,
 `deposit_penalty_appeals`, `deposit_reconciliations`.
 
+## Suspension on a shortfall (BE-2, migration 0025)
+
+Trigger `trg_wallets_deposit_suspension`: a deduction that leaves `deposit_balance` below `MIN_NURSE_DEPOSIT` (outside
+the ADR-0004 grace — and any debt, grace or not) sets the profile `SUSPENDED` / `DEPOSIT_SHORTFALL`; a credit that
+brings it back to `MIN_NURSE_DEPOSIT` sets it `ACTIVE` again (SRS v2.0 nurse lifecycle, FR-PAY-03). Nothing to call:
+it fires inside the transaction that moved the money. Test: `test/integration/deposit-suspension.test.ts`.
+
 ## For other modules
 
 ```ts

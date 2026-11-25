@@ -113,6 +113,22 @@ once, then daily (02:15):
 `PUT /nurse/bank-account` body `{ "bankName": "Vietcombank", "accountNumber": "0071006899", "accountHolder": "NGUYEN THI LAN" }`
 (account number: 6–30 digits). `GET` → `{ "bankName", "accountMasked": "•••• 6899", "accountHolder" }` or `null`.
 
+## Profile suspension on a deposit shortfall (BE-2 · migration 0025)
+
+SRS v2.0 nurse lifecycle and FR-PAY-03, enforced by the trigger `trg_wallets_deposit_suspension` on
+`wallets.deposit_balance` (every writer is covered, in its own transaction):
+
+| Event | Result |
+|---|---|
+| a deduction (`PENALTY_DEDUCT`) leaves the deposit below `MIN_NURSE_DEPOSIT`, outside the ADR-0004 grace | `nurse_profiles.profile_status = SUSPENDED`, `suspended_reason = DEPOSIT_SHORTFALL` |
+| a deduction leaves the deposit **negative** (debt) | suspended even during grace (BR-04: a debt is never covered) |
+| a credit (`TOPUP`, `PENALTY_REVERSAL`, `DEPOSIT_WITHHOLD`) brings it back to `MIN_NURSE_DEPOSIT` | `ACTIVE` again, `suspended_reason = NULL` |
+
+Only `ACTIVE` profiles are suspended; a profile suspended for another reason (`COMMISSION_OVERDUE`,
+`TRUST_SCORE_BELOW_THRESHOLD`) keeps it, and only `DEPOSIT_SHORTFALL` is lifted here. A nurse closing her account
+(`closure_requested_at`) is not suspended. The nurse sees it in `GET /wallets/me` (`profileStatus`,
+`profileSuspendedReason`); matching answers `403 NURSE_NOT_ACTIVE`.
+
 ## Background jobs (Vietnam time)
 
 - `deposits.reconciliation` 01:30 — each wallet's `deposit_balance` vs its DEPOSIT ledger rows, totals vs the custody
