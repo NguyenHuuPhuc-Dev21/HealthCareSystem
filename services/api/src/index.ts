@@ -13,6 +13,9 @@ import { describeError } from './core/errors';
 import { getAccountsOtpService } from './modules/accounts-otp/accounts-otp.service';
 import { startRealtimeSubscriber } from './modules/notifications/notifications.realtime';
 import { attachNotificationSocket } from './modules/notifications/notifications.socket';
+import { attachShiftSocket, startShiftSubscriber } from './modules/shift-logs/shift-logs.realtime';
+import { canWatch } from './modules/shift-logs/shift-logs.repo';
+import { getPool } from './core/database';
 
 export async function bootstrap(): Promise<void> {
   await checkConnection();
@@ -26,12 +29,19 @@ export async function bootstrap(): Promise<void> {
   const auth = getAccountsOtpService();
   const notificationSocket = attachNotificationSocket(server, { verify: (token) => auth.sessions.verifyAccessToken(token) });
   const stopRealtime = startRealtimeSubscriber();
+  // BE-2 · Phase 4 · shift-logs: /ws/shifts?bookingId= (customer, assigned nurse, Admin) + events from other instances.
+  const shiftSocket = attachShiftSocket(server, {
+    verify: (token) => auth.sessions.verifyAccessToken(token),
+    canWatch: (bookingId, user) => canWatch(getPool(), bookingId, user),
+  });
+  const stopShiftRealtime = startShiftSubscriber();
 
   const shutdown = (signal: string) => {
     console.log(`[Bootstrap] ${signal} received, shutting down…`);
     void notificationSocket.close();
+    void shiftSocket.close();
     server.close(() => {
-      Promise.all([closePool(), closeKeyValueStore(), stopRealtime()])
+      Promise.all([closePool(), closeKeyValueStore(), stopRealtime(), stopShiftRealtime()])
         .catch((err: Error) => console.error('[Bootstrap] Pool close error:', err.message))
         .finally(() => process.exit(0));
     });

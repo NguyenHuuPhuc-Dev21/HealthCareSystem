@@ -53,6 +53,12 @@ import { getPrescriptionRejectionService } from './modules/prescription-rejectio
 import { getPrescriptionGateService } from './modules/prescription-gate/prescription-gate.service';
 import { createPrivacyConsentRouter } from './modules/privacy-consent/privacy-consent.routes';
 import { getPrivacyConsentService } from './modules/privacy-consent/privacy-consent.service';
+import { createCheckInRouter } from './modules/check-in/check-in.routes';
+import { getCheckInService } from './modules/check-in/check-in.service';
+import { createShiftLogsRouter } from './modules/shift-logs/shift-logs.routes';
+import { getShiftLogsService } from './modules/shift-logs/shift-logs.service';
+import { createCheckOutRouter } from './modules/check-out/check-out.routes';
+import { getCheckOutService } from './modules/check-out/check-out.service';
 
 function buildApiRouter(): Router {
   const api = Router();
@@ -84,6 +90,9 @@ function buildApiRouter(): Router {
   api.use(createPrescriptionGateRouter(getPrescriptionGateService())); // BE-1 · Phase 3 · prescription-gate
   api.use(createPrescriptionRejectionRouter(getPrescriptionRejectionService())); // BE-1 · Phase 4 · prescription-rejection
   api.use(createShiftExtendRouter(getShiftExtendService())); // BE-1 · Phase 4 · shift-extend
+  api.use(createCheckInRouter(getCheckInService())); // BE-2 · Phase 4 · check-in (anti mock GPS, ≤ 200 m, live selfie)
+  api.use(createShiftLogsRouter(getShiftLogsService())); // BE-2 · Phase 4 · shift-logs (assessment, vitals, checklist, tracking)
+  api.use(createCheckOutRouter(getCheckOutService())); // BE-2 · Phase 4 · check-out (care report, 24h/12h clocks)
   api.use(createCancellationPolicyRouter(getCancellationPolicyService())); // BE-1 · Phase 5 · cancellation-policy
   api.use(createReviewsRouter(getReviewsService())); // BE-1 · Phase 6 · reviews-trustscore
   api.use(createWalletsLedgerRouter(getWalletsLedgerService())); // BE-3 · Phase 5 · wallets-ledger (balances, history, earnings, upcoming settlements)
