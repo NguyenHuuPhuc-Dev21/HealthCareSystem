@@ -16,6 +16,8 @@
  *      transaction — TOPUP of at most the shortfall, the rest returned by the custody partner.
  *      An orderCode "HH…" is a cash-booking commission self-paid by the nurse: cash-commission's
  *      confirmCommissionPayment, same transaction — COMMISSION_PAYMENT (no balance moves), booking SETTLED.
+ *      An orderCode `<booking code>-PT<n>` is a condition-mismatch surcharge (FR-SHIFT-02): shift-logs'
+ *      confirmConditionSurchargePayment (BE-2), same transaction — escrow hold + surcharge in effect, or 100% refund.
  *
  * Escrow and deposit stay separate balances: this file books only escrow; the deposit is booked by deposits.
  */
@@ -33,6 +35,9 @@ import { topupCodeExists } from '../deposits/deposits.repo';
 import { activateMatching, getMatchingRadarService } from '../matching-radar/matching-radar.service';
 import { isExtensionPaymentCode } from '../shift-extend/shift-extend.policy';
 import { findBookingIdByPaymentCode } from '../shift-extend/shift-extend.repo';
+import { isConditionSurchargePaymentCode } from '../shift-logs/shift-logs.policy';
+import { findBookingIdBySurchargeCode } from '../shift-logs/shift-logs.repo';
+import { confirmConditionSurchargePayment } from '../shift-logs/shift-logs.service';
 import { confirmExtensionPayment } from '../shift-extend/shift-extend.service';
 import { holdEscrow, ledgerEntryExists, ledgerKeys, refundEscrow } from './gateway-webhooks.ledger';
 import { decideWebhookAction, signData, verifySignature, vietQrImageUrl } from './gateway-webhooks.policy';
@@ -109,6 +114,17 @@ export class GatewayWebhooksService {
       if (isExtensionPaymentCode(data.orderCode) && (await findBookingIdByPaymentCode(db, data.orderCode)) !== null) {
         if (!parsed.data.success || parsed.data.code !== '00') return event('NOT_SUCCESS', null);
         const r = await (this.deps.confirmExtensionPayment ?? defaultExtensionPayment)(
+          db,
+          { paymentCode: data.orderCode, amount: data.amount, providerRef: data.reference },
+          nowMs,
+        );
+        return event(r.outcome, r.bookingId);
+      }
+
+      // `<code>-PT<n>` AND a real condition surcharge with that code (BE-2 shift-logs): same rule as -GH<n>.
+      if (isConditionSurchargePaymentCode(data.orderCode) && (await findBookingIdBySurchargeCode(db, data.orderCode)) !== null) {
+        if (!parsed.data.success || parsed.data.code !== '00') return event('NOT_SUCCESS', null);
+        const r = await confirmConditionSurchargePayment(
           db,
           { paymentCode: data.orderCode, amount: data.amount, providerRef: data.reference },
           nowMs,

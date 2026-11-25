@@ -15,6 +15,8 @@ export type WebhookOutcome =
   | 'NOT_SUCCESS' // gateway reported a failed / cancelled payment
   | 'EXTENSION_PAID' // shift extension paid → held in escrow and in effect (shift-extend, BE-1)
   | 'UNKNOWN_EXTENSION' // `<code>-GH<n>` that matches no extension
+  | 'SURCHARGE_PAID' // condition-mismatch surcharge paid → held in escrow and in effect (shift-logs, BE-2)
+  | 'UNKNOWN_SURCHARGE' // `<code>-PT<n>` that matches no surcharge
   | 'TOPUP_CREDITED' // nurse deposit top-up ("KQ…") credited in full (deposits, ADR-0004)
   | 'TOPUP_EXCESS_RETURNED' // shortfall credited, the rest returned by the custody partner
   | 'TOPUP_RETURNED' // deposit already full / link already paid: everything returned

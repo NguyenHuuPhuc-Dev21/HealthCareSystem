@@ -7,6 +7,7 @@ export type NurseNotificationType =
   | 'BOOKING_CANCELLED'
   | 'SHIFT_REMINDER'
   | 'EXTENSION_REQUEST'
+  | 'CONDITION_SURCHARGE_ANSWERED' // family answered the condition-mismatch surcharge (FR-SHIFT-02)
   | 'DISPUTE_OPENED'
   | 'DISPUTE_RESOLVED'
   | 'COMMISSION_DUE'

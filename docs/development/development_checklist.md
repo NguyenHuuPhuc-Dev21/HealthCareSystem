@@ -205,14 +205,14 @@
 - [ ] `prescription-rejection`: `POST /api/v1/bookings/:id/reject-invalid-prescription` — mandatory evidence photo, transitions to `CANCELLED`, zero penalty, zero TrustScore deduction.
 
 ### BE-2 (Phase Lead)
-- [ ] `check-in` (FR-SHIFT-01): `POST /api/v1/bookings/:id/check-in` — blocks OS mock locations.
-- [ ] `check-in`: Haversine distance verification $\le 200\text{ m}$ against booking location coordinates.
-- [ ] `check-in`: Server-stamped timestamp and GPS coordinates embedded on live selfie → transitions `execution_status` to `IN_PROGRESS`.
-- [ ] `shift-logs` (FR-SHIFT-02): Structured clinical logging + initial condition mismatch flow (surcharge addition request or no-penalty cancellation).
-- [ ] `shift-logs`: Real-time shift log synchronization via WebSocket.
-- [ ] `check-out` (FR-SHIFT-04): `POST /api/v1/bookings/:id/check-out` — strictly blocks check-out if minimal care report is absent (final vitals, care activities, handover notes).
-- [ ] `check-out`: Records `checkout_time`, starts 24h dispute/settlement countdown and 12h medical record access closure timer, opens two-way ratings.
-- [ ] `check-out`: Fully completed task-based bookings receive 100% compensation regardless of early completion.
+- [x] `check-in` (FR-SHIFT-01): `POST /api/v1/bookings/:id/check-in` — blocks OS mock locations.
+- [x] `check-in`: Haversine distance verification $\le 200\text{ m}$ against booking location coordinates.
+- [x] `check-in`: Server-stamped timestamp and GPS coordinates embedded on live selfie → transitions `execution_status` to `IN_PROGRESS`. _(BE-2: burnt into the pixels server-side with sharp; the stamped JPEG is the photo the family sees)_
+- [x] `shift-logs` (FR-SHIFT-02): Structured clinical logging + initial condition mismatch flow (surcharge addition request or no-penalty cancellation).
+- [x] `shift-logs`: Real-time shift log synchronization via WebSocket.
+- [x] `check-out` (FR-SHIFT-04): `POST /api/v1/bookings/:id/check-out` — strictly blocks check-out if minimal care report is absent (final vitals, care activities, handover notes).
+- [x] `check-out`: Records `checkout_time`, starts 24h dispute/settlement countdown and 12h medical record access closure timer, opens two-way ratings.
+- [x] `check-out`: Fully completed task-based bookings receive 100% compensation regardless of early completion.
 
 ### BE-3
 - [ ] `sos` (FR-SHIFT-05): Dispatches concurrent high-priority FCM push + SMS fallback containing GPS coordinates and latest vital signs to family and Admin ($< 2\text{ seconds}$).

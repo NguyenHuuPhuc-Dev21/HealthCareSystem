@@ -96,6 +96,13 @@ export const SYSTEM_CONFIG_KEYS = {
 
   // Disputes (disputes — migration 0022)
   DISPUTE_REBUTTAL_HOURS: 'DISPUTE_REBUTTAL_HOURS',                         // 24 (counter-party rebuttal window, FR-DISP-01)
+
+  // Shift execution: check-in, shift logs, check-out (BE-2 Phase 4 — migration 0024; proposed values, pending PO)
+  CHECKIN_OPENS_BEFORE_START_MINUTES: 'CHECKIN_OPENS_BEFORE_START_MINUTES', // 30 (check-in possible from start − 30 min, FR-SHIFT-01)
+  CHECKIN_SELFIE_MAX_AGE_MINUTES: 'CHECKIN_SELFIE_MAX_AGE_MINUTES',         // 10 (selfie upload URL issued at most 10 min before check-in)
+  CONDITION_MISMATCH_WINDOW_MINUTES: 'CONDITION_MISMATCH_WINDOW_MINUTES',   // 30 (condition discrepancy reported in the first 30 min, FR-SHIFT-02)
+  CHECKOUT_EARLY_TOLERANCE_MINUTES: 'CHECKOUT_EARLY_TOLERANCE_MINUTES',     // 15 (shift-based bookings: check-out from scheduled end − 15 min)
+  CASH_COMMISSION_DUE_HOURS: 'CASH_COMMISSION_DUE_HOURS',                   // 24 (cash booking: commission due check-out + 24h, FR-PAY-02)
 } as const;
 
 export type SystemConfigKey = keyof typeof SYSTEM_CONFIG_KEYS;

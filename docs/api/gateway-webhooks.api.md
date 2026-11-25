@@ -83,6 +83,12 @@ PayOS-style envelope:
 | `UNKNOWN_BOOKING` | no booking with `orderCode` | none |
 | `NOT_SUCCESS` | `success = false` or `code ≠ "00"` | none |
 
+### Condition-surcharge payments (`<booking code>-PT<n>`, FR-SHIFT-02)
+
+Same rule as `-GH<n>`: when a condition surcharge with that code exists, the webhook hands the payment to shift-logs'
+`confirmConditionSurchargePayment` (BE-2) in the same transaction. Outcomes `SURCHARGE_PAID`, `DUPLICATE`,
+`UNKNOWN_SURCHARGE`, `AMOUNT_MISMATCH`, `LATE_PAYMENT_REFUNDED` — see [`shift-execution.api.md`](./shift-execution.api.md) §7.
+
 ### Shift-extension payments (`<booking code>-GH<n>`, FR-SHIFT-03)
 
 A bank-transfer extension (BE-1 `shift-extend`) is paid to the **same webhook** with its own transfer content
