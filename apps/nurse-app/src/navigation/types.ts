@@ -36,6 +36,9 @@ export type ActiveStackParamList = {
   ShiftResult: {
     outcomeType: 'COMPLETED' | 'CANCELLED_SAFE';
     note?: string;
+    bookingId?: string;
+    bookingCode?: string;
+    customerName?: string;
   };
   Credentials: undefined;
   RenewGphn: undefined;

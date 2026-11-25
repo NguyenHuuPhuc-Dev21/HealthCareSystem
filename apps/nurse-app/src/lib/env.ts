@@ -47,6 +47,12 @@ export const env = {
       process.env.USE_MOCK_TRUST_SCORE !== 'false'
     );
   },
+  get useMockReviews(): boolean {
+    return (
+      nativeConfig.USE_MOCK_REVIEWS !== 'false' &&
+      process.env.USE_MOCK_REVIEWS !== 'false'
+    );
+  },
   get useMockCredentials(): boolean {
     return (
       nativeConfig.USE_MOCK_CREDENTIALS === 'true' ||

@@ -31,12 +31,15 @@ import {
   PaymentMethod,
   PaymentStatus,
   type MobileShiftSummary,
+  type PendingReviewDto,
 } from '@healthcare-system/shared';
 import { AppButton } from '../../components';
 import { formatVND } from '../../lib/formatters';
 import { tokens } from '../../styles/tokens';
 import type { ActiveStackParamList } from '../../navigation/types';
 import { getShiftState } from '../active-shift/active-shift.api';
+import { RateCustomerSheet } from '../reviews/components/RateCustomerSheet';
+import { getPendingReviews } from '../reviews/reviews.api';
 import { ShiftStatusBadges } from './components/ShiftStatusBadges';
 
 type CompletedShiftDetailScreenProps = NativeStackScreenProps<
@@ -51,6 +54,8 @@ export const CompletedShiftDetailScreen: React.FC<CompletedShiftDetailScreenProp
   const { bookingId } = route.params;
 
   const [shift, setShift] = useState<MobileShiftSummary | null>(null);
+  const [pendingReview, setPendingReview] = useState<PendingReviewDto | null>(null);
+  const [rateSheetVisible, setRateSheetVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,10 +65,22 @@ export const CompletedShiftDetailScreen: React.FC<CompletedShiftDetailScreenProp
       setLoading(true);
       setError(null);
       try {
-        const res = await getShiftState(bookingId);
+        const [res, pendingRes] = await Promise.all([
+          getShiftState(bookingId),
+          getPendingReviews(),
+        ]);
         if (!mounted) return;
         if (res.success && res.data) {
-          setShift(res.data);
+          const shiftData = res.data;
+          setShift(shiftData);
+          if (pendingRes.success) {
+            const match = pendingRes.data.find(
+              (p) =>
+                p.bookingId === bookingId ||
+                p.bookingCode === shiftData.bookingCode
+            );
+            setPendingReview(match ?? null);
+          }
         } else {
           setError(res.error?.message || 'Không tìm thấy thông tin ca trực.');
         }
@@ -253,19 +270,15 @@ export const CompletedShiftDetailScreen: React.FC<CompletedShiftDetailScreenProp
             />
           ) : null}
 
-          <AppButton
-            label="Đánh giá người bệnh / người nhà"
-            icon={<Star size={18} color={tokens.colors.brandJade} />}
-            variant="secondary"
-            onPress={() => {
-              Alert.alert(
-                'Đánh giá người bệnh',
-                `Đánh giá 2 chiều cho ca ${shift.bookingCode} sẽ khả dụng ở phân hệ A14.`,
-                [{ text: 'Đóng' }]
-              );
-            }}
-            style={styles.actionBtn}
-          />
+          {pendingReview ? (
+            <AppButton
+              label="Đánh giá khách"
+              icon={<Star size={18} color={tokens.colors.brandJade} />}
+              variant="secondary"
+              onPress={() => setRateSheetVisible(true)}
+              style={styles.actionBtn}
+            />
+          ) : null}
 
           <AppButton
             label="Mở khiếu nại / Phản ánh ca này"
@@ -282,6 +295,21 @@ export const CompletedShiftDetailScreen: React.FC<CompletedShiftDetailScreenProp
           />
         </View>
       </ScrollView>
+
+      {pendingReview ? (
+        <RateCustomerSheet
+          visible={rateSheetVisible}
+          bookingId={pendingReview.bookingId}
+          bookingCode={pendingReview.bookingCode}
+          customerName={pendingReview.customerName}
+          onClose={() => setRateSheetVisible(false)}
+          onSuccess={(message) => {
+            setRateSheetVisible(false);
+            setPendingReview(null);
+            Alert.alert('Đã gửi đánh giá', message);
+          }}
+        />
+      ) : null}
     </SafeAreaView>
   );
 };
