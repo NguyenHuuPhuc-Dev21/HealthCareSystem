@@ -13,11 +13,13 @@ import {
   AlertTriangle,
   ArrowLeft,
   Lock,
-  MessageSquare,
+  CheckCircle2,
   ShieldAlert,
 } from 'lucide-react-native';
 import type {
+  PendingReviewDto,
   ReceivedReviewDto,
+  SentReviewDto,
   TrustScoreDto,
 } from '@healthcare-system/shared';
 import { StateView } from '../../components/StateView';
@@ -25,6 +27,9 @@ import { env } from '../../lib/env';
 import { formatDateTime } from '../../lib/formatters';
 import type { ActiveStackParamList } from '../../navigation/types';
 import { tokens } from '../../styles/tokens';
+import { RateCustomerSheet } from '../reviews/components/RateCustomerSheet';
+import { SentReviewList } from '../reviews/components/SentReviewList';
+import { getPendingReviews, getSentReviews } from '../reviews/reviews.api';
 import { ScoreHistoryList } from './components/ScoreHistoryList';
 import { ScoreRing } from './components/ScoreRing';
 import { ScoreRulesCard } from './components/ScoreRulesCard';
@@ -34,9 +39,9 @@ import {
   mockSetScoreForTesting,
 } from './trust-score.api';
 import {
-  getReviewDisplayState,
   getScoreTierMeta,
-  getTrustScoreBannerState,
+  TRUST_SCORE_SUSPEND_THRESHOLD,
+  TRUST_SCORE_WARNING_THRESHOLD,
 } from './trust-score-labels';
 
 type TrustScoreNavProp = NativeStackNavigationProp<
@@ -61,6 +66,10 @@ export const TrustScoreScreen: React.FC<TrustScoreScreenProps> = ({
   const [activeTab, setActiveTab] = useState<TrustScoreTab>('my-score');
   const [trustScoreData, setTrustScoreData] = useState<TrustScoreDto | null>(null);
   const [reviews, setReviews] = useState<ReceivedReviewDto[]>([]);
+  const [sentReviews, setSentReviews] = useState<SentReviewDto[]>([]);
+  const [pendingReviews, setPendingReviews] = useState<PendingReviewDto[]>([]);
+  const [ratingTarget, setRatingTarget] = useState<PendingReviewDto | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,9 +83,11 @@ export const TrustScoreScreen: React.FC<TrustScoreScreenProps> = ({
     setError(null);
 
     try {
-      const [tsRes, revRes] = await Promise.all([
+      const [tsRes, revRes, sentRes, pendingRes] = await Promise.all([
         getTrustScore(),
         getReceivedReviews(),
+        getSentReviews(),
+        getPendingReviews(),
       ]);
 
       if (tsRes.success && tsRes.data) {
@@ -87,6 +98,14 @@ export const TrustScoreScreen: React.FC<TrustScoreScreenProps> = ({
 
       if (revRes.success && revRes.data) {
         setReviews(revRes.data);
+      }
+
+      if (sentRes.success && sentRes.data) {
+        setSentReviews(sentRes.data);
+      }
+
+      if (pendingRes.success && pendingRes.data) {
+        setPendingReviews(pendingRes.data);
       }
     } catch {
       setError('Lỗi kết nối khi tải dữ liệu TrustScore.');
@@ -101,10 +120,12 @@ export const TrustScoreScreen: React.FC<TrustScoreScreenProps> = ({
   }, [loadData]);
 
   const score = trustScoreData?.score ?? 0;
-  const bannerState =
-    trustScoreData !== null
-      ? getTrustScoreBannerState(score)
-      : { kind: 'none' as const, title: '', message: '' };
+  const isSuspended =
+    trustScoreData !== null && score < TRUST_SCORE_SUSPEND_THRESHOLD;
+  const isWarning =
+    trustScoreData !== null &&
+    score >= TRUST_SCORE_SUSPEND_THRESHOLD &&
+    score < TRUST_SCORE_WARNING_THRESHOLD;
   const tierMeta = getScoreTierMeta(score);
 
   const distribution = trustScoreData?.ratingDistribution ?? {
@@ -181,18 +202,35 @@ export const TrustScoreScreen: React.FC<TrustScoreScreenProps> = ({
       </View>
 
       {activeTab === 'sent-reviews' ? (
-        <ScrollView contentContainerStyle={styles.content}>
-          <View style={styles.card}>
-            <View style={styles.placeholderBox}>
-              <MessageSquare size={34} color={tokens.colors.brandJade} />
-              <Text style={styles.placeholderTitle}>
-                Đánh giá bạn đã gửi cho khách hàng
-              </Text>
-              <Text style={styles.placeholderSub}>
-                Tính năng xem lại và gửi đánh giá cho gia đình người bệnh sau ca trực sẽ được kích hoạt ở bản cập nhật A14.
-              </Text>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => void loadData(true)}
+              colors={[tokens.colors.brandJade]}
+            />
+          }
+        >
+          {toastMessage ? (
+            <View style={styles.toastBox} accessibilityRole="alert">
+              <CheckCircle2 size={20} color={tokens.colors.brandJade} />
+              <Text style={styles.toastText}>{toastMessage}</Text>
             </View>
-          </View>
+          ) : null}
+          {loading ? (
+            <StateView
+              kind="loading"
+              title="Đang tải đánh giá đã gửi..."
+              message="Vui lòng chờ trong giây lát."
+            />
+          ) : (
+            <SentReviewList
+              reviews={sentReviews}
+              pendingReviews={pendingReviews}
+              onOpenRateSheet={(pending) => setRatingTarget(pending)}
+            />
+          )}
         </ScrollView>
       ) : (
         <ScrollView
@@ -222,7 +260,7 @@ export const TrustScoreScreen: React.FC<TrustScoreScreenProps> = ({
           ) : (
             <>
               {/* Suspended Banner (< 60) */}
-              {bannerState.kind === 'suspended' ? (
+              {isSuspended ? (
                 <View style={styles.suspendedBanner} accessibilityRole="alert">
                   <ShieldAlert
                     size={24}
@@ -231,17 +269,18 @@ export const TrustScoreScreen: React.FC<TrustScoreScreenProps> = ({
                   />
                   <View style={styles.bannerBody}>
                     <Text style={styles.suspendedTitle}>
-                      {bannerState.title}
+                      Tài khoản đang tạm khóa nhận ca
                     </Text>
                     <Text style={styles.suspendedMsg}>
-                      {bannerState.message}
+                      Điểm TrustScore hiện tại là {score} / 100 (dưới ngưỡng{' '}
+                      {TRUST_SCORE_SUSPEND_THRESHOLD} điểm). Bạn tạm thời không thể nhận ca mới từ Radar hoặc Job Board. Vui lòng liên hệ Admin để được hỗ trợ.
                     </Text>
                   </View>
                 </View>
               ) : null}
 
               {/* Warning Banner (60 - 69) */}
-              {bannerState.kind === 'warning' ? (
+              {isWarning ? (
                 <View style={styles.warningBanner} accessibilityRole="alert">
                   <AlertTriangle
                     size={24}
@@ -250,10 +289,11 @@ export const TrustScoreScreen: React.FC<TrustScoreScreenProps> = ({
                   />
                   <View style={styles.bannerBody}>
                     <Text style={styles.warningTitle}>
-                      {bannerState.title}
+                      Cảnh báo: Điểm sắp chạm ngưỡng {TRUST_SCORE_SUSPEND_THRESHOLD}
                     </Text>
                     <Text style={styles.warningMsg}>
-                      {bannerState.message}
+                      Điểm hiện tại là {score} / 100. Khi dưới{' '}
+                      {TRUST_SCORE_SUSPEND_THRESHOLD} điểm, hệ thống sẽ tạm khóa quyền nhận ca. Hãy hoàn thành tốt các ca sắp tới (+2 điểm mỗi ca được đánh giá ≥ 4★).
                     </Text>
                   </View>
                 </View>
@@ -321,7 +361,7 @@ export const TrustScoreScreen: React.FC<TrustScoreScreenProps> = ({
                   <View style={styles.ratingAvgBox}>
                     <Text style={styles.ratingAvgValue}>
                       {trustScoreData?.ratingAvg !== null &&
-                      trustScoreData?.ratingAvg !== undefined
+                        trustScoreData?.ratingAvg !== undefined
                         ? trustScoreData.ratingAvg.toFixed(1)
                         : '—'}
                     </Text>
@@ -361,57 +401,69 @@ export const TrustScoreScreen: React.FC<TrustScoreScreenProps> = ({
                     Chưa có đánh giá nào từ khách hàng.
                   </Text>
                 ) : (
-                  reviews.map((review, index) => {
-                    const display = getReviewDisplayState(review);
-                    return (
-                      <View
-                        key={review.id}
-                        style={[
-                          styles.reviewItem,
-                          index === reviews.length - 1 && styles.reviewItemLast,
-                        ]}
-                      >
-                        <View style={styles.reviewHead}>
-                          <Text style={styles.reviewCustomer}>
-                            {review.customerName || 'Khách hàng CareNest'}
-                          </Text>
-                          <Text style={styles.reviewCode}>{review.bookingCode}</Text>
-                        </View>
-                        <Text style={styles.reviewDate}>
-                          {formatDateTime(review.createdAt)}
+                  reviews.map((review, index) => (
+                    <View
+                      key={review.id}
+                      style={[
+                        styles.reviewItem,
+                        index === reviews.length - 1 && styles.reviewItemLast,
+                      ]}
+                    >
+                      <View style={styles.reviewHead}>
+                        <Text style={styles.reviewCustomer}>
+                          {review.customerName || 'Khách hàng CareNest'}
                         </Text>
-
-                        {display.isHidden ? (
-                          <View style={styles.blindBox}>
-                            <Lock size={16} color={tokens.colors.inkMuted} />
-                            <Text style={styles.blindText}>
-                              {display.hiddenNotice}
-                            </Text>
-                          </View>
-                        ) : (
-                          <>
-                            <Text
-                              style={styles.reviewStars}
-                              accessibilityLabel={`${review.rating} trên 5 sao`}
-                            >
-                              {display.starsText}
-                            </Text>
-                            {display.comment ? (
-                              <Text style={styles.reviewComment}>
-                                {display.comment}
-                              </Text>
-                            ) : null}
-                          </>
-                        )}
+                        <Text style={styles.reviewCode}>{review.bookingCode}</Text>
                       </View>
-                    );
-                  })
+                      <Text style={styles.reviewDate}>
+                        {formatDateTime(review.createdAt)}
+                      </Text>
+
+                      {!review.isVisible ? (
+                        <View style={styles.blindBox}>
+                          <Lock size={16} color={tokens.colors.inkMuted} />
+                          <Text style={styles.blindText}>
+                            Đánh giá đang được ẩn — hiển thị khi hai bên cùng đánh giá hoặc đủ 7 ngày.
+                          </Text>
+                        </View>
+                      ) : (
+                        <>
+                          <Text
+                            style={styles.reviewStars}
+                            accessibilityLabel={`${review.rating} trên 5 sao`}
+                          >
+                            {renderStarsText(review.rating)}
+                          </Text>
+                          {review.comment ? (
+                            <Text style={styles.reviewComment}>
+                              {review.comment}
+                            </Text>
+                          ) : null}
+                        </>
+                      )}
+                    </View>
+                  ))
                 )}
               </View>
             </>
           )}
         </ScrollView>
       )}
+
+      {ratingTarget ? (
+        <RateCustomerSheet
+          visible={ratingTarget !== null}
+          bookingId={ratingTarget.bookingId}
+          bookingCode={ratingTarget.bookingCode}
+          customerName={ratingTarget.customerName}
+          onClose={() => setRatingTarget(null)}
+          onSuccess={(message) => {
+            setRatingTarget(null);
+            setToastMessage(message);
+            void loadData(true);
+          }}
+        />
+      ) : null}
     </SafeAreaView>
   );
 };
@@ -741,6 +793,23 @@ const styles = StyleSheet.create({
     color: tokens.colors.inkMuted,
     textAlign: 'center',
     paddingVertical: 16,
+  },
+  toastBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: tokens.colors.brandJadeSoft,
+    borderWidth: 1,
+    borderColor: tokens.colors.brandJade,
+    borderRadius: tokens.radii.md,
+    padding: 14,
+  },
+  toastText: {
+    flex: 1,
+    fontSize: 14.5,
+    fontWeight: '700',
+    color: tokens.colors.brandJadeDark,
+    lineHeight: 20,
   },
   placeholderBox: {
     alignItems: 'center',

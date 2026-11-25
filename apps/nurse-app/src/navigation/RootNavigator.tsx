@@ -54,9 +54,7 @@ import { CommissionPaymentScreen } from '../features/commission-payment/Commissi
 import { TrustScoreScreen } from '../features/trust-score/TrustScoreScreen';
 import { getDepositStatus, getRefundRequest } from '../features/wallet/deposit.api';
 import { getCommissionDebts } from '../features/commission-payment/commission-payment.api';
-import {
-  ShiftResultScreen,
-} from '../features/placeholders/ZoneScreens';
+import { ShiftResultScreen } from '../features/active-shift/ShiftResultScreen';
 import {
   createCameraProvider,
   createLocationProvider,
@@ -361,6 +359,9 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
                     navigation.replace('ShiftResult', {
                       outcomeType: outcome?.type === 'CANCELLED_SAFE' ? 'CANCELLED_SAFE' : 'COMPLETED',
                       note: outcome?.note,
+                      bookingId: shift.bookingId,
+                      bookingCode: shift.bookingCode,
+                      customerName: shift.patientName,
                     })
                   }
                 />
@@ -423,11 +424,6 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
           <ActiveStack.Screen
             name="Withdraw"
             component={WithdrawScreen}
-            options={{ headerShown: false }}
-          />
-          <ActiveStack.Screen
-            name="TrustScore"
-            component={TrustScoreScreen}
             options={{ headerShown: false }}
           />
           <ActiveStack.Screen
