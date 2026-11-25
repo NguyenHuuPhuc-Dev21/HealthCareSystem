@@ -50,5 +50,5 @@ export type ActiveStackParamList = {
   AccountClosure: undefined;
   CommissionPayment: { bookingId?: string } | undefined;
   Withdraw: undefined;
+  TrustScore: undefined;
 };
-

@@ -51,6 +51,7 @@ import { AppealPenaltyScreen } from '../features/wallet/AppealPenaltyScreen';
 import { AccountClosureScreen } from '../features/wallet/AccountClosureScreen';
 import { WithdrawScreen } from '../features/wallet/WithdrawScreen';
 import { CommissionPaymentScreen } from '../features/commission-payment/CommissionPaymentScreen';
+import { TrustScoreScreen } from '../features/trust-score/TrustScoreScreen';
 import { getDepositStatus, getRefundRequest } from '../features/wallet/deposit.api';
 import { getCommissionDebts } from '../features/commission-payment/commission-payment.api';
 import {
@@ -422,6 +423,16 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
           <ActiveStack.Screen
             name="Withdraw"
             component={WithdrawScreen}
+            options={{ headerShown: false }}
+          />
+          <ActiveStack.Screen
+            name="TrustScore"
+            component={TrustScoreScreen}
+            options={{ headerShown: false }}
+          />
+          <ActiveStack.Screen
+            name="TrustScore"
+            component={TrustScoreScreen}
             options={{ headerShown: false }}
           />
         </ActiveStack.Navigator>

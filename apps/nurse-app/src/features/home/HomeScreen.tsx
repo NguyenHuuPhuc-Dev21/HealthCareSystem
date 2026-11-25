@@ -24,6 +24,7 @@ import {
   ChevronRight,
   FileText,
   ShieldAlert,
+  ShieldCheck,
   Wallet,
   Zap,
 } from 'lucide-react-native';
@@ -35,6 +36,7 @@ import { DEV_SAMPLE_SHIFT } from '../shifts/shifts.mock';
 import { useRadar } from '../radar/RadarContext';
 import { createSimulatedRadarOffer } from '../radar/radar.mock';
 import { useWalletSummary } from '../wallet/useWalletSummary';
+import { getScoreTierMeta } from '../trust-score/trust-score-labels';
 
 export { DEV_SAMPLE_SHIFT };
 import {
@@ -66,6 +68,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const { session } = useAuth();
   const { isOnline, toggleOnline, triggerRadarOffer } = useRadar();
   const { summary: walletSummary } = useWalletSummary();
+  const trustScore = session?.profile?.trust_score ?? 92;
+  const trustScoreMeta = getScoreTierMeta(trustScore);
 
   const [activeShift, setActiveShift] = useState<MobileShiftSummary | null>(
     initialShift ?? (IS_DEV ? DEV_SAMPLE_SHIFT : null)
@@ -321,6 +325,91 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Nút TrustScore trên Trang chủ */}
+        <TouchableOpacity
+          style={styles.scheduleButton}
+          onPress={() => navigation.navigate('TrustScore')}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Xem điểm TrustScore và đánh giá"
+        >
+          <View style={styles.scheduleLeft}>
+            <View
+              style={[
+                styles.scheduleIconWrap,
+                { backgroundColor: trustScoreMeta.softColor },
+              ]}
+            >
+              <ShieldCheck size={20} color={trustScoreMeta.color} />
+            </View>
+            <View style={styles.scheduleTextBox}>
+              <Text style={styles.scheduleTitle}>
+                TrustScore · {trustScore}/100 ({trustScoreMeta.label})
+              </Text>
+              <Text style={styles.scheduleSub} numberOfLines={1}>
+                {trustScoreMeta.summary}
+              </Text>
+            </View>
+          </View>
+          <ChevronRight color={tokens.colors.inkSecondary} size={20} />
+        </TouchableOpacity>
+
+        {/* Nút TrustScore trên Trang chủ */}
+        <TouchableOpacity
+          style={styles.scheduleButton}
+          onPress={() => navigation.navigate('TrustScore')}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Xem điểm TrustScore và đánh giá"
+        >
+          <View style={styles.scheduleLeft}>
+            <View
+              style={[
+                styles.scheduleIconWrap,
+                { backgroundColor: trustScoreMeta.softColor },
+              ]}
+            >
+              <ShieldCheck size={20} color={trustScoreMeta.color} />
+            </View>
+            <View style={styles.scheduleTextBox}>
+              <Text style={styles.scheduleTitle}>
+                TrustScore · {trustScore}/100 ({trustScoreMeta.label})
+              </Text>
+              <Text style={styles.scheduleSub} numberOfLines={1}>
+                {trustScoreMeta.summary}
+              </Text>
+            </View>
+          </View>
+          <ChevronRight color={tokens.colors.inkSecondary} size={20} />
+        </TouchableOpacity>
+
+        {/* Nút TrustScore trên Trang chủ (A13) */}
+        <TouchableOpacity
+          style={styles.scheduleButton}
+          onPress={() => navigation.navigate('TrustScore')}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Đánh giá và điểm TrustScore"
+        >
+          <View style={styles.scheduleLeft}>
+            <View style={styles.scheduleIconWrap}>
+              <ShieldCheck
+                size={20}
+                color={getScoreTierMeta(session?.profile?.trust_score ?? 92).color}
+              />
+            </View>
+            <View style={styles.scheduleTextBox}>
+              <Text style={styles.scheduleTitle}>
+                TrustScore · {session?.profile?.trust_score ?? 92}/100
+              </Text>
+              <Text style={styles.scheduleSub}>
+                {getScoreTierMeta(session?.profile?.trust_score ?? 92).label} — Xem lịch sử điểm &amp; đánh giá
+              </Text>
+            </View>
+          </View>
+          <ChevronRight size={20} color={tokens.colors.inkSecondary} />
+        </TouchableOpacity>
 
         {/* Nút Lịch rảnh trên Trang chủ */}
         <TouchableOpacity
