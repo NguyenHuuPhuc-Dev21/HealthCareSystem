@@ -15,6 +15,8 @@
     "test:unit": "npm run test:unit --workspace=services/api --if-present",
     "test:db": "npm run test --workspace=db/tests --if-present",
     "db:migrate": "npm run db:migrate --workspace=services/api",
+    "ops:embargo-check": "npm run ops:embargo-check --workspace=services/api",
+    "ops:dr-verify": "npm run ops:dr-verify --workspace=services/api",
     "lint": "npm run lint --workspaces --if-present",
     "dev:api": "npm run dev --workspace=services/api",
     "dev:worker": "npm run worker --workspace=services/api",
@@ -25,6 +27,9 @@
     "dev:nurse-app": "npm run start --workspace=apps/nurse-app",
     "docker:up": "docker compose -f infra/docker/docker-compose.yml up -d",
     "docker:down": "docker compose -f infra/docker/docker-compose.yml down",
+    "docker:up:dr": "docker compose -f infra/docker/docker-compose.yml -f infra/docker/docker-compose.dr.yml up -d",
+    "dr:drill": "docker exec -u postgres healthcare_postgres sh /dr/drill.sh",
+    "dr:backup": "docker exec -u postgres healthcare_postgres sh /dr/backup.sh",
     "dev:all": "concurrently \"npm run dev:api\" \"npm run dev:admin\" \"npm run dev:patient\" \"npm run dev:nurse-web\""
   },
   "devDependencies": {

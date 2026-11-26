@@ -372,9 +372,9 @@
 - [ ] Remediate all penetration testing findings within identity and profile domains.
 
 ### BE-2
-- [ ] Concurrency and race condition testing on matching engine and background job queues.
-- [ ] Disaster recovery drill: daily backup snapshot + PITR verification — RPO $\le 1\text{h}$ (wallets) / $\le 24\text{h}$ (logs), RTO $\le 4\text{h}$.
-- [ ] Verify maintenance embargo: zero scheduled migrations or downtime during shift handover window 19:00–21:00.
+- [x] Concurrency and race condition testing on matching engine and background job queues. (`test/integration/concurrency.test.ts` — found and fixed a claim ↔ Admin-suspend deadlock)
+- [x] Disaster recovery drill: daily backup snapshot + PITR verification — RPO $\le 1\text{h}$ (wallets) / $\le 24\text{h}$ (logs), RTO $\le 4\text{h}$. (`infra/dr/`, `npm run ops:dr-verify`, runbook `backup-pitr-dr-drill.md`; staging drill by DevOps)
+- [x] Verify maintenance embargo: zero scheduled migrations or downtime during shift handover window 19:00–21:00. (migration 0028, `db:migrate` guard, `npm run ops:embargo-check`, runbook `maintenance-embargo.md`)
 
 ### BE-3
 - [ ] Financial concurrency verification: wallet race conditions, gateway webhook deduplication under high load.

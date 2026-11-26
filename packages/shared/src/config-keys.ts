@@ -106,6 +106,10 @@ export const SYSTEM_CONFIG_KEYS = {
 
   // In-app chat & call (BE-2 Phase 6 — migration 0026; proposed value, pending PO)
   CHAT_CALL_RING_TIMEOUT_SECONDS: 'CHAT_CALL_RING_TIMEOUT_SECONDS',         // 45 (unanswered in-app call → missed, FR-CHAT-01)
+
+  // Maintenance embargo (BE-2 Phase 8 — migration 0028, NFR-AVAIL-01): no migration / deploy in the shift handover
+  MAINTENANCE_EMBARGO_START: 'MAINTENANCE_EMBARGO_START',                   // '19:00' (Vietnam time)
+  MAINTENANCE_EMBARGO_END: 'MAINTENANCE_EMBARGO_END',                       // '21:00' (exclusive)
 } as const;
 
 export type SystemConfigKey = keyof typeof SYSTEM_CONFIG_KEYS;
