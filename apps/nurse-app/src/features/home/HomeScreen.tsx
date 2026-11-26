@@ -20,6 +20,7 @@ import {
 } from '@healthcare-system/shared';
 import {
   AlertTriangle,
+  Bell,
   Calendar,
   ChevronRight,
   FileText,
@@ -30,6 +31,8 @@ import {
 } from 'lucide-react-native';
 import { AppButton, CareNestLogoMark, StateView, StatusBadge } from '../../components';
 import { useAuth } from '../auth/AuthContext';
+import { useOptionalNotifications } from '../notifications/NotificationContext';
+import { NOTIFICATION_LABELS } from '../notifications/notification-labels';
 import { getGphnAlertInfo } from '../credentials/credentials.api';
 import { getMyShifts } from '../active-shift/active-shift.api';
 import { DEV_SAMPLE_SHIFT } from '../shifts/shifts.mock';
@@ -68,6 +71,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const { session } = useAuth();
   const { isOnline, toggleOnline, triggerRadarOffer } = useRadar();
   const { summary: walletSummary } = useWalletSummary();
+  const notificationCtx = useOptionalNotifications();
+  const unreadNotificationCount = notificationCtx?.unreadCount ?? 0;
   const trustScore = session?.profile?.trust_score ?? 92;
   const trustScoreMeta = getScoreTierMeta(trustScore);
 
@@ -122,9 +127,26 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.homeHead}>
-          <View style={styles.brandRow}>
-            <CareNestLogoMark size={24} />
-            <Text style={styles.brandMark}>CareNest</Text>
+          <View style={styles.brandRowWrap}>
+            <View style={styles.brandRow}>
+              <CareNestLogoMark size={24} />
+              <Text style={styles.brandMark}>CareNest</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.bellBtn}
+              onPress={() => navigation.navigate('Notifications')}
+              accessibilityRole="button"
+              accessibilityLabel={NOTIFICATION_LABELS.bellAccessibility}
+            >
+              <Bell size={22} color={tokens.colors.inkPrimary} />
+              {unreadNotificationCount > 0 ? (
+                <View style={styles.bellBadge}>
+                  <Text style={styles.bellBadgeText}>
+                    {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                  </Text>
+                </View>
+              ) : null}
+            </TouchableOpacity>
           </View>
           <Text style={styles.title}>Lịch trực hôm nay</Text>
           <Text style={styles.subtitle}>
@@ -533,11 +555,43 @@ const styles = StyleSheet.create({
   homeHead: {
     marginBottom: 18,
   },
+  brandRowWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
   brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 6,
+  },
+  bellBtn: {
+    width: tokens.spacing.touchTargetMin,
+    height: tokens.spacing.touchTargetMin,
+    borderRadius: tokens.radii.pill,
+    backgroundColor: tokens.colors.paper,
+    borderWidth: 1,
+    borderColor: tokens.colors.borderHairline,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bellBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    paddingHorizontal: 4,
+    backgroundColor: tokens.colors.alertCrimson,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bellBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: tokens.colors.paper,
   },
   brandMark: {
     fontSize: 15,
