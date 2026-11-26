@@ -11,6 +11,7 @@ import { registerDepositsJobs } from './modules/deposits/deposits.jobs';
 import { registerSettlementsJobs } from './modules/settlements/settlements.jobs';
 import { registerCashCommissionJobs } from './modules/cash-commission/cash-commission.jobs';
 import { registerNotificationsJobs } from './modules/notifications/notifications.jobs';
+import { registerOpsMonitoringJobs } from './modules/ops-monitoring/ops-monitoring.jobs';
 
 async function main() {
   // Phase 1+: các module đăng ký handler tại đây, vd: registerTierLifecycleJobs(jobs)
@@ -30,6 +31,7 @@ async function main() {
   await registerSettlementsJobs(jobs); // BE-3 · Phase 5 · settlements.sweep (every 5 minutes)
   await registerCashCommissionJobs(jobs); // BE-3 · Phase 5 · cash-commission.overdue-sweep (every 5 minutes)
   registerNotificationsJobs(); // BE-3 · Phase 6 · notifications.urgent-sms-fallback (60 s after each HIGH notice)
+  await registerOpsMonitoringJobs(jobs); // BE-3 · Phase 8 · ops-monitoring.sweep (every 5 minutes)
 
   jobs.startWorker();
   console.log('[Worker] Shared job queue worker started');
