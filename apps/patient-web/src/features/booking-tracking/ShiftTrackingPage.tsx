@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Phone, Siren } from 'lucide-react';
 import { Alert, Button } from '../../components';
 import { PatientLayout } from '../../components/layout/PatientLayout';
@@ -11,6 +11,7 @@ import { EXECUTION_LABEL } from '../booking/booking.types';
 import { getBooking } from '../booking/booking.api';
 import type { Booking } from '../booking/booking.types';
 import { EscrowIndicator } from '../payments/components/EscrowIndicator';
+import { PostShiftActions } from '../booking/components/PostShiftActions';
 import { getBookingTracking, raiseSos } from './booking-tracking.api';
 import type { BookingTracking } from './booking-tracking.types';
 import { EXTENSION_WINDOW_MINUTES } from './booking-tracking.types';
@@ -52,6 +53,7 @@ function stepIndex(t: BookingTracking): number {
  */
 export function ShiftTrackingPage() {
   const { id = '' } = useParams();
+  const [searchParams] = useSearchParams();
   const { user, signOut } = useAuth();
   const now = useNow();
 
@@ -190,6 +192,14 @@ export function ShiftTrackingPage() {
               )}
             </section>
           </div>
+        )}
+
+        {booking && (
+          <section className="card step-card bt-card bt-psa" aria-label="Trao đổi, đánh giá và khiếu nại">
+            <h3 className="step-card__title">Trao đổi &amp; phản hồi</h3>
+            <p className="bt-sub">Nhắn tin với điều dưỡng trong ứng dụng (số điện thoại được ẩn), đánh giá sau ca hoặc khiếu nại nếu có vấn đề.</p>
+            <PostShiftActions booking={booking} nurseName={data.nurse?.fullName} layout="row" autoOpenChat={searchParams.get('chat') === '1'} onChanged={(msg) => { setNotice(msg ?? null); refresh(); }} />
+          </section>
         )}
 
         {booking && <EscrowIndicator booking={{ ...booking, totalAmount: booking.pricing.totalAmount }} />}

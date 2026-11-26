@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { maskPhone } from '../../lib/phone';
 import { SosBanner } from '../../features/sos/SosBanner';
+import { useNotifications } from '../../features/notifications/NotificationProvider';
 import { initialsOf, LogoMark } from './SetupLayout';
 
 /**
@@ -28,7 +29,7 @@ import { initialsOf, LogoMark } from './SetupLayout';
 const NAV_ITEMS: Array<{ label: string; icon: ReactNode; to: string | null; match?: string[] }> = [
   { label: 'Trang chủ', icon: <Home size={20} />, to: '/' },
   { label: 'Dịch vụ', icon: <Stethoscope size={20} />, to: '/nurses', match: ['/nurses'] },
-  { label: 'Đơn của tôi', icon: <ClipboardList size={20} />, to: '/bookings', match: ['/bookings', '/refunds'] },
+  { label: 'Đơn của tôi', icon: <ClipboardList size={20} />, to: '/bookings', match: ['/bookings', '/refunds', '/disputes'] },
   { label: 'Tin nhắn', icon: <MessageSquare size={20} />, to: null },
   { label: 'Tài khoản', icon: <UserRound size={20} />, to: '/patient-profiles', match: ['/patient-profiles'] },
 ];
@@ -37,7 +38,7 @@ const MENU_ITEMS: Array<{ icon: ReactNode; label: string; to: string | null }> =
   { icon: <User size={16} />, label: 'Hồ sơ cá nhân', to: null },
   { icon: <Stethoscope size={16} />, label: 'Hồ sơ người được chăm sóc', to: '/patient-profiles' },
   { icon: <CreditCard size={16} />, label: 'Thanh toán của tôi', to: null },
-  { icon: <Bell size={16} />, label: 'Thông báo', to: null },
+  { icon: <Bell size={16} />, label: 'Thông báo', to: '/notifications' },
   { icon: <ShieldCheck size={16} />, label: 'Quyền riêng tư & dữ liệu', to: null },
   { icon: <MessageSquare size={16} />, label: 'Hỗ trợ', to: null },
 ];
@@ -61,6 +62,7 @@ interface PatientLayoutProps {
 
 export function PatientLayout({ fullName, phone, onSignOut, children }: PatientLayoutProps) {
   const location = useLocation();
+  const { unreadCount } = useNotifications();
   const [collapsed, setCollapsed] = useState(readCollapsed);
   const [drawerOpen, setDrawerOpen] = useState(false); // chỉ dùng trên điện thoại
   const [menuOpen, setMenuOpen] = useState(false);
@@ -173,10 +175,19 @@ export function PatientLayout({ fullName, phone, onSignOut, children }: PatientL
 
         <div className="sidebar__foot" ref={menuRef}>
           {/* TODO: số thông báo chưa đọc — làm ở Phase 6 (notifications) */}
-          <button type="button" className="sidebar__bell" aria-label="Thông báo" disabled title="Đang phát triển">
-            <span className="sidebar__icon" aria-hidden="true"><Bell size={20} /></span>
+          <Link
+            to="/notifications"
+            className={`sidebar__bell${location.pathname.startsWith('/notifications') ? ' active' : ''}`}
+            aria-label={unreadCount > 0 ? `Thông báo, ${unreadCount} chưa đọc` : 'Thông báo'}
+            aria-current={location.pathname.startsWith('/notifications') ? 'page' : undefined}
+            title={collapsed ? 'Thông báo' : undefined}
+          >
+            <span className="sidebar__icon bell-wrap" aria-hidden="true">
+              <Bell size={20} />
+              {unreadCount > 0 && <span className="bell-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>}
+            </span>
             <span className="sidebar__label">Thông báo</span>
-          </button>
+          </Link>
 
           <button
             type="button"

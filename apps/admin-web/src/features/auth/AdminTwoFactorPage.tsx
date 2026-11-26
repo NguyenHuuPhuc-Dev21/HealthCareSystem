@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Alert, Button } from '../../components';
 import { maskPhone } from '../../lib/phone';
+import { markMfaVerified } from '../../lib/session';
 import { setup2fa, verify2fa } from './auth.api';
 import type { TwoFaSetupResult } from './auth.api';
 import { getAuthErrorMessage } from './auth.messages';
@@ -68,6 +69,7 @@ export function AdminTwoFactorPage() {
       return;
     }
     clearChallenge();
+    markMfaVerified(); // chỉ ở đây: sau khi TOTP đúng và vai trò là ADMIN
     signIn(res.data.access_token, res.data.user);
     const from = (location.state as { from?: string } | null)?.from;
     navigate(from && from !== '/' ? from : '/nurse-verification', { replace: true });

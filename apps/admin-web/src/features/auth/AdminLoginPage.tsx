@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Alert, Button } from '../../components';
 import { ArrowLeft } from 'lucide-react';
 import { formatPhoneInput, normalizeVnPhone } from '../../lib/phone';
+import { clearLogoutReason, peekLogoutReason } from '../../lib/session';
 import { requestOtp } from './auth.api';
 import { getAuthErrorMessage } from './auth.messages';
 import type { AuthMessage } from './auth.messages';
@@ -16,6 +17,8 @@ const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 export function AdminLoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [logoutReason] = useState(() => peekLogoutReason());
+  useEffect(() => clearLogoutReason, []);
   const [phone, setPhone] = useState(() => {
     const pending = loadPending();
     return pending ? formatPhoneInput(`0${pending.phone.replace(/^\+84/, '')}`) : '';
@@ -113,6 +116,8 @@ export function AdminLoginPage() {
         </div>
 
         {error && <Alert title={error.title}>{error.detail}</Alert>}
+        {!error && logoutReason === 'idle' && <Alert tone="info" title="Phiên đã tự đăng xuất do không thao tác.">Vì an toàn, phiên Admin chỉ giữ tối đa 30 phút khi nhàn rỗi. Hãy đăng nhập lại.</Alert>}
+        {!error && logoutReason === 'mfa' && <Alert title="Phiên không hợp lệ cho Admin Console.">Phiên phải thuộc tài khoản quản trị và đã qua xác thực 2 lớp (2FA). Hãy đăng nhập lại.</Alert>}
 
         <Button type="submit" size="lg" block loading={loading}>
           {loading ? 'Đang gửi mã…' : 'Nhận mã OTP →'}

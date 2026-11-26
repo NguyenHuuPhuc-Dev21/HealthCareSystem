@@ -280,10 +280,10 @@
 ## Phase 6 — DISP, RATE, NOTIF, CHAT [MVP]
 
 ### FE-1
-- [ ] Patient Web — File customer dispute with up to 5 evidence file attachments.
-- [ ] Patient Web — Post-shift nurse rating and review form.
-- [ ] Patient Web — In-app notification center.
-- [ ] Shared in-app chat component (FE-1 leads development; FE-2 integrates for nurse surfaces).
+- [x] Patient Web — File customer dispute with up to 5 evidence file attachments.
+- [x] Patient Web — Post-shift nurse rating and review form.
+- [x] Patient Web — In-app notification center.
+- [x] Shared in-app chat component (FE-1 leads development; FE-2 integrates for nurse surfaces).
 
 ### FE-2
 - [x] Nurse Web — In-app notification center with read/unread, direct routing to relevant booking, dispute, or commission action.
@@ -328,12 +328,12 @@
 ## Phase 7 — ADMIN: Catalog, Configuration & Reconciliation [MVP]
 
 ### FE-1 (Phase Lead)
-- [ ] Admin Web — Service catalog management: create/edit services, configure invasive flag (`is_invasive`), prohibited flag (`is_prohibited`), required Tier.
-- [ ] Admin Web — Dynamic `system_configs` parameter editor.
-- [ ] Admin Web — User management: search, profile details, suspend/ban/reactivate customer and nurse accounts.
-- [ ] Admin Web — Dispute investigation and adjudication console.
-- [ ] Admin Web — Financial reconciliation dashboard and report export.
-- [ ] Enforce mandatory 2FA authentication for all Admin Web Portal sessions.
+- [x] Admin Web — Service catalog management: create/edit services, configure invasive flag (`is_invasive`), prohibited flag (`is_prohibited`), required Tier.
+- [x] Admin Web — Dynamic `system_configs` parameter editor.
+- [x] Admin Web — User management: search, profile details, suspend/ban/reactivate customer and nurse accounts.
+- [x] Admin Web — Dispute investigation and adjudication console.
+- [x] Admin Web — Financial reconciliation dashboard and report export.
+- [x] Enforce mandatory 2FA authentication for all Admin Web Portal sessions.
 
 ### FE-2
 - [ ] Support FE-1 with Admin Web credential review and dispute evidence queues.

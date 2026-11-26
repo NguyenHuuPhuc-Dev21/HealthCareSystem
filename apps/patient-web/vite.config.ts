@@ -14,6 +14,11 @@ export default defineConfig(({ mode }) => {
           target: env.VITE_API_PROXY_TARGET || 'http://localhost:3000',
           changeOrigin: true,
         },
+        // WebSocket (chat, thông báo): trình duyệt không gắn được header Authorization nên token đi theo query access_token
+        '/ws': {
+          target: (env.VITE_API_PROXY_TARGET || 'http://localhost:3000').replace(/^http/, 'ws'),
+          ws: true,
+        },
       },
     },
   };
