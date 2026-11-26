@@ -86,3 +86,16 @@ This index lists the standard operating runbooks for the on-demand nursing marke
   2. Nurse late cancellation (≤ 12h): confirm the 20%-of-shift-value deposit penalty, −20 TrustScore, and that the penalty was added to the booking as an Urgent Bonus pushed into SOS Dispatch for a replacement (SLA row 7).
   3. No-show (30 minutes past start, no arrival): run SOS Dispatch for a replacement; if none is found, apply SLA row 8 — nurse `BANNED` from the first offence, 50,000 VND `NO_SHOW_PENALTY` deducted from the deposit (debt if insufficient) and converted in full into the customer's voucher, 100% refund for bank-transfer bookings.
   4. Sanity-check side effects: released nurse schedules, matching state returned correctly, and all state changes visible on the booking's three status axes.
+
+## 9. `backup-pitr-dr-drill.md` — Backup, Point-in-Time Recovery & DR Drill
+
+- **Purpose:** Meet NFR-AVAIL-01 (CT-23): daily snapshot + PITR, RPO ≤ 1 h (wallets) / ≤ 24 h (logs), RTO ≤ 4 h.
+- **Trigger:** Lost or corrupted database, bad mass update / deploy, monthly staging drill.
+- **Key steps:** WAL archiving (`archive_timeout` 300 s) + daily `infra/dr/backup.sh`; restore to a new data directory with `infra/dr/restore.sh`; verify with `npm run ops:dr-verify` (migrations, critical triggers, rows up to the target, ledger); reconcile money for the gap; switch the application; record RPO / RTO.
+
+## 10. `maintenance-embargo.md` — No Maintenance During Shift Handover (19:00–21:00)
+
+- **Purpose:** Keep the night-shift handover untouched (NFR-AVAIL-01).
+- **Trigger:** Any migration, deploy, restart or planned maintenance.
+- **Key steps:** `npm run ops:embargo-check` first (exit 3 inside the window); `db:migrate` refuses pending migrations in production inside the window; emergency only with `--override-embargo="<reason>"`, logged.
+

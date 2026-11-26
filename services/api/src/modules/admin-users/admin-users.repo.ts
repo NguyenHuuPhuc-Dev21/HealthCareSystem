@@ -51,9 +51,14 @@ export async function findUser(db: Queryable, id: string): Promise<UserRow | nul
 /**
  * Locks the account row, then the nurse profile (always in this order). The cash-commission sweep, the TrustScore
  * update and the deposit trigger write nurse_profiles too: they wait for us, never interleave.
+ *
+ * FOR NO KEY UPDATE, not FOR UPDATE (found by the Phase 8 concurrency test): a nurse accepting a shift holds her
+ * nurse_profiles row and then writes bookings.nurse_id, whose foreign key takes FOR KEY SHARE on this users row.
+ * FOR UPDATE would block that while we wait for nurse_profiles → deadlock. We never change users.id, so the
+ * weaker lock is exact; it still serializes with bookings' FOR SHARE read of a customer's status.
  */
 export async function lockUser(db: Queryable, id: string): Promise<UserRow | null> {
-  const { rows } = await db.query<{ id: string }>(`SELECT id FROM users WHERE id = $1 FOR UPDATE`, [id]);
+  const { rows } = await db.query<{ id: string }>(`SELECT id FROM users WHERE id = $1 FOR NO KEY UPDATE`, [id]);
   if (!rows[0]) return null;
   await db.query(`SELECT 1 FROM nurse_profiles WHERE user_id = $1 FOR UPDATE`, [id]);
   return findUser(db, id);

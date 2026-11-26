@@ -28,7 +28,7 @@ export async function findOwnedProfileForQuote(
 }
 
 /**
- * Account status of the customer, read FOR SHARE so an Admin suspension (admin-users, FOR UPDATE on the same row)
+ * Account status of the customer, read FOR SHARE so an Admin suspension (admin-users, FOR NO KEY UPDATE on the same row)
  * and a new booking never interleave.
  */
 export async function lockCustomerStatus(db: Queryable, customerId: string): Promise<string | null> {

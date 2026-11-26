@@ -30,7 +30,7 @@ describe('admin-users (integration)', () => {
   async function user(role: 'PATIENT' | 'NURSE' | 'ADMIN', name: string, status = 'ACTIVE') {
     const { rows } = await pool.query(
       `INSERT INTO users (phone, full_name, role, status, email, cccd_number) VALUES ($1, $2, $3, $4::user_status_enum, $5, $6) RETURNING id, phone`,
-      [phone(), name, role, status, `${RUN.toLowerCase()}${++seq}@example.com`, role === 'PATIENT' ? `0792${RUN.replace(/\D/g, '9').padEnd(4, '9')}${String(seq).padStart(4, '0')}` : null],
+      [phone(), name, role, status, `${RUN.toLowerCase()}${++seq}@example.com`, role === 'PATIENT' ? `079${String(Math.floor(Math.random() * 1e9)).padStart(9, '0')}` : null], // CCCD: 12 random digits, unique across runs
     );
     return { id: rows[0].id as string, phone: rows[0].phone as string };
   }
