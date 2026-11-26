@@ -99,3 +99,13 @@ This index lists the standard operating runbooks for the on-demand nursing marke
 - **Trigger:** Any migration, deploy, restart or planned maintenance.
 - **Key steps:** `npm run ops:embargo-check` first (exit 3 inside the window); `db:migrate` refuses pending migrations in production inside the window; emergency only with `--override-embargo="<reason>"`, logged.
 
+## 11. `monitoring-and-alerts.md` — Operational Monitoring & Alerts (BE-3 · Phase 8)
+
+- **Purpose:** Say what each `ops-monitoring` alert means and which runbook to follow.
+- **Trigger:** `[OPS][ALERT]` log line, an `OPS_ALERT` notification to Admins, or `GET /api/v1/admin/ops/health` not `OK`.
+- **Key steps:** job backlog / dead letters, webhook problems, unacknowledged SOS, failed urgent deliveries, overdue
+  cash commission the sweep missed, settlement lag, finance holds, ledger drift — each mapped to the runbook above.
+
+> Runbooks 1–5, 7, 8 and 11 are written (BE-3, Phase 8). Runbook 6 (`gphn-expiry-sweep.md`) belongs to the
+> tier-lifecycle owner (BE-2).
+
