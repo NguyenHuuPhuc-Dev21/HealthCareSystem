@@ -347,7 +347,7 @@
 - [x] `admin-users`: User search and management; account locking/unlocking across `ACTIVE`, `SUSPENDED`, `BANNED`, strictly respecting `profile_status` as the sole authority for shift eligibility.
 
 ### BE-3
-- [ ] `admin-finance` (CT-15): Reconciliation engine: total escrow held, total 15% platform commission, total payouts, total refunds, pending withdrawal requests.
+- [x] `admin-finance` (CT-15): Reconciliation engine: total escrow held, total 15% platform commission, total payouts, total refunds, pending withdrawal requests.
 
 ### Phase 7 Exit Criteria
 - [ ] Full operational day simulated exclusively via Admin Portal: verify nurse, resolve dispute, update config, export financial reconciliation.

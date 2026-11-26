@@ -300,6 +300,10 @@ export enum AuditAction {
   REVIEW_CUSTOMER_KYC = 'REVIEW_CUSTOMER_KYC', // migration 0007 · BE-2 patient-profiles (Admin actor)
   VIEW_CHAT_HISTORY = 'VIEW_CHAT_HISTORY',     // migration 0026 · BE-2 chat (Admin reads a conversation, FR-CHAT-01)
   CHANGE_ACCOUNT_STATUS = 'CHANGE_ACCOUNT_STATUS', // migration 0027 · BE-2 admin-users (Admin suspends / bans / reactivates, FR-ADMIN-01)
+  PROCESS_WITHDRAWAL = 'PROCESS_WITHDRAWAL',         // migration 0029 · BE-3 admin-finance (withdrawal paid / rejected, FR-PAY-04)
+  PROCESS_DEPOSIT_REFUND = 'PROCESS_DEPOSIT_REFUND', // migration 0029 · BE-3 admin-finance (closure refund paid / rejected, ADR-0004 D3)
+  RESOLVE_FINANCE_HOLD = 'RESOLVE_FINANCE_HOLD',     // migration 0029 · BE-3 admin-finance (reconciliation mismatch / settlement hold)
+  EXPORT_FINANCE_REPORT = 'EXPORT_FINANCE_REPORT',   // migration 0029 · BE-3 admin-finance (ledger audit trail export)
 }
 
 // ============================================================================

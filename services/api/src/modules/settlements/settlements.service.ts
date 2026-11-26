@@ -15,7 +15,8 @@
  *   settlements row  gross = commission + net, net = withheld + payout · booking SETTLED
  */
 import type { SystemConfigKey } from '@healthcare-system/shared';
-import { TxType } from '@healthcare-system/shared';
+import { AuditAction, TxType } from '@healthcare-system/shared';
+import { writeAuditLog } from '../../core/audit';
 import { getConfigNumber } from '../../core/config';
 import { query, withTransaction, type Queryable } from '../../core/database';
 import { AppError, badRequest, conflict, forbidden } from '../../core/errors';
@@ -179,11 +180,23 @@ export class SettlementsService {
   }
 
   /** Admin (admin-finance, Phase 7): the escrow was corrected / explained — the sweep may settle the booking again. */
-  async resolveHold(adminId: string, bookingId: string, note: string): Promise<void> {
-    if (note.trim().length < 10) throw badRequest('VALIDATION_ERROR', 'Explain how the escrow mismatch was resolved');
-    if (!(await repo.resolveHold(this.deps.read, bookingId, adminId, note.trim()))) {
-      throw new AppError(404, 'HOLD_NOT_FOUND', 'No open settlement hold for this booking');
-    }
+  async resolveHold(adminId: string, bookingId: string, note: string, ip?: string): Promise<void> {
+    const text = note.trim();
+    if (text.length < 10) throw badRequest('VALIDATION_ERROR', 'Explain how the escrow mismatch was resolved');
+    await this.deps.withTx(async (db) => {
+      if (!(await repo.resolveHold(db, bookingId, adminId, text))) {
+        throw new AppError(404, 'HOLD_NOT_FOUND', 'No open settlement hold for this booking');
+      }
+      await writeAuditLog(db, {
+        actorId: adminId,
+        action: AuditAction.RESOLVE_FINANCE_HOLD,
+        targetTable: 'settlement_holds',
+        targetId: bookingId,
+        oldValue: { resolved: false },
+        newValue: { resolved: true, note: text },
+        ipAddress: ip,
+      });
+    });
   }
 
   async runSweep(): Promise<SettlementSweepResult> {

@@ -12,7 +12,8 @@
  * Only available_balance is ever withdrawn: the deposit and escrow are never touched here.
  */
 import { randomUUID } from 'node:crypto';
-import { TxType, WithdrawalStatus, type WithdrawalDto } from '@healthcare-system/shared';
+import { AuditAction, TxType, WithdrawalStatus, type WithdrawalDto } from '@healthcare-system/shared';
+import { writeAuditLog } from '../../core/audit';
 import { query, withTransaction, type Queryable } from '../../core/database';
 import { AppError, badRequest, conflict, notFound } from '../../core/errors';
 import { findBankAccount } from '../deposits/deposits.repo';
@@ -95,13 +96,22 @@ export class WithdrawalsService {
   }
 
   /** Admin: the bank transfer was made. */
-  async markWithdrawn(adminId: string, withdrawalId: string, payoutRef: string | null): Promise<WithdrawalDto> {
+  async markWithdrawn(adminId: string, withdrawalId: string, payoutRef: string | null, ip?: string): Promise<WithdrawalDto> {
     const at = new Date(this.nowMs());
     const done = await this.deps.withTx(async (db) => {
       const w = await repo.lockWithdrawal(db, withdrawalId);
       if (!w) throw notFound('WITHDRAWAL_NOT_FOUND', 'Withdrawal not found');
       if (w.status !== WithdrawalStatus.WITHDRAW_REQUESTED) throw conflict('WITHDRAWAL_CLOSED', 'This withdrawal was already processed');
       await repo.markWithdrawn(db, w.id, adminId, payoutRef, at);
+      await writeAuditLog(db, {
+        actorId: adminId,
+        action: AuditAction.PROCESS_WITHDRAWAL,
+        targetTable: 'withdrawal_requests',
+        targetId: w.id,
+        oldValue: { status: w.status },
+        newValue: { status: WithdrawalStatus.WITHDRAWN, amount: Number(w.amount), nurseId: w.user_id, payoutRef },
+        ipAddress: ip,
+      });
       return { nurseId: w.user_id, dto: toDto((await repo.lockWithdrawal(db, w.id))!) };
     });
     await sendNotices(this.deps.notify, [withdrawalUpdate(done.nurseId, { withdrawalId: done.dto.id, amount: done.dto.amount, status: 'WITHDRAWN' })]);
@@ -109,7 +119,7 @@ export class WithdrawalsService {
   }
 
   /** Admin: refused with a written reason — the money goes back to the available balance. */
-  async reject(adminId: string, withdrawalId: string, reason: string): Promise<WithdrawalDto> {
+  async reject(adminId: string, withdrawalId: string, reason: string, ip?: string): Promise<WithdrawalDto> {
     const text = reason.trim();
     if (text.length < 10) throw badRequest('VALIDATION_ERROR', 'A rejection needs a written reason');
     const at = new Date(this.nowMs());
@@ -127,6 +137,15 @@ export class WithdrawalsService {
         externalRef: null,
       });
       await repo.markRejected(db, w.id, adminId, text, posted!.transactionId, at);
+      await writeAuditLog(db, {
+        actorId: adminId,
+        action: AuditAction.PROCESS_WITHDRAWAL,
+        targetTable: 'withdrawal_requests',
+        targetId: w.id,
+        oldValue: { status: w.status },
+        newValue: { status: WithdrawalStatus.REJECTED, amount: Number(w.amount), nurseId: w.user_id, reason: text, reversalTransactionId: posted!.transactionId },
+        ipAddress: ip,
+      });
       return { nurseId: w.user_id, dto: toDto((await repo.lockWithdrawal(db, w.id))!) };
     });
     await sendNotices(this.deps.notify, [withdrawalUpdate(done.nurseId, { withdrawalId: done.dto.id, amount: done.dto.amount, status: 'REJECTED', reason: text })]);

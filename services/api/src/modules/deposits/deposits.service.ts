@@ -17,6 +17,7 @@
  */
 import { randomBytes } from 'node:crypto';
 import {
+  AuditAction,
   DepositRefundStatus,
   TxStatus,
   TxType,
@@ -29,6 +30,7 @@ import {
   type PenaltyReason,
   type SystemConfigKey,
 } from '@healthcare-system/shared';
+import { writeAuditLog } from '../../core/audit';
 import { getConfigNumber } from '../../core/config';
 import { query, withTransaction, type Queryable } from '../../core/database';
 import { AppError, badRequest, conflict, notFound } from '../../core/errors';
@@ -322,7 +324,7 @@ export class DepositsService {
   }
 
   /** Admin: pay a READY refund (one DEPOSIT_REFUND row with the custody partner reference). Frozen by a reconciliation mismatch. */
-  async payoutRefund(adminId: string, requestId: string, externalRef: string | null): Promise<DepositRefundRequestDto> {
+  async payoutRefund(adminId: string, requestId: string, externalRef: string | null, ip?: string): Promise<DepositRefundRequestDto> {
     const at = new Date(this.nowMs());
     const paid = await this.deps.withTx(async (db) => {
       if (await repo.hasUnresolvedMismatch(db)) {
@@ -345,6 +347,15 @@ export class DepositsService {
       });
       if (!posted) throw conflict('REFUND_ALREADY_PAID', 'This refund was already paid');
       await repo.setRefundStatus(db, r.id, { status: 'REFUNDED', at, reviewedBy: adminId, transactionId: posted.transactionId, refundAmount: amount });
+      await writeAuditLog(db, {
+        actorId: adminId,
+        action: AuditAction.PROCESS_DEPOSIT_REFUND,
+        targetTable: 'deposit_refund_requests',
+        targetId: r.id,
+        oldValue: { status: r.status },
+        newValue: { status: 'REFUNDED', amount, nurseId: r.user_id, externalRef, transactionId: posted.transactionId },
+        ipAddress: ip,
+      });
       return { nurseId: r.user_id, amount };
     });
     await sendNotices(this.deps.notify, [depositRefundStatus(paid.nurseId, { requestId, status: 'REFUNDED', amount: paid.amount })]);
@@ -352,7 +363,7 @@ export class DepositsService {
   }
 
   /** Admin: reject with a written reason (e.g. bank account mismatch). The money is never forfeited. */
-  async rejectRefund(adminId: string, requestId: string, reason: string): Promise<DepositRefundRequestDto> {
+  async rejectRefund(adminId: string, requestId: string, reason: string, ip?: string): Promise<DepositRefundRequestDto> {
     const text = reason.trim();
     if (text.length < 10) throw badRequest('VALIDATION_ERROR', 'A rejection needs a written reason');
     const at = new Date(this.nowMs());
@@ -361,6 +372,15 @@ export class DepositsService {
       if (!r) throw notFound('REFUND_REQUEST_NOT_FOUND', 'Refund request not found');
       if (!['REQUESTED', 'WAITING_HOLD', 'READY'].includes(r.status)) throw conflict('REFUND_NOT_OPEN', 'The request is already closed');
       await repo.setRefundStatus(db, r.id, { status: 'REJECTED', at, reviewedBy: adminId, rejectReason: text });
+      await writeAuditLog(db, {
+        actorId: adminId,
+        action: AuditAction.PROCESS_DEPOSIT_REFUND,
+        targetTable: 'deposit_refund_requests',
+        targetId: r.id,
+        oldValue: { status: r.status },
+        newValue: { status: 'REJECTED', nurseId: r.user_id, reason: text },
+        ipAddress: ip,
+      });
       return r.user_id;
     });
     await sendNotices(this.deps.notify, [depositRefundStatus(nurseId, { requestId, status: 'REJECTED', reason: text })]);
@@ -393,10 +413,23 @@ export class DepositsService {
   }
 
   /** Admin: a mismatch was explained / corrected — payouts resume. */
-  async resolveReconciliation(adminId: string, runDate: string, note: string): Promise<void> {
-    if (note.trim().length < 10) throw badRequest('VALIDATION_ERROR', 'Explain how the mismatch was resolved');
-    const ok = await repo.resolveReconciliation(this.deps.read, runDate, adminId, note.trim(), new Date(this.nowMs()));
-    if (!ok) throw notFound('RECONCILIATION_NOT_FOUND', 'No open mismatch for that date');
+  async resolveReconciliation(adminId: string, runDate: string, note: string, ip?: string): Promise<void> {
+    const text = note.trim();
+    if (text.length < 10) throw badRequest('VALIDATION_ERROR', 'Explain how the mismatch was resolved');
+    const at = new Date(this.nowMs());
+    await this.deps.withTx(async (db) => {
+      const id = await repo.resolveReconciliation(db, runDate, adminId, text, at);
+      if (!id) throw notFound('RECONCILIATION_NOT_FOUND', 'No open mismatch for that date');
+      await writeAuditLog(db, {
+        actorId: adminId,
+        action: AuditAction.RESOLVE_FINANCE_HOLD,
+        targetTable: 'deposit_reconciliations',
+        targetId: id,
+        oldValue: { status: 'MISMATCH', resolved: false },
+        newValue: { resolved: true, runDate, note: text },
+        ipAddress: ip,
+      });
+    });
   }
 }
 
