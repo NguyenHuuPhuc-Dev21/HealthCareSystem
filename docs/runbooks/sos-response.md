@@ -1,8 +1,7 @@
 # Emergency (SOS) Response
 
-> FR-SHIFT-05 · alert `SOS_UNACKNOWLEDGED` (`monitoring-and-alerts.md`). The app **assists**; it never replaces
-> the 115 emergency call. Module `sos` (BE-3, Phase 4) sends the alert; until it ships, SOS comes from the nurse app's
-> 115 button and the family banner only.
+> FR-SHIFT-05 · module `sos` (BE-3) · API `docs/api/sos.api.md` · alert `SOS_UNACKNOWLEDGED` (`monitoring-and-alerts.md`).
+> The app **assists**; it never replaces the 115 emergency call.
 
 ## On site (always first)
 
@@ -23,8 +22,12 @@ SELECT n.user_id, n.channel, n.delivery_status, n.acked_at, n.created_at
 ```
 
    A FAILED SMS row → provider problem (`URGENT_DELIVERY_FAILURES`); keep calling.
-4. Record the incident in `shift_logs.emergency_incident_log` (time, who called 115, transfer hospital); keep all
-   logs for review.
+4. Open alerts: `GET /api/v1/admin/sos-alerts` (oldest ACTIVE first); acknowledge
+   (`POST /api/v1/sos-alerts/:id/acknowledge`) once someone is handling it.
+5. The nurse writes what happened (`POST /api/v1/sos-alerts/:id/report` — 115 called, hospital); every event lands in
+   `shift_logs.emergency_incident_log` (`GET /api/v1/admin/sos-alerts/:id` shows it).
+6. Close with the outcome (`POST /api/v1/admin/sos-alerts/:id/close {outcome, note}`, audited
+   `CLOSE_SOS_INCIDENT`): `TRANSFERRED_TO_HOSPITAL`, `RESOLVED_ON_SITE` or `FALSE_ALARM`. Keep all logs for review.
 
 ## Money afterwards
 

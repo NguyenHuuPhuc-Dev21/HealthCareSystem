@@ -53,6 +53,8 @@ import { createAdminFinanceRouter } from './modules/admin-finance/admin-finance.
 import { getAdminFinanceService } from './modules/admin-finance/admin-finance.service';
 import { createOpsMonitoringRouter } from './modules/ops-monitoring/ops-monitoring.routes';
 import { getOpsMonitoringService } from './modules/ops-monitoring/ops-monitoring.service';
+import { createSosRouter } from './modules/sos/sos.routes';
+import { getSosService } from './modules/sos/sos.service';
 import { getPrescriptionRejectionService } from './modules/prescription-rejection/prescription-rejection.service';
 import { getPrescriptionGateService } from './modules/prescription-gate/prescription-gate.service';
 import { createPrivacyConsentRouter } from './modules/privacy-consent/privacy-consent.routes';
@@ -114,6 +116,7 @@ function buildApiRouter(): Router {
   api.use(createNotificationsRouter(getNotificationsService())); // BE-3 · Phase 6 · notifications (in-app centre; WebSocket in index.ts)
   api.use(createAdminFinanceRouter(getAdminFinanceService())); // BE-3 · Phase 7 · admin-finance (CT-15 reconciliation, ledger export, finance queues)
   api.use(createOpsMonitoringRouter(getOpsMonitoringService())); // BE-3 · Phase 8 · ops-monitoring (health checks + alerts)
+  api.use(createSosRouter(getSosService())); // BE-3 · Phase 4 · sos (FR-SHIFT-05 emergency alerts, incident report)
 
   return api;
 }
