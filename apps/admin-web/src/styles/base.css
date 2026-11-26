@@ -2347,3 +2347,601 @@ a.sidebar__item:hover {
   color: var(--navy);
   font-weight: 600;
 }
+
+/* ===================================================================
+ * Phase 7 — Người dùng · Khiếu nại · Tài chính · Dịch vụ · Cấu hình
+ * =================================================================== */
+.modal--form {
+  max-width: 560px;
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+.modal--wide {
+  max-width: 760px;
+}
+
+.modal__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 22px 24px 8px;
+}
+
+.modal__head .modal-sub {
+  margin: 4px 0 0;
+}
+
+.modal__close {
+  border: 0;
+  background: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-grid;
+  place-items: center;
+  color: var(--slate);
+  cursor: pointer;
+  flex: 0 0 36px;
+}
+
+.modal__close:hover {
+  background: var(--bg);
+}
+
+.modal__body {
+  padding: 8px 24px 24px;
+  overflow-y: auto;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.modal__body .modal-actions {
+  margin-top: 4px;
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--slate);
+  cursor: pointer;
+}
+
+.icon-btn:hover:not(:disabled) {
+  background: var(--bg);
+  color: var(--blue);
+}
+
+.icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pager {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  color: var(--slate);
+  font-size: 14px;
+}
+
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.field-hint {
+  color: var(--muted);
+  font-size: 12.5px;
+  margin-top: 4px;
+}
+
+.row-link {
+  cursor: pointer;
+}
+
+.row-link:hover {
+  background: #f4faf7;
+}
+
+.row-muted td {
+  opacity: 0.6;
+}
+
+.toolbar__check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--slate);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.age--ok {
+  color: var(--slate);
+}
+
+.kv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14.5px;
+}
+
+.kv-table th,
+.kv-table td {
+  text-align: left;
+  padding: 9px 0;
+  border-bottom: 1px dashed var(--line);
+  vertical-align: top;
+}
+
+.kv-table th {
+  width: 38%;
+  color: var(--slate);
+  font-weight: 500;
+  padding-right: 12px;
+}
+
+.kv-table td {
+  color: var(--ink);
+}
+
+/* ----- Người dùng ----- */
+.us-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.us-list {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.us-history {
+  list-style: none;
+  padding: 0 0 0 18px;
+  margin: 0;
+  border-left: 2px solid var(--line);
+  display: grid;
+  gap: 14px;
+}
+
+.us-history li {
+  position: relative;
+  display: grid;
+  gap: 2px;
+}
+
+.us-history li::before {
+  content: '';
+  position: absolute;
+  left: -25px;
+  top: 5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--blue);
+}
+
+.us-history time {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.us-history p {
+  margin: 0;
+  color: var(--slate);
+  font-size: 14px;
+}
+
+.us-actions {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.us-blockers {
+  padding: 12px 14px;
+  border: 1px solid #f5d98a;
+  background: var(--amber-bg);
+  border-radius: 12px;
+  color: var(--amber);
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.us-blockers ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.us-blockers p {
+  margin: 0;
+}
+
+.us-refs ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.us-audit {
+  font-size: 12.5px;
+  margin: 0;
+}
+
+/* ----- Khiếu nại ----- */
+.dsp-state {
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+}
+
+.dsp-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  margin-top: 16px;
+}
+
+.dsp-col {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.dsp-card {
+  padding: 20px;
+  display: grid;
+  gap: 10px;
+}
+
+.dsp-card .section-title {
+  margin: 0;
+}
+
+.dsp-text {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.55;
+}
+
+.dsp-sub {
+  margin: 8px 0 0;
+  color: var(--navy);
+  font-size: 14px;
+}
+
+.dsp-penalty {
+  margin: 0;
+  padding: 10px 12px;
+  background: var(--amber-bg);
+  border-radius: 10px;
+  color: var(--amber);
+}
+
+.dsp-evid {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+}
+
+.dsp-evid a {
+  display: grid;
+  gap: 4px;
+  width: 140px;
+  text-decoration: none;
+  color: var(--slate);
+}
+
+.dsp-evid img,
+.dsp-evid__file {
+  width: 140px;
+  height: 100px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  object-fit: cover;
+  background: #e4f2ec;
+  display: grid;
+  place-items: center;
+  color: var(--blue);
+}
+
+.dsp-evid small {
+  font-size: 11.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dsp-chat {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.dsp-chat__row {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--bg);
+  display: grid;
+  gap: 3px;
+}
+
+.dsp-chat__row.is-nurse {
+  background: #e4f2ec;
+}
+
+.dsp-chat__row.is-flagged {
+  outline: 2px solid #fecaca;
+  background: var(--red-bg);
+}
+
+.dsp-chat__who {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+
+.dsp-chat__who span {
+  color: var(--muted);
+}
+
+.dsp-chat__who time {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.dsp-chat__row p {
+  margin: 0;
+  font-size: 14.5px;
+}
+
+.dsp-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--red);
+  font-size: 12.5px;
+}
+
+.dsp-options {
+  display: grid;
+  gap: 10px;
+}
+
+.dsp-summary {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.dsp-summary > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--line);
+}
+
+.dsp-summary dt {
+  color: var(--slate);
+}
+
+.dsp-summary dd {
+  margin: 0;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+/* ----- Tài chính ----- */
+.fin-period {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.fin-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--slate);
+  font-size: 14px;
+}
+
+.fin-date .input {
+  width: 160px;
+}
+
+.fin-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+  margin: 16px 0;
+}
+
+.fin-kpi {
+  padding: 16px 18px;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+
+.fin-kpi small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.fin-kpi b {
+  font-size: 22px;
+  color: var(--navy);
+  font-variant-numeric: tabular-nums;
+}
+
+.fin-kpi span {
+  color: var(--slate);
+  font-size: 12.5px;
+}
+
+.fin-kpi--teal {
+  background: var(--green-bg);
+  border-color: #b6e0c4;
+}
+
+.fin-kpi--amber {
+  background: var(--amber-bg);
+  border-color: #f5d98a;
+}
+
+.fin-card {
+  padding: 20px;
+  margin-bottom: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.fin-card .section-title {
+  margin: 0;
+}
+
+.fin-card .data-table {
+  min-width: 560px;
+}
+
+.fin-two {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.fin-two .fin-card {
+  margin-bottom: 0;
+}
+
+.fin-dl {
+  display: grid;
+  margin: 0;
+}
+
+.fin-dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 9px 0;
+  border-bottom: 1px dashed var(--line);
+  font-size: 14.5px;
+}
+
+.fin-dl dt {
+  color: var(--slate);
+}
+
+.fin-dl dd {
+  margin: 0;
+  font-weight: 700;
+  color: var(--navy);
+  font-variant-numeric: tabular-nums;
+}
+
+.fin-bad {
+  color: var(--red) !important;
+}
+
+.fin-note {
+  font-size: 13px;
+  margin: 0;
+}
+
+.fin-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.fin-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ----- Dịch vụ & cấu hình ----- */
+.catalog-group {
+  margin-top: 22px;
+}
+
+.catalog-group .muted {
+  margin: -6px 0 10px;
+  font-size: 14px;
+}
+
+.catalog-form {
+  display: grid;
+  gap: 14px;
+}
+
+.catalog-form__row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.catalog-flags {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.catalog-flags legend {
+  padding: 0 6px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.cfg-desc {
+  margin: 0;
+  color: var(--slate);
+  font-size: 14.5px;
+}
+
+.cfg-crit {
+  margin-left: 8px;
+}
+
+.cfg-diff {
+  margin: 4px 0;
+}
+
+@media (max-width: 900px) {
+  .dsp-grid,
+  .catalog-form__row {
+    grid-template-columns: 1fr;
+  }
+  .dsp-state {
+    justify-items: start;
+  }
+}

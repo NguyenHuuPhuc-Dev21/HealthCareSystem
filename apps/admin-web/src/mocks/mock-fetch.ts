@@ -7,6 +7,8 @@
 export interface MockResult {
   status: number;
   body: unknown;
+  /** Khi `body` là chuỗi (CSV): tên tệp trả trong Content-Disposition */
+  filename?: string;
 }
 
 export interface MockRequest {
@@ -79,6 +81,13 @@ export function installMockFetch(routes: Record<string, MockHandler>): void {
     const headers = new Headers(init?.headers);
     const result = handler(body, { body, headers, params, query: parsedUrl.searchParams });
     console.info(`[mock] ${method} ${path} → ${result.status}`);
+
+    if (typeof result.body === 'string') {
+      return new Response(result.body, {
+        status: result.status,
+        headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': result.filename ? `attachment; filename="${result.filename}"` : 'attachment' },
+      });
+    }
 
     return new Response(JSON.stringify(result.body), {
       status: result.status,

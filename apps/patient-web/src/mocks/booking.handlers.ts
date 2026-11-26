@@ -155,12 +155,30 @@ const liveSample = (): Booking => {
   };
 };
 
+/** Ca vừa hoàn thành 3 giờ trước, tiền còn tạm giữ (chưa quyết toán) → còn trong thời hạn khiếu nại 24 giờ và đánh giá 7 ngày. */
+const doneSample = (): Booking => {
+  const now = Date.now();
+  return {
+    ...SAMPLE_BASE, id: 'b-done', code: 'HC-2026-1058', serviceCode: 'HYGIENE_FEEDING', serviceLabel: 'Vệ sinh, hỗ trợ ăn uống',
+    startAt: new Date(now - 7 * 3_600_000).toISOString(), endAt: new Date(now - 3 * 3_600_000).toISOString(),
+    paymentMethod: 'BANK_TRANSFER', pricing: { ...sampleQuote(180_000), hours: 4 },
+    executionStatus: 'COMPLETED', paymentStatus: 'ESCROW_HELD', disputeStatus: 'NONE', matchingMode: 'JOB_BOARD',
+    createdAt: new Date(now - 30 * 3_600_000).toISOString(),
+  };
+};
+
 export const loadMockBookings = (userId: string): Booking[] => load(userId);
 export const saveMockBookings = (userId: string, list: Booking[]) => save(userId, list);
 
 const load = (userId: string): Booking[] => {
   let list = getUserData<Booking[]>(userId, 'bookings', userId === 'u-patient-verified' ? SAMPLE : []);
   if (userId === 'u-patient-verified') {
+    const done = list.find((b) => b.id === 'b-done');
+    if (!done || Date.now() - Date.parse(done.endAt) > 20 * 3_600_000) {
+      list = [doneSample(), ...list.filter((b) => b.id !== 'b-done')];
+      setUserData(userId, 'bookings', list);
+      setUserData(userId, 'reviewed', []);
+    }
     const live = list.find((b) => b.id === 'b-live');
     if (!live || Date.parse(live.endAt) < Date.now()) {
       list = [liveSample(), ...list.filter((b) => b.id !== 'b-live')];
