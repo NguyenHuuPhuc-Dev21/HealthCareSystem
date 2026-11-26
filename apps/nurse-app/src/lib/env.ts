@@ -59,6 +59,12 @@ export const env = {
       process.env.USE_MOCK_DISPUTES !== 'false'
     );
   },
+  get useMockChat(): boolean {
+    return (
+      nativeConfig.USE_MOCK_CHAT !== 'false' &&
+      process.env.USE_MOCK_CHAT !== 'false'
+    );
+  },
   get useMockCredentials(): boolean {
     return (
       nativeConfig.USE_MOCK_CREDENTIALS === 'true' ||

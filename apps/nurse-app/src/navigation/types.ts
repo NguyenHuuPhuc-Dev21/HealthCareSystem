@@ -57,4 +57,5 @@ export type ActiveStackParamList = {
   DisputeList: undefined;
   DisputeDetail: { disputeId: string };
   OpenDispute: { bookingId: string };
+  Chat: { bookingId: string; bookingCode?: string };
 };

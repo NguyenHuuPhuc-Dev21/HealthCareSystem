@@ -114,6 +114,8 @@ export function parsePushPayload(
 let activePushToken: string | null = null;
 let foregroundRadarListener: ((payload: RadarPushPayload) => void) | null = null;
 let navigationHandler: ((offerId: string, notificationId?: string) => void) | null = null;
+let chatNavigationHandler: ((bookingId: string) => void) | null = null;
+let activeChatTarget: { bookingId?: string; conversationId?: string } | null = null;
 
 export function setForegroundRadarListener(
   listener: ((payload: RadarPushPayload) => void) | null
@@ -125,6 +127,36 @@ export function setNavigationHandler(
   handler: ((offerId: string, notificationId?: string) => void) | null
 ): void {
   navigationHandler = handler;
+}
+
+export function setChatNavigationHandler(
+  handler: ((bookingId: string) => void) | null
+): void {
+  chatNavigationHandler = handler;
+}
+
+export function setActiveChatTarget(
+  target: { bookingId?: string; conversationId?: string } | null
+): void {
+  activeChatTarget = target;
+}
+
+export function getActiveChatTarget(): { bookingId?: string; conversationId?: string } | null {
+  return activeChatTarget;
+}
+
+export function isSameActiveChat(
+  target: { bookingId?: string; conversationId?: string } | null,
+  payload: { bookingId?: string; conversationId?: string }
+): boolean {
+  if (!target) return false;
+  if (target.conversationId && payload.conversationId) {
+    return target.conversationId === payload.conversationId;
+  }
+  if (target.bookingId && payload.bookingId) {
+    return target.bookingId === payload.bookingId;
+  }
+  return false;
 }
 
 export async function createNotificationChannels(): Promise<void> {
@@ -213,6 +245,10 @@ export async function checkInitialNotification(): Promise<void> {
     const initialMessaging = await messaging().getInitialNotification();
     if (initialMessaging) {
       const payload = parsePushPayload(initialMessaging);
+      if (payload?.type === 'NEW_MESSAGE' && payload.bookingId && chatNavigationHandler) {
+        chatNavigationHandler(payload.bookingId);
+        return;
+      }
       if (payload?.offerId && navigationHandler) {
         navigationHandler(payload.offerId, payload.notificationId);
       }
@@ -228,6 +264,48 @@ export async function handleIncomingRemoteMessage(
 ): Promise<void> {
   const payload = parsePushPayload(remoteMessage);
   if (!payload) return;
+
+  if (payload.type === 'NEW_MESSAGE') {
+    const incomingBookingId = payload.bookingId;
+    const incomingConversationId =
+      typeof payload.conversationId === 'string' ? payload.conversationId : undefined;
+
+    if (
+      isSameActiveChat(activeChatTarget, {
+        bookingId: incomingBookingId,
+        conversationId: incomingConversationId,
+      })
+    ) {
+      // Suppress push notification when user is already viewing this exact conversation
+      return;
+    }
+
+    const title =
+      remoteMessage.notification?.title ||
+      (typeof payload.senderName === 'string' && payload.senderName
+        ? `Tin nhắn mới từ ${payload.senderName}`
+        : 'Tin nhắn mới từ khách hàng');
+    const body =
+      remoteMessage.notification?.body ||
+      (typeof payload.preview === 'string' && payload.preview
+        ? payload.preview
+        : 'Bạn có tin nhắn mới trong ca trực.');
+
+    await notifee.displayNotification({
+      id: payload.notificationId || `chat-${incomingBookingId || Date.now()}`,
+      title,
+      body,
+      data: payload as Record<string, any>,
+      android: {
+        channelId: PUSH_CHANNEL_GENERAL,
+        importance: AndroidImportance.DEFAULT,
+        pressAction: {
+          id: 'default',
+        },
+      },
+    });
+    return;
+  }
 
   const isOnline = await getOnlineStatus();
   if (!isOnline) {
@@ -285,9 +363,25 @@ function handleNotificationOpen(notification?: NotifeeNotification): void {
   if (!notification || !notification.data) return;
   const payload = notification.data as RadarPushPayload;
 
+  if (payload.type === 'NEW_MESSAGE' && payload.bookingId && chatNavigationHandler) {
+    chatNavigationHandler(String(payload.bookingId));
+    return;
+  }
+
   if (payload.offerId && navigationHandler) {
     navigationHandler(payload.offerId, payload.notificationId);
   }
+}
+
+export function handleChatNotificationNavigation(
+  payload: { type?: string; bookingId?: string },
+  navigate: (route: string, params?: any) => void
+): boolean {
+  if (payload.type === 'NEW_MESSAGE' && payload.bookingId) {
+    navigate('Chat', { bookingId: payload.bookingId });
+    return true;
+  }
+  return false;
 }
 
 /**

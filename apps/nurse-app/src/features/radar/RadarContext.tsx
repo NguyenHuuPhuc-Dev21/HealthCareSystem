@@ -13,6 +13,7 @@ import {
 } from './radar.api';
 import {
   initPushNotifications,
+  setChatNavigationHandler,
   setForegroundRadarListener,
   setNavigationHandler,
   type RadarPushPayload,
@@ -113,6 +114,14 @@ export const RadarProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     });
 
+    setChatNavigationHandler((bookingId) => {
+      if (navigationRef.isReady()) {
+        (navigationRef as any).navigate('Chat', {
+          bookingId,
+        });
+      }
+    });
+
     // Register foreground push arrival listener
     setForegroundRadarListener((payload: RadarPushPayload) => {
       if (!isOnline) return;
@@ -130,6 +139,7 @@ export const RadarProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     return () => {
       setNavigationHandler(null);
+      setChatNavigationHandler(null);
       setForegroundRadarListener(null);
     };
   }, [isOnline]);
