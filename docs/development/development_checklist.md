@@ -215,9 +215,9 @@
 - [x] `check-out`: Fully completed task-based bookings receive 100% compensation regardless of early completion.
 
 ### BE-3
-- [ ] `sos` (FR-SHIFT-05): Dispatches concurrent high-priority FCM push + SMS fallback containing GPS coordinates and latest vital signs to family and Admin ($< 2\text{ seconds}$).
-- [ ] `sos`: Persists emergency incident report into `shift_logs.emergency_incident_log`.
-- [ ] Real-time WebSocket gateway infrastructure shared with BE-2 for clinical shift logging.
+- [x] `sos` (FR-SHIFT-05): Dispatches concurrent high-priority FCM push + SMS fallback containing GPS coordinates and latest vital signs to family and Admin ($< 2\text{ seconds}$).
+- [x] `sos`: Persists emergency incident report into `shift_logs.emergency_incident_log`.
+- [x] Real-time WebSocket gateway infrastructure shared with BE-2 for clinical shift logging.
 
 ### Phase 4 Exit Criteria
 - [ ] Full shift lifecycle executed on physical hardware: check-in → logging → extension → check-out + report.
