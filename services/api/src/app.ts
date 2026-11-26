@@ -49,6 +49,8 @@ import { createDisputesRouter } from './modules/disputes/disputes.routes';
 import { getDisputesService } from './modules/disputes/disputes.service';
 import { createNotificationsRouter } from './modules/notifications/notifications.routes';
 import { getNotificationsService } from './modules/notifications/notifications.service';
+import { createAdminFinanceRouter } from './modules/admin-finance/admin-finance.routes';
+import { getAdminFinanceService } from './modules/admin-finance/admin-finance.service';
 import { getPrescriptionRejectionService } from './modules/prescription-rejection/prescription-rejection.service';
 import { getPrescriptionGateService } from './modules/prescription-gate/prescription-gate.service';
 import { createPrivacyConsentRouter } from './modules/privacy-consent/privacy-consent.routes';
@@ -108,6 +110,7 @@ function buildApiRouter(): Router {
   api.use(createCashCommissionRouter(getCashCommissionService())); // BE-3 · Phase 5 · cash-commission (FR-PAY-02 cash part)
   api.use(createDisputesRouter(getDisputesService())); // BE-3 · Phase 6 · disputes (open/freeze, rebuttal, admin resolve, penalty appeals)
   api.use(createNotificationsRouter(getNotificationsService())); // BE-3 · Phase 6 · notifications (in-app centre; WebSocket in index.ts)
+  api.use(createAdminFinanceRouter(getAdminFinanceService())); // BE-3 · Phase 7 · admin-finance (CT-15 reconciliation, ledger export, finance queues)
 
   return api;
 }

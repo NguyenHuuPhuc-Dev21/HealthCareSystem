@@ -327,11 +327,13 @@ export async function hasUnresolvedMismatch(db: Queryable): Promise<boolean> {
   return rows.length > 0;
 }
 
-export async function resolveReconciliation(db: Queryable, runDate: string, adminId: string, note: string, at: Date): Promise<boolean> {
-  const { rowCount } = await db.query(
+/** Returns the id of the run that was resolved, or null when there is no open mismatch on that date. */
+export async function resolveReconciliation(db: Queryable, runDate: string, adminId: string, note: string, at: Date): Promise<string | null> {
+  const { rows } = await db.query<{ id: string }>(
     `UPDATE deposit_reconciliations SET resolved_by = $2, resolution_note = $3, resolved_at = $4
-      WHERE run_date = $1::date AND status = 'MISMATCH' AND resolved_at IS NULL`,
+      WHERE run_date = $1::date AND status = 'MISMATCH' AND resolved_at IS NULL
+      RETURNING id`,
     [runDate, adminId, note, at],
   );
-  return (rowCount ?? 0) > 0;
+  return rows[0]?.id ?? null;
 }
