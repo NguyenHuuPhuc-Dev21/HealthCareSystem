@@ -145,6 +145,7 @@ export function suspensionOf(s: SuspensionInput): { isSuspended: boolean; suspen
   if (s.profileStatus === 'SUSPENDED') {
     if (s.profileSuspendedReason === 'TRUST_SCORE_BELOW_THRESHOLD') return { isSuspended: true, suspendedReason: 'TRUST_SCORE_LOW' };
     if (s.profileSuspendedReason === 'COMMISSION_OVERDUE') return { isSuspended: true, suspendedReason: 'COMMISSION_OVERDUE' }; // cash-commission
+    if (s.profileSuspendedReason === 'DEPOSIT_SHORTFALL') return { isSuspended: true, suspendedReason: 'DEPOSIT_BELOW_MIN' }; // BE-2 trigger, migration 0025
     return { isSuspended: true, suspendedReason: null };
   }
   if (s.commissionOverdue) return { isSuspended: true, suspendedReason: 'COMMISSION_OVERDUE' };

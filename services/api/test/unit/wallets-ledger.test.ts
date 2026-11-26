@@ -95,6 +95,10 @@ describe('wallets-ledger policy', () => {
       expect(suspensionOf({ ...ok, commissionOverdue: true, depositShort: true }).suspendedReason).toBe('COMMISSION_OVERDUE');
       expect(suspensionOf({ ...ok, depositShort: true }).suspendedReason).toBe('DEPOSIT_BELOW_MIN');
     });
+    it('a profile the 0025 trigger suspended for DEPOSIT_SHORTFALL shows DEPOSIT_BELOW_MIN (even in grace)', () => {
+      const shortfall = { ...ok, profileStatus: 'SUSPENDED', profileSuspendedReason: 'DEPOSIT_SHORTFALL', depositShort: true, graceActive: true };
+      expect(suspensionOf(shortfall)).toEqual({ isSuspended: true, suspendedReason: 'DEPOSIT_BELOW_MIN' });
+    });
   });
 
   describe('earnings windows (Vietnam time)', () => {
