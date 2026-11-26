@@ -377,9 +377,9 @@
 - [x] Verify maintenance embargo: zero scheduled migrations or downtime during shift handover window 19:00–21:00. (migration 0028, `db:migrate` guard, `npm run ops:embargo-check`, runbook `maintenance-embargo.md`)
 
 ### BE-3
-- [ ] Financial concurrency verification: wallet race conditions, gateway webhook deduplication under high load.
-- [ ] Operational monitoring and alerting: job queue backlog, webhook failures, unacknowledged SOS events, overdue cash commissions.
-- [ ] Author standard incident runbooks in `docs/runbooks/`.
+- [x] Financial concurrency verification: wallet race conditions, gateway webhook deduplication under high load.
+- [x] Operational monitoring and alerting: job queue backlog, webhook failures, unacknowledged SOS events, overdue cash commissions.
+- [x] Author standard incident runbooks in `docs/runbooks/`.
 - [ ] Remediate all penetration testing findings within financial and ledger domains.
 
 ### Phase 8 Exit Criteria (Go-Live)

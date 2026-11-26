@@ -51,6 +51,8 @@ import { createNotificationsRouter } from './modules/notifications/notifications
 import { getNotificationsService } from './modules/notifications/notifications.service';
 import { createAdminFinanceRouter } from './modules/admin-finance/admin-finance.routes';
 import { getAdminFinanceService } from './modules/admin-finance/admin-finance.service';
+import { createOpsMonitoringRouter } from './modules/ops-monitoring/ops-monitoring.routes';
+import { getOpsMonitoringService } from './modules/ops-monitoring/ops-monitoring.service';
 import { getPrescriptionRejectionService } from './modules/prescription-rejection/prescription-rejection.service';
 import { getPrescriptionGateService } from './modules/prescription-gate/prescription-gate.service';
 import { createPrivacyConsentRouter } from './modules/privacy-consent/privacy-consent.routes';
@@ -111,6 +113,7 @@ function buildApiRouter(): Router {
   api.use(createDisputesRouter(getDisputesService())); // BE-3 · Phase 6 · disputes (open/freeze, rebuttal, admin resolve, penalty appeals)
   api.use(createNotificationsRouter(getNotificationsService())); // BE-3 · Phase 6 · notifications (in-app centre; WebSocket in index.ts)
   api.use(createAdminFinanceRouter(getAdminFinanceService())); // BE-3 · Phase 7 · admin-finance (CT-15 reconciliation, ledger export, finance queues)
+  api.use(createOpsMonitoringRouter(getOpsMonitoringService())); // BE-3 · Phase 8 · ops-monitoring (health checks + alerts)
 
   return api;
 }
