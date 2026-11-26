@@ -16,6 +16,7 @@ import {
   setChatNavigationHandler,
   setForegroundRadarListener,
   setNavigationHandler,
+  setNotificationRouteHandler,
   type RadarPushPayload,
 } from '../../lib/push';
 import { navigationRef } from '../../navigation/RootNavigator';
@@ -122,6 +123,12 @@ export const RadarProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     });
 
+    setNotificationRouteHandler((routeName, params) => {
+      if (navigationRef.isReady()) {
+        (navigationRef as any).navigate(routeName, params);
+      }
+    });
+
     // Register foreground push arrival listener
     setForegroundRadarListener((payload: RadarPushPayload) => {
       if (!isOnline) return;
@@ -140,6 +147,7 @@ export const RadarProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => {
       setNavigationHandler(null);
       setChatNavigationHandler(null);
+      setNotificationRouteHandler(null);
       setForegroundRadarListener(null);
     };
   }, [isOnline]);

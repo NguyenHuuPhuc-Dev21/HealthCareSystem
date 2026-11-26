@@ -56,6 +56,7 @@ import { DisputeListScreen } from '../features/disputes/DisputeListScreen';
 import { DisputeDetailScreen } from '../features/disputes/DisputeDetailScreen';
 import { OpenDisputeScreen } from '../features/disputes/OpenDisputeScreen';
 import { ChatScreen } from '../features/chat/ChatScreen';
+import { NotificationsScreen } from '../features/notifications/NotificationsScreen';
 import { getDepositStatus, getRefundRequest } from '../features/wallet/deposit.api';
 import { getCommissionDebts } from '../features/commission-payment/commission-payment.api';
 import { ShiftResultScreen } from '../features/active-shift/ShiftResultScreen';
@@ -469,6 +470,11 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
           <ActiveStack.Screen
             name="Chat"
             component={ChatScreen}
+            options={{ headerShown: false }}
+          />
+          <ActiveStack.Screen
+            name="Notifications"
+            component={NotificationsScreen}
             options={{ headerShown: false }}
           />
         </ActiveStack.Navigator>

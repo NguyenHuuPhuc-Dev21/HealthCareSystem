@@ -10,6 +10,7 @@ declare module 'react-native-config' {
     USE_MOCK_REVIEWS?: string;
     USE_MOCK_DISPUTES?: string;
     USE_MOCK_CHAT?: string;
+    USE_MOCK_NOTIFICATIONS?: string;
     MOCK_DEPOSIT_SCENARIO?: string;
   }
   export const Config: NativeConfig;

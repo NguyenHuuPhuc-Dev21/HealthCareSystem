@@ -8,11 +8,12 @@ import notifee, {
 import { Platform } from 'react-native';
 import type { RadarJob } from '@healthcare-system/shared';
 import {
-  ackNotification,
   getOnlineStatus,
   registerDeviceToken,
   unregisterDeviceToken,
 } from '../features/radar/radar.api';
+import { ackNotification } from '../features/notifications/notifications.api';
+import { resolveNotificationTarget } from '../features/notifications/notification-navigation';
 
 export const PUSH_CHANNEL_RADAR = 'radar';
 export const PUSH_CHANNEL_GENERAL = 'general';
@@ -115,6 +116,7 @@ let activePushToken: string | null = null;
 let foregroundRadarListener: ((payload: RadarPushPayload) => void) | null = null;
 let navigationHandler: ((offerId: string, notificationId?: string) => void) | null = null;
 let chatNavigationHandler: ((bookingId: string) => void) | null = null;
+let notificationRouteHandler: ((routeName: string, params?: any) => void) | null = null;
 let activeChatTarget: { bookingId?: string; conversationId?: string } | null = null;
 
 export function setForegroundRadarListener(
@@ -133,6 +135,12 @@ export function setChatNavigationHandler(
   handler: ((bookingId: string) => void) | null
 ): void {
   chatNavigationHandler = handler;
+}
+
+export function setNotificationRouteHandler(
+  handler: ((routeName: string, params?: any) => void) | null
+): void {
+  notificationRouteHandler = handler;
 }
 
 export function setActiveChatTarget(
@@ -245,12 +253,8 @@ export async function checkInitialNotification(): Promise<void> {
     const initialMessaging = await messaging().getInitialNotification();
     if (initialMessaging) {
       const payload = parsePushPayload(initialMessaging);
-      if (payload?.type === 'NEW_MESSAGE' && payload.bookingId && chatNavigationHandler) {
-        chatNavigationHandler(payload.bookingId);
-        return;
-      }
-      if (payload?.offerId && navigationHandler) {
-        navigationHandler(payload.offerId, payload.notificationId);
+      if (payload) {
+        routePushPayload(payload);
       }
     }
   } catch {
@@ -304,16 +308,19 @@ export async function handleIncomingRemoteMessage(
         },
       },
     });
-    return;
-  }
-
-  const isOnline = await getOnlineStatus();
-  if (!isOnline) {
-    // Nurse is offline -> ignore Radar push
+    if (payload.notificationId) {
+      void ackNotification(payload.notificationId);
+    }
     return;
   }
 
   if (payload.type === 'RADAR_URGENT') {
+    const isOnline = await getOnlineStatus();
+    if (!isOnline) {
+      // Nurse is offline -> ignore Radar push
+      return;
+    }
+
     const title =
       remoteMessage.notification?.title ||
       '🚨 Ca gấp Radar cần nhận ngay!';
@@ -346,10 +353,40 @@ export async function handleIncomingRemoteMessage(
       },
     });
 
+    if (payload.notificationId) {
+      void ackNotification(payload.notificationId);
+    }
+
     // If app is currently in foreground, notify listener immediately so RadarScreen appears
     if (isForeground && foregroundRadarListener) {
       foregroundRadarListener(payload);
     }
+    return;
+  }
+
+  // General / HIGH-priority notifications (A17)
+  const title = remoteMessage.notification?.title || String(payload.title || 'Thông báo CareNest');
+  const body =
+    remoteMessage.notification?.body ||
+    String(payload.body || 'Bạn có cập nhật mới trong ứng dụng.');
+  const isHigh = payload.priority === 'HIGH';
+
+  await notifee.displayNotification({
+    id: payload.notificationId || `notif-${Date.now()}`,
+    title,
+    body,
+    data: payload as Record<string, any>,
+    android: {
+      channelId: PUSH_CHANNEL_GENERAL,
+      importance: isHigh ? AndroidImportance.HIGH : AndroidImportance.DEFAULT,
+      pressAction: {
+        id: 'default',
+      },
+    },
+  });
+
+  if (payload.notificationId) {
+    void ackNotification(payload.notificationId);
   }
 }
 
@@ -359,18 +396,40 @@ export async function handleBackgroundMessage(
   await handleIncomingRemoteMessage(remoteMessage, false);
 }
 
-function handleNotificationOpen(notification?: NotifeeNotification): void {
-  if (!notification || !notification.data) return;
-  const payload = notification.data as RadarPushPayload;
+export function routePushPayload(payload: RadarPushPayload): void {
+  if (payload.notificationId) {
+    void ackNotification(String(payload.notificationId));
+  }
 
   if (payload.type === 'NEW_MESSAGE' && payload.bookingId && chatNavigationHandler) {
     chatNavigationHandler(String(payload.bookingId));
     return;
   }
 
+  if (payload.type === 'RADAR_URGENT' && payload.offerId && navigationHandler) {
+    navigationHandler(String(payload.offerId), payload.notificationId);
+    return;
+  }
+
+  if (notificationRouteHandler) {
+    const target = resolveNotificationTarget({
+      type: payload.type,
+      id: payload.notificationId,
+      data: payload,
+    });
+    notificationRouteHandler(target.routeName, target.params);
+    return;
+  }
+
   if (payload.offerId && navigationHandler) {
     navigationHandler(payload.offerId, payload.notificationId);
   }
+}
+
+function handleNotificationOpen(notification?: NotifeeNotification): void {
+  if (!notification || !notification.data) return;
+  const payload = notification.data as RadarPushPayload;
+  routePushPayload(payload);
 }
 
 export function handleChatNotificationNavigation(

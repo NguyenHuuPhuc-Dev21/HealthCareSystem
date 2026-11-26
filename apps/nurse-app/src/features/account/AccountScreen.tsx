@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   Alert,
+  Linking,
   ScrollView,
   StyleSheet,
   Switch,
@@ -14,6 +15,7 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   Award,
+  Bell,
   Calendar,
   ChevronRight,
   Coins,
@@ -35,6 +37,7 @@ import { IS_DEV } from '../../lib/hardware-providers';
 import { tokens } from '../../styles/tokens';
 import type { ActiveStackParamList, MainTabParamList } from '../../navigation/types';
 import { calculateGphnDaysRemaining } from '../credentials/credentials.api';
+import { NOTIFICATION_LABELS } from '../notifications/notification-labels';
 
 type AccountNavProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'ProfileTab'>,
@@ -348,6 +351,28 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
                 Ngừng hợp tác &amp; hoàn ký quỹ
               </Text>
               <Text style={styles.menuSub}>Thủ tục tất toán &amp; hoàn tiền sau 7 ngày</Text>
+            </View>
+            <ChevronRight color={tokens.colors.inkSecondary} size={20} />
+          </TouchableOpacity>
+
+          {/* Cài đặt thông báo (A17) */}
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => void Linking.openSettings()}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={NOTIFICATION_LABELS.accountSettingsTitle}
+          >
+            <View style={styles.menuIconBox}>
+              <Bell color={tokens.colors.brandJade} size={22} />
+            </View>
+            <View style={styles.menuTextBox}>
+              <Text style={[styles.menuTitle, largeFont && styles.menuTitleLarge]}>
+                {NOTIFICATION_LABELS.accountSettingsTitle}
+              </Text>
+              <Text style={styles.menuSub}>
+                {NOTIFICATION_LABELS.accountSettingsSub}
+              </Text>
             </View>
             <ChevronRight color={tokens.colors.inkSecondary} size={20} />
           </TouchableOpacity>

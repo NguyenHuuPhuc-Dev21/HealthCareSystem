@@ -65,6 +65,12 @@ export const env = {
       process.env.USE_MOCK_CHAT !== 'false'
     );
   },
+  get useMockNotifications(): boolean {
+    return (
+      nativeConfig.USE_MOCK_NOTIFICATIONS !== 'false' &&
+      process.env.USE_MOCK_NOTIFICATIONS !== 'false'
+    );
+  },
   get useMockCredentials(): boolean {
     return (
       nativeConfig.USE_MOCK_CREDENTIALS === 'true' ||
