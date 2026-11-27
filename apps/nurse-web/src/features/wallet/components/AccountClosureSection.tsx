@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   Clock,
   LogOut,
-  X,
 } from 'lucide-react';
 import {
   DEFAULT_DEPOSIT_REFUND_HOLD_DAYS,
@@ -16,6 +15,7 @@ import {
 import type { BankAccountDto, DepositRefundPendingReason, DepositRefundRequestDto } from '@healthcare-system/shared';
 import { formatDateTime, formatVND } from '../../../lib/formatters';
 import { REFUND_STATUS_LABELS } from '../deposit-labels';
+import { Modal, ModalCloseButton } from '../../../components';
 
 export interface AccountClosureSectionProps {
   refundRequest: DepositRefundRequestDto | null;
@@ -332,52 +332,19 @@ export const AccountClosureSection: React.FC<AccountClosureSectionProps> = ({
       )}
 
       {/* Modal xác nhận 5 ý khi bấm Ngừng hợp tác */}
-      {modalOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 999,
-            background: 'rgba(15, 23, 42, 0.65)',
-            display: 'grid',
-            placeItems: 'center',
-            padding: 16,
-          }}
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            className="card"
-            style={{
-              width: '100%',
-              maxWidth: 560,
-              background: '#ffffff',
-              borderRadius: 18,
-              padding: 24,
-              boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
-              position: 'relative',
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setModalOpen(false)}
-              style={{
-                position: 'absolute',
-                top: 18,
-                right: 18,
-                background: 'transparent',
-                border: 0,
-                cursor: 'pointer',
-                color: 'var(--text-secondary, #64748B)',
-              }}
-              aria-label="Đóng modal"
-            >
-              <X size={22} />
-            </button>
-
-            <h3 style={{ fontSize: '20px', fontWeight: 900, color: 'var(--navy, #0F172A)', margin: '0 0 10px' }}>
-              Xác nhận ngừng hợp tác &amp; hoàn ký quỹ
-            </h3>
+      <Modal
+        open={modalOpen}
+        onClose={() => !submitting && setModalOpen(false)}
+        titleId="closure-modal-title"
+        maxWidth={560}
+        closeOnBackdrop={!submitting}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 10 }}>
+          <h3 id="closure-modal-title" style={{ fontSize: '20px', fontWeight: 900, color: 'var(--navy, #0F172A)', margin: 0 }}>
+            Xác nhận ngừng hợp tác &amp; hoàn ký quỹ
+          </h3>
+          <ModalCloseButton onClick={() => !submitting && setModalOpen(false)} label="Đóng modal" />
+        </div>
 
             <div
               style={{
@@ -499,56 +466,18 @@ export const AccountClosureSection: React.FC<AccountClosureSectionProps> = ({
                 {submitting ? 'Đang gửi...' : 'Xác nhận ngừng hợp tác'}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+      </Modal>
 
       {/* Modal xác nhận HỦY yêu cầu ngừng hợp tác */}
-      {cancelModalOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 999,
-            background: 'rgba(15, 23, 42, 0.65)',
-            display: 'grid',
-            placeItems: 'center',
-            padding: 16,
-          }}
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            className="card"
-            style={{
-              width: '100%',
-              maxWidth: 500,
-              background: '#ffffff',
-              borderRadius: 18,
-              padding: 24,
-              boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
-              position: 'relative',
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setCancelModalOpen(false)}
-              disabled={cancelling}
-              style={{
-                position: 'absolute',
-                top: 18,
-                right: 18,
-                background: 'transparent',
-                border: 0,
-                cursor: 'pointer',
-                color: 'var(--text-secondary, #64748B)',
-              }}
-              aria-label="Đóng modal"
-            >
-              <X size={22} />
-            </button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+      <Modal
+        open={cancelModalOpen}
+        onClose={() => !cancelling && setCancelModalOpen(false)}
+        titleId="cancel-closure-modal-title"
+        maxWidth={500}
+        closeOnBackdrop={!cancelling}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div
                 style={{
                   width: 44,
@@ -561,10 +490,10 @@ export const AccountClosureSection: React.FC<AccountClosureSectionProps> = ({
                   flexShrink: 0,
                 }}
               >
-                <AlertTriangle size={24} />
+                <AlertTriangle size={24} aria-hidden="true" />
               </div>
               <div>
-                <h3 style={{ fontSize: '18px', fontWeight: 900, color: 'var(--navy, #0F172A)', margin: 0 }}>
+                <h3 id="cancel-closure-modal-title" style={{ fontSize: '18px', fontWeight: 900, color: 'var(--navy, #0F172A)', margin: 0 }}>
                   Không muốn ngừng hợp tác nữa?
                 </h3>
                 <p style={{ fontSize: '13.5px', color: 'var(--text-secondary, #64748B)', margin: '2px 0 0' }}>
@@ -572,6 +501,8 @@ export const AccountClosureSection: React.FC<AccountClosureSectionProps> = ({
                 </p>
               </div>
             </div>
+            <ModalCloseButton onClick={() => !cancelling && setCancelModalOpen(false)} label="Đóng modal" />
+        </div>
 
             <p style={{ fontSize: '14.5px', color: 'var(--navy, #0F172A)', lineHeight: 1.6, margin: '0 0 16px' }}>
               Khi bạn hủy yêu cầu ngừng hợp tác, tài khoản của bạn sẽ được kích hoạt lại quyền nhận ca làm việc bình
@@ -622,9 +553,7 @@ export const AccountClosureSection: React.FC<AccountClosureSectionProps> = ({
                 {cancelling ? 'Đang xử lý...' : 'Xác nhận tiếp tục làm việc'}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 };

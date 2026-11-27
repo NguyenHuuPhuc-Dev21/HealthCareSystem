@@ -286,13 +286,14 @@ export async function mockSubmitCheckIn(
   payload: CheckInRequest
 ): Promise<{ success: boolean; message: string; data?: ShiftExecutionState }> {
   await new Promise((r) => setTimeout(r, 300));
+  const bookingId = payload.bookingId || '';
   const store = loadShiftStore();
-  const shift = store[payload.bookingId] || await mockGetShiftExecutionState(payload.bookingId);
+  const shift = store[bookingId] || await mockGetShiftExecutionState(bookingId);
 
   // 1. Anti-Mock-Location Check (BR-07 §2.1)
   if (payload.isMockLocation) {
     shift.isMockLocationDetected = true;
-    store[payload.bookingId] = shift;
+    store[bookingId] = shift;
     saveShiftStore(store);
     return {
       success: false,
@@ -330,7 +331,7 @@ export async function mockSubmitCheckIn(
   shift.checkInSelfieUrl = payload.selfieImageBase64;
   shift.isMockLocationDetected = false;
 
-  store[payload.bookingId] = shift;
+  store[bookingId] = shift;
   saveShiftStore(store);
   return {
     success: true,

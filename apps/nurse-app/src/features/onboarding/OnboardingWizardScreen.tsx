@@ -124,17 +124,27 @@ export const OnboardingWizardScreen: React.FC<Props> = ({ route, navigation }) =
         return Boolean(draft.portraitUri);
       case 2:
         return Boolean(draft.degreeUri);
-      case 3:
+      case 3: {
         if (!draft.hasGphn) return true;
+        const isoDateRe = /^\d{4}-\d{2}-\d{2}$/;
+        const expiryValid =
+          isoDateRe.test(draft.gphnExpiryDate) &&
+          !Number.isNaN(Date.parse(draft.gphnExpiryDate)) &&
+          draft.gphnExpiryDate > todayStr;
+        const issuedValid =
+          !draft.gphnIssuedDate ||
+          (isoDateRe.test(draft.gphnIssuedDate) &&
+            !Number.isNaN(Date.parse(draft.gphnIssuedDate)) &&
+            draft.gphnExpiryDate > draft.gphnIssuedDate);
         return (
           Boolean(draft.gphnUri) &&
           Boolean(draft.gphnNumber.trim()) &&
-          Boolean(draft.gphnExpiryDate) &&
-          draft.gphnExpiryDate > todayStr &&
-          (!draft.gphnIssuedDate || draft.gphnExpiryDate > draft.gphnIssuedDate) &&
+          expiryValid &&
+          issuedValid &&
           Boolean(draft.gphnAuthority.trim()) &&
           Boolean(draft.scopeOfPractice.trim())
         );
+      }
       case 4:
         if (!draft.isRetired) return true;
         return Boolean(draft.retirementUri);

@@ -175,6 +175,7 @@ export const GphnStep: React.FC<GphnStepProps> = ({
               placeholder="2020-05-15"
               placeholderTextColor={tokens.colors.inkMuted}
               keyboardType="numbers-and-punctuation"
+              maxLength={10}
               accessibilityLabel="Ngày cấp GPHN"
             />
           </View>
@@ -190,6 +191,7 @@ export const GphnStep: React.FC<GphnStepProps> = ({
               placeholder="2027-05-15"
               placeholderTextColor={tokens.colors.inkMuted}
               keyboardType="numbers-and-punctuation"
+              maxLength={10}
               accessibilityLabel="Ngày hết hạn GPHN"
             />
             {isExpired ? (

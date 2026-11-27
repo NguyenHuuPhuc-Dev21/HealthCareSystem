@@ -51,16 +51,17 @@ export async function submitCheckIn(
     return mockShift.mockSubmitCheckIn(payload);
   }
 
+  const bookingId = payload.bookingId || '';
   const formData = new FormData();
   formData.append('latitude', payload.latitude.toString());
   formData.append('longitude', payload.longitude.toString());
   formData.append('is_mock_location', payload.isMockLocation ? 'true' : 'false');
-  formData.append('timestamp', payload.timestamp);
+  formData.append('timestamp', payload.timestamp || new Date().toISOString());
   if (payload.selfieImageBase64) {
     formData.append('selfie_image', payload.selfieImageBase64);
   }
 
-  const res = await apiClient<ShiftExecutionState>(`/bookings/${payload.bookingId}/check-in`, {
+  const res = await apiClient<ShiftExecutionState>(`/bookings/${bookingId}/check-in`, {
     method: 'POST',
     body: formData,
   });

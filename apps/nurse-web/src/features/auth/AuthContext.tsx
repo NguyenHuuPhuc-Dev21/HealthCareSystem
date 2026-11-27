@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { NurseCredential, NurseProfile } from '@healthcare-system/shared';
 import { USE_MOCK_AUTH } from '../../lib/mock-flags';
+import { setUnauthorizedHandler } from '../../lib/api-client';
 import { getOnboardingStatus } from '../onboarding/onboarding.api';
 import { mapCredentialView, mapStatusToProfile } from '../onboarding/onboarding.types';
 import { logoutServer } from './auth.api';
@@ -29,6 +30,11 @@ function loadSession(): SessionData | null {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [session, setSession] = useState<SessionData | null>(loadSession);
+
+    useEffect(() => {
+        setUnauthorizedHandler(() => setSession(null));
+        return () => setUnauthorizedHandler(null);
+    }, []);
 
     // Khi khởi động lại hoặc F5: nếu đang chạy API thật và đã có phiên, đồng bộ profileStatus từ backend
     useEffect(() => {

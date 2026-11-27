@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { detectOffPlatformContact } from '@healthcare-system/shared';
 import { useConversation } from './useConversation';
+import { useDialogA11y } from '../../components/Modal';
 
 export interface ChatPanelProps {
   bookingId: string;
@@ -33,6 +34,9 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
   const [showWarningConfirm, setShowWarningConfirm] = useState(false);
   const [pendingText, setPendingText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
+
+  useDialogA11y({ open: isOpen, onClose, containerRef: drawerRef });
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -40,17 +44,6 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isOpen]);
-
-  // Handle Escape key to close
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -107,7 +100,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="chat-drawer">
+      <div className="chat-drawer" ref={drawerRef} tabIndex={-1}>
         {/* 1. Header */}
         <div className="chat-header">
           <div className="chat-header__info">

@@ -58,7 +58,7 @@ export async function declineRadar(id: string): Promise<{ success: boolean }> {
     return mockDeclineRadar(id);
   }
 
-  const res = await apiClient<{ success: boolean }>(`/bookings/${id}/decline-radar`, {
+  const res = await apiClient<{ success: boolean }>(`/bookings/${id}/dismiss-radar`, {
     method: 'POST',
   });
   return { success: res.success };
@@ -77,6 +77,9 @@ export async function registerDeviceToken(
       method: 'POST',
       body: JSON.stringify({ fcmToken, platform }),
     });
+    if (!res.success && res.error?.code === 'HTTP_404') {
+      return { success: true };
+    }
     return { success: res.success };
   } catch {
     return { success: false };
@@ -92,6 +95,9 @@ export async function unregisterDeviceToken(token: string): Promise<{ success: b
     const res = await apiClient<{ success: boolean }>(`/devices/${encodeURIComponent(token)}`, {
       method: 'DELETE',
     });
+    if (!res.success && res.error?.code === 'HTTP_404') {
+      return { success: true };
+    }
     return { success: res.success };
   } catch {
     return { success: false };
@@ -109,6 +115,9 @@ export async function ackNotification(id: string): Promise<{ success: boolean }>
     const res = await apiClient<{ success: boolean }>(`/notifications/${id}/ack`, {
       method: 'POST',
     });
+    if (!res.success && res.error?.code === 'HTTP_404') {
+      return { success: true };
+    }
     return { success: res.success };
   } catch {
     return { success: false };
@@ -125,6 +134,9 @@ export async function setOnline(isOnline: boolean): Promise<{ success: boolean }
       method: 'PATCH',
       body: JSON.stringify({ isOnline }),
     });
+    if (!res.success && res.error?.code === 'HTTP_404') {
+      return { success: true };
+    }
     return { success: res.success };
   } catch {
     return { success: false };

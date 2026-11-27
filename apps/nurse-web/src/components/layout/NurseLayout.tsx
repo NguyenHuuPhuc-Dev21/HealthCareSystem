@@ -311,23 +311,15 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                     const isUnread = !n.readAt;
                     const isHigh = n.priority === 'HIGH';
                     return (
-                      <div
+                      <button
                         key={n.id}
+                        type="button"
                         className={`notif-item ${isUnread ? 'notif-item--unread' : ''}`}
-                        role="button"
-                        tabIndex={0}
+                        style={{ width: '100%', textAlign: 'left', border: 0, background: 'transparent' }}
                         onClick={() => {
                           if (isUnread) markAsRead(n.id);
                           setNotifOpen(false);
                           navigate(getNotificationRoute(n));
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            if (isUnread) markAsRead(n.id);
-                            setNotifOpen(false);
-                            navigate(getNotificationRoute(n));
-                          }
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6 }}>
@@ -369,7 +361,7 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                         >
                           {n.body}
                         </div>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
@@ -410,7 +402,7 @@ export const NurseLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                 <span className="avatar lg">{initialsOf(fullName)}</span>
                 <div>
                   <b>{fullName}</b>
-                  <span>{phone ? maskPhone(phone) : '0905 ••• 123'} · {tierDesc}</span>
+                  <span>{phone ? maskPhone(phone) : 'Chưa cập nhật SĐT'} · {tierDesc}</span>
                 </div>
               </div>
 

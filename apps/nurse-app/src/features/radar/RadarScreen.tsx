@@ -235,8 +235,7 @@ export const RadarScreen: React.FC<RadarScreenProps> = ({
             {
               text: 'Nạp ký quỹ',
               onPress: () => {
-                navigation.goBack();
-                // User can navigate to wallet/deposit from tab or account
+                navigation.replace('Deposit');
               },
             },
           ]);

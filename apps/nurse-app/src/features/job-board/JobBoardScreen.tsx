@@ -63,6 +63,7 @@ export const JobBoardScreen: React.FC<JobBoardScreenProps> = ({ navigation }) =>
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [claimingJobId, setClaimingJobId] = useState<string | null>(null);
 
   // ADR-0004 states
   const [depositGraceActive, setDepositGraceActive] = useState<boolean>(false);
@@ -178,7 +179,7 @@ export const JobBoardScreen: React.FC<JobBoardScreenProps> = ({ navigation }) =>
           { text: 'Đóng', style: 'cancel' },
           {
             text: 'Nạp ký quỹ',
-            onPress: () => navigation.navigate('ProfileTab'),
+            onPress: () => navigation.navigate('Deposit'),
           },
         ]
       );
@@ -189,8 +190,8 @@ export const JobBoardScreen: React.FC<JobBoardScreenProps> = ({ navigation }) =>
         [
           { text: 'Đóng', style: 'cancel' },
           {
-            text: 'Nạp ký quỹ (A10)',
-            onPress: () => navigation.navigate('ProfileTab'),
+            text: 'Nạp ký quỹ',
+            onPress: () => navigation.navigate('Deposit'),
           },
         ]
       );
@@ -213,6 +214,7 @@ export const JobBoardScreen: React.FC<JobBoardScreenProps> = ({ navigation }) =>
   };
 
   const handleJobCardAccept = (job: JobItem) => {
+    if (claimingJobId) return;
     const isLocked = Boolean(job.isInvasive && !isTier2);
     if (isLocked) {
       Alert.alert(
@@ -233,6 +235,8 @@ export const JobBoardScreen: React.FC<JobBoardScreenProps> = ({ navigation }) =>
         {
           text: 'Đồng ý nhận ca',
           onPress: async () => {
+            if (claimingJobId) return;
+            setClaimingJobId(job.id);
             try {
               const res = await acceptJob(job.id, nurseTier, depositBalance);
               if (res.success) {
@@ -253,6 +257,8 @@ export const JobBoardScreen: React.FC<JobBoardScreenProps> = ({ navigation }) =>
               }
             } catch {
               Alert.alert('Lỗi', 'Không thể kết nối máy chủ để nhận ca.');
+            } finally {
+              setClaimingJobId(null);
             }
           },
         },

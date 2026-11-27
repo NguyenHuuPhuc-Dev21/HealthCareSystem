@@ -211,7 +211,7 @@ export const TrustScorePage: React.FC = () => {
       )}
 
       {/* Main 2-column Layout */}
-      <div className="cols-2" style={{ alignItems: 'start', gridTemplateColumns: '1fr 1.25fr' }}>
+      <div className="cols-2" style={{ alignItems: 'start' }}>
         {/* Left Column: Gauge, Score Explanations & History */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           {/* Card 1: Score Gauge & Policy */}

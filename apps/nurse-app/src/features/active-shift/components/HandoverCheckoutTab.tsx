@@ -76,11 +76,22 @@ export const HandoverCheckoutTab: React.FC<HandoverCheckoutTabProps> = ({
       return;
     }
 
-    onSubmitCheckOut({
-      finalHr: finalHr.trim(),
-      finalBp: finalBp.trim(),
-      handoverNote: handoverNote.trim(),
-    });
+    Alert.alert(
+      'Xác nhận kết thúc ca trực',
+      'Sau khi lưu báo cáo và kết thúc ca, bạn không thể chỉnh sửa hồ sơ ca này. Bạn chắc chắn muốn hoàn tất?',
+      [
+        { text: 'Kiểm tra lại', style: 'cancel' },
+        {
+          text: 'Xác nhận kết thúc ca',
+          onPress: () =>
+            onSubmitCheckOut({
+              finalHr: finalHr.trim(),
+              finalBp: finalBp.trim(),
+              handoverNote: handoverNote.trim(),
+            }),
+        },
+      ]
+    );
   };
 
   // Trạng thái sau check-out: Nếu là ca tiền mặt, hiển thị thẻ nộp hoa hồng ngay

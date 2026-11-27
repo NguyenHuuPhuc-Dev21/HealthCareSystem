@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Star } from 'lucide-react';
 
 export interface StarInputProps {
@@ -17,26 +17,30 @@ const RATING_LABELS: Record<number, string> = {
 
 export const StarInput: React.FC<StarInputProps> = ({ value, onChange, disabled = false }) => {
   const [hoverValue, setHoverValue] = useState<number | null>(null);
+  const btnRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const activeValue = hoverValue ?? value;
+
+  const selectAndFocus = (rating: 1 | 2 | 3 | 4 | 5) => {
+    onChange(rating);
+    btnRefs.current[rating - 1]?.focus();
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (disabled) return;
 
     if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
       e.preventDefault();
-      const next = Math.min(5, (value || 0) + 1) as 1 | 2 | 3 | 4 | 5;
-      onChange(next);
+      selectAndFocus(Math.min(5, (value || 0) + 1) as 1 | 2 | 3 | 4 | 5);
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
       e.preventDefault();
-      const prev = Math.max(1, (value || 1) - 1) as 1 | 2 | 3 | 4 | 5;
-      onChange(prev);
+      selectAndFocus(Math.max(1, (value || 1) - 1) as 1 | 2 | 3 | 4 | 5);
     } else if (e.key === 'Home') {
       e.preventDefault();
-      onChange(1);
+      selectAndFocus(1);
     } else if (e.key === 'End') {
       e.preventDefault();
-      onChange(5);
+      selectAndFocus(5);
     }
   };
 
@@ -45,7 +49,6 @@ export const StarInput: React.FC<StarInputProps> = ({ value, onChange, disabled 
       <div
         role="radiogroup"
         aria-label="Đánh giá từ 1 đến 5 sao"
-        tabIndex={disabled ? -1 : 0}
         onKeyDown={handleKeyDown}
         style={{
           display: 'inline-flex',
@@ -64,9 +67,12 @@ export const StarInput: React.FC<StarInputProps> = ({ value, onChange, disabled 
           return (
             <button
               key={star}
+              ref={(el) => {
+                btnRefs.current[star - 1] = el;
+              }}
               type="button"
               role="radio"
-              tabIndex={-1}
+              tabIndex={disabled ? -1 : value === star || (value === 0 && star === 1) ? 0 : -1}
               aria-checked={value === star}
               aria-label={`${star} trên 5 sao`}
               disabled={disabled}

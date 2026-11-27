@@ -184,10 +184,12 @@ export const VietQrSheet: React.FC<VietQrSheetProps> = ({
   };
 
   const handleSaveQrImage = () => {
+    const summary = `Ngân hàng: ${data.bankName}\nSTK: ${data.accountNumber}\nSố tiền: ${data.amount.toLocaleString('vi-VN')}đ\nNội dung: ${data.transferContent}`;
+    Clipboard.setString(summary);
     Alert.alert(
-      'Lưu ảnh QR',
-      'Đã lưu thông tin mã QR chuyển khoản vào thiết bị. Bạn có thể mở ứng dụng ngân hàng và tải ảnh lên từ thư viện.',
-      [{ text: 'Xong' }]
+      'Đã sao chép thông tin chuyển khoản',
+      'Thiết bị hiện chưa hỗ trợ tải ảnh QR trực tiếp. Toàn bộ thông tin tài khoản, số tiền và nội dung chuyển khoản đã được sao chép để bạn dán vào ứng dụng ngân hàng.',
+      [{ text: 'Đã hiểu' }]
     );
   };
 

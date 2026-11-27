@@ -358,7 +358,7 @@ export const CredentialsPage: React.FC = () => {
                   />
                   {file && <div className="hint">Đã chọn: {file.name}</div>}
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
                   <div className="field">
                     <label htmlFor="gphn-number">Số GPHN mới</label>
                     <input
@@ -380,7 +380,7 @@ export const CredentialsPage: React.FC = () => {
                     />
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
                   <div className="field">
                     <label htmlFor="gphn-issued">Ngày cấp</label>
                     <input
@@ -410,7 +410,7 @@ export const CredentialsPage: React.FC = () => {
                     onChange={(e) => setScope(e.target.value)}
                   />
                 </div>
-                {error && <div className="alert-error">{error}</div>}
+                {error && <div className="alert-error" role="alert">{error}</div>}
                 <div style={{ display: 'flex', gap: 10 }}>
                   <Button type="submit" disabled={loading}>
                     {loading ? 'Đang tải hồ sơ...' : 'Gửi hồ sơ thẩm định'}

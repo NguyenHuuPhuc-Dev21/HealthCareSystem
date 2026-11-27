@@ -69,20 +69,16 @@ export const ClinicalSafetyCard: React.FC = () => {
         {DEFAULT_GEAR.map((item) => {
           const isChecked = checkedIds.includes(item.id);
           return (
-            <div
+            <label
               key={item.id}
               className={`checklist-item ${isChecked ? 'checklist-item--checked' : ''}`}
-              onClick={() => toggleItem(item.id)}
-              role="checkbox"
-              aria-checked={isChecked}
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === ' ' || e.key === 'Enter') {
-                  e.preventDefault();
-                  toggleItem(item.id);
-                }
-              }}
             >
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={isChecked}
+                onChange={() => toggleItem(item.id)}
+              />
               <div className="checklist-item__box" aria-hidden="true">
                 <Check size={14} />
               </div>
@@ -92,7 +88,7 @@ export const ClinicalSafetyCard: React.FC = () => {
                   {item.requiredFor}
                 </div>
               </div>
-            </div>
+            </label>
           );
         })}
       </div>

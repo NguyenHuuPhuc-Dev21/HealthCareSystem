@@ -350,8 +350,8 @@ export const CredentialsScreen: React.FC<CredentialsScreenProps> = ({ navigation
             <View style={styles.docInfo}>
               <Text style={styles.docName}>Giấy phép hành nghề (GPHN)</Text>
               <Text style={styles.docSub}>
-                Số: <Text style={styles.boldText}>{profile?.gphn_number || '00123/GPHN-ĐN'}</Text>
-                {'\n'}Phạm vi: {profile?.scope_of_practice || 'Điều dưỡng đa khoa'}
+                Số: <Text style={styles.boldText}>{profile?.gphn_number || 'Chưa cập nhật'}</Text>
+                {'\n'}Phạm vi: {profile?.scope_of_practice || 'Chưa cập nhật'}
                 {expiryDate ? `\nHết hạn: ${expiryDate}` : ''}
               </Text>
 

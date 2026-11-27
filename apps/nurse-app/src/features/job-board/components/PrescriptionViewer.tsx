@@ -3,13 +3,13 @@ import {
   ActivityIndicator,
   Image,
   Modal,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar, FileCheck2, X, ZoomIn, ZoomOut } from 'lucide-react-native';
 import { tokens } from '../../../styles/tokens';
 
@@ -60,7 +60,7 @@ export const PrescriptionViewer: React.FC<PrescriptionViewerProps> = ({
             accessibilityRole="button"
             accessibilityLabel="Đóng xem đơn thuốc"
           >
-            <X size={24} color={tokens.colors.inkPrimary} />
+            <X size={24} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
 

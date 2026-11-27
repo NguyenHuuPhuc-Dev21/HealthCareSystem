@@ -157,7 +157,7 @@ export const NurseHomePage: React.FC = () => {
       ? profile.trust_score
       : USE_MOCK_AUTH
       ? 92
-      : 92);
+      : 0);
 
   const ratingAvg: number | null = trustScoreData?.ratingAvg ?? (USE_MOCK_AUTH ? 4.9 : null);
   const ratingCount: number = trustScoreData?.ratingCount ?? (USE_MOCK_AUTH ? 128 : 0);

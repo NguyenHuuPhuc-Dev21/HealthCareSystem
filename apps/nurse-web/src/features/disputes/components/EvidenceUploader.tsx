@@ -138,9 +138,12 @@ export const EvidenceUploader: React.FC<EvidenceUploaderProps> = ({
 
       {/* Upload Zone */}
       {files.length < maxFiles && (
-        <div
+        <button
+          type="button"
+          disabled={disabled}
           onClick={() => !disabled && fileInputRef.current?.click()}
           style={{
+            width: '100%',
             border: '2px dashed var(--border-hairline)',
             borderRadius: 12,
             padding: '18px 16px',
@@ -149,6 +152,7 @@ export const EvidenceUploader: React.FC<EvidenceUploaderProps> = ({
             cursor: disabled ? 'not-allowed' : 'pointer',
             transition: 'border-color 0.15s ease, background 0.15s ease',
             marginBottom: 12,
+            display: 'block',
           }}
         >
           <input
@@ -171,7 +175,7 @@ export const EvidenceUploader: React.FC<EvidenceUploaderProps> = ({
           <div style={{ fontSize: 12, color: 'var(--ink-muted)', marginTop: 2 }}>
             Hỗ trợ PNG, JPG, JPEG, MP4, MOV · Tối đa {formatFileSize(maxSizeBytes)} mỗi tệp
           </div>
-        </div>
+        </button>
       )}
 
       {/* Selected files list */}

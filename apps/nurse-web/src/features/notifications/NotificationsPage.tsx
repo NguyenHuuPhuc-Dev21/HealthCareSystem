@@ -135,15 +135,17 @@ export const NotificationsPage: React.FC = () => {
         </div>
 
         <div className="notifications-header__actions">
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={handleTriggerTestHighAlert}
-            title="Mô phỏng server gửi thông báo khẩn cấp HIGH để kiểm tra âm thanh & popup toast"
-          >
-            <Zap size={14} style={{ color: 'var(--alert-crimson)' }} aria-hidden="true" />
-            <span>Thử thông báo khẩn (HIGH)</span>
-          </button>
+          {import.meta.env.DEV && (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={handleTriggerTestHighAlert}
+              title="Mô phỏng server gửi thông báo khẩn cấp HIGH để kiểm tra âm thanh & popup toast"
+            >
+              <Zap size={14} style={{ color: 'var(--alert-crimson)' }} aria-hidden="true" />
+              <span>Thử thông báo khẩn (HIGH)</span>
+            </button>
+          )}
 
           <button
             type="button"

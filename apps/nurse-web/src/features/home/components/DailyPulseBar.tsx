@@ -127,17 +127,21 @@ export const DailyPulseBar: React.FC<DailyPulseBarProps> = ({
         <div className="pulse-card__value tabular-nums">
           {loading ? (
             '...'
-          ) : (
+          ) : ratingAvg !== null ? (
             <>
-              ★ {ratingAvg !== null ? ratingAvg.toFixed(1) : '4.9'}{' '}
+              ★ {ratingAvg.toFixed(1)}{' '}
               <span style={{ fontSize: 13.5, fontWeight: 500, color: 'var(--ink-secondary)' }}>
-                ({ratingCount > 0 ? ratingCount : 128})
+                ({ratingCount})
               </span>
             </>
+          ) : (
+            'Chưa có'
           )}
         </div>
         <div className="pulse-card__footer">
-          <span className="pulse-card__sub">100% đúng giờ</span>
+          <span className="pulse-card__sub">
+            {ratingCount > 0 ? `${ratingCount} lượt đánh giá` : 'Chưa có đánh giá'}
+          </span>
           <Link to="/trust-score" className="ledger-link">
             Xem sao
           </Link>

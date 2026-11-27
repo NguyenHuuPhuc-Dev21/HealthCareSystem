@@ -185,23 +185,25 @@ export const CommissionPaymentPage: React.FC = () => {
         }}
       >
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span
-              style={{
-                fontSize: '12.5px',
-                fontWeight: 900,
-                color: '#166B58',
-                background: '#E6F4F0',
-                padding: '3px 8px',
-                borderRadius: 6,
-              }}
-            >
-              MÀN HÌNH N11
-            </span>
-            <span style={{ fontSize: '14px', color: 'var(--text-secondary, #64748B)' }}>
-              Quy chuẩn FR-PAY-01 &amp; FR-PAY-02
-            </span>
-          </div>
+          {import.meta.env.DEV && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span
+                style={{
+                  fontSize: '12.5px',
+                  fontWeight: 900,
+                  color: '#166B58',
+                  background: '#E6F4F0',
+                  padding: '3px 8px',
+                  borderRadius: 6,
+                }}
+              >
+                MÀN HÌNH N11
+              </span>
+              <span style={{ fontSize: '14px', color: 'var(--text-secondary, #64748B)' }}>
+                Quy chuẩn FR-PAY-01 &amp; FR-PAY-02
+              </span>
+            </div>
+          )}
           <h1
             style={{
               fontSize: '28px',
@@ -603,7 +605,21 @@ export const CommissionPaymentPage: React.FC = () => {
           </span>
         </div>
 
-        {debts.length === 0 ? (
+        {loading ? (
+          <div
+            className="card"
+            role="status"
+            style={{
+              padding: '48px 24px',
+              textAlign: 'center',
+              borderRadius: 16,
+              background: '#ffffff',
+              color: 'var(--ink-secondary, #64748B)',
+            }}
+          >
+            Đang tải danh sách khoản nộp hoa hồng...
+          </div>
+        ) : debts.length === 0 ? (
           /* Trạng thái trống (Test #5) */
           <div
             className="card"

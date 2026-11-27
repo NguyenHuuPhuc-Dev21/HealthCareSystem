@@ -72,9 +72,13 @@ export async function ackNotification(
     return { success: true, data };
   }
 
-  return apiClient<{ success: boolean }>(`/notifications/${id}/ack`, {
+  const res = await apiClient<{ success: boolean }>(`/notifications/${id}/ack`, {
     method: 'POST',
   });
+  if (!res.success && res.error?.code === 'HTTP_404') {
+    return { success: true, data: { success: true } };
+  }
+  return res;
 }
 
 export function subscribeNotifications(

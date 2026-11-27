@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useDialogA11y } from '../../components/Modal';
 import {
   AlertCircle,
   ArrowLeft,
@@ -22,6 +23,7 @@ import { formatDateTime } from '../../lib/formatters';
 
 export const DisputeDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const lightboxRef = useRef<HTMLDivElement>(null);
 
   const [dispute, setDispute] = useState<DisputeDto | null>(null);
   const [loading, setLoading] = useState(true);
@@ -209,7 +211,7 @@ export const DisputeDetailPage: React.FC = () => {
       </div>
 
       {/* 2-Column Main Layout */}
-      <div className="cols-2" style={{ alignItems: 'start', gridTemplateColumns: '1.35fr 1fr', gap: 20 }}>
+      <div className="cols-2" style={{ alignItems: 'start', gap: 20 }}>
         {/* Left Column: Details, Evidences, Rebuttal, Resolution */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           {/* 1. Chi tiết khiếu nại */}
@@ -276,10 +278,13 @@ export const DisputeDetailPage: React.FC = () => {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 10 }}>
                   {dispute.evidences.map((ev) => (
-                    <div
+                    <button
                       key={ev.id}
+                      type="button"
                       onClick={() => setSelectedPreviewMedia(ev)}
+                      aria-label={`Xem bằng chứng ${ev.fileName || ''}`.trim()}
                       style={{
+                        padding: 0,
                         borderRadius: 8,
                         border: '1px solid var(--border-hairline)',
                         overflow: 'hidden',
@@ -287,6 +292,7 @@ export const DisputeDetailPage: React.FC = () => {
                         background: 'var(--surface-canvas)',
                         position: 'relative',
                         aspectRatio: '1',
+                        width: '100%',
                       }}
                       title="Nhấn để phóng to"
                     >
@@ -311,7 +317,7 @@ export const DisputeDetailPage: React.FC = () => {
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                       )}
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -512,10 +518,27 @@ export const DisputeDetailPage: React.FC = () => {
       </div>
 
       {/* Media Lightbox Modal */}
-      {selectedPreviewMedia && (
+      <LightboxModal
+        media={selectedPreviewMedia}
+        containerRef={lightboxRef}
+        onClose={() => setSelectedPreviewMedia(null)}
+      />
+    </div>
+  );
+};
+
+const LightboxModal: React.FC<{
+  media: DisputeEvidenceDto | null;
+  containerRef: React.RefObject<HTMLDivElement>;
+  onClose: () => void;
+}> = ({ media, containerRef, onClose }) => {
+  useDialogA11y({ open: !!media, onClose, containerRef });
+  if (!media) return null;
+  return (
         <div
           role="dialog"
           aria-modal="true"
+          aria-label="Xem trước bằng chứng"
           style={{
             position: 'fixed',
             inset: 0,
@@ -526,19 +549,23 @@ export const DisputeDetailPage: React.FC = () => {
             justifyContent: 'center',
             padding: 24,
           }}
-          onClick={() => setSelectedPreviewMedia(null)}
+          onClick={onClose}
         >
           <div
+            ref={containerRef}
+            tabIndex={-1}
             style={{ position: 'relative', maxWidth: '90vw', maxHeight: '90vh' }}
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
-              onClick={() => setSelectedPreviewMedia(null)}
+              onClick={onClose}
               style={{
                 position: 'absolute',
-                top: -38,
+                top: -44,
                 right: 0,
+                minWidth: 44,
+                minHeight: 44,
                 background: 'transparent',
                 border: 'none',
                 color: '#fff',
@@ -546,30 +573,28 @@ export const DisputeDetailPage: React.FC = () => {
               }}
               aria-label="Đóng xem trước"
             >
-              <X size={28} />
+              <X size={28} aria-hidden="true" />
             </button>
-            {selectedPreviewMedia.kind === 'VIDEO' ? (
+            {media.kind === 'VIDEO' ? (
               <video
-                src={selectedPreviewMedia.url}
+                src={media.url}
                 controls
                 autoPlay
                 style={{ maxWidth: '100%', maxHeight: '80vh', borderRadius: 8 }}
               />
             ) : (
               <img
-                src={selectedPreviewMedia.url}
+                src={media.url}
                 alt="Bằng chứng phóng to"
                 style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: 8 }}
               />
             )}
-            {selectedPreviewMedia.fileName && (
+            {media.fileName && (
               <div style={{ color: '#fff', textAlign: 'center', marginTop: 10, fontSize: 13 }}>
-                {selectedPreviewMedia.fileName}
+                {media.fileName}
               </div>
             )}
           </div>
         </div>
-      )}
-    </div>
   );
 };

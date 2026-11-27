@@ -92,21 +92,22 @@ export const DepositPage: React.FC = () => {
 
   useEffect(() => {
     loadData();
-  }, [loadData, searchParams]);
+  }, [loadData]);
 
   // Tạo mã nạp VietQR
   const handleTopupClick = async (amount: number) => {
     setCreatingTopup(true);
     setSuccessNotice(null);
+    setPageError(null);
     try {
       const res = await createDepositTopupLink(amount);
       if (res.success && res.data) {
         setActiveTopupLink(res.data);
       } else {
-        alert(res.error?.message || 'Không thể tạo mã nạp');
+        setPageError(res.error?.message || 'Không thể tạo mã nạp');
       }
     } catch (err: any) {
-      alert(err.message || 'Lỗi tạo mã nạp');
+      setPageError(err.message || 'Lỗi tạo mã nạp');
     } finally {
       setCreatingTopup(false);
     }

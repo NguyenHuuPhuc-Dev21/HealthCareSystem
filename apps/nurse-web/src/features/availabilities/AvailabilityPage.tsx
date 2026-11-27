@@ -346,12 +346,13 @@ export const AvailabilityPage: React.FC = () => {
                                             <button
                                                 type="button"
                                                 className="btn-close-sm"
+                                                aria-label="Đóng form thêm khung giờ"
                                                 onClick={() => {
                                                     setOpenAddDay(null);
                                                     setDayError({});
                                                 }}
                                             >
-                                                <X size={16} />
+                                                <X size={16} aria-hidden="true" />
                                             </button>
                                         </div>
 

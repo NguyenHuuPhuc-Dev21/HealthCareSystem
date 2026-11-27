@@ -207,8 +207,33 @@ export async function getPendingCommissionNotice(): Promise<{
   }
 
   try {
-    const res = await apiClient<any>('/wallets/me/pending-commission');
+    const res = await apiClient<any>('/nurse/commission-debts');
     if (res.success && res.data) {
+      const list = Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res.data.items)
+        ? res.data.items
+        : null;
+
+      if (list) {
+        const pending = list.find(
+          (item: any) => item.status === 'PENDING' || item.status === 'OVERDUE' || !item.paidAt
+        );
+        if (!pending) return { hasPendingCommission: false };
+
+        const dueMs = pending.dueAt ? Date.parse(pending.dueAt) : Number.NaN;
+        const hoursRemaining = Number.isFinite(dueMs)
+          ? Math.max(0, Math.round((dueMs - Date.now()) / 3600000))
+          : 24;
+        return {
+          hasPendingCommission: true,
+          bookingCode: pending.bookingCode ?? pending.booking_code,
+          amount: Number(pending.commissionAmount ?? pending.amount ?? 0),
+          hoursRemaining,
+          description: pending.description,
+        };
+      }
+
       return {
         hasPendingCommission: Boolean(res.data.hasPendingCommission ?? res.data.has_pending),
         bookingCode: res.data.bookingCode ?? res.data.booking_code,

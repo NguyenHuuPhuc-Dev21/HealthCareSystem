@@ -35,15 +35,20 @@ export const LoginPage: React.FC = () => {
         setError('');
         setLoading(true);
         const clean = phone.replace(/\s/g, '');
-        const res = await requestOtp(clean);
-        setLoading(false);
-        if (!res.success) {
-            setError(res.error?.message ?? 'Không gửi được mã OTP. Vui lòng thử lại');
-            return;
+        try {
+            const res = await requestOtp(clean);
+            if (!res.success) {
+                setError(res.error?.message ?? 'Không gửi được mã OTP. Vui lòng thử lại');
+                return;
+            }
+            sessionStorage.setItem('pending_phone', clean);
+            sessionStorage.setItem('otp_resend_after', String(res.data.resendAfterSeconds));
+            navigate('/login/otp');
+        } catch {
+            setError('Không thể kết nối tới máy chủ. Vui lòng kiểm tra backend API đã chạy chưa.');
+        } finally {
+            setLoading(false);
         }
-        sessionStorage.setItem('pending_phone', clean);
-        sessionStorage.setItem('otp_resend_after', String(res.data.resendAfterSeconds));
-        navigate('/login/otp');
     };
 
     return (
@@ -78,11 +83,13 @@ export const LoginPage: React.FC = () => {
                         </div>
                         <div className="hint">ⓘ Mã OTP gồm 6 chữ số sẽ được gửi qua SMS hoặc Zalo ZNS.</div>
                     </div>
-                    {error && <div className="alert-error">
-                        <AlertTriangle size={16} aria-hidden="true" /> <strong>{error}</strong>
-                        <br />
-                        Nếu không nhận được mã, bạn có thể gửi lại sau khi hết đếm ngược.
-                    </div>}
+                    {error && (
+                        <div className="alert-error" role="alert">
+                            <AlertTriangle size={16} aria-hidden="true" /> <strong>{error}</strong>
+                            <br />
+                            Vui lòng kiểm tra lại số điện thoại và thử lại sau ít phút.
+                        </div>
+                    )}
                     <Button type="submit" className="btn-block btn-lg" disabled={!phoneValid || loading}>
                         {loading ? 'Đang gửi mã…' : 'Nhận mã OTP →'}
                     </Button>

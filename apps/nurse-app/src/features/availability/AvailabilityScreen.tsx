@@ -10,6 +10,8 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ArrowLeft } from 'lucide-react-native';
 import { tokens } from '../../styles/tokens';
 import {
   getAvailabilities,
@@ -221,19 +223,38 @@ export const AvailabilityScreen: React.FC = () => {
   }
 
   return (
-    <View style={styles.root}>
+    <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
       {/* Top Header */}
       <View style={styles.topHeader}>
-        <Text style={styles.screenTitle}>Lịch rảnh & Ngày nghỉ</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{
+              width: 44,
+              height: 44,
+              marginLeft: -8,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 10,
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="Quay lại"
+          >
+            <ArrowLeft size={22} color={tokens.colors.inkPrimary} />
+          </TouchableOpacity>
+          <Text style={styles.screenTitle}>Lịch rảnh & Ngày nghỉ</Text>
+        </View>
         <Text style={styles.screenSubtitle}>
           Thiết lập khung giờ rảnh cố định theo tuần và đăng ký các ngày nghỉ cụ thể (FR-SCHED-01).
         </Text>
 
         {/* 2-Section Tabs */}
-        <View style={styles.segmentedTabs}>
+        <View style={styles.segmentedTabs} accessibilityRole="tablist">
           <TouchableOpacity
             style={[styles.segTab, activeTab === 'WEEKLY' && styles.segTabActive]}
             onPress={() => setActiveTab('WEEKLY')}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: activeTab === 'WEEKLY' }}
           >
             <Text style={[styles.segTabText, activeTab === 'WEEKLY' && styles.segTabTextActive]}>
               Khung giờ rảnh theo tuần
@@ -242,6 +263,8 @@ export const AvailabilityScreen: React.FC = () => {
           <TouchableOpacity
             style={[styles.segTab, activeTab === 'TIMEOFF' && styles.segTabActive]}
             onPress={() => setActiveTab('TIMEOFF')}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: activeTab === 'TIMEOFF' }}
           >
             <Text style={[styles.segTabText, activeTab === 'TIMEOFF' && styles.segTabTextActive]}>
               Lịch tháng & Ngày nghỉ
@@ -315,7 +338,7 @@ export const AvailabilityScreen: React.FC = () => {
         onRemoveTimeOff={handleRemoveTimeOff}
         onClose={() => setTimeOffSheetVisible(false)}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

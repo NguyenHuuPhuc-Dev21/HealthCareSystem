@@ -267,41 +267,59 @@ export const VietQrPanel: React.FC<VietQrPanelProps> = ({
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'minmax(200px, 220px) 1fr',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
               gap: 24,
               alignItems: 'center',
             }}
           >
             {/* Cột QR Code (Elder-friendly, độ tương phản cao) */}
             <div style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  width: 196,
-                  height: 196,
-                  margin: '0 auto',
-                  borderRadius: 12,
-                  border: '6px solid #ffffff',
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                  background:
-                    'repeating-conic-gradient(#12211C 0% 25%, #ffffff 0% 50%) 0 0 / 24px 24px',
-                  display: 'grid',
-                  placeItems: 'center',
-                }}
-              >
-                <span
+              {data.qrImageUrl ? (
+                <img
+                  src={data.qrImageUrl}
+                  alt={`Mã QR chuyển khoản VietQR ${data.amount.toLocaleString('vi-VN')}đ`}
                   style={{
+                    width: 196,
+                    height: 196,
+                    margin: '0 auto',
+                    display: 'block',
+                    borderRadius: 12,
+                    border: '6px solid #ffffff',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                    objectFit: 'contain',
                     background: '#ffffff',
-                    padding: '4px 8px',
-                    borderRadius: 6,
-                    fontSize: '12px',
-                    fontWeight: 800,
-                    color: 'var(--navy, #0F172A)',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: 196,
+                    height: 196,
+                    margin: '0 auto',
+                    borderRadius: 12,
+                    border: '6px solid #ffffff',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                    background:
+                      'repeating-conic-gradient(#12211C 0% 25%, #ffffff 0% 50%) 0 0 / 24px 24px',
+                    display: 'grid',
+                    placeItems: 'center',
                   }}
                 >
-                  VietQR · CareNest
-                </span>
-              </div>
+                  <span
+                    style={{
+                      background: '#ffffff',
+                      padding: '4px 8px',
+                      borderRadius: 6,
+                      fontSize: '12px',
+                      fontWeight: 800,
+                      color: 'var(--navy, #0F172A)',
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
+                    }}
+                  >
+                    VietQR · CareNest
+                  </span>
+                </div>
+              )}
               <div style={{ fontSize: '13px', color: 'var(--text-secondary, #64748B)', marginTop: 8 }}>
                 Quét bằng ứng dụng ngân hàng bất kỳ
               </div>

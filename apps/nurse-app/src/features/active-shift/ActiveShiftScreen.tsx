@@ -6,7 +6,10 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import NetInfo from '@react-native-community/netinfo';
 import { MessageSquare } from 'lucide-react-native';
 import { tokens } from '../../styles/tokens';
@@ -540,7 +543,7 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
   const completedActivitiesCount = activities.filter((a) => a.completed).length;
 
   return (
-    <View style={styles.root}>
+    <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
       {/* Sticky Top Header + SOS Bar */}
       <View style={styles.topHeader}>
         <View style={styles.headerMeta}>
@@ -621,7 +624,7 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
         )}
 
         {/* 4-Tab Clinical Navigation */}
-        <View style={styles.tabBar}>
+        <View style={styles.tabBar} accessibilityRole="tablist">
           {[
             { key: 'ASSESSMENT' as const, label: 'Sàng lọc 30p', dot: !assessmentCompleted },
             { key: 'VITALS' as const, label: 'Sinh tồn', dot: false },
@@ -634,6 +637,8 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
                 key={tab.key}
                 style={[styles.tabItem, active && styles.tabItemActive]}
                 onPress={() => setActiveTab(tab.key)}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: active }}
               >
                 <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>
                   {tab.label}
@@ -646,7 +651,15 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
       </View>
 
       {/* Scrollable Workspace Content */}
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Real-time Extension Request Banner */}
         {pendingExtension && (
           <View style={styles.extensionBanner}>
@@ -734,7 +747,8 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
           />
         )}
       </ScrollView>
-    </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 

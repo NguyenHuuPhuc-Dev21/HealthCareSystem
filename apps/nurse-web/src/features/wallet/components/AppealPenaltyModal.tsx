@@ -3,6 +3,7 @@ import { AlertCircle, Camera, X } from 'lucide-react';
 import type { DepositPenaltyDto } from '@healthcare-system/shared';
 import { formatVND } from '../../../lib/formatters';
 import { PENALTY_REASON_LABELS } from '../deposit-labels';
+import { Modal, ModalCloseButton } from '../../../components';
 
 export interface AppealPenaltyModalProps {
   penalty: DepositPenaltyDto;
@@ -70,56 +71,17 @@ export const AppealPenaltyModal: React.FC<AppealPenaltyModalProps> = ({
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 999,
-        background: 'rgba(15, 23, 42, 0.65)',
-        display: 'grid',
-        placeItems: 'center',
-        padding: 16,
-      }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="appeal-modal-title"
-    >
-      <div
-        className="card"
-        style={{
-          width: '100%',
-          maxWidth: 540,
-          background: '#ffffff',
-          borderRadius: 18,
-          padding: 24,
-          boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
-          position: 'relative',
-        }}
-      >
-        <button
-          type="button"
-          onClick={onClose}
-          style={{
-            position: 'absolute',
-            top: 18,
-            right: 18,
-            background: 'transparent',
-            border: 0,
-            cursor: 'pointer',
-            color: 'var(--text-secondary, #64748B)',
-          }}
-          aria-label="Đóng modal"
-        >
-          <X size={22} />
-        </button>
-
+    <Modal open onClose={() => !submitting && onClose()} titleId="appeal-modal-title" maxWidth={540} closeOnBackdrop={!submitting}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
         <h3
           id="appeal-modal-title"
-          style={{ fontSize: '20px', fontWeight: 900, color: 'var(--navy, #0F172A)', margin: '0 0 8px' }}
+          style={{ fontSize: '20px', fontWeight: 900, color: 'var(--navy, #0F172A)', margin: 0 }}
         >
           Khiếu nại khoản trừ ký quỹ
         </h3>
-        <p style={{ fontSize: '14.5px', color: 'var(--text-secondary, #64748B)', margin: '0 0 16px' }}>
+        <ModalCloseButton onClick={() => !submitting && onClose()} label="Đóng modal" />
+      </div>
+      <p style={{ fontSize: '14.5px', color: 'var(--text-secondary, #64748B)', margin: '0 0 16px' }}>
           Yêu cầu sẽ được chuyển đến Admin thẩm tra. Nếu khiếu nại được chấp thuận, số tiền phạt sẽ được hoàn trả đầy đủ
           vào ký quỹ.
         </p>
@@ -278,7 +240,6 @@ export const AppealPenaltyModal: React.FC<AppealPenaltyModalProps> = ({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 };

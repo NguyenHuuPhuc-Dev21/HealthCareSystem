@@ -22,7 +22,7 @@ import { InvalidPrescriptionModal } from '../../shifts/components/InvalidPrescri
 interface JobDetailModalProps {
   job: JobItem;
   onClose: () => void;
-  onAccept?: (jobId: string) => void;
+  onAccept?: (jobId: string) => Promise<boolean | void> | void;
   isAccepting?: boolean;
 }
 
@@ -356,9 +356,11 @@ export const JobDetailModal: React.FC<JobDetailModalProps> = ({
               className="btn btn-primary btn-lg"
               type="button"
               style={{ height: 50, minWidth: 200 }}
-              onClick={() => {
-                onAccept(job.id);
-                onClose();
+              onClick={async () => {
+                const accepted = await onAccept(job.id);
+                if (accepted !== false) {
+                  onClose();
+                }
               }}
               disabled={isAccepting || job.isLockedForTier1}
             >

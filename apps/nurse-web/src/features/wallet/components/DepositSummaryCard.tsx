@@ -209,6 +209,8 @@ export const DepositSummaryCard: React.FC<DepositSummaryCardProps> = ({
             <div style={{ position: 'relative', flex: '1 1 240px', maxWidth: 320 }}>
               <input
                 type="text"
+                inputMode="numeric"
+                aria-label="Số tiền nạp bổ sung ký quỹ"
                 className="input"
                 value={parsedAmount > 0 ? parsedAmount.toLocaleString('vi-VN') : ''}
                 onChange={handleAmountChange}

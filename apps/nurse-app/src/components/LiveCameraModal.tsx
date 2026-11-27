@@ -2,11 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Linking,
   Modal,
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Camera,
   useCameraDevice,
@@ -165,7 +165,11 @@ export const LiveCameraProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             )}
           </View>
 
-          {cameraError ? <Text style={styles.errorText}>{cameraError}</Text> : null}
+          {cameraError ? (
+            <Text style={styles.errorText} accessibilityLiveRegion="polite">
+              {cameraError}
+            </Text>
+          ) : null}
 
           <View style={styles.footer}>
             <AppButton

@@ -33,7 +33,7 @@ export const EarningsChart: React.FC<EarningsChartProps> = ({
 
   const numBars = points.length;
   const availableWidth = svgWidth - 40;
-  const barWidth = Math.min(38, Math.max(24, Math.floor(availableWidth / (numBars * 1.6))));
+  const barWidth = numBars > 0 ? Math.min(38, Math.max(24, Math.floor(availableWidth / (numBars * 1.6)))) : 32;
   const gap = numBars > 1 ? (availableWidth - numBars * barWidth) / (numBars - 1) : 0;
   const startX = 20;
 

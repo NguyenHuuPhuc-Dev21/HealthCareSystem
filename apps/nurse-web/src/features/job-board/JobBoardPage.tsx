@@ -118,15 +118,17 @@ export const JobBoardPage: React.FC = () => {
     }, 4000);
   };
 
-  const handleAcceptJob = async (jobId: string) => {
+  const handleAcceptJob = async (jobId: string): Promise<boolean> => {
     setIsProcessing(true);
     const result = await acceptJob(jobId, tierCode, depositAmount ?? 0);
     setIsProcessing(false);
     if (result.success) {
       showToast('success', result.message ?? 'Đã nhận ca thành công!');
       await loadData();
+      return true;
     } else {
       showToast('error', result.message ?? 'Không thể nhận ca. Vui lòng thử lại.');
+      return false;
     }
   };
 

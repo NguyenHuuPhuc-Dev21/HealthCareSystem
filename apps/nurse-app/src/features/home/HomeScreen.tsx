@@ -217,68 +217,75 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         )}
 
         {/* Thẻ GPHN trên trang chủ — Bấm vào mở Credentials */}
-        <TouchableOpacity
+        <View
           style={[
             styles.gphnCard,
             alertInfo.status === 'EXPIRED' && styles.gphnCardExpired,
             alertInfo.status === 'EXPIRING_SOON' && styles.gphnCardExpiring,
             alertInfo.status === 'PENDING' && styles.gphnCardPending,
+            { flexDirection: 'column', alignItems: 'stretch' },
           ]}
-          onPress={() => navigation.navigate('Credentials')}
-          activeOpacity={0.8}
-          accessibilityRole="button"
-          accessibilityLabel="Trạng thái Giấy phép hành nghề"
         >
-          <View style={styles.gphnCardLeft}>
-            {alertInfo.status === 'EXPIRED' ? (
-              <ShieldAlert color={tokens.colors.alertCrimson} size={22} />
-            ) : alertInfo.status === 'EXPIRING_SOON' ? (
-              <AlertTriangle color={tokens.colors.accentOchre} size={22} />
-            ) : (
-              <FileText color={tokens.colors.brandJade} size={22} />
-            )}
-          </View>
-          <View style={styles.gphnCardBody}>
-            <View style={styles.gphnCardTitleRow}>
-              <Text
-                style={[
-                  styles.gphnCardTitle,
-                  alertInfo.status === 'EXPIRED' && styles.gphnTextRed,
-                  alertInfo.status === 'EXPIRING_SOON' && styles.gphnTextAmber,
-                ]}
-              >
-                {alertInfo.label}
-              </Text>
+          <TouchableOpacity
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}
+            onPress={() => navigation.navigate('Credentials')}
+            activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Trạng thái Giấy phép hành nghề"
+          >
+            <View style={styles.gphnCardLeft}>
               {alertInfo.status === 'EXPIRED' ? (
-                <View style={styles.badgeDanger}>
-                  <Text style={styles.badgeDangerText}>Hạ Tầng 1</Text>
-                </View>
-              ) : null}
+                <ShieldAlert color={tokens.colors.alertCrimson} size={22} />
+              ) : alertInfo.status === 'EXPIRING_SOON' ? (
+                <AlertTriangle color={tokens.colors.accentOchre} size={22} />
+              ) : (
+                <FileText color={tokens.colors.brandJade} size={22} />
+              )}
             </View>
-            <Text style={styles.gphnCardDesc}>{alertInfo.description}</Text>
-            {alertInfo.status === 'EXPIRED' ? (
-              <View style={styles.gphnActionRow}>
-                <TouchableOpacity
-                  style={styles.gphnBtnRed}
-                  onPress={() => navigation.navigate('RenewGphn')}
-                  activeOpacity={0.8}
+            <View style={styles.gphnCardBody}>
+              <View style={styles.gphnCardTitleRow}>
+                <Text
+                  style={[
+                    styles.gphnCardTitle,
+                    alertInfo.status === 'EXPIRED' && styles.gphnTextRed,
+                    alertInfo.status === 'EXPIRING_SOON' && styles.gphnTextAmber,
+                  ]}
                 >
-                  <Text style={styles.gphnBtnRedText}>Nộp GPHN mới</Text>
-                </TouchableOpacity>
+                  {alertInfo.label}
+                </Text>
+                {alertInfo.status === 'EXPIRED' ? (
+                  <View style={styles.badgeDanger}>
+                    <Text style={styles.badgeDangerText}>Hạ Tầng 1</Text>
+                  </View>
+                ) : null}
               </View>
-            ) : null}
-          </View>
-          <ChevronRight
-            color={
-              alertInfo.status === 'EXPIRED'
-                ? tokens.colors.alertCrimson
-                : alertInfo.status === 'EXPIRING_SOON'
-                  ? tokens.colors.accentOchre
-                  : tokens.colors.inkSecondary
-            }
-            size={20}
-          />
-        </TouchableOpacity>
+              <Text style={styles.gphnCardDesc}>{alertInfo.description}</Text>
+            </View>
+            <ChevronRight
+              color={
+                alertInfo.status === 'EXPIRED'
+                  ? tokens.colors.alertCrimson
+                  : alertInfo.status === 'EXPIRING_SOON'
+                    ? tokens.colors.accentOchre
+                    : tokens.colors.inkSecondary
+              }
+              size={20}
+            />
+          </TouchableOpacity>
+          {alertInfo.status === 'EXPIRED' ? (
+            <View style={[styles.gphnActionRow, { paddingLeft: 34 }]}>
+              <TouchableOpacity
+                style={[styles.gphnBtnRed, { minHeight: 44, justifyContent: 'center' }]}
+                onPress={() => navigation.navigate('RenewGphn')}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Nộp Giấy phép hành nghề mới"
+              >
+                <Text style={styles.gphnBtnRedText}>Nộp GPHN mới</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+        </View>
 
         {/* Bento Tóm tắt Ví & Ký quỹ (APP-N4 & W01/A09) */}
         <View style={styles.walletBentoRow}>
@@ -294,8 +301,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <Wallet size={17} color={tokens.colors.brandJade} />
               <Text style={styles.tileTitle}>Khả dụng</Text>
             </View>
-            <Text style={styles.tileAmount}>
-              {(walletSummary?.availableBalance ?? 3850000).toLocaleString('vi-VN')}đ
+            <Text style={styles.tileAmount} numberOfLines={1} adjustsFontSizeToFit>
+              {walletSummary
+                ? `${walletSummary.availableBalance.toLocaleString('vi-VN')}đ`
+                : '—'}
             </Text>
             <Text style={styles.tileSub}>Xem chi tiết ví →</Text>
           </TouchableOpacity>
@@ -335,8 +344,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   !walletSummary.depositGraceActive &&
                   styles.tileAmountWarning,
               ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
             >
-              {(walletSummary?.depositBalance ?? 300000).toLocaleString('vi-VN')}đ
+              {walletSummary
+                ? `${walletSummary.depositBalance.toLocaleString('vi-VN')}đ`
+                : '—'}
             </Text>
             <Text style={styles.tileSub}>
               {walletSummary?.depositGraceActive
@@ -375,62 +388,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </View>
           </View>
           <ChevronRight color={tokens.colors.inkSecondary} size={20} />
-        </TouchableOpacity>
-
-        {/* Nút TrustScore trên Trang chủ */}
-        <TouchableOpacity
-          style={styles.scheduleButton}
-          onPress={() => navigation.navigate('TrustScore')}
-          activeOpacity={0.8}
-          accessibilityRole="button"
-          accessibilityLabel="Xem điểm TrustScore và đánh giá"
-        >
-          <View style={styles.scheduleLeft}>
-            <View
-              style={[
-                styles.scheduleIconWrap,
-                { backgroundColor: trustScoreMeta.softColor },
-              ]}
-            >
-              <ShieldCheck size={20} color={trustScoreMeta.color} />
-            </View>
-            <View style={styles.scheduleTextBox}>
-              <Text style={styles.scheduleTitle}>
-                TrustScore · {trustScore}/100 ({trustScoreMeta.label})
-              </Text>
-              <Text style={styles.scheduleSub} numberOfLines={1}>
-                {trustScoreMeta.summary}
-              </Text>
-            </View>
-          </View>
-          <ChevronRight color={tokens.colors.inkSecondary} size={20} />
-        </TouchableOpacity>
-
-        {/* Nút TrustScore trên Trang chủ (A13) */}
-        <TouchableOpacity
-          style={styles.scheduleButton}
-          onPress={() => navigation.navigate('TrustScore')}
-          activeOpacity={0.8}
-          accessibilityRole="button"
-          accessibilityLabel="Đánh giá và điểm TrustScore"
-        >
-          <View style={styles.scheduleLeft}>
-            <View style={styles.scheduleIconWrap}>
-              <ShieldCheck
-                size={20}
-                color={getScoreTierMeta(session?.profile?.trust_score ?? 92).color}
-              />
-            </View>
-            <View style={styles.scheduleTextBox}>
-              <Text style={styles.scheduleTitle}>
-                TrustScore · {session?.profile?.trust_score ?? 92}/100
-              </Text>
-              <Text style={styles.scheduleSub}>
-                {getScoreTierMeta(session?.profile?.trust_score ?? 92).label} — Xem lịch sử điểm &amp; đánh giá
-              </Text>
-            </View>
-          </View>
-          <ChevronRight size={20} color={tokens.colors.inkSecondary} />
         </TouchableOpacity>
 
         {/* Nút Lịch rảnh trên Trang chủ */}

@@ -53,8 +53,8 @@ export const WalletPage: React.FC = () => {
       const [sumRes, settRes, earnRes, txRes] = await Promise.all([
         getWalletSummary(),
         getUpcomingSettlements(),
-        getEarnings(earningsRange),
-        getWalletTransactions({ type: activeTxFilter }),
+        getEarnings('week'),
+        getWalletTransactions({ type: 'ALL' }),
       ]);
 
       if (sumRes.success && sumRes.data) {
@@ -82,7 +82,7 @@ export const WalletPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [activeTxFilter, earningsRange]);
+  }, []);
 
   useEffect(() => {
     loadInitialData();

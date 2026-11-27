@@ -42,6 +42,27 @@ export const AssessmentTab: React.FC<AssessmentTabProps> = ({
       Alert.alert('Cần ghi rõ mô tả', 'Vui lòng mô tả sai lệch thể trạng thực tế (ít nhất 5 ký tự).');
       return;
     }
+    if (hasMismatch && mismatchAction === 'STOP_NO_PENALTY') {
+      Alert.alert(
+        'Xác nhận dừng ca do sai lệch',
+        'Hệ thống sẽ kết thúc ca ngay lập tức (không phạt ký quỹ) và ghi nhận báo cáo sai lệch. Tiếp tục?',
+        [
+          { text: 'Hủy', style: 'cancel' },
+          {
+            text: 'Xác nhận dừng ca',
+            style: 'destructive',
+            onPress: () =>
+              onSaveAssessment({
+                mobility: selectedMobility,
+                hasMismatch,
+                mismatchAction,
+                reason: reason.trim(),
+              }),
+          },
+        ]
+      );
+      return;
+    }
     onSaveAssessment({
       mobility: selectedMobility,
       hasMismatch,

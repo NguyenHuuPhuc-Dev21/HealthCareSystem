@@ -2,13 +2,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   AlertCircle,
   AlertTriangle,
@@ -315,20 +315,22 @@ export const AccountClosureScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.cardTitle}>Tài khoản thụ hưởng</Text>
               </View>
               <View style={styles.bankInfoBox}>
-                <Text style={styles.bankName}>
-                  {bankAccount?.bankName || refundRequest?.bankAccount.bankName || 'Vietcombank'}
-                </Text>
-                <Text style={styles.bankAccountNum}>
-                  {bankAccount?.accountMasked ||
-                    refundRequest?.bankAccount.accountMasked ||
-                    '•••• 6899'}
-                </Text>
-                <Text style={styles.bankHolder}>
-                  Chủ TK:{' '}
-                  {bankAccount?.accountHolder ||
-                    refundRequest?.bankAccount.accountHolder ||
-                    'TRAN THI MAI'}
-                </Text>
+                {bankAccount || refundRequest?.bankAccount ? (
+                  <>
+                    <Text style={styles.bankName}>
+                      {bankAccount?.bankName || refundRequest?.bankAccount.bankName}
+                    </Text>
+                    <Text style={styles.bankAccountNum}>
+                      {bankAccount?.accountMasked || refundRequest?.bankAccount.accountMasked}
+                    </Text>
+                    <Text style={styles.bankHolder}>
+                      Chủ TK:{' '}
+                      {bankAccount?.accountHolder || refundRequest?.bankAccount.accountHolder}
+                    </Text>
+                  </>
+                ) : (
+                  <Text style={styles.bankHolder}>Chưa liên kết tài khoản ngân hàng</Text>
+                )}
               </View>
               <Text style={styles.bankNotice}>
                 Tiền hoàn sẽ chuyển vào tài khoản ngân hàng chính chủ của bạn qua chuyển khoản nhanh

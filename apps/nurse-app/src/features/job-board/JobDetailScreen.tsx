@@ -161,7 +161,7 @@ export const JobDetailScreen: React.FC<JobDetailScreenProps> = ({
               {
                 text: 'Nạp ký quỹ',
                 onPress: () => {
-                  navigation.navigate('MainTabs' as any, { screen: 'ProfileTab' });
+                  navigation.navigate('Deposit');
                 },
               },
             ]
@@ -173,9 +173,9 @@ export const JobDetailScreen: React.FC<JobDetailScreenProps> = ({
             [
               { text: 'Đóng', style: 'cancel' },
               {
-                text: 'Nạp ký quỹ (A10)',
+                text: 'Nạp ký quỹ',
                 onPress: () => {
-                  navigation.navigate('MainTabs' as any, { screen: 'ProfileTab' });
+                  navigation.navigate('Deposit');
                 },
               },
             ]

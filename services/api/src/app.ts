@@ -125,6 +125,30 @@ export function createApp(): Express {
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', 1); // real client IP behind one reverse proxy (needed for rate limits/audit IP)
+
+  const configuredOrigins = (process.env.CORS_ORIGIN ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    const isDevLocal =
+      process.env.NODE_ENV !== 'production' &&
+      typeof origin === 'string' &&
+      /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+    if (origin && (configuredOrigins.includes(origin) || isDevLocal)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Vary', 'Origin');
+      res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,Idempotency-Key');
+      if (req.method === 'OPTIONS') {
+        res.status(204).end();
+        return;
+      }
+    }
+    next();
+  });
+
   app.use(express.json({ limit: '1mb' })); // files never go through the API (presigned uploads)
 
   app.use(process.env.API_PREFIX ?? '/api/v1', buildApiRouter());

@@ -260,13 +260,11 @@ export const CompletedShiftDetailScreen: React.FC<CompletedShiftDetailScreenProp
             <AppButton
               label={`Nộp hoa hồng (${formatVND(commission)})`}
               variant="primary"
-              onPress={() => {
-                Alert.alert(
-                  'Nộp hoa hồng',
-                  `Bạn cần nộp ${formatVND(commission)} hoa hồng cho ca ${shift.bookingCode}. Tính năng nạp ví sẽ mở trong đợt phát hành A11.`,
-                  [{ text: 'Đóng' }]
-                );
-              }}
+              onPress={() =>
+                navigation.navigate('CommissionPayment', {
+                  bookingId: shift.bookingId,
+                })
+              }
               style={styles.actionBtn}
             />
           ) : null}

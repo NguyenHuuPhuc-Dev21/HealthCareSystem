@@ -1,6 +1,6 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Button } from '../../components';
+import { Button, Modal } from '../../components';
 import { useAuth } from '../auth/AuthContext';
 import { submitOnboarding } from './onboarding.api';
 
@@ -466,25 +466,26 @@ export const OnboardingWizard: React.FC = () => {
                 </div>
             </div>
 
-            {confirmCancel && (
-                <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-cancel-title">
-                    <div className="modal-card">
-                        <h3 id="modal-cancel-title">Hủy tạo hồ sơ?</h3>
-                        <p>
-                            Mọi thông tin bạn đã nhập và các ảnh đã chọn sẽ bị xóa. Lần sau đăng nhập, bạn sẽ tạo lại
-                            hồ sơ từ đầu.
-                        </p>
-                        <div className="actions-row">
-                            <Button type="button" variant="secondary" onClick={() => setConfirmCancel(false)}>
-                                Tiếp tục tạo hồ sơ
-                            </Button>
-                            <Button type="button" className="btn-danger" onClick={handleCancel}>
-                                Xác nhận hủy
-                            </Button>
-                        </div>
-                    </div>
+            <Modal
+                open={confirmCancel}
+                onClose={() => setConfirmCancel(false)}
+                titleId="modal-cancel-title"
+                maxWidth={460}
+            >
+                <h3 id="modal-cancel-title" style={{ marginTop: 0 }}>Hủy tạo hồ sơ?</h3>
+                <p>
+                    Mọi thông tin bạn đã nhập và các ảnh đã chọn sẽ bị xóa. Lần sau đăng nhập, bạn sẽ tạo lại
+                    hồ sơ từ đầu.
+                </p>
+                <div className="actions-row">
+                    <Button type="button" variant="secondary" onClick={() => setConfirmCancel(false)}>
+                        Tiếp tục tạo hồ sơ
+                    </Button>
+                    <Button type="button" className="btn-danger" onClick={handleCancel}>
+                        Xác nhận hủy
+                    </Button>
                 </div>
-            )}
+            </Modal>
         </div>
     );
 };

@@ -54,7 +54,7 @@ interface WalletScreenProps {
 export const WalletScreen: React.FC<WalletScreenProps> = ({ navigation }) => {
   const { summary, loading: loadingSummary, refresh: refreshSummary } = useWalletSummary();
 
-  const [bankAccountMasked, setBankAccountMasked] = useState<string>('•••• 6899');
+  const [bankAccountMasked, setBankAccountMasked] = useState<string>('');
   const [pendingCommission, setPendingCommission] = useState<{
     hasPendingCommission: boolean;
     bookingCode?: string;

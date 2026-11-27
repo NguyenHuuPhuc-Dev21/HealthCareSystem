@@ -31,6 +31,7 @@ import {
 import { DocType, DisputeStatus, NurseTier, VerificationStatus } from '@healthcare-system/shared';
 import { AppButton, CareNestLogoMark, StatusBadge } from '../../components';
 import { useAuth } from '../auth/AuthContext';
+import { useRadar } from '../radar/RadarContext';
 import { getMyDisputes } from '../disputes/disputes.api';
 import { formatMaskedPhone } from '../../lib/formatters';
 import { IS_DEV } from '../../lib/hardware-providers';
@@ -50,6 +51,7 @@ interface AccountScreenProps {
 
 export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
   const { session, logout, enterDevZone } = useAuth();
+  const { isOnline } = useRadar();
   const profile = session?.profile;
   const user = session?.user;
   const credentials = session?.credentials ?? [];
@@ -162,7 +164,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
               {user?.full_name || 'Điều dưỡng CareNest'}
             </Text>
             <Text style={styles.userPhone}>
-              {formatMaskedPhone(user?.phone || '') || '0905 ••• 123'} · Đà Nẵng
+              {formatMaskedPhone(user?.phone || '') || 'Chưa cập nhật SĐT'} · Đà Nẵng
             </Text>
           </View>
         </View>
@@ -195,9 +197,16 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
               <Text style={styles.chipBadgeText}>Cán bộ y tế nghỉ hưu</Text>
             </View>
           ) : null}
-          <View style={styles.chipJade}>
-            <View style={styles.onlineDot} />
-            <Text style={styles.chipJadeText}>Sẵn sàng nhận ca</Text>
+          <View style={isOnline ? styles.chipJade : styles.chipBadge}>
+            <View
+              style={[
+                styles.onlineDot,
+                !isOnline && { backgroundColor: tokens.colors.inkSecondary },
+              ]}
+            />
+            <Text style={isOnline ? styles.chipJadeText : styles.chipBadgeText}>
+              {isOnline ? 'Sẵn sàng nhận ca' : 'Đang ngoại tuyến'}
+            </Text>
           </View>
         </View>
 

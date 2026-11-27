@@ -18,6 +18,7 @@ import {
   subscribeNotifications,
 } from './notifications.api';
 import { getNotificationRoute } from './notification-routes';
+import { useAuth } from '../auth/AuthContext';
 
 interface NotificationContextValue {
   notifications: NotificationDto[];
@@ -72,12 +73,19 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   const [activeHighToast, setActiveHighToast] = useState<NotificationDto | null>(null);
   const toastTimeoutRef = useRef<number | null>(null);
   const navigate = useNavigate();
+  const { session } = useAuth();
+  const isAuthenticated = Boolean(session?.token);
 
   const unreadCount = useMemo(() => {
     return notifications.filter((n) => !n.readAt).length;
   }, [notifications]);
 
   const fetchNotifications = useCallback(async () => {
+    if (!isAuthenticated) {
+      setNotifications([]);
+      setLoading(false);
+      return;
+    }
     try {
       const res = await getNotifications();
       if (res.success && res.data) {
@@ -88,7 +96,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   // Tải danh sách thông báo lần đầu
   useEffect(() => {
@@ -107,8 +115,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     }, 7000);
   }, []);
 
-  // Lắng nghe thông báo mới qua WebSocket hoặc Mock subscriber
+  // Lắng nghe thông báo mới qua WebSocket hoặc Mock subscriber (chỉ khi đã đăng nhập)
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     const unsubscribe = subscribeNotifications((newNotif) => {
       setNotifications((prev) => {
         // Tránh trùng lặp
@@ -134,7 +144,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
         window.clearTimeout(toastTimeoutRef.current);
       }
     };
-  }, [fetchNotifications, triggerHighPriorityToast]);
+  }, [isAuthenticated, fetchNotifications, triggerHighPriorityToast]);
 
   const markAsRead = useCallback(async (id: string) => {
     // Optimistic update
