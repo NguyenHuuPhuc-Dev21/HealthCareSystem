@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking } from 'react-native';
+import { MessageSquare } from 'lucide-react-native';
 import { tokens } from '../../styles/tokens';
+import { getConversation, subscribeConversation } from '../chat/chat.api';
+import { CHAT_LABELS } from '../chat/chat-labels';
+import { countUnreadMessages } from '../chat/useConversation';
 
 interface ShiftBriefingScreenProps {
+  bookingId?: string;
   bookingCode: string;
   serviceName: string;
   timeRange: string;
@@ -13,11 +18,14 @@ interface ShiftBriefingScreenProps {
   allergies: string;
   isInvasive: boolean;
   prescriptionSummary?: string;
+  unreadChatCount?: number;
+  onOpenChat?: () => void;
   onProceedToCheckIn: () => void;
   onBack: () => void;
 }
 
 export const ShiftBriefingScreen: React.FC<ShiftBriefingScreenProps> = ({
+  bookingId,
   bookingCode,
   serviceName,
   timeRange,
@@ -28,9 +36,36 @@ export const ShiftBriefingScreen: React.FC<ShiftBriefingScreenProps> = ({
   allergies,
   isInvasive,
   prescriptionSummary,
+  unreadChatCount,
+  onOpenChat,
   onProceedToCheckIn,
   onBack,
 }) => {
+  const [fetchedUnread, setFetchedUnread] = useState(0);
+
+  useEffect(() => {
+    if (unreadChatCount !== undefined || !bookingId) return;
+    let alive = true;
+    let unsub: (() => void) | undefined;
+
+    void getConversation(bookingId).then((res) => {
+      if (!alive || !res.success || !res.data) return;
+      setFetchedUnread(countUnreadMessages(res.data.messages));
+      unsub = subscribeConversation(res.data.id, (msg) => {
+        if (msg.senderRole !== 'NURSE' && !msg.readAt) {
+          setFetchedUnread((prev) => prev + 1);
+        }
+      });
+    });
+
+    return () => {
+      alive = false;
+      if (unsub) unsub();
+    };
+  }, [bookingId, unreadChatCount]);
+
+  const effectiveUnread = unreadChatCount ?? fetchedUnread;
+
   const handleOpenDirections = () => {
     const query = encodeURIComponent(patientAddress);
     Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${query}`);
@@ -89,6 +124,25 @@ export const ShiftBriefingScreen: React.FC<ShiftBriefingScreenProps> = ({
           </Text>
         </View>
       )}
+
+      {onOpenChat ? (
+        <TouchableOpacity
+          style={styles.chatBtn}
+          onPress={onOpenChat}
+          accessibilityRole="button"
+          accessibilityLabel={CHAT_LABELS.chatActionButton}
+        >
+          <MessageSquare size={18} color={tokens.colors.brandJade} />
+          <Text style={styles.chatBtnText}>{CHAT_LABELS.chatActionButton}</Text>
+          {effectiveUnread > 0 ? (
+            <View style={styles.unreadBadge}>
+              <Text style={styles.unreadBadgeText}>
+                {effectiveUnread > 99 ? '99+' : effectiveUnread}
+              </Text>
+            </View>
+          ) : null}
+        </TouchableOpacity>
+      ) : null}
 
       <TouchableOpacity style={styles.primaryBtn} onPress={onProceedToCheckIn}>
         <Text style={styles.primaryBtnText}>Tôi đã tới nơi, điểm danh vào ca</Text>
@@ -204,6 +258,38 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '700',
     color: '#FFFFFF',
+  },
+  chatBtn: {
+    height: tokens.spacing.touchTargetMin,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: tokens.colors.brandJade,
+    backgroundColor: tokens.colors.brandJadeSoft,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  chatBtnText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: tokens.colors.brandJadeDark,
+  },
+  unreadBadge: {
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    paddingHorizontal: 6,
+    backgroundColor: tokens.colors.alertCrimson,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  unreadBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: tokens.colors.paper,
   },
 });
 

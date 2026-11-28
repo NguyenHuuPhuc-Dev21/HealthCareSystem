@@ -28,7 +28,8 @@ export type StorageCategory =
   | 'prescription'
   | 'checkin-selfie'
   | 'prescription-rejection'
-  | 'dispute-evidence';
+  | 'dispute-evidence'
+  | 'chat-image';
 
 /** Content types accepted for upload (images + PDF scans). */
 export const ALLOWED_UPLOAD_CONTENT_TYPES: ReadonlySet<string> = new Set([
@@ -179,6 +180,31 @@ export async function readObjectHead(objectKey: string, bytes = 16): Promise<Buf
     if (status === 404) return null;
     throw err;
   }
+}
+
+/**
+ * Reads a whole object (server-side processing, e.g. stamping the check-in selfie — BE-2 check-in).
+ * null if missing. Callers must bound the size first with statObject (MAX_UPLOAD_BYTES).
+ */
+export async function readObject(objectKey: string): Promise<Buffer | null> {
+  if (!isValidObjectKey(objectKey)) throw new StorageError('Invalid object key');
+  try {
+    const res = await getClient().send(new GetObjectCommand({ Bucket: bucket(), Key: objectKey }));
+    const body = res.Body as { transformToByteArray?: () => Promise<Uint8Array> } | undefined;
+    if (!body?.transformToByteArray) return Buffer.alloc(0);
+    return Buffer.from(await body.transformToByteArray());
+  } catch (err) {
+    const status = (err as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode;
+    if (status === 404) return null;
+    throw err;
+  }
+}
+
+/** Writes an object produced by the server (never user bytes passed through unchecked). */
+export async function putObject(objectKey: string, body: Buffer, contentType: string): Promise<void> {
+  if (!isValidObjectKey(objectKey)) throw new StorageError('Invalid object key');
+  if (!ALLOWED_UPLOAD_CONTENT_TYPES.has(contentType)) throw new StorageError(`Content type not allowed: ${contentType}`);
+  await getClient().send(new PutObjectCommand({ Bucket: bucket(), Key: objectKey, Body: body, ContentType: contentType }));
 }
 
 /** Returns size/content type, or null if the object does not exist. */

@@ -88,6 +88,11 @@ export interface RunMigrationsOptions {
   dbDir?: string;
   includeSeeds?: boolean;
   log?: (msg: string) => void;
+  /**
+   * Called with the pending files (inside the advisory lock, before anything is applied); throw to stop.
+   * Used by scripts/migrate.ts for the 19:00–21:00 maintenance embargo (BE-2 · Phase 8 · NFR-AVAIL-01).
+   */
+  beforeApply?: (pending: MigrationFile[], client: pg.Client) => Promise<void>;
 }
 
 export async function runMigrations(options: RunMigrationsOptions): Promise<MigrationFile[]> {
@@ -138,6 +143,8 @@ export async function runMigrations(options: RunMigrationsOptions): Promise<Migr
       log('[migrate] Database is up to date.');
       return [];
     }
+
+    if (options.beforeApply) await options.beforeApply(plan.pending, client);
 
     for (const file of plan.pending) {
       const sql = readFileSync(file.absolutePath, 'utf8');

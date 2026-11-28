@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   Alert,
+  Linking,
   ScrollView,
   StyleSheet,
   Switch,
@@ -14,6 +15,7 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   Award,
+  Bell,
   Calendar,
   ChevronRight,
   Coins,
@@ -26,14 +28,16 @@ import {
   User,
   UserX,
 } from 'lucide-react-native';
-import { DocType, NurseTier, VerificationStatus } from '@healthcare-system/shared';
+import { DocType, DisputeStatus, NurseTier, VerificationStatus } from '@healthcare-system/shared';
 import { AppButton, CareNestLogoMark, StatusBadge } from '../../components';
 import { useAuth } from '../auth/AuthContext';
+import { getMyDisputes } from '../disputes/disputes.api';
 import { formatMaskedPhone } from '../../lib/formatters';
 import { IS_DEV } from '../../lib/hardware-providers';
 import { tokens } from '../../styles/tokens';
 import type { ActiveStackParamList, MainTabParamList } from '../../navigation/types';
 import { calculateGphnDaysRemaining } from '../credentials/credentials.api';
+import { NOTIFICATION_LABELS } from '../notifications/notification-labels';
 
 type AccountNavProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'ProfileTab'>,
@@ -51,6 +55,35 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
   const credentials = session?.credentials ?? [];
 
   const [largeFont, setLargeFont] = useState(false);
+  const [needsRebuttalCount, setNeedsRebuttalCount] = useState(0);
+
+  React.useEffect(() => {
+    let active = true;
+    const loadDisputeBadge = async () => {
+      try {
+        const res = await getMyDisputes();
+        if (active && res.success) {
+          const count = res.data.filter(
+            (d) =>
+              d.status === DisputeStatus.OPEN &&
+              d.openedBy === 'PATIENT' &&
+              !d.nurseRebuttal
+          ).length;
+          setNeedsRebuttalCount(count);
+        }
+      } catch {
+        // ignore
+      }
+    };
+    void loadDisputeBadge();
+    const unsub = navigation.addListener('focus', () => {
+      void loadDisputeBadge();
+    });
+    return () => {
+      active = false;
+      unsub();
+    };
+  }, [navigation]);
 
   const isTier2 = profile?.tier === NurseTier.TIER_2_SPECIALIST;
   const isRetired = Boolean(profile?.is_retired_medical_staff);
@@ -140,10 +173,16 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
             label={isTier2 ? 'Cấp 2' : 'Cấp 1'}
             tone={isTier2 ? 'jade' : 'neutral'}
           />
-          <View style={styles.chipJade}>
+          <TouchableOpacity
+            style={styles.chipJade}
+            onPress={() => navigation.navigate('TrustScore')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Xem chi tiết điểm TrustScore"
+          >
             <ShieldCheck color={tokens.colors.brandJade} size={14} />
             <Text style={styles.chipJadeText}>TrustScore {trustScore}/100</Text>
-          </View>
+          </TouchableOpacity>
           {ratingAvg > 0 ? (
             <View style={styles.chipAmber}>
               <Star color={tokens.colors.accentOchre} size={14} />
@@ -252,7 +291,51 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
             <ChevronRight color={tokens.colors.inkSecondary} size={20} />
           </TouchableOpacity>
 
-          {/* 5. Ngừng hợp tác & hoàn ký quỹ (A10 / ADR-0004) */}
+          {/* 5. Đánh giá & TrustScore (A13) */}
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('TrustScore')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Đánh giá và điểm TrustScore"
+          >
+            <View style={styles.menuIconBox}>
+              <ShieldCheck color={tokens.colors.brandJade} size={22} />
+            </View>
+            <View style={styles.menuTextBox}>
+              <Text style={[styles.menuTitle, largeFont && styles.menuTitleLarge]}>
+                Đánh giá &amp; TrustScore
+              </Text>
+              <Text style={styles.menuSub}>
+                Điểm uy tín {trustScore}/100 · Lịch sử &amp; đánh giá khách hàng
+              </Text>
+            </View>
+            <ChevronRight color={tokens.colors.inkSecondary} size={20} />
+          </TouchableOpacity>
+
+          {/* 6. Khiếu nại & phản hồi (A15) */}
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('DisputeList')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Khiếu nại và phản hồi"
+          >
+            <View style={styles.menuIconBox}>
+              <Shield color={tokens.colors.accentOchre} size={22} />
+            </View>
+            <View style={styles.menuTextBox}>
+              <Text style={[styles.menuTitle, largeFont && styles.menuTitleLarge]}>
+                Khiếu nại{needsRebuttalCount > 0 ? ` (${needsRebuttalCount} cần phản hồi)` : ''}
+              </Text>
+              <Text style={styles.menuSub}>
+                Phản hồi bằng chứng &amp; theo dõi phân xử
+              </Text>
+            </View>
+            <ChevronRight color={tokens.colors.inkSecondary} size={20} />
+          </TouchableOpacity>
+
+          {/* 7. Ngừng hợp tác & hoàn ký quỹ (A10 / ADR-0004) */}
           <TouchableOpacity
             style={styles.menuItem}
             onPress={() => navigation.navigate('AccountClosure')}
@@ -268,6 +351,28 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
                 Ngừng hợp tác &amp; hoàn ký quỹ
               </Text>
               <Text style={styles.menuSub}>Thủ tục tất toán &amp; hoàn tiền sau 7 ngày</Text>
+            </View>
+            <ChevronRight color={tokens.colors.inkSecondary} size={20} />
+          </TouchableOpacity>
+
+          {/* Cài đặt thông báo (A17) */}
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => void Linking.openSettings()}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={NOTIFICATION_LABELS.accountSettingsTitle}
+          >
+            <View style={styles.menuIconBox}>
+              <Bell color={tokens.colors.brandJade} size={22} />
+            </View>
+            <View style={styles.menuTextBox}>
+              <Text style={[styles.menuTitle, largeFont && styles.menuTitleLarge]}>
+                {NOTIFICATION_LABELS.accountSettingsTitle}
+              </Text>
+              <Text style={styles.menuSub}>
+                {NOTIFICATION_LABELS.accountSettingsSub}
+              </Text>
             </View>
             <ChevronRight color={tokens.colors.inkSecondary} size={20} />
           </TouchableOpacity>

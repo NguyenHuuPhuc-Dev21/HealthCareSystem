@@ -93,6 +93,23 @@ export const SYSTEM_CONFIG_KEYS = {
   TRUST_RECOVERY_GOOD_RATING: 'TRUST_RECOVERY_GOOD_RATING',                 // 2 (per shift rated ≥ TRUST_RECOVERY_MIN_STARS)
   TRUST_RECOVERY_MIN_STARS: 'TRUST_RECOVERY_MIN_STARS',                     // 4
   TRUST_SUSPEND_BELOW: 'TRUST_SUSPEND_BELOW',                               // 60 (ACTIVE nurse below 60 → SUSPENDED)
+
+  // Disputes (disputes — migration 0022)
+  DISPUTE_REBUTTAL_HOURS: 'DISPUTE_REBUTTAL_HOURS',                         // 24 (counter-party rebuttal window, FR-DISP-01)
+
+  // Shift execution: check-in, shift logs, check-out (BE-2 Phase 4 — migration 0024; proposed values, pending PO)
+  CHECKIN_OPENS_BEFORE_START_MINUTES: 'CHECKIN_OPENS_BEFORE_START_MINUTES', // 30 (check-in possible from start − 30 min, FR-SHIFT-01)
+  CHECKIN_SELFIE_MAX_AGE_MINUTES: 'CHECKIN_SELFIE_MAX_AGE_MINUTES',         // 10 (selfie upload URL issued at most 10 min before check-in)
+  CONDITION_MISMATCH_WINDOW_MINUTES: 'CONDITION_MISMATCH_WINDOW_MINUTES',   // 30 (condition discrepancy reported in the first 30 min, FR-SHIFT-02)
+  CHECKOUT_EARLY_TOLERANCE_MINUTES: 'CHECKOUT_EARLY_TOLERANCE_MINUTES',     // 15 (shift-based bookings: check-out from scheduled end − 15 min)
+  CASH_COMMISSION_DUE_HOURS: 'CASH_COMMISSION_DUE_HOURS',                   // 24 (cash booking: commission due check-out + 24h, FR-PAY-02)
+
+  // In-app chat & call (BE-2 Phase 6 — migration 0026; proposed value, pending PO)
+  CHAT_CALL_RING_TIMEOUT_SECONDS: 'CHAT_CALL_RING_TIMEOUT_SECONDS',         // 45 (unanswered in-app call → missed, FR-CHAT-01)
+
+  // Maintenance embargo (BE-2 Phase 8 — migration 0028, NFR-AVAIL-01): no migration / deploy in the shift handover
+  MAINTENANCE_EMBARGO_START: 'MAINTENANCE_EMBARGO_START',                   // '19:00' (Vietnam time)
+  MAINTENANCE_EMBARGO_END: 'MAINTENANCE_EMBARGO_END',                       // '21:00' (exclusive)
 } as const;
 
 export type SystemConfigKey = keyof typeof SYSTEM_CONFIG_KEYS;

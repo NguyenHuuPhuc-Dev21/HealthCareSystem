@@ -19,7 +19,8 @@ Radar Dispatch for urgent bookings, and the single claim transaction used by eve
 - Candidates: ACTIVE, no closure request, Tier valid on the shift date (`isTier2ValidOn`), deposit rule, inside the radius,
   and free according to `availability-engine` — the same engine nurse search uses.
 - Deposit rule (ADR-0004 D2): full deposit → any booking; short deposit → only `BANK_TRANSFER` bookings while the grace
-  period runs and completed + held grace shifts < `DEPOSIT_GRACE_MAX_SHIFTS`. See `depositAllows` in the policy.
+  period runs and completed + held grace shifts < `DEPOSIT_GRACE_MAX_SHIFTS`, and never over a debt (negative deposit).
+  See `depositAllows` in the policy. A penalty below the minimum also suspends the profile (migration 0025).
 - **Claim = first accept wins.** Lock order: `nurse_profiles` row, then `bookings` row (same order as tier-lifecycle and
   nurse-availabilities). Everything is re-validated under the locks; the DB exclusion constraint on overlapping
   bookings is the last line of defence.

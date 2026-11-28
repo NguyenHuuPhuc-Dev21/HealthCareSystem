@@ -83,6 +83,26 @@ PayOS-style envelope:
 | `UNKNOWN_BOOKING` | no booking with `orderCode` | none |
 | `NOT_SUCCESS` | `success = false` or `code ≠ "00"` | none |
 
+### Condition-surcharge payments (`<booking code>-PT<n>`, FR-SHIFT-02)
+
+Same rule as `-GH<n>`: when a condition surcharge with that code exists, the webhook hands the payment to shift-logs'
+`confirmConditionSurchargePayment` (BE-2) in the same transaction. Outcomes `SURCHARGE_PAID`, `DUPLICATE`,
+`UNKNOWN_SURCHARGE`, `AMOUNT_MISMATCH`, `LATE_PAYMENT_REFUNDED` — see [`shift-execution.api.md`](./shift-execution.api.md) §7.
+
+### Shift-extension payments (`<booking code>-GH<n>`, FR-SHIFT-03)
+
+A bank-transfer extension (BE-1 `shift-extend`) is paid to the **same webhook** with its own transfer content
+`<booking code>-GH<n>`. When an extension with that code exists, the webhook hands the payment to shift-extend's
+`confirmExtensionPayment` in the same transaction (a booking code that merely ends in `-GH<digits>` still goes the booking way):
+
+| outcome | Effect |
+|---|---|
+| `EXTENSION_PAID` | `ESCROW_HOLD` in the customer's escrow; extension in effect (`end_time` and amounts updated) |
+| `DUPLICATE` | same `reference` already booked |
+| `AMOUNT_MISMATCH` | amount ≠ extension price → nothing moves |
+| `LATE_PAYMENT_REFUNDED` | payment window over / no longer usable → `ESCROW_HOLD` + `REFUND` 100% |
+| `UNKNOWN_EXTENSION` | extension disappeared between lookup and lock |
+
 Idempotency keys: `escrow-hold:<reference>`, `escrow-refund:<reference>`, `escrow-refund:unmatched:<bookingId>` (UNIQUE in `wallet_transactions`).
 
 ### `POST /payments/dev/simulate-escrow` — PATIENT (owner), dev / demo only
@@ -113,3 +133,20 @@ the webhook the sandbox would send for the exact amount and runs the real handle
 - Late / extra payments are refunded automatically in the ledger; the actual bank payout in the sandbox is simulated.
 - Commission-payment webhook for cash bookings (`COMMISSION_PAYMENT`) is Phase 5 and will reuse the same signature check.
 - FE-1: `Booking.bankTransfer` (BE-2 view) stays `null`; read the transfer details from `GET /bookings/:id/payment-link`.
+
+## Nurse deposit top-ups (`KQ…`, ADR-0004)
+
+An `orderCode` of the form `KQ` + 12 characters that matches a `deposit_topups` row is a nurse deposit top-up, handled
+by `deposits` (`confirmTopup`) in the webhook's transaction — never a booking. At most the current shortfall to
+`MIN_NURSE_DEPOSIT` is credited (`TOPUP`, `external_ref` = gateway reference); the rest is returned by the custody partner.
+
+| outcome | meaning |
+|---|---|
+| `TOPUP_CREDITED` | whole amount credited to the deposit |
+| `TOPUP_EXCESS_RETURNED` | shortfall credited, the rest returned |
+| `TOPUP_RETURNED` | deposit already full, or the link was already paid: everything returned |
+| `DUPLICATE` | same gateway reference again |
+| `AMOUNT_MISMATCH` | amount differs from the link: nothing moves |
+| `UNKNOWN_TOPUP` | no such top-up |
+
+`bookingId` is `null` for these events. Contract: `docs/api/deposits.api.md`.

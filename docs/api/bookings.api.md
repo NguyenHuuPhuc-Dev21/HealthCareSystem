@@ -62,7 +62,7 @@ Gates, in this order — nothing is written unless all pass:
 | 1 | service exists · not prohibited (Group 3) · active | `404 SERVICE_NOT_FOUND` · **`403 SERVICE_PROHIBITED`** · `400 SERVICE_NOT_AVAILABLE` |
 | 2 | slot: starts in the future; shifts last 4 / 8 / 12 / 24 h; a `PER_TIME` visit ≤ 4 h | `400 START_IN_PAST` · `400 END_BEFORE_START` · `400 INVALID_DURATION` |
 | 3 | invasive: medical order photo, issued ≤ 7 days ago, uploaded by this customer | `400 PRESCRIPTION_REQUIRED` · `PRESCRIPTION_EXPIRED` · `PRESCRIPTION_DATE_IN_FUTURE` · `INVALID_FILE_KEY` · `FILE_NOT_UPLOADED` · `FILE_TYPE_NOT_ALLOWED` · `FILE_TOO_LARGE` |
-| 4 | profile is the caller's · Decree-13 consent active · home care needs eKYC `VERIFIED` | `403 FORBIDDEN` · `403 CONSENT_REQUIRED` · `403 EKYC_REQUIRED` |
+| 4 | account not locked by an Admin (`users.status` not `SUSPENDED` / `BANNED`, admin-users Phase 7) · profile is the caller's · Decree-13 consent active · home care needs eKYC `VERIFIED` | `403 ACCOUNT_SUSPENDED` · `403 FORBIDDEN` · `403 CONSENT_REQUIRED` · `403 EKYC_REQUIRED` |
 | 5 | invited nurse is ACTIVE | `400 INVITED_NURSE_NOT_AVAILABLE` |
 
 Prohibited services are also refused by a **database trigger** (`trg_bookings_no_prohibited_service`, migration 0009), so
@@ -127,7 +127,7 @@ First accept wins. One transaction locks the nurse row, then the booking row, an
 | 403 | `NURSE_NOT_ACTIVE` | profile or account not `ACTIVE` |
 | 403 | `ACCOUNT_CLOSING` | the nurse asked to close the account (`wallets.closure_requested_at`, ADR-0004 D3) |
 | 403 | `TIER_MISMATCH` | service needs Tier 2 with a GPHN valid on the shift date |
-| 403 | `DEPOSIT_SHORTFALL` | deposit below `MIN_NURSE_DEPOSIT` and no usable grace period (`details.minDeposit`, `details.paymentMethod`) |
+| 403 | `DEPOSIT_SHORTFALL` | deposit below `MIN_NURSE_DEPOSIT` and no usable grace period — a negative deposit (debt) is never covered by grace (`details.minDeposit`, `details.paymentMethod`) |
 | 409 | `SCHEDULE_CONFLICT` | not free for the slot (`details.reason`: `NO_DECLARED_AVAILABILITY` / `TIME_OFF` / `BOOKING_CONFLICT` / `TRAVEL_BUFFER`) |
 | 409 | `PAYMENT_NOT_SECURED` | bank-transfer booking not in `ESCROW_HELD` |
 | 404 | `BOOKING_NOT_FOUND` | |

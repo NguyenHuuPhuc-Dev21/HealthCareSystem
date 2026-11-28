@@ -12,7 +12,24 @@ export type WebhookOutcome =
   | 'AMOUNT_MISMATCH' // amount differs from the booking total → nothing moved, Admin follows up
   | 'NOT_TRANSFER_BOOKING' // a cash booking received a transfer → nothing moved, Admin follows up
   | 'UNKNOWN_BOOKING' // no booking with this code
-  | 'NOT_SUCCESS'; // gateway reported a failed / cancelled payment
+  | 'NOT_SUCCESS' // gateway reported a failed / cancelled payment
+  | 'EXTENSION_PAID' // shift extension paid → held in escrow and in effect (shift-extend, BE-1)
+  | 'UNKNOWN_EXTENSION' // `<code>-GH<n>` that matches no extension
+  | 'SURCHARGE_PAID' // condition-mismatch surcharge paid → held in escrow and in effect (shift-logs, BE-2)
+  | 'UNKNOWN_SURCHARGE' // `<code>-PT<n>` that matches no surcharge
+  | 'TOPUP_CREDITED' // nurse deposit top-up ("KQ…") credited in full (deposits, ADR-0004)
+  | 'TOPUP_EXCESS_RETURNED' // shortfall credited, the rest returned by the custody partner
+  | 'TOPUP_RETURNED' // deposit already full / link already paid: everything returned
+  | 'UNKNOWN_TOPUP' // "KQ…" that matches no top-up
+  | 'COMMISSION_PAID' // cash-booking commission ("HH…") self-paid by the nurse (cash-commission, FR-PAY-02)
+  | 'COMMISSION_RETURNED' // commission already paid: the second transfer goes back
+  | 'UNKNOWN_COMMISSION'; // "HH…" that matches no commission
+
+/** What shift-extend's confirmExtensionPayment answers, plus the booking it belongs to (for the event row). */
+export interface ExtensionPaymentResult {
+  outcome: 'EXTENSION_PAID' | 'DUPLICATE' | 'UNKNOWN_EXTENSION' | 'AMOUNT_MISMATCH' | 'LATE_PAYMENT_REFUNDED';
+  bookingId: string | null;
+}
 
 /** Booking as the webhook reads it (locked FOR UPDATE). */
 export type PaymentBookingRow = {

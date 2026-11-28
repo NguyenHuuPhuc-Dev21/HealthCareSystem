@@ -51,11 +51,15 @@ import { AppealPenaltyScreen } from '../features/wallet/AppealPenaltyScreen';
 import { AccountClosureScreen } from '../features/wallet/AccountClosureScreen';
 import { WithdrawScreen } from '../features/wallet/WithdrawScreen';
 import { CommissionPaymentScreen } from '../features/commission-payment/CommissionPaymentScreen';
+import { TrustScoreScreen } from '../features/trust-score/TrustScoreScreen';
+import { DisputeListScreen } from '../features/disputes/DisputeListScreen';
+import { DisputeDetailScreen } from '../features/disputes/DisputeDetailScreen';
+import { OpenDisputeScreen } from '../features/disputes/OpenDisputeScreen';
+import { ChatScreen } from '../features/chat/ChatScreen';
+import { NotificationsScreen } from '../features/notifications/NotificationsScreen';
 import { getDepositStatus, getRefundRequest } from '../features/wallet/deposit.api';
 import { getCommissionDebts } from '../features/commission-payment/commission-payment.api';
-import {
-  ShiftResultScreen,
-} from '../features/placeholders/ZoneScreens';
+import { ShiftResultScreen } from '../features/active-shift/ShiftResultScreen';
 import {
   createCameraProvider,
   createLocationProvider,
@@ -301,6 +305,7 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
               const { shift } = route.params;
               return (
                 <ShiftBriefingScreen
+                  bookingId={shift.bookingId}
                   bookingCode={shift.bookingCode}
                   serviceName={shift.serviceName}
                   timeRange={shift.timeRange}
@@ -311,6 +316,12 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
                   allergies={shift.allergies || 'Chưa ghi nhận dị ứng'}
                   isInvasive={shift.isInvasive}
                   prescriptionSummary={shift.prescriptionSummary}
+                  onOpenChat={() =>
+                    navigation.navigate('Chat', {
+                      bookingId: shift.bookingId,
+                      bookingCode: shift.bookingCode,
+                    })
+                  }
                   onProceedToCheckIn={() => navigation.navigate('CheckIn', { shift })}
                   onBack={() => navigation.goBack()}
                 />
@@ -354,12 +365,24 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
                   onPayCommissionNow={(bookingId) =>
                     navigation.replace('CommissionPayment', { bookingId })
                   }
+                  onOpenDispute={(bookingId) =>
+                    navigation.navigate('OpenDispute', { bookingId })
+                  }
+                  onOpenChat={(bookingId) =>
+                    navigation.navigate('Chat', {
+                      bookingId,
+                      bookingCode: shift.bookingCode,
+                    })
+                  }
                   onRequestCurrentPosition={locationProvider}
                   onCaptureLivePhoto={backCameraProvider}
                   onShiftCompleted={(outcome) =>
                     navigation.replace('ShiftResult', {
                       outcomeType: outcome?.type === 'CANCELLED_SAFE' ? 'CANCELLED_SAFE' : 'COMPLETED',
                       note: outcome?.note,
+                      bookingId: shift.bookingId,
+                      bookingCode: shift.bookingCode,
+                      customerName: shift.patientName,
                     })
                   }
                 />
@@ -422,6 +445,36 @@ export const RootNavigator: React.FC<RootNavigatorProps> = ({
           <ActiveStack.Screen
             name="Withdraw"
             component={WithdrawScreen}
+            options={{ headerShown: false }}
+          />
+          <ActiveStack.Screen
+            name="TrustScore"
+            component={TrustScoreScreen}
+            options={{ headerShown: false }}
+          />
+          <ActiveStack.Screen
+            name="DisputeList"
+            component={DisputeListScreen}
+            options={{ headerShown: false }}
+          />
+          <ActiveStack.Screen
+            name="DisputeDetail"
+            component={DisputeDetailScreen}
+            options={{ headerShown: false }}
+          />
+          <ActiveStack.Screen
+            name="OpenDispute"
+            component={OpenDisputeScreen}
+            options={{ headerShown: false }}
+          />
+          <ActiveStack.Screen
+            name="Chat"
+            component={ChatScreen}
+            options={{ headerShown: false }}
+          />
+          <ActiveStack.Screen
+            name="Notifications"
+            component={NotificationsScreen}
             options={{ headerShown: false }}
           />
         </ActiveStack.Navigator>

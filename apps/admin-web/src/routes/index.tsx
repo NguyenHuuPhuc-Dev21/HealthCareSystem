@@ -8,6 +8,12 @@ import {
 } from '../features/auth';
 import { NurseReviewPage } from '../features/nurse-verification/NurseReviewPage';
 import { VerificationQueuePage } from '../features/nurse-verification/VerificationQueuePage';
+import { UsersPage } from '../features/users/UsersPage';
+import { ConfigsPage } from '../features/configs/ConfigsPage';
+import { CatalogPage } from '../features/catalog/CatalogPage';
+import { FinancePage } from '../features/finance/FinancePage';
+import { DisputeDetailPage } from '../features/disputes/DisputeDetailPage';
+import { DisputesPage } from '../features/disputes/DisputesPage';
 
 export const AppRoutes = () => {
   return (
@@ -24,6 +30,12 @@ export const AppRoutes = () => {
         <Route path="/" element={<Navigate to="/nurse-verification" replace />} />
         <Route path="/nurse-verification" element={<VerificationQueuePage />} />
         <Route path="/nurse-verification/:nurseId" element={<NurseReviewPage />} />
+        <Route path="/users" element={<UsersPage />} />
+        <Route path="/configs" element={<ConfigsPage />} />
+        <Route path="/catalog" element={<CatalogPage />} />
+        <Route path="/finance" element={<FinancePage />} />
+        <Route path="/disputes" element={<DisputesPage />} />
+        <Route path="/disputes/:id" element={<DisputeDetailPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

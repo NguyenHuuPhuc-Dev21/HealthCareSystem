@@ -7,6 +7,7 @@
  *
  *   holdEscrow    ESCROW_HOLD  escrow_locked += amount   (verified gateway webhook)
  *   refundEscrow  REFUND       escrow_locked -= amount   (unmatched expiry, late / extra payment)
+ *   releaseEscrow ESCROW_RELEASE escrow_locked -= amount (settlements: paid out to the nurse + platform commission)
  *
  * Nurse deposit money (ADR-0004) is never touched here: escrow and deposit stay strictly separate.
  * Shared by gateway-webhooks and booking-expiry; it imports nothing from either service.
@@ -82,9 +83,30 @@ export async function refundEscrow(db: Queryable, m: Movement): Promise<boolean>
   return true;
 }
 
+/**
+ * Settlement (FR-PAY-02): the held money leaves the customer's escrow towards the nurse and the platform.
+ * Same guarantees as refundEscrow: false when already booked, EscrowInconsistencyError when not enough is held.
+ */
+export async function releaseEscrow(db: Queryable, m: Movement): Promise<boolean> {
+  if (await ledgerEntryExists(db, m.idempotencyKey)) return false;
+  const w = await lockCustomerWallet(db, m.customerId);
+  const before = Number(w.escrow_locked_balance);
+  if (before < m.amount) throw new EscrowInconsistencyError(m.bookingId, before, m.amount);
+  const after = before - m.amount;
+  await db.query(
+    `INSERT INTO wallet_transactions
+       (wallet_id, booking_id, idempotency_key, tx_type, balance_type, amount, balance_before, balance_after, status, external_ref)
+     VALUES ($1, $2, $3, $4::tx_type_enum, $5::balance_type_enum, $6, $7, $8, 'COMPLETED', $9)`,
+    [w.id, m.bookingId, m.idempotencyKey, TxType.ESCROW_RELEASE, BalanceType.ESCROW_LOCKED, m.amount, before, after, m.externalRef],
+  );
+  await db.query(`UPDATE wallets SET escrow_locked_balance = $2, updated_at = now() WHERE id = $1`, [w.id, after]);
+  return true;
+}
+
 /** Idempotency keys — one per business event, so retries and re-deliveries book money exactly once. */
 export const ledgerKeys = {
   hold: (providerRef: string) => `escrow-hold:${providerRef}`,
   refundPayment: (providerRef: string) => `escrow-refund:${providerRef}`,
   refundUnmatched: (bookingId: string) => `escrow-refund:unmatched:${bookingId}`,
+  release: (bookingId: string) => `escrow-release:${bookingId}`,
 };

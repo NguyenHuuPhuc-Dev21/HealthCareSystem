@@ -27,6 +27,15 @@ export async function findOwnedProfileForQuote(
   return rows[0] ?? null;
 }
 
+/**
+ * Account status of the customer, read FOR SHARE so an Admin suspension (admin-users, FOR NO KEY UPDATE on the same row)
+ * and a new booking never interleave.
+ */
+export async function lockCustomerStatus(db: Queryable, customerId: string): Promise<string | null> {
+  const { rows } = await db.query<{ status: string }>(`SELECT status::text AS status FROM users WHERE id = $1 FOR SHARE`, [customerId]);
+  return rows[0]?.status ?? null;
+}
+
 /** A nurse the customer may invite directly: ACTIVE account and ACTIVE profile. */
 export async function isInvitableNurse(db: Queryable, nurseId: string): Promise<boolean> {
   const { rows } = await db.query(

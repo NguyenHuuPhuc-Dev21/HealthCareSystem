@@ -8,8 +8,12 @@ import {
   Alert,
 } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
+import { MessageSquare } from 'lucide-react-native';
 import { tokens } from '../../styles/tokens';
 import { SosButton } from '../sos/SosButton';
+import { getConversation, subscribeConversation } from '../chat/chat.api';
+import { CHAT_LABELS } from '../chat/chat-labels';
+import { countUnreadMessages } from '../chat/useConversation';
 import {
   getShiftExecutionState,
   submitInitialAssessment,
@@ -64,6 +68,9 @@ interface ActiveShiftScreenProps {
   paymentMethod?: 'CASH' | 'BANK_TRANSFER';
   bookingAmount?: number;
   onPayCommissionNow?: (bookingId: string) => void;
+  onOpenDispute?: (bookingId: string) => void;
+  onOpenChat?: (bookingId: string) => void;
+  unreadChatCount?: number;
   onRequestCurrentPosition?: () => Promise<DeviceGeoCoords>;
   onCaptureLivePhoto?: () => Promise<string | null>;
   onShiftCompleted: (outcome?: { type: 'COMPLETED' | 'CANCELLED_SAFE'; note?: string }) => void;
@@ -82,6 +89,9 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
   paymentMethod = 'CASH',
   bookingAmount = 500000,
   onPayCommissionNow,
+  onOpenDispute,
+  onOpenChat,
+  unreadChatCount,
   onRequestCurrentPosition,
   onCaptureLivePhoto,
   onShiftCompleted,
@@ -116,6 +126,32 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
 
   // Check-out state
   const [submittingCheckout, setSubmittingCheckout] = useState(false);
+
+  // Chat unread count
+  const [fetchedChatUnread, setFetchedChatUnread] = useState(0);
+
+  useEffect(() => {
+    if (unreadChatCount !== undefined || !bookingId) return;
+    let alive = true;
+    let unsub: (() => void) | undefined;
+
+    void getConversation(bookingId).then((res) => {
+      if (!alive || !res.success || !res.data) return;
+      setFetchedChatUnread(countUnreadMessages(res.data.messages));
+      unsub = subscribeConversation(res.data.id, (msg) => {
+        if (msg.senderRole !== 'NURSE' && !msg.readAt) {
+          setFetchedChatUnread((prev) => prev + 1);
+        }
+      });
+    });
+
+    return () => {
+      alive = false;
+      if (unsub) unsub();
+    };
+  }, [bookingId, unreadChatCount]);
+
+  const effectiveChatUnread = unreadChatCount ?? fetchedChatUnread;
 
   // 1. Initial State Loading from Server
   useEffect(() => {
@@ -518,13 +554,43 @@ export const ActiveShiftScreen: React.FC<ActiveShiftScreenProps> = ({
           </View>
 
           {/* Unified Zero-Latency SOS Button */}
-          <SosButton
-            bookingId={bookingId}
-            patientLatitude={patientLatitude}
-            patientLongitude={patientLongitude}
-            onRequestCurrentPosition={onRequestCurrentPosition}
-            getLatestVitals={getLatestVitalsRecord}
-          />
+          <View style={styles.headerActions}>
+            {onOpenChat ? (
+              <TouchableOpacity
+                style={styles.chatBtn}
+                onPress={() => onOpenChat(bookingId)}
+                accessibilityRole="button"
+                accessibilityLabel={CHAT_LABELS.chatActionButton}
+              >
+                <MessageSquare size={15} color={tokens.colors.brandJadeDark} />
+                <Text style={styles.chatBtnText}>{CHAT_LABELS.chatActionButton}</Text>
+                {effectiveChatUnread > 0 ? (
+                  <View style={styles.chatUnreadBadge}>
+                    <Text style={styles.chatUnreadText}>
+                      {effectiveChatUnread > 99 ? '99+' : effectiveChatUnread}
+                    </Text>
+                  </View>
+                ) : null}
+              </TouchableOpacity>
+            ) : null}
+            {onOpenDispute ? (
+              <TouchableOpacity
+                style={styles.disputeBtn}
+                onPress={() => onOpenDispute(bookingId)}
+                accessibilityRole="button"
+                accessibilityLabel="Mở khiếu nại ca trực"
+              >
+                <Text style={styles.disputeBtnText}>Khiếu nại</Text>
+              </TouchableOpacity>
+            ) : null}
+            <SosButton
+              bookingId={bookingId}
+              patientLatitude={patientLatitude}
+              patientLongitude={patientLongitude}
+              onRequestCurrentPosition={onRequestCurrentPosition}
+              getLatestVitals={getLatestVitalsRecord}
+            />
+          </View>
         </View>
 
         {/* Offline Queue Status Banner */}
@@ -683,6 +749,54 @@ const styles = StyleSheet.create({
     borderBottomColor: tokens.colors.borderHairline,
     paddingTop: 12,
     paddingHorizontal: 16,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  disputeBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: tokens.radii.sm,
+    borderWidth: 1,
+    borderColor: tokens.colors.alertCrimson,
+    backgroundColor: tokens.colors.alertCrimsonSoft,
+  },
+  disputeBtnText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: tokens.colors.alertCrimson,
+  },
+  chatBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: tokens.radii.sm,
+    borderWidth: 1,
+    borderColor: tokens.colors.brandJade,
+    backgroundColor: tokens.colors.brandJadeSoft,
+  },
+  chatBtnText: {
+    fontSize: 12.5,
+    fontWeight: '700',
+    color: tokens.colors.brandJadeDark,
+  },
+  chatUnreadBadge: {
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    paddingHorizontal: 4,
+    backgroundColor: tokens.colors.alertCrimson,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chatUnreadText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: tokens.colors.paper,
   },
   headerMeta: {
     flexDirection: 'row',

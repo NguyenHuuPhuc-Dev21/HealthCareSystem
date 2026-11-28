@@ -94,9 +94,9 @@
 - [ ] `patient-profiles` (FR-AUTH-03): Patient profile management + customer eKYC; blocks home-care booking creation when customer eKYC is not `VERIFIED`; blocks profile creation if consent is missing.
 
 ### BE-3
-- [ ] `privacy-consent` (FR-PRIV-01): Consent event capture recording timestamp + client IP + device metadata.
-- [ ] `privacy-consent`: Medical record access authorization policy — restricted to assigned nurse, valid from `CONFIRMED` until check-out +12h; time-boxed Admin temporary re-grant with audit log.
-- [ ] `privacy-consent`: 24-month medical data retention enforcement; account deletion/anonymization request handler.
+- [x] `privacy-consent` (FR-PRIV-01): Consent event capture recording timestamp + client IP + device metadata.
+- [x] `privacy-consent`: Medical record access authorization policy — restricted to assigned nurse, valid from `CONFIRMED` until check-out +12h; time-boxed Admin temporary re-grant with audit log.
+- [x] `privacy-consent`: 24-month medical data retention enforcement; account deletion/anonymization request handler.
 - [x] Support BE-1: 10-minute Presigned URL minting pipeline for sensitive identity and credential documents.
 
 ### Phase 1 Exit Criteria
@@ -128,8 +128,8 @@
 - [x] `availability-engine` serves as the single source of truth for both nurse search and automated matching (no divergent availability logic).
 
 ### BE-3
-- [ ] `nurse-search`: `GET /api/v1/nurses/search` implementing all FR-SEARCH-01 query filters.
-- [ ] `nurse-search`: Surfaces only `ACTIVE` nurses with `deposit_balance ≥ 300,000` VND and qualifying Tier for the requested service; consumes `availability-engine`.
+- [x] `nurse-search`: `GET /api/v1/nurses/search` implementing all FR-SEARCH-01 query filters.
+- [x] `nurse-search`: Surfaces only `ACTIVE` nurses (no closure request) meeting the deposit rule — `deposit_balance ≥ MIN_NURSE_DEPOSIT`, or ADR-0004 grace for bank-transfer bookings (`cashAllowed = false`) — and a Tier valid on the shift date; consumes `availability-engine` (same gate as matching).
 
 ### Phase 2 Exit Criteria
 - [ ] A nurse with a `TIME_OFF_EXCEPTION` is strictly excluded from search results and candidate dispatch pools for that window.
@@ -169,11 +169,11 @@
 - [x] `matching-radar`: Backend re-validates `profile_status = ACTIVE`, Tier qualification, deposit rule (`≥ MIN_NURSE_DEPOSIT`, or ADR-0004 grace for bank-transfer bookings), no closure request, and effective availability at the exact moment of acceptance.
 
 ### BE-3
-- [ ] `job-board`: Advance bookings $> 6\text{h}$ published to Job Board for eligible nurses.
-- [ ] `job-board`: Direct nurse invitation — falls back to broad dispatch if unanswered after 15 minutes.
-- [ ] `booking-expiry`: Expiration worker — unpaid booking transitions to `EXPIRED` at 15 minutes.
-- [ ] `booking-expiry`: Unmatched booking within 30 minutes of scheduled start transitions to `EXPIRED` + triggers 100% refund if funds are `ESCROW_HELD`.
-- [ ] `gateway-webhooks` (minimal scope): Bank transfer webhook processes payment to `ESCROW_HELD` to activate the matching engine.
+- [x] `job-board`: Advance bookings $> 6\text{h}$ published to Job Board for eligible nurses.
+- [x] `job-board`: Direct nurse invitation — falls back to broad dispatch if unanswered after 15 minutes.
+- [x] `booking-expiry`: Expiration worker — unpaid booking transitions to `EXPIRED` at 15 minutes.
+- [x] `booking-expiry`: Unmatched booking within 30 minutes of scheduled start transitions to `EXPIRED` + triggers 100% refund if funds are `ESCROW_HELD`.
+- [x] `gateway-webhooks` (minimal scope): Bank transfer webhook processes payment to `ESCROW_HELD` to activate the matching engine.
 
 ### Phase 3 Exit Criteria
 - [ ] Both matching mechanisms (Radar Dispatch and Job Board) successfully pair a shift on staging.
@@ -205,19 +205,19 @@
 - [ ] `prescription-rejection`: `POST /api/v1/bookings/:id/reject-invalid-prescription` — mandatory evidence photo, transitions to `CANCELLED`, zero penalty, zero TrustScore deduction.
 
 ### BE-2 (Phase Lead)
-- [ ] `check-in` (FR-SHIFT-01): `POST /api/v1/bookings/:id/check-in` — blocks OS mock locations.
-- [ ] `check-in`: Haversine distance verification $\le 200\text{ m}$ against booking location coordinates.
-- [ ] `check-in`: Server-stamped timestamp and GPS coordinates embedded on live selfie → transitions `execution_status` to `IN_PROGRESS`.
-- [ ] `shift-logs` (FR-SHIFT-02): Structured clinical logging + initial condition mismatch flow (surcharge addition request or no-penalty cancellation).
-- [ ] `shift-logs`: Real-time shift log synchronization via WebSocket.
-- [ ] `check-out` (FR-SHIFT-04): `POST /api/v1/bookings/:id/check-out` — strictly blocks check-out if minimal care report is absent (final vitals, care activities, handover notes).
-- [ ] `check-out`: Records `checkout_time`, starts 24h dispute/settlement countdown and 12h medical record access closure timer, opens two-way ratings.
-- [ ] `check-out`: Fully completed task-based bookings receive 100% compensation regardless of early completion.
+- [x] `check-in` (FR-SHIFT-01): `POST /api/v1/bookings/:id/check-in` — blocks OS mock locations.
+- [x] `check-in`: Haversine distance verification $\le 200\text{ m}$ against booking location coordinates.
+- [x] `check-in`: Server-stamped timestamp and GPS coordinates embedded on live selfie → transitions `execution_status` to `IN_PROGRESS`. _(BE-2: burnt into the pixels server-side with sharp; the stamped JPEG is the photo the family sees)_
+- [x] `shift-logs` (FR-SHIFT-02): Structured clinical logging + initial condition mismatch flow (surcharge addition request or no-penalty cancellation).
+- [x] `shift-logs`: Real-time shift log synchronization via WebSocket.
+- [x] `check-out` (FR-SHIFT-04): `POST /api/v1/bookings/:id/check-out` — strictly blocks check-out if minimal care report is absent (final vitals, care activities, handover notes).
+- [x] `check-out`: Records `checkout_time`, starts 24h dispute/settlement countdown and 12h medical record access closure timer, opens two-way ratings.
+- [x] `check-out`: Fully completed task-based bookings receive 100% compensation regardless of early completion.
 
 ### BE-3
-- [ ] `sos` (FR-SHIFT-05): Dispatches concurrent high-priority FCM push + SMS fallback containing GPS coordinates and latest vital signs to family and Admin ($< 2\text{ seconds}$).
-- [ ] `sos`: Persists emergency incident report into `shift_logs.emergency_incident_log`.
-- [ ] Real-time WebSocket gateway infrastructure shared with BE-2 for clinical shift logging.
+- [x] `sos` (FR-SHIFT-05): Dispatches concurrent high-priority FCM push + SMS fallback containing GPS coordinates and latest vital signs to family and Admin ($< 2\text{ seconds}$).
+- [x] `sos`: Persists emergency incident report into `shift_logs.emergency_incident_log`.
+- [x] Real-time WebSocket gateway infrastructure shared with BE-2 for clinical shift logging.
 
 ### Phase 4 Exit Criteria
 - [ ] Full shift lifecycle executed on physical hardware: check-in → logging → extension → check-out + report.
@@ -251,26 +251,26 @@
 - [ ] `cancellation-policy`: Nurse no-show results in permanent account ban (`BANNED`) + 50,000 VND deposit penalty converted to customer apology voucher.
 
 ### BE-2
-- [ ] `deposits` (FR-PAY-03): Upfront 300,000 VND deposit gate required to accept shifts; zero progressive accumulation, zero shift value cap.
-- [ ] `deposits`: SLA penalty deductions exceeding balance are booked as debt (negative balance), blocking new shift acceptance until replenished.
-- [ ] `deposits`: Full deposit refund permitted only upon account closure after 7 dispute-free days.
-- [ ] `cash-commission`: `POST /api/v1/bookings/:id/commission-payment-link` — generates VietQR link for exactly 15% of in-app booking price for cash orders.
-- [ ] `cash-commission`: Gateway webhook confirms payment → transitions booking `payment_status` to `SETTLED`; unpaid after 24h → nurse transitions to `SUSPENDED`.
-- [ ] `cash-commission`: Absolute invariant — cash commission is **never** deducted from `deposit_balance` or `available_balance`.
+- [x] `deposits` (FR-PAY-03): Upfront 300,000 VND deposit gate required to accept shifts; zero progressive accumulation, zero shift value cap. _(BE-2: gate in matching-radar `depositAllows` for Radar, Job Board, direct requests and nurse search; amended by ADR-0004 D2 — grace for bank-transfer bookings only, never over a debt; a penalty below the minimum suspends the profile `DEPOSIT_SHORTFALL` and a top-up reactivates it, migration 0025)_
+- [x] `deposits`: SLA penalty deductions exceeding balance are booked as debt (negative balance), blocking new shift acceptance until replenished.
+- [x] `deposits`: Full deposit refund permitted only upon account closure after 7 dispute-free days.
+- [x] `cash-commission`: `POST /api/v1/bookings/:id/commission-payment-link` — generates VietQR link for exactly 15% of in-app booking price for cash orders.
+- [x] `cash-commission`: Gateway webhook confirms payment → transitions booking `payment_status` to `SETTLED`; unpaid after 24h → nurse transitions to `SUSPENDED`.
+- [x] `cash-commission`: Absolute invariant — cash commission is **never** deducted from `deposit_balance` or `available_balance`.
 
 ### BE-3 (Phase Lead)
-- [ ] `wallets-ledger`: Strict separation of 3 ledger balances in `wallets` table.
-- [ ] `wallets-ledger`: Append-only `wallet_transactions` table; every entry records unique `idempotency_key`, `balance_before`, and `balance_after`; zero UPDATE/DELETE grants.
-- [ ] `wallets-ledger`: All balance adjustments execute inside ACID transactions with row-level locks (`SELECT … FOR UPDATE`) or Redis locks.
-- [ ] `gateway-webhooks` (FR-PAY-01): `POST /api/v1/payments/escrow-webhook` — verifies raw HMAC-SHA256 signature first; invalid signature returns HTTP 401 with zero state mutation.
-- [ ] `gateway-webhooks`: Replayed webhooks handled idempotently (HTTP 200, no duplicate ledger entry).
-- [ ] `settlements` (FR-PAY-02): Bank-transfer bookings — customer early confirmation **or** check-out +24h with `dispute_status = NONE` → deducts 15% platform fee, credits 85% to nurse `available_balance`.
-- [ ] `settlements`: Active dispute (`OPEN`) atomically freezes settlement payout.
-- [ ] `withdrawals` (FR-PAY-04): `POST /api/v1/wallets/withdraw` — amount exceeding `available_balance` returns HTTP 400; initializes `WITHDRAW_REQUESTED` approval flow.
+- [x] `wallets-ledger`: Strict separation of 3 ledger balances in `wallets` table.
+- [x] `wallets-ledger`: Append-only `wallet_transactions` table; every entry records unique `idempotency_key`, `balance_before`, and `balance_after`; zero UPDATE/DELETE grants.
+- [x] `wallets-ledger`: All balance adjustments execute inside ACID transactions with row-level locks (`SELECT … FOR UPDATE`) or Redis locks.
+- [x] `gateway-webhooks` (FR-PAY-01): `POST /api/v1/payments/escrow-webhook` — verifies raw HMAC-SHA256 signature first; invalid signature returns HTTP 401 with zero state mutation.
+- [x] `gateway-webhooks`: Replayed webhooks handled idempotently (HTTP 200, no duplicate ledger entry).
+- [x] `settlements` (FR-PAY-02): Bank-transfer bookings — customer early confirmation **or** check-out +24h with `dispute_status = NONE` → deducts 15% platform fee, credits 85% to nurse `available_balance`.
+- [x] `settlements`: Active dispute (`OPEN`) atomically freezes settlement payout.
+- [x] `withdrawals` (FR-PAY-04): `POST /api/v1/wallets/withdraw` — amount exceeding `available_balance` returns HTTP 400; initializes `WITHDRAW_REQUESTED` approval flow.
 
 ### Phase 5 Exit Criteria
 - [ ] A 500,000 VND bank-transfer shift settles with exactly 425,000 VND credited to nurse and 75,000 VND platform fee.
-- [ ] Cash-job commission payment leaves `deposit_balance` completely unaffected.
+- [x] Cash-job commission payment leaves `deposit_balance` completely unaffected.
 - [ ] Duplicate gateway webhook delivery creates exactly one transaction record in the ledger.
 - [ ] Both payment methods complete full lifecycles on staging with zero ledger discrepancy.
 - [ ] Refunds apply strictly to bank-transfer orders (cash orders were never prepaid to the platform).
@@ -280,10 +280,10 @@
 ## Phase 6 — DISP, RATE, NOTIF, CHAT [MVP]
 
 ### FE-1
-- [ ] Patient Web — File customer dispute with up to 5 evidence file attachments.
-- [ ] Patient Web — Post-shift nurse rating and review form.
-- [ ] Patient Web — In-app notification center.
-- [ ] Shared in-app chat component (FE-1 leads development; FE-2 integrates for nurse surfaces).
+- [x] Patient Web — File customer dispute with up to 5 evidence file attachments.
+- [x] Patient Web — Post-shift nurse rating and review form.
+- [x] Patient Web — In-app notification center.
+- [x] Shared in-app chat component (FE-1 leads development; FE-2 integrates for nurse surfaces).
 
 ### FE-2
 - [x] Nurse Web — In-app notification center with read/unread, direct routing to relevant booking, dispute, or commission action.
@@ -304,36 +304,36 @@
 - [ ] `reviews-trustscore`: TrustScore dropping below 60 automatically transitions nurse to `SUSPENDED`.
 
 ### BE-2
-- [ ] `chat` (FR-CHAT-01): In-app messaging and call logs on `conversations_messages`, activated once booking reaches `CONFIRMED`.
-- [ ] `chat`: Masked identity — real phone numbers never exposed in any UI component or API response.
-- [ ] `chat`: Automated content regex scanning for phone numbers or external payment links; issues warning and logs security event.
-- [ ] `chat`: Conversation history permanently retained as dispute evidence (no hard deletion); chat closes upon shift completion; Admin access audit-logged.
+- [x] `chat` (FR-CHAT-01): In-app messaging, photos and call logs on `conversations_messages`, activated once booking reaches `CONFIRMED`; in-app WebRTC call signalling over `/ws/chat` (no phone number dialled).
+- [x] `chat`: Masked identity — real phone numbers never exposed in any UI component or API response.
+- [x] `chat`: Automated content regex scanning for phone numbers or external payment links; issues warning and logs security event.
+- [x] `chat`: Conversation history permanently retained as dispute evidence (no hard deletion); chat closes upon shift completion; Admin access audit-logged.
 
 ### BE-3 (Phase Lead)
-- [ ] `disputes` (FR-DISP-01): `POST /api/v1/bookings/:id/disputes` — window open from `IN_PROGRESS` until check-out +24h; maximum 5 evidence files.
-- [ ] `disputes`: Filing a dispute atomically freezes the scheduled settlement job for that booking.
-- [ ] `disputes`: `PATCH /api/v1/admin/disputes/:id/resolve` — MVP outcomes: 100% customer refund or 100% nurse settlement release.
-- [ ] `disputes`: Upheld dispute on cash booking deducts compensation from violating nurse's deposit.
-- [ ] `notifications` (FR-NOTIF-01): Concurrent high-priority FCM push + in-app notification center + real-time WebSocket.
-- [ ] `notifications`: Automatic SMS/ZNS fallback triggered when urgent notification remains unacknowledged after 60 seconds.
+- [x] `disputes` (FR-DISP-01): `POST /api/v1/bookings/:id/disputes` — window open from `IN_PROGRESS` until check-out +24h; maximum 5 evidence files.
+- [x] `disputes`: Filing a dispute atomically freezes the scheduled settlement job for that booking.
+- [x] `disputes`: `PATCH /api/v1/admin/disputes/:id/resolve` — MVP outcomes: 100% customer refund or 100% nurse settlement release.
+- [x] `disputes`: Upheld dispute on cash booking deducts compensation from violating nurse's deposit.
+- [x] `notifications` (FR-NOTIF-01): Concurrent high-priority FCM push + in-app notification center + real-time WebSocket.
+- [x] `notifications`: Automatic SMS/ZNS fallback triggered when urgent notification remains unacknowledged after 60 seconds.
 
 ### Phase 6 Exit Criteria
-- [ ] A dispute filed at hour 20 post-check-out successfully freezes settlement release scheduled for hour 24.
+- [x] A dispute filed at hour 20 post-check-out successfully freezes settlement release scheduled for hour 24.
 - [ ] Two-way blind rating lifecycle verified: reviews become visible only when both submit or 7 days elapse.
-- [ ] SMS fallback notification fires reliably when FCM push delivery is unacknowledged after 60 seconds.
-- [ ] In-app chat is strictly disabled prior to `CONFIRMED` status.
+- [x] SMS fallback notification fires reliably when FCM push delivery is unacknowledged after 60 seconds.
+- [x] In-app chat is strictly disabled prior to `CONFIRMED` status.
 
 ---
 
 ## Phase 7 — ADMIN: Catalog, Configuration & Reconciliation [MVP]
 
 ### FE-1 (Phase Lead)
-- [ ] Admin Web — Service catalog management: create/edit services, configure invasive flag (`is_invasive`), prohibited flag (`is_prohibited`), required Tier.
-- [ ] Admin Web — Dynamic `system_configs` parameter editor.
-- [ ] Admin Web — User management: search, profile details, suspend/ban/reactivate customer and nurse accounts.
-- [ ] Admin Web — Dispute investigation and adjudication console.
-- [ ] Admin Web — Financial reconciliation dashboard and report export.
-- [ ] Enforce mandatory 2FA authentication for all Admin Web Portal sessions.
+- [x] Admin Web — Service catalog management: create/edit services, configure invasive flag (`is_invasive`), prohibited flag (`is_prohibited`), required Tier.
+- [x] Admin Web — Dynamic `system_configs` parameter editor.
+- [x] Admin Web — User management: search, profile details, suspend/ban/reactivate customer and nurse accounts.
+- [x] Admin Web — Dispute investigation and adjudication console.
+- [x] Admin Web — Financial reconciliation dashboard and report export.
+- [x] Enforce mandatory 2FA authentication for all Admin Web Portal sessions.
 
 ### FE-2
 - [ ] Support FE-1 with Admin Web credential review and dispute evidence queues.
@@ -344,10 +344,10 @@
 - [ ] `admin-configs`: Dynamic configuration updates (§5.1) without code redeployment; every mutation writes an `audit_logs` record with `updated_by`.
 
 ### BE-2
-- [ ] `admin-users`: User search and management; account locking/unlocking across `ACTIVE`, `SUSPENDED`, `BANNED`, strictly respecting `profile_status` as the sole authority for shift eligibility.
+- [x] `admin-users`: User search and management; account locking/unlocking across `ACTIVE`, `SUSPENDED`, `BANNED`, strictly respecting `profile_status` as the sole authority for shift eligibility.
 
 ### BE-3
-- [ ] `admin-finance` (CT-15): Reconciliation engine: total escrow held, total 15% platform commission, total payouts, total refunds, pending withdrawal requests.
+- [x] `admin-finance` (CT-15): Reconciliation engine: total escrow held, total 15% platform commission, total payouts, total refunds, pending withdrawal requests.
 
 ### Phase 7 Exit Criteria
 - [ ] Full operational day simulated exclusively via Admin Portal: verify nurse, resolve dispute, update config, export financial reconciliation.
@@ -372,14 +372,14 @@
 - [ ] Remediate all penetration testing findings within identity and profile domains.
 
 ### BE-2
-- [ ] Concurrency and race condition testing on matching engine and background job queues.
-- [ ] Disaster recovery drill: daily backup snapshot + PITR verification — RPO $\le 1\text{h}$ (wallets) / $\le 24\text{h}$ (logs), RTO $\le 4\text{h}$.
-- [ ] Verify maintenance embargo: zero scheduled migrations or downtime during shift handover window 19:00–21:00.
+- [x] Concurrency and race condition testing on matching engine and background job queues. (`test/integration/concurrency.test.ts` — found and fixed a claim ↔ Admin-suspend deadlock)
+- [x] Disaster recovery drill: daily backup snapshot + PITR verification — RPO $\le 1\text{h}$ (wallets) / $\le 24\text{h}$ (logs), RTO $\le 4\text{h}$. (`infra/dr/`, `npm run ops:dr-verify`, runbook `backup-pitr-dr-drill.md`; staging drill by DevOps)
+- [x] Verify maintenance embargo: zero scheduled migrations or downtime during shift handover window 19:00–21:00. (migration 0028, `db:migrate` guard, `npm run ops:embargo-check`, runbook `maintenance-embargo.md`)
 
 ### BE-3
-- [ ] Financial concurrency verification: wallet race conditions, gateway webhook deduplication under high load.
-- [ ] Operational monitoring and alerting: job queue backlog, webhook failures, unacknowledged SOS events, overdue cash commissions.
-- [ ] Author standard incident runbooks in `docs/runbooks/`.
+- [x] Financial concurrency verification: wallet race conditions, gateway webhook deduplication under high load.
+- [x] Operational monitoring and alerting: job queue backlog, webhook failures, unacknowledged SOS events, overdue cash commissions.
+- [x] Author standard incident runbooks in `docs/runbooks/`.
 - [ ] Remediate all penetration testing findings within financial and ledger domains.
 
 ### Phase 8 Exit Criteria (Go-Live)

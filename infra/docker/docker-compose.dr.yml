@@ -1,0 +1,27 @@
+# =====================================================================
+# Backup & PITR profile for local drills (BE-2 · Phase 8 · NFR-AVAIL-01 / CT-23).
+# Adds continuous WAL archiving + a backups volume to the dev PostgreSQL, and exposes 5433 for a restored copy.
+#
+#   docker compose -f infra/docker/docker-compose.yml -f infra/docker/docker-compose.dr.yml up -d postgres
+#   docker exec -u postgres healthcare_postgres sh /dr/drill.sh
+#
+# Production uses the same settings on the managed / VM PostgreSQL (see docs/runbooks/backup-pitr-dr-drill.md).
+# archive_timeout = 300 s → at most 5 minutes of committed wallet transactions can be lost (SRS: RPO ≤ 1 h).
+# =====================================================================
+services:
+  postgres:
+    command: >
+      sh -c "mkdir -p /backups/wal /backups/base && chown -R postgres:postgres /backups &&
+      exec docker-entrypoint.sh postgres
+      -c wal_level=replica
+      -c archive_mode=on
+      -c archive_timeout=300
+      -c archive_command='test ! -f /backups/wal/%f && cp %p /backups/wal/%f'"
+    ports:
+      - '5433:5433' # restored copy (infra/dr/restore.sh) — for npm run ops:dr-verify
+    volumes:
+      - pg_backups:/backups
+      - ../dr:/dr:ro
+
+volumes:
+  pg_backups:

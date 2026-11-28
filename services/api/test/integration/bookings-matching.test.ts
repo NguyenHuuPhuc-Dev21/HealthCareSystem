@@ -280,6 +280,16 @@ describe('bookings + pricing-engine + matching-radar (integration)', () => {
       expect(rows[0].n).toBe(0);
     });
 
+    it('a customer locked by an Admin (admin-users, Phase 7) cannot create bookings; unlocked again → can', async () => {
+      const c = await createCustomer();
+      await pool.query(`UPDATE users SET status = 'SUSPENDED' WHERE id = $1`, [c.id]);
+      await rejectsWith(bookings.create(c.id, body(c)), 403, 'ACCOUNT_SUSPENDED');
+      await pool.query(`UPDATE users SET status = 'BANNED' WHERE id = $1`, [c.id]);
+      await rejectsWith(bookings.create(c.id, body(c)), 403, 'ACCOUNT_SUSPENDED');
+      await pool.query(`UPDATE users SET status = 'ACTIVE' WHERE id = $1`, [c.id]);
+      expect((await bookings.create(c.id, body(c))).id).toBeTruthy();
+    });
+
     it('invasive service: medical order required and at most 7 days old', async () => {
       const c = await createCustomer();
       const invasive = { serviceCode: 'SRV_IV_INJECTION' };
@@ -459,6 +469,11 @@ describe('bookings + pricing-engine + matching-radar (integration)', () => {
       );
 
       await rejectsWith(radar.claimBooking(turnedSuspended, view.id, 'RADAR'), 403, 'NURSE_NOT_ACTIVE');
+      // SRS lifecycle (migration 0025): a deposit that drops below 300,000 suspends the profile → NURSE_NOT_ACTIVE …
+      expect((await pool.query('SELECT suspended_reason FROM nurse_profiles WHERE user_id = $1', [spentDeposit])).rows[0].suspended_reason).toBe('DEPOSIT_SHORTFALL');
+      await rejectsWith(radar.claimBooking(spentDeposit, view.id, 'RADAR'), 403, 'NURSE_NOT_ACTIVE');
+      // … and the gate checks the deposit itself as well, even if the profile were put back to ACTIVE by hand
+      await pool.query("UPDATE nurse_profiles SET profile_status = 'ACTIVE', suspended_reason = NULL WHERE user_id = $1", [spentDeposit]);
       await rejectsWith(radar.claimBooking(spentDeposit, view.id, 'RADAR'), 403, 'DEPOSIT_SHORTFALL');
       const conflict = await rejectsWith(radar.claimBooking(gotBusy, view.id, 'RADAR'), 409, 'SCHEDULE_CONFLICT');
       expect(conflict.details).toEqual({ reason: 'TRAVEL_BUFFER' }); // next shift starts 30 min after this one ends

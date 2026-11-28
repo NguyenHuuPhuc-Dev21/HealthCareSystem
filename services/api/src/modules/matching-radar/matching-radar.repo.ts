@@ -73,7 +73,7 @@ export async function findRadarCandidates(
         AND np.current_lat BETWEEN $3 AND $4
         AND np.current_lng BETWEEN $5 AND $6
         AND w.closure_requested_at IS NULL
-        AND (COALESCE(w.deposit_balance, 0) >= $7 OR w.deposit_grace_expires_at > now())
+        AND (COALESCE(w.deposit_balance, 0) >= $7 OR (w.deposit_grace_expires_at > now() AND COALESCE(w.deposit_balance, 0) >= 0))
         AND np.user_id <> $2
         AND np.user_id <> ALL($8::uuid[])
         AND NOT EXISTS (SELECT 1 FROM booking_offers o WHERE o.booking_id = $1 AND o.nurse_id = np.user_id)

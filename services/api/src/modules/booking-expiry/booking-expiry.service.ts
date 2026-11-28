@@ -16,6 +16,8 @@ import type { SystemConfigKey } from '@healthcare-system/shared';
 import { ledgerKeys, refundEscrow } from '../gateway-webhooks/gateway-webhooks.ledger';
 import { expiryReason, refundDue } from './booking-expiry.policy';
 import * as repo from './booking-expiry.repo';
+import { bookingExpired } from '../notifications/notifications.notices';
+import { notifyUser } from '../notifications/notifications.service';
 import type { ExpiryNotice, ExpiryResult, ExpiryRule, SweepResult } from './booking-expiry.types';
 
 /** Operational guard: bookings handled per sweep run (the next run, a minute later, takes the rest). */
@@ -120,6 +122,11 @@ export class BookingExpiryService {
 let singleton: BookingExpiryService | null = null;
 
 export function getBookingExpiryService(): BookingExpiryService {
-  if (!singleton) singleton = new BookingExpiryService({ withTx: (fn) => withTransaction((client) => fn(client)) });
+  if (!singleton) {
+    singleton = new BookingExpiryService({
+      withTx: (fn) => withTransaction((client) => fn(client)),
+      notify: (n) => notifyUser(bookingExpired(n)), // Phase 6 · notifications
+    });
+  }
   return singleton;
 }

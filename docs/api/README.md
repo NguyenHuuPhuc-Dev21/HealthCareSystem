@@ -43,16 +43,29 @@ This catalogue lists the core endpoints defined by SRS v2.0 §8, grouped by doma
 | `GET /api/v1/bookings` · `GET /api/v1/bookings/:id` | PATIENT | The customer's bookings with the three independent status axes. |
 | `GET /api/v1/nurse/radar` | NURSE | Current open Radar Dispatch offer for the nurse, or `null` (FR-BOOK-03). |
 | `POST /api/v1/bookings/:id/claim-radar` | NURSE | Accept a Radar offer — first accept wins; ACTIVE / Tier / deposit / availability re-checked at that moment. `POST …/dismiss-radar` declines it. |
-| `POST /api/v1/bookings/:id/check-in` | NURSE | Check-in: verifies the anti-mock-GPS flag, distance ≤ 200 m, uploads the live selfie and confirms the on-site medical-order cross-check (FR-SHIFT-01). |
+| `POST /api/v1/bookings/:id/check-in/selfie-upload-url` · `POST /api/v1/bookings/:id/check-in` | NURSE | Check-in: refuses (and logs) a mock location, verifies Haversine distance ≤ 200 m, a fresh single-use live selfie; stamps server time + GPS; `CONFIRMED → IN_PROGRESS` (FR-SHIFT-01). Detail: [`shift-execution.api.md`](./shift-execution.api.md). |
+| `POST …/assessment` · `POST …/vitals` · `PATCH …/activities/:activityId` · `POST …/notes` · `POST …/condition-mismatch/refuse` | NURSE | Shift log: initial assessment with the 30-minute condition-mismatch flow (surcharge request or no-penalty cancellation), vitals, care checklist, notes (FR-SHIFT-02). |
+| `GET /api/v1/nurse/shifts` · `GET /api/v1/bookings/:id/shift-state` | NURSE | My shifts; the running shift's state (inside the medical-record window). |
+| `GET /api/v1/bookings/:id/tracking` · `POST …/condition-surcharge/respond` | PATIENT | Family tracking view (check-in selfie, vitals, care log, extensions, surcharge); accept / decline a condition surcharge. |
+| `GET /ws/shifts?bookingId=` | PATIENT / NURSE / ADMIN | WebSocket: `SHIFT_UPDATED` on every change of the shift (FR-SHIFT-02 real time). |
 | `POST /api/v1/bookings/:id/reject-invalid-prescription` | NURSE (Tier 2) | Nurse rejects a shift on site because the medical order is forged / the medication does not match, without penalty (FR-BOOK-02). |
-| `POST /api/v1/bookings/:id/check-out` | NURSE | Check-out and submission of the minimum shift report; records `checkout_time`, starts the 24-hour dispute window and the 12-hour medical-record access closure timer (FR-SHIFT-04). |
+| `POST /api/v1/bookings/:id/check-out` | NURSE | Check-out, refused until the minimum care report is complete (final vitals, mandatory checklist, handover note); records `checkout_time`, the anchor of the 24-hour settlement/dispute window, the cash commission deadline and the 12-hour medical-record window; reviews open (FR-SHIFT-04). Detail: [`shift-execution.api.md`](./shift-execution.api.md). |
 | `POST /api/v1/bookings/:id/extend` | PATIENT | Customer requests a shift extension in 1-hour blocks; the system checks the nurse's next-shift schedule (FR-SHIFT-03). |
 
 ## 5. Chat & Calls
 
 FR-CHAT-01 requires in-app chat/calling with masked phone numbers, opened once a booking is `CONFIRMED`, with message scanning for leaked phone numbers/external links and full history retained in `conversations_messages` as dispute evidence.
 
-- Chat/call endpoints: **[Not specified in SRS v2.0 — open item]** (SRS §8 lists no chat endpoints; see the Open Decisions Register).
+| Method & Endpoint | Role | Description |
+|---|---|---|
+| `GET /api/v1/bookings/:id/conversation` | PATIENT / NURSE | The booking's conversation (id = booking id), counterpart name, fully masked phone, open/closed. Detail: [`chat.api.md`](./chat.api.md). |
+| `POST /api/v1/bookings/:id/messages` | PATIENT / NURSE | Send a text or a photo (`{ type: "IMAGE", imageKey }`) — only while `CONFIRMED` / `IN_PROGRESS` (409 `CONVERSATION_CLOSED`); texts scanned for phone numbers / links / off-platform payment → flagged, warned, logged. |
+| `POST /api/v1/bookings/:id/messages/image-upload-url` | PATIENT / NURSE | Presigned PUT for a chat photo; the server re-encodes it without EXIF / GPS. |
+| `GET /api/v1/bookings/:id/call-config` | PATIENT / NURSE | ICE servers + ring timeout for the in-app WebRTC call (no phone number involved). |
+| `POST /api/v1/bookings/:id/calls` | PATIENT / NURSE | Log an in-app call (`VOICE_CALL_LOG`). |
+| `POST /api/v1/conversations/:id/read` | PATIENT / NURSE | Read receipt. |
+| `GET /api/v1/admin/bookings/:id/conversation` | ADMIN | Evidence view with flags; audit-logged `VIEW_CHAT_HISTORY`. |
+| `GET /ws/chat?conversationId=` | PATIENT / NURSE / ADMIN | WebSocket: `NEW_MESSAGE`, `READ`; call signalling `CALL_SIGNAL` relayed to the other participant only (`CALL_ERROR` on refusal). |
 
 ## 6. Wallet & Payments
 
@@ -80,6 +93,16 @@ FR-CHAT-01 requires in-app chat/calling with masked phone numbers, opened once a
 The SOS behaviour is specified functionally (FR-SHIFT-05): the Nurse App opens the 115 dialler immediately and the system pushes an emergency alert (Push + SMS fallback) with GPS coordinates and latest vital signs to the Family and Admin Portal in < 2 seconds (SRS §10, TC-SOS-01).
 
 - A dedicated SOS API endpoint: **[Not specified in SRS v2.0 — open item]** (SRS §8 lists no SOS endpoint; see the Open Decisions Register).
+
+## 9. Admin — User Management
+
+FR-ADMIN-01 "Quản lý Người dùng": search, view, lock / unlock customer and nurse accounts. For a nurse, `nurse_profiles.profile_status` stays the only source of truth for taking shifts. Detail: [`admin-users.api.md`](./admin-users.api.md).
+
+| Method & Endpoint | Role | Description |
+|---|---|---|
+| `GET /api/v1/admin/users` | ADMIN | Search customers and nurses (name / email, phone, id), filter `role` / `status`, paginated. |
+| `GET /api/v1/admin/users/:id` | ADMIN | Detail: account, nurse profile, deposit / commission / TrustScore standing, reactivation blockers, status history. |
+| `PATCH /api/v1/admin/users/:id/status` | ADMIN | `ACTIVE` / `SUSPENDED` / `BANNED` with a reason; nurse shifts re-dispatched; sessions revoked on ban; audit `CHANGE_ACCOUNT_STATUS`. |
 
 ---
 

@@ -3,6 +3,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import type { MobileShiftSummary } from '@healthcare-system/shared';
 import { LiveCameraProvider } from './components';
 import { AuthProvider } from './features/auth/AuthContext';
+import { NotificationProvider } from './features/notifications/NotificationContext';
 import { RadarProvider } from './features/radar/RadarContext';
 import type { DeviceGeoCoords } from './lib/hardware-providers';
 import { RootNavigator } from './navigation/RootNavigator';
@@ -23,15 +24,17 @@ export default function App({
   return (
     <SafeAreaProvider>
       <AuthProvider autoStartDevSession={autoStartDevSession}>
-        <RadarProvider>
-          <LiveCameraProvider>
-            <RootNavigator
-              initialShift={initialShift}
-              onRequestCurrentPosition={onRequestCurrentPosition}
-              onCaptureLivePhoto={onCaptureLivePhoto}
-            />
-          </LiveCameraProvider>
-        </RadarProvider>
+        <NotificationProvider>
+          <RadarProvider>
+            <LiveCameraProvider>
+              <RootNavigator
+                initialShift={initialShift}
+                onRequestCurrentPosition={onRequestCurrentPosition}
+                onCaptureLivePhoto={onCaptureLivePhoto}
+              />
+            </LiveCameraProvider>
+          </RadarProvider>
+        </NotificationProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );

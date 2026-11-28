@@ -35,6 +35,26 @@ import { getCancellationPolicyService } from './modules/cancellation-policy/canc
 import { getShiftExtendService } from './modules/shift-extend/shift-extend.service';
 import { createReviewsRouter } from './modules/reviews-trustscore/reviews-trustscore.routes';
 import { getReviewsService } from './modules/reviews-trustscore/reviews-trustscore.service';
+import { createWalletsLedgerRouter } from './modules/wallets-ledger/wallets-ledger.routes';
+import { getWalletsLedgerService } from './modules/wallets-ledger/wallets-ledger.service';
+import { createDepositsRouter } from './modules/deposits/deposits.routes';
+import { getDepositsService } from './modules/deposits/deposits.service';
+import { createSettlementsRouter } from './modules/settlements/settlements.routes';
+import { getSettlementsService } from './modules/settlements/settlements.service';
+import { createWithdrawalsRouter } from './modules/withdrawals/withdrawals.routes';
+import { getWithdrawalsService } from './modules/withdrawals/withdrawals.service';
+import { createCashCommissionRouter } from './modules/cash-commission/cash-commission.routes';
+import { getCashCommissionService } from './modules/cash-commission/cash-commission.service';
+import { createDisputesRouter } from './modules/disputes/disputes.routes';
+import { getDisputesService } from './modules/disputes/disputes.service';
+import { createNotificationsRouter } from './modules/notifications/notifications.routes';
+import { getNotificationsService } from './modules/notifications/notifications.service';
+import { createAdminFinanceRouter } from './modules/admin-finance/admin-finance.routes';
+import { getAdminFinanceService } from './modules/admin-finance/admin-finance.service';
+import { createOpsMonitoringRouter } from './modules/ops-monitoring/ops-monitoring.routes';
+import { getOpsMonitoringService } from './modules/ops-monitoring/ops-monitoring.service';
+import { createSosRouter } from './modules/sos/sos.routes';
+import { getSosService } from './modules/sos/sos.service';
 import { createAdminCatalogRouter } from './modules/admin-catalog/admin-catalog.routes';
 import { getAdminCatalogService } from './modules/admin-catalog/admin-catalog.service';
 import { createAdminConfigsRouter } from './modules/admin-configs/admin-configs.routes';
@@ -43,6 +63,16 @@ import { getPrescriptionRejectionService } from './modules/prescription-rejectio
 import { getPrescriptionGateService } from './modules/prescription-gate/prescription-gate.service';
 import { createPrivacyConsentRouter } from './modules/privacy-consent/privacy-consent.routes';
 import { getPrivacyConsentService } from './modules/privacy-consent/privacy-consent.service';
+import { createCheckInRouter } from './modules/check-in/check-in.routes';
+import { getCheckInService } from './modules/check-in/check-in.service';
+import { createShiftLogsRouter } from './modules/shift-logs/shift-logs.routes';
+import { getShiftLogsService } from './modules/shift-logs/shift-logs.service';
+import { createCheckOutRouter } from './modules/check-out/check-out.routes';
+import { createChatRouter } from './modules/chat/chat.routes';
+import { createAdminUsersRouter } from './modules/admin-users/admin-users.routes';
+import { getAdminUsersService } from './modules/admin-users/admin-users.service';
+import { getChatService } from './modules/chat/chat.service';
+import { getCheckOutService } from './modules/check-out/check-out.service';
 
 function buildApiRouter(): Router {
   const api = Router();
@@ -74,8 +104,23 @@ function buildApiRouter(): Router {
   api.use(createPrescriptionGateRouter(getPrescriptionGateService())); // BE-1 · Phase 3 · prescription-gate
   api.use(createPrescriptionRejectionRouter(getPrescriptionRejectionService())); // BE-1 · Phase 4 · prescription-rejection
   api.use(createShiftExtendRouter(getShiftExtendService())); // BE-1 · Phase 4 · shift-extend
+  api.use(createCheckInRouter(getCheckInService())); // BE-2 · Phase 4 · check-in (anti mock GPS, ≤ 200 m, live selfie)
+  api.use(createShiftLogsRouter(getShiftLogsService())); // BE-2 · Phase 4 · shift-logs (assessment, vitals, checklist, tracking)
+  api.use(createCheckOutRouter(getCheckOutService())); // BE-2 · Phase 4 · check-out (care report, 24h/12h clocks)
+  api.use(createChatRouter(getChatService())); // BE-2 · Phase 6 · chat (masked in-app chat & call logs, FR-CHAT-01)
+  api.use(createAdminUsersRouter(getAdminUsersService())); // BE-2 · Phase 7 · admin-users (search, lock / unlock accounts, FR-ADMIN-01)
   api.use(createCancellationPolicyRouter(getCancellationPolicyService())); // BE-1 · Phase 5 · cancellation-policy
   api.use(createReviewsRouter(getReviewsService())); // BE-1 · Phase 6 · reviews-trustscore
+  api.use(createWalletsLedgerRouter(getWalletsLedgerService())); // BE-3 · Phase 5 · wallets-ledger (balances, history, earnings, upcoming settlements)
+  api.use(createDepositsRouter(getDepositsService())); // BE-3 · Phase 5 · deposits (ADR-0004: top-up, penalties, appeal, closure refund, bank account)
+  api.use(createSettlementsRouter(getSettlementsService())); // BE-3 · Phase 5 · settlements (85/15 payout, customer confirm-completion)
+  api.use(createWithdrawalsRouter(getWithdrawalsService())); // BE-3 · Phase 5 · withdrawals (FR-PAY-04)
+  api.use(createCashCommissionRouter(getCashCommissionService())); // BE-3 · Phase 5 · cash-commission (FR-PAY-02 cash part)
+  api.use(createDisputesRouter(getDisputesService())); // BE-3 · Phase 6 · disputes (open/freeze, rebuttal, admin resolve, penalty appeals)
+  api.use(createNotificationsRouter(getNotificationsService())); // BE-3 · Phase 6 · notifications (in-app centre; WebSocket in index.ts)
+  api.use(createAdminFinanceRouter(getAdminFinanceService())); // BE-3 · Phase 7 · admin-finance (CT-15 reconciliation, ledger export, finance queues)
+  api.use(createOpsMonitoringRouter(getOpsMonitoringService())); // BE-3 · Phase 8 · ops-monitoring (health checks + alerts)
+  api.use(createSosRouter(getSosService())); // BE-3 · Phase 4 · sos (FR-SHIFT-05 emergency alerts, incident report)
   api.use(createAdminCatalogRouter(getAdminCatalogService())); // BE-1 · Phase 7 · admin-catalog
   api.use(createAdminConfigsRouter(getAdminConfigsService())); // BE-1 · Phase 7 · admin-configs
 

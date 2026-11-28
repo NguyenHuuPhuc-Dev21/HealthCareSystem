@@ -36,6 +36,9 @@ export type ActiveStackParamList = {
   ShiftResult: {
     outcomeType: 'COMPLETED' | 'CANCELLED_SAFE';
     note?: string;
+    bookingId?: string;
+    bookingCode?: string;
+    customerName?: string;
   };
   Credentials: undefined;
   RenewGphn: undefined;
@@ -50,5 +53,10 @@ export type ActiveStackParamList = {
   AccountClosure: undefined;
   CommissionPayment: { bookingId?: string } | undefined;
   Withdraw: undefined;
+  TrustScore: undefined;
+  DisputeList: undefined;
+  DisputeDetail: { disputeId: string };
+  OpenDispute: { bookingId: string };
+  Chat: { bookingId: string; bookingCode?: string };
+  Notifications: undefined;
 };
-

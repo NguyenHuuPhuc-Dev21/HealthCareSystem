@@ -201,6 +201,7 @@ export enum TxType {
   DEPOSIT_WITHHOLD = 'DEPOSIT_WITHHOLD',   // grace period: part of a payout moved into deposit_balance (ADR-0004 D2)
   DEPOSIT_REFUND = 'DEPOSIT_REFUND',       // deposit paid out on account closure (ADR-0004 D3)
   PENALTY_REVERSAL = 'PENALTY_REVERSAL',   // upheld appeal credits a penalty back (ADR-0004 D3)
+  TRAVEL_SUPPORT = 'TRAVEL_SUPPORT',       // travel support for an on-site rejected invalid prescription, from the operations fund (FR-BOOK-02 L3)
 }
 
 /** Reason of a deposit penalty (deposit_penalty_details.reason, migration 0008) */
@@ -297,6 +298,13 @@ export enum AuditAction {
   GRANT_RECORD_ACCESS = 'GRANT_RECORD_ACCESS',
   TIER_DEMOTION = 'TIER_DEMOTION',             // migration 0007 · BE-2 tier-lifecycle (system actor)
   REVIEW_CUSTOMER_KYC = 'REVIEW_CUSTOMER_KYC', // migration 0007 · BE-2 patient-profiles (Admin actor)
+  VIEW_CHAT_HISTORY = 'VIEW_CHAT_HISTORY',     // migration 0026 · BE-2 chat (Admin reads a conversation, FR-CHAT-01)
+  CHANGE_ACCOUNT_STATUS = 'CHANGE_ACCOUNT_STATUS', // migration 0027 · BE-2 admin-users (Admin suspends / bans / reactivates, FR-ADMIN-01)
+  PROCESS_WITHDRAWAL = 'PROCESS_WITHDRAWAL',         // migration 0029 · BE-3 admin-finance (withdrawal paid / rejected, FR-PAY-04)
+  PROCESS_DEPOSIT_REFUND = 'PROCESS_DEPOSIT_REFUND', // migration 0029 · BE-3 admin-finance (closure refund paid / rejected, ADR-0004 D3)
+  RESOLVE_FINANCE_HOLD = 'RESOLVE_FINANCE_HOLD',     // migration 0029 · BE-3 admin-finance (reconciliation mismatch / settlement hold)
+  EXPORT_FINANCE_REPORT = 'EXPORT_FINANCE_REPORT',   // migration 0029 · BE-3 admin-finance (ledger audit trail export)
+  CLOSE_SOS_INCIDENT = 'CLOSE_SOS_INCIDENT',         // migration 0030 · BE-3 sos (Admin closes an emergency with its outcome, FR-SHIFT-05)
   UPDATE_SERVICE_CATALOG = 'UPDATE_SERVICE_CATALOG', // migration 0031 · BE-1 admin-catalog (Admin actor)
 }
 

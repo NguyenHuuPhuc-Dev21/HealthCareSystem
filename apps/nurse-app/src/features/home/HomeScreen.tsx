@@ -20,21 +20,26 @@ import {
 } from '@healthcare-system/shared';
 import {
   AlertTriangle,
+  Bell,
   Calendar,
   ChevronRight,
   FileText,
   ShieldAlert,
+  ShieldCheck,
   Wallet,
   Zap,
 } from 'lucide-react-native';
 import { AppButton, CareNestLogoMark, StateView, StatusBadge } from '../../components';
 import { useAuth } from '../auth/AuthContext';
+import { useOptionalNotifications } from '../notifications/NotificationContext';
+import { NOTIFICATION_LABELS } from '../notifications/notification-labels';
 import { getGphnAlertInfo } from '../credentials/credentials.api';
 import { getMyShifts } from '../active-shift/active-shift.api';
 import { DEV_SAMPLE_SHIFT } from '../shifts/shifts.mock';
 import { useRadar } from '../radar/RadarContext';
 import { createSimulatedRadarOffer } from '../radar/radar.mock';
 import { useWalletSummary } from '../wallet/useWalletSummary';
+import { getScoreTierMeta } from '../trust-score/trust-score-labels';
 
 export { DEV_SAMPLE_SHIFT };
 import {
@@ -66,6 +71,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const { session } = useAuth();
   const { isOnline, toggleOnline, triggerRadarOffer } = useRadar();
   const { summary: walletSummary } = useWalletSummary();
+  const notificationCtx = useOptionalNotifications();
+  const unreadNotificationCount = notificationCtx?.unreadCount ?? 0;
+  const trustScore = session?.profile?.trust_score ?? 92;
+  const trustScoreMeta = getScoreTierMeta(trustScore);
 
   const [activeShift, setActiveShift] = useState<MobileShiftSummary | null>(
     initialShift ?? (IS_DEV ? DEV_SAMPLE_SHIFT : null)
@@ -118,9 +127,26 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.homeHead}>
-          <View style={styles.brandRow}>
-            <CareNestLogoMark size={24} />
-            <Text style={styles.brandMark}>CareNest</Text>
+          <View style={styles.brandRowWrap}>
+            <View style={styles.brandRow}>
+              <CareNestLogoMark size={24} />
+              <Text style={styles.brandMark}>CareNest</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.bellBtn}
+              onPress={() => navigation.navigate('Notifications')}
+              accessibilityRole="button"
+              accessibilityLabel={NOTIFICATION_LABELS.bellAccessibility}
+            >
+              <Bell size={22} color={tokens.colors.inkPrimary} />
+              {unreadNotificationCount > 0 ? (
+                <View style={styles.bellBadge}>
+                  <Text style={styles.bellBadgeText}>
+                    {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                  </Text>
+                </View>
+              ) : null}
+            </TouchableOpacity>
           </View>
           <Text style={styles.title}>Lịch trực hôm nay</Text>
           <Text style={styles.subtitle}>
@@ -322,6 +348,91 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </TouchableOpacity>
         </View>
 
+        {/* Nút TrustScore trên Trang chủ */}
+        <TouchableOpacity
+          style={styles.scheduleButton}
+          onPress={() => navigation.navigate('TrustScore')}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Xem điểm TrustScore và đánh giá"
+        >
+          <View style={styles.scheduleLeft}>
+            <View
+              style={[
+                styles.scheduleIconWrap,
+                { backgroundColor: trustScoreMeta.softColor },
+              ]}
+            >
+              <ShieldCheck size={20} color={trustScoreMeta.color} />
+            </View>
+            <View style={styles.scheduleTextBox}>
+              <Text style={styles.scheduleTitle}>
+                TrustScore · {trustScore}/100 ({trustScoreMeta.label})
+              </Text>
+              <Text style={styles.scheduleSub} numberOfLines={1}>
+                {trustScoreMeta.summary}
+              </Text>
+            </View>
+          </View>
+          <ChevronRight color={tokens.colors.inkSecondary} size={20} />
+        </TouchableOpacity>
+
+        {/* Nút TrustScore trên Trang chủ */}
+        <TouchableOpacity
+          style={styles.scheduleButton}
+          onPress={() => navigation.navigate('TrustScore')}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Xem điểm TrustScore và đánh giá"
+        >
+          <View style={styles.scheduleLeft}>
+            <View
+              style={[
+                styles.scheduleIconWrap,
+                { backgroundColor: trustScoreMeta.softColor },
+              ]}
+            >
+              <ShieldCheck size={20} color={trustScoreMeta.color} />
+            </View>
+            <View style={styles.scheduleTextBox}>
+              <Text style={styles.scheduleTitle}>
+                TrustScore · {trustScore}/100 ({trustScoreMeta.label})
+              </Text>
+              <Text style={styles.scheduleSub} numberOfLines={1}>
+                {trustScoreMeta.summary}
+              </Text>
+            </View>
+          </View>
+          <ChevronRight color={tokens.colors.inkSecondary} size={20} />
+        </TouchableOpacity>
+
+        {/* Nút TrustScore trên Trang chủ (A13) */}
+        <TouchableOpacity
+          style={styles.scheduleButton}
+          onPress={() => navigation.navigate('TrustScore')}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Đánh giá và điểm TrustScore"
+        >
+          <View style={styles.scheduleLeft}>
+            <View style={styles.scheduleIconWrap}>
+              <ShieldCheck
+                size={20}
+                color={getScoreTierMeta(session?.profile?.trust_score ?? 92).color}
+              />
+            </View>
+            <View style={styles.scheduleTextBox}>
+              <Text style={styles.scheduleTitle}>
+                TrustScore · {session?.profile?.trust_score ?? 92}/100
+              </Text>
+              <Text style={styles.scheduleSub}>
+                {getScoreTierMeta(session?.profile?.trust_score ?? 92).label} — Xem lịch sử điểm &amp; đánh giá
+              </Text>
+            </View>
+          </View>
+          <ChevronRight size={20} color={tokens.colors.inkSecondary} />
+        </TouchableOpacity>
+
         {/* Nút Lịch rảnh trên Trang chủ */}
         <TouchableOpacity
           style={styles.scheduleButton}
@@ -444,11 +555,43 @@ const styles = StyleSheet.create({
   homeHead: {
     marginBottom: 18,
   },
+  brandRowWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
   brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 6,
+  },
+  bellBtn: {
+    width: tokens.spacing.touchTargetMin,
+    height: tokens.spacing.touchTargetMin,
+    borderRadius: tokens.radii.pill,
+    backgroundColor: tokens.colors.paper,
+    borderWidth: 1,
+    borderColor: tokens.colors.borderHairline,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bellBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    paddingHorizontal: 4,
+    backgroundColor: tokens.colors.alertCrimson,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bellBadgeText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: tokens.colors.paper,
   },
   brandMark: {
     fontSize: 15,

@@ -41,6 +41,36 @@ export const env = {
   get useMockWallet(): boolean {
     return nativeConfig.USE_MOCK_WALLET !== 'false' && process.env.USE_MOCK_WALLET !== 'false';
   },
+  get useMockTrustScore(): boolean {
+    return (
+      nativeConfig.USE_MOCK_TRUST_SCORE !== 'false' &&
+      process.env.USE_MOCK_TRUST_SCORE !== 'false'
+    );
+  },
+  get useMockReviews(): boolean {
+    return (
+      nativeConfig.USE_MOCK_REVIEWS !== 'false' &&
+      process.env.USE_MOCK_REVIEWS !== 'false'
+    );
+  },
+  get useMockDisputes(): boolean {
+    return (
+      nativeConfig.USE_MOCK_DISPUTES !== 'false' &&
+      process.env.USE_MOCK_DISPUTES !== 'false'
+    );
+  },
+  get useMockChat(): boolean {
+    return (
+      nativeConfig.USE_MOCK_CHAT !== 'false' &&
+      process.env.USE_MOCK_CHAT !== 'false'
+    );
+  },
+  get useMockNotifications(): boolean {
+    return (
+      nativeConfig.USE_MOCK_NOTIFICATIONS !== 'false' &&
+      process.env.USE_MOCK_NOTIFICATIONS !== 'false'
+    );
+  },
   get useMockCredentials(): boolean {
     return (
       nativeConfig.USE_MOCK_CREDENTIALS === 'true' ||
@@ -59,4 +89,3 @@ export const env = {
     return nativeConfig.SUPPORT_HOTLINE?.trim() || process.env.SUPPORT_HOTLINE || '1900 6868';
   },
 };
-

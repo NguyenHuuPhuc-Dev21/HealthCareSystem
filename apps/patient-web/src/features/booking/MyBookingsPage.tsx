@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { CalendarClock, Plus, ReceiptText, Send } from 'lucide-react';
+import { CalendarClock, Flag, Plus, ReceiptText, Send } from 'lucide-react';
 import { Alert, Button } from '../../components';
 import { PatientLayout } from '../../components/layout/PatientLayout';
 import { getErrorMessage } from '../../lib/errors';
@@ -11,6 +11,7 @@ import type { Booking } from './booking.types';
 import { StatusBadges } from './components/StatusBadges';
 import { EscrowIndicator } from '../payments/components/EscrowIndicator';
 import { CancelBookingModal } from '../refunds/components/CancelBookingModal';
+import { PostShiftActions } from './components/PostShiftActions';
 
 type Load = { state: 'loading' } | { state: 'error'; message: string } | { state: 'ready'; items: Booking[] };
 
@@ -41,13 +42,17 @@ export function MyBookingsPage() {
           <p>Theo dõi ca chăm sóc, thanh toán và khiếu nại — ba trạng thái này độc lập với nhau.</p>
         </div>
         <div className="bk-head-actions">
+          <Link to="/disputes" className="btn btn-secondary"><Flag size={16} style={{ marginRight: 6 }} /> Khiếu nại của tôi</Link>
           <Link to="/refunds" className="btn btn-secondary"><ReceiptText size={16} style={{ marginRight: 6 }} /> Theo dõi hoàn tiền</Link>
           <Link to="/bookings/new" className="btn btn-primary"><Plus size={16} style={{ marginRight: 6 }} /> Đặt ca mới</Link>
         </div>
       </div>
 
       {flash && <Alert tone="success" title={flash} />}
-      {notice && <Alert tone="success" title={notice}><Link to="/refunds" className="link-strong">Theo dõi hoàn tiền →</Link></Alert>}
+      {notice && <Alert tone="success" title={notice}>
+          {notice.includes('hoàn') && <Link to="/refunds" className="link-strong">Theo dõi hoàn tiền →</Link>}
+          {notice.includes('khiếu nại') && <Link to="/disputes" className="link-strong">Xem khiếu nại của tôi →</Link>}
+        </Alert>}
 
       {load.state === 'loading' && <div className="card step-card skeleton">Đang tải đơn…</div>}
       {load.state === 'error' && (
@@ -93,6 +98,7 @@ export function MyBookingsPage() {
                   {['DRAFT', 'MATCHING', 'CONFIRMED'].includes(b.executionStatus) && Date.parse(b.startAt) > Date.now() && (
                     <button type="button" className="btn btn-secondary btn-sm" onClick={() => { setNotice(null); setCancelTarget(b); }}>Huỷ ca</button>
                   )}
+                  <PostShiftActions booking={b} nurseName={b.invitedNurse?.fullName} onChanged={(msg) => { setNotice(msg ?? null); fetchList(); }} />
                   {payNow && <Link to={`/bookings/${b.id}/pay`} className="btn btn-primary btn-sm">Thanh toán ngay</Link>}
                 </div>
               </li>

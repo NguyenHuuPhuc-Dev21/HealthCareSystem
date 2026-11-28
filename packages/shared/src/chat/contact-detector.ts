@@ -20,7 +20,7 @@ const OBFUSCATED_DIGITS_REGEX =
 
 // Regex phát hiện URL hoặc tên miền mạng xã hội
 const URL_REGEX =
-  /(?:https?:\/\/|www\.)[^\s/$.?#].[^\s]*|(?:\b(?:facebook\.com|fb\.com|fb\.me|zalo\.me|t\.me|telegram\.me)\/[^\s]+)/gi;
+  /(?:https?:\/\/|www\.)[^\s/$.?#].[^\s]*|\b(?:facebook\.com|fb\.com|fb\.me|zalo\.me|t\.me|telegram\.me)(?:\/[^\s]*)?/gi;
 
 // Từ khóa giao dịch ngoài nền tảng
 const PAYMENT_KEYWORDS = [

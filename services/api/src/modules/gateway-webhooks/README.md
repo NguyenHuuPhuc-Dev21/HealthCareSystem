@@ -14,6 +14,8 @@ Prepaid bank transfer → escrow → matching, and the escrow ledger.
 | `gateway-webhooks.repo.ts` / `.schema.ts` / `.routes.ts` / `.types.ts` | SQL, validation, HTTP, shapes |
 
 ## Rules
+- `<booking code>-GH<n>` with a matching extension = shift-extension payment → shift-extend `confirmExtensionPayment`
+  (BE-1) in the webhook transaction (`EXTENSION_PAID`, `DUPLICATE`, `AMOUNT_MISMATCH`, `LATE_PAYMENT_REFUNDED`).
 - Signature first: a wrong signature changes nothing (401). Everything verified answers 200 so the gateway stops retrying.
 - One transaction under the booking lock: ledger + `ESCROW_HELD` + `activateMatching` (BE-2). Radar starts after COMMIT.
 - Money that arrives too late (or twice) is booked and refunded 100% in the same transaction — never silently kept.
@@ -22,3 +24,20 @@ Prepaid bank transfer → escrow → matching, and the escrow ledger.
 ## Env
 `PAYMENT_GATEWAY_WEBHOOK_SECRET` (required, otherwise every webhook is 401) · `PAYMENT_RECEIVING_BANK_BIN`, `_BANK_NAME`,
 `_ACCOUNT_NO`, `_ACCOUNT_NAME` (VietQR) · `PAYMENT_SIMULATOR_ENABLED=true` for demos (ignored in production).
+
+## Nurse deposit top-ups (`KQ…`, ADR-0004)
+
+An `orderCode` of the form `KQ` + 12 characters that matches a `deposit_topups` row is a nurse deposit top-up, handled
+by `deposits` (`confirmTopup`) in the webhook's transaction — never a booking. At most the current shortfall to
+`MIN_NURSE_DEPOSIT` is credited (`TOPUP`, `external_ref` = gateway reference); the rest is returned by the custody partner.
+
+| outcome | meaning |
+|---|---|
+| `TOPUP_CREDITED` | whole amount credited to the deposit |
+| `TOPUP_EXCESS_RETURNED` | shortfall credited, the rest returned |
+| `TOPUP_RETURNED` | deposit already full, or the link was already paid: everything returned |
+| `DUPLICATE` | same gateway reference again |
+| `AMOUNT_MISMATCH` | amount differs from the link: nothing moves |
+| `UNKNOWN_TOPUP` | no such top-up |
+
+`bookingId` is `null` for these events. Contract: `docs/api/deposits.api.md`.
