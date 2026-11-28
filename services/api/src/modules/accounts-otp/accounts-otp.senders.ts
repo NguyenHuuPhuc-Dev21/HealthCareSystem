@@ -4,16 +4,17 @@
  *   OTP_CHANNEL=mock  development / staging: nothing is sent. The code is kept in a mock inbox
  *                     (Redis, same lifetime as the OTP) that testers read through
  *                     GET /auth/dev/otp-inbox. Refused in production.
- *   OTP_CHANNEL=zns   Zalo ZNS (the channel the team chose). Not implemented yet: the team has
- *                     no Zalo Official Account / approved OTP template, so the server refuses
- *                     to start with it — it never pretends a code was delivered.
+ *   OTP_CHANNEL=zns   Zalo ZNS (the channel the team chose) — accounts-otp.zns.ts. Needs the team's
+ *                     Zalo Official Account, an approved ZNS template of type OTP and the ZALO_*
+ *                     variables; the server refuses to start without them (never falls back to mock).
  *
  * Unset: `mock` outside production; in production the variable is required.
- * Adding the real sender = one class implementing `OtpSender` + one branch in `createOtpDelivery`.
+ * Another channel = one class implementing `OtpSender` + one branch in `createOtpDelivery`.
  */
 import { createHash, timingSafeEqual } from 'node:crypto';
 import type { KeyValueStore } from '../../core/redis';
 import type { MockOtpInbox, MockOtpMessage, OtpSender } from './accounts-otp.types';
+import { ZaloZnsOtpSender, znsConfigFromEnv } from './accounts-otp.zns';
 
 export type OtpChannel = 'mock' | 'zns';
 
@@ -92,9 +93,7 @@ export interface OtpDelivery {
 export function createOtpDelivery(env: Env, kv: KeyValueStore): OtpDelivery {
   const channel = resolveOtpChannel(env);
   if (channel === 'zns') {
-    throw new Error(
-      'OTP_CHANNEL=zns is not implemented yet (OD-09): it needs a Zalo Official Account and an approved ZNS OTP template',
-    );
+    return { sender: new ZaloZnsOtpSender(znsConfigFromEnv(env), kv), mockInbox: null };
   }
   const inbox = new MockInboxOtpSender(kv, env.OTP_MOCK_INBOX_KEY?.trim() || undefined);
   return { sender: inbox, mockInbox: inbox };
