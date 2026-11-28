@@ -32,6 +32,8 @@ import { createPrescriptionRejectionRouter } from './modules/prescription-reject
 import { createShiftExtendRouter } from './modules/shift-extend/shift-extend.routes';
 import { createCancellationPolicyRouter } from './modules/cancellation-policy/cancellation-policy.routes';
 import { getCancellationPolicyService } from './modules/cancellation-policy/cancellation-policy.service';
+import { createNurseCancelRouter } from './modules/cancellation-policy/cancellation-policy.nurse.routes';
+import { getNurseCancelService } from './modules/cancellation-policy/cancellation-policy.nurse';
 import { getShiftExtendService } from './modules/shift-extend/shift-extend.service';
 import { createReviewsRouter } from './modules/reviews-trustscore/reviews-trustscore.routes';
 import { getReviewsService } from './modules/reviews-trustscore/reviews-trustscore.service';
@@ -110,6 +112,7 @@ function buildApiRouter(): Router {
   api.use(createChatRouter(getChatService())); // BE-2 · Phase 6 · chat (masked in-app chat & call logs, FR-CHAT-01)
   api.use(createAdminUsersRouter(getAdminUsersService())); // BE-2 · Phase 7 · admin-users (search, lock / unlock accounts, FR-ADMIN-01)
   api.use(createCancellationPolicyRouter(getCancellationPolicyService())); // BE-1 · Phase 5 · cancellation-policy
+  api.use(createNurseCancelRouter(getNurseCancelService())); // BE-1 · cancellation-policy, nurse side (SRS §5.2 rows 6–7)
   api.use(createReviewsRouter(getReviewsService())); // BE-1 · Phase 6 · reviews-trustscore
   api.use(createWalletsLedgerRouter(getWalletsLedgerService())); // BE-3 · Phase 5 · wallets-ledger (balances, history, earnings, upcoming settlements)
   api.use(createDepositsRouter(getDepositsService())); // BE-3 · Phase 5 · deposits (ADR-0004: top-up, penalties, appeal, closure refund, bank account)

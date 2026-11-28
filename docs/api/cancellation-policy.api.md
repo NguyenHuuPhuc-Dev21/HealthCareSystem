@@ -67,3 +67,35 @@ The customer's refunds, newest first (at most 100): cancellations, expired booki
   `outcome` in the cancel response; `booking` there is a short summary, not the full `Booking` — reload the booking if needed.
 - Add `INVALID_PRESCRIPTION` and `OTHER` to `RefundScenario`.
 - Always show the preview right before confirming; do not compute amounts in the app.
+
+## Nurse side — SRS §5.2 rows 6–7 (NURSE only)
+
+### GET /bookings/:id/nurse-cancel-preview
+
+What giving the shift back now would cost. Nothing is stored.
+
+```json
+{ "bookingId": "uuid", "bookingCode": "HC-…", "scenario": "NURSE_CANCEL_URGENT", "hoursBeforeStart": 3,
+  "freeHours": 12, "fine": 80000, "finePercent": 20, "trustScoreDelta": -20 }
+```
+
+### POST /bookings/:id/nurse-cancel  `{ "reason": "…" }` (1–500 chars, required)
+
+Same fields as the preview, plus `cancellationId`, `trustScore` (after), `suspended` (fell below 60 → no new shifts
+until an Admin lifts it), `penaltyTransactionId` (the deposit deduction, appealable like any penalty).
+
+| Scenario | When | TrustScore | Deposit |
+|---|---|---|---|
+| `NURSE_CANCEL_EARLY` | more than `NURSE_CANCEL_FREE_HOURS` (12) before the start | −`TRUST_PENALTY_NURSE_CANCEL_EARLY` (5) | — |
+| `NURSE_CANCEL_URGENT` | 12 h or less before the start | −`TRUST_PENALTY_NURSE_CANCEL_LATE` (20) | −`NURSE_LATE_CANCEL_FINE_RATE` (20%) × booking total (may go negative = debt) |
+
+The booking goes back to `MATCHING` without a nurse (the customer pays nothing more); a row-7 fine is added to the
+booking's `urgent_bonus_amount` for the nurse who takes it instead; matching restarts (urgent → Radar, otherwise Job Board).
+
+| Status | Code | When |
+|---|---|---|
+| 404 | `BOOKING_NOT_FOUND` | unknown id, or not this nurse's booking |
+| 409 | `SHIFT_IN_PROGRESS` | the shift has started (checked in) |
+| 409 | `BOOKING_NOT_CANCELLABLE` | not `CONFIRMED` |
+| 422 | `SHIFT_ALREADY_STARTED` | the start time has passed (no-show flow, not a cancellation) |
+| 400 | `VALIDATION_ERROR` | no / too long `reason` |
