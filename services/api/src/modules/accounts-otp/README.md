@@ -25,6 +25,9 @@ Phone number + OTP sign-in, first-time registration, and session management for 
 
 - OTP: CSPRNG, `OTP_LENGTH` digits, valid `OTP_TTL_SECONDS`, stored only as HMAC-SHA256 with `OTP_SECRET`, single use, invalid after `OTP_MAX_VERIFY_ATTEMPTS` wrong tries.
 - Throttling: `OTP_RESEND_COOLDOWN_SECONDS` per phone, `OTP_MAX_SENDS_PER_PHONE_PER_HOUR`, `OTP_MAX_SENDS_PER_IP_PER_HOUR`.
+- Brute-force lock (Phase 8, migration `0032`): wrong codes are also counted per phone over one hour, across every code;
+  at `OTP_MAX_FAILED_VERIFY_PER_PHONE_PER_HOUR` (10) the phone is locked for `OTP_LOCKOUT_MINUTES` (60) → `429 OTP_LOCKED`,
+  no verify and no new SMS. A successful sign-in clears the count. Admin authenticator codes: same, per Admin → `429 TOTP_LOCKED`.
 - Anti-enumeration: `request-otp` gives the same answer for any number; banned numbers get no SMS.
 - Admin 2FA: `verify-otp` → `SECOND_FACTOR_REQUIRED` (+ `enrolled`). First time `/2fa/setup` returns a QR URI;
   `/verify-2fa` enrols and signs in. Secrets AES-256-GCM encrypted (`TOTP_ENCRYPTION_KEY`), ±30 s drift,

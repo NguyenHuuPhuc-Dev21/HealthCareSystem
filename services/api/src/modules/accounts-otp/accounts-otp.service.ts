@@ -88,12 +88,17 @@ function safeEqualHex(a: string, b: string): boolean {
 const keys = {
   otpCode: (phone: string) => `otp:code:${phone}`,
   otpFails: (phone: string) => `otp:fail:${phone}`,
+  /** Wrong codes for this phone over the last hour, across every code sent (Phase 8 brute-force lock). */
+  otpFailsHour: (phone: string) => `otp:fail:hour:${phone}`,
+  otpLock: (phone: string) => `otp:lock:${phone}`,
   otpCooldown: (phone: string) => `otp:cooldown:${phone}`,
   otpSentPhone: (phone: string) => `otp:sent:phone:${phone}`,
   otpSentIp: (ip: string) => `otp:sent:ip:${ip}`,
   registration: (hash: string) => `auth:reg:${hash}`,
   twoFactor: (hash: string) => `auth:2fa:${hash}`,
   twoFactorFails: (hash: string) => `auth:2fa:fail:${hash}`,
+  twoFactorFailsHour: (userId: string) => `auth:2fa:fail:hour:${userId}`,
+  twoFactorLock: (userId: string) => `auth:2fa:lock:${userId}`,
   totpUsed: (userId: string, step: number) => `auth:totp:used:${userId}:${step}`,
   access: (hash: string) => `sess:a:${hash}`,
   refresh: (hash: string) => `sess:r:${hash}`,
@@ -105,6 +110,9 @@ const invalidOtp = (details?: unknown) =>
   new AppError(400, 'OTP_INVALID_OR_EXPIRED', 'The code is incorrect or has expired', details);
 const otpLocked = () =>
   new AppError(400, 'OTP_ATTEMPTS_EXCEEDED', 'Too many wrong attempts. Request a new code.');
+/** 429 while a phone (or an Admin's authenticator) is locked after too many wrong codes in an hour. */
+const lockedOut = (code: 'OTP_LOCKED' | 'TOTP_LOCKED', retryAfterSeconds: number) =>
+  new AppError(429, code, 'Too many wrong codes. Try again later.', { retryAfterSeconds: Math.max(retryAfterSeconds, 1) });
 const sessionInvalid = () => new AppError(401, 'SESSION_INVALID', 'Session expired or revoked. Sign in again.');
 const challengeInvalid = () =>
   new AppError(400, 'CHALLENGE_INVALID', 'Sign-in step expired. Start again with your phone number.');
@@ -248,6 +256,29 @@ export class AccountsOtpService {
     return this.deps.getNumber(key);
   }
 
+  /** Throws 429 while `lockKey` exists (seconds left in the details). */
+  private async assertNotLocked(lockKey: string, code: 'OTP_LOCKED' | 'TOTP_LOCKED'): Promise<void> {
+    if ((await this.deps.kv.get(lockKey)) !== null) throw lockedOut(code, await this.deps.kv.ttl(lockKey));
+  }
+
+  /**
+   * Counts one wrong code in the hourly window. At OTP_MAX_FAILED_VERIFY_PER_PHONE_PER_HOUR the key is locked for
+   * OTP_LOCKOUT_MINUTES (Phase 8: a new code every few minutes must not give an attacker unlimited guesses).
+   * Returns the lock's length in seconds when this failure set it, else null.
+   */
+  private async countHourlyFailure(failKey: string, lockKey: string): Promise<number | null> {
+    const [maxPerHour, lockMinutes] = await Promise.all([
+      this.cfg('OTP_MAX_FAILED_VERIFY_PER_PHONE_PER_HOUR'),
+      this.cfg('OTP_LOCKOUT_MINUTES'),
+    ]);
+    const n = await this.deps.kv.incrWithTtl(failKey, HOUR_SECONDS);
+    if (n < maxPerHour) return null;
+    const seconds = lockMinutes * 60;
+    await this.deps.kv.set(lockKey, '1', seconds);
+    await this.deps.kv.del(failKey);
+    return seconds;
+  }
+
   /** POST /auth/request-otp. `phone` must already be normalised by the schema. */
   async requestOtp(phone: string, ctx: RequestContext): Promise<RequestOtpResult> {
     const { kv, repo } = this.deps;
@@ -258,6 +289,9 @@ export class AccountsOtpService {
       this.cfg('OTP_MAX_SENDS_PER_IP_PER_HOUR'),
       this.cfg('OTP_LENGTH'),
     ]);
+
+    // A locked phone gets no new code (and no SMS cost) until the lock ends.
+    await this.assertNotLocked(keys.otpLock(phone), 'OTP_LOCKED');
 
     if (!(await kv.setIfAbsent(keys.otpCooldown(phone), '1', cooldown))) {
       const left = await kv.ttl(keys.otpCooldown(phone));
@@ -297,6 +331,7 @@ export class AccountsOtpService {
     const { kv, repo } = this.deps;
     const [maxAttempts, ttl] = await Promise.all([this.cfg('OTP_MAX_VERIFY_ATTEMPTS'), this.cfg('OTP_TTL_SECONDS')]);
 
+    await this.assertNotLocked(keys.otpLock(phone), 'OTP_LOCKED');
     const stored = await kv.get(keys.otpCode(phone));
     if (!stored) throw invalidOtp();
 
@@ -307,6 +342,11 @@ export class AccountsOtpService {
     }
 
     if (!safeEqualHex(stored, this.hashOtp(phone, code))) {
+      const locked = await this.countHourlyFailure(keys.otpFailsHour(phone), keys.otpLock(phone));
+      if (locked !== null) {
+        await kv.del(keys.otpCode(phone));
+        throw lockedOut('OTP_LOCKED', locked);
+      }
       const n = await kv.incrWithTtl(keys.otpFails(phone), ttl);
       if (n >= maxAttempts) {
         await kv.del(keys.otpCode(phone));
@@ -318,6 +358,7 @@ export class AccountsOtpService {
     // Single use: only the request that actually deletes the code wins (SEC-1.2 #3).
     if ((await kv.del(keys.otpCode(phone))) !== 1) throw invalidOtp();
     await kv.del(keys.otpFails(phone));
+    await kv.del(keys.otpFailsHour(phone));
 
     const user = await repo.findByPhone(phone);
 
@@ -418,6 +459,7 @@ export class AccountsOtpService {
     const now = (this.deps.now ?? Date.now)();
     const maxAttempts = await this.cfg('OTP_MAX_VERIFY_ATTEMPTS');
     const { key, hash, challenge } = await this.loadChallenge(challengeToken);
+    await this.assertNotLocked(keys.twoFactorLock(challenge.userId), 'TOTP_LOCKED');
     const user = await this.loadAdmin(challenge.userId);
 
     let secretEnc: string | null;
@@ -432,6 +474,11 @@ export class AccountsOtpService {
     const fresh =
       step !== null && (await kv.setIfAbsent(keys.totpUsed(user.id, step), '1', TOTP_STEP_SECONDS * 4));
     if (!fresh) {
+      const locked = await this.countHourlyFailure(keys.twoFactorFailsHour(user.id), keys.twoFactorLock(user.id));
+      if (locked !== null) {
+        await kv.del(key);
+        throw lockedOut('TOTP_LOCKED', locked);
+      }
       const ttl = Math.max(await kv.ttl(key), 1);
       const n = await kv.incrWithTtl(keys.twoFactorFails(hash), ttl);
       if (n >= maxAttempts) {
@@ -444,6 +491,7 @@ export class AccountsOtpService {
     // The challenge is single-use.
     if ((await kv.del(key)) !== 1) throw challengeInvalid();
     await kv.del(keys.twoFactorFails(hash));
+    await kv.del(keys.twoFactorFailsHour(user.id));
 
     if (!user.totpEnabled) {
       const enabled = await repo.enableTotp(user.id, secretEnc);
