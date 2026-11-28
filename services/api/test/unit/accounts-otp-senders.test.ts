@@ -52,8 +52,8 @@ describe('createOtpDelivery', () => {
     expect(d.sender).toBe(d.mockInbox);
   });
 
-  it('zns channel fails closed until it is implemented (never falls back to mock)', () => {
-    expect(() => createOtpDelivery({ OTP_CHANNEL: 'zns' }, new MemoryKeyValueStore())).toThrow(/not implemented yet/);
+  it('zns channel without its ZALO_* settings fails closed (never falls back to mock)', () => {
+    expect(() => createOtpDelivery({ OTP_CHANNEL: 'zns' }, new MemoryKeyValueStore())).toThrow(/needs ZALO_APP_ID/);
   });
 });
 

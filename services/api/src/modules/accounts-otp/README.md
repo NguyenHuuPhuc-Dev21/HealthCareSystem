@@ -17,7 +17,8 @@ Phone number + OTP sign-in, first-time registration, and session management for 
 | `accounts-otp.policy.ts` | who may sign in (BANNED blocked, SUSPENDED allowed), Admin needs 2FA |
 | `accounts-otp.schema.ts` | Zod whitelists + Vietnamese phone normalisation (`0xxxxxxxxx`) |
 | `accounts-otp.types.ts` | DTOs and interfaces (`AccountsRepo`, `OtpSender`) |
-| `accounts-otp.senders.ts` | OTP delivery channels: `OTP_CHANNEL` selection, mock inbox (dev/staging), ZNS slot (OD-09) |
+| `accounts-otp.senders.ts` | OTP delivery channels: `OTP_CHANNEL` selection, mock inbox (dev/staging) |
+| `accounts-otp.zns.ts` | Zalo ZNS sender (`OTP_CHANNEL=zns`): OA token refresh (rotating refresh token kept in Redis), template send |
 | `accounts-otp.totp.ts` | RFC 6238 TOTP + AES-256-GCM encryption of Admin secrets (node:crypto only) |
 | — `jobs.ts` | not needed: every expiry is a Redis TTL, no business timer |
 
@@ -48,8 +49,34 @@ await revokeAllSessionsForUser(userId); // on BAN / SUSPEND / phone re-binding (
 1. **Admin 2FA backup codes / reset** — SEC-1.5 asks for single-use backup codes; not built yet. A lost
    authenticator is reset by clearing `users.totp_secret_enc` + `totp_enabled_at` (future admin-users action, audited).
    First enrolment relies on the phone OTP only — seed Admin phones must be real, controlled numbers.
-2. **Zalo ZNS sender** (OD-09) — the team chose Zalo ZNS but has no Official Account / approved OTP template yet.
-   `OTP_CHANNEL=mock` (default outside production) keeps codes in a mock inbox read through `GET /auth/dev/otp-inbox`;
-   `OTP_CHANNEL=zns` and production both refuse to start until the sender is written in `accounts-otp.senders.ts`.
+2. **Zalo ZNS: the code is written, the accounts are not** (OD-09) — the sender exists (`accounts-otp.zns.ts`), but it
+   only works once the team has the Zalo Official Account, the app and an approved OTP template (see below).
+   Until then keep `OTP_CHANNEL=mock`; production refuses to start without a real channel.
 3. **Login audit** — SEC-1.5 asks to record Admin logins (IP, device). `audit_action_enum` has no login action yet (BE-3 owns `core/audit`).
 4. **Web cookies** — tokens are returned in the JSON body (works for mobile + web). HttpOnly cookie delivery for web (SEC-1.7) to agree with FE-1.
+
+## Zalo ZNS setup (OTP_CHANNEL=zns)
+
+1. **Zalo Official Account (OA)** — create it at oa.zalo.me and get it verified by Zalo (business OA).
+2. **Zalo app** — at developers.zalo.me create an app, link it to the OA, enable ZNS; note **App ID** and **App Secret**.
+3. **ZNS template of type OTP** — register it in the ZNS dashboard with one parameter for the code (e.g. `otp`) and
+   wait for Zalo's approval; note the **template id**. Top up the ZNS balance (each message is billed).
+4. **First refresh token** — API Explorer (developers.zalo.me/tools/explorer) → *OA Access Token* → grant → copy the
+   **refresh token**.
+5. `services/api/.env`:
+   ```
+   OTP_CHANNEL=zns
+   ZALO_APP_ID=...            ZALO_APP_SECRET=...
+   ZALO_ZNS_OTP_TEMPLATE_ID=...   ZALO_ZNS_OTP_PARAM=otp
+   ZALO_REFRESH_TOKEN=...     ZALO_ZNS_DEV_MODE=true   # first tests: only the OA's test numbers receive it
+   OTP_DEV_ECHO=false
+   ```
+6. Restart the API, request an OTP for a number that has Zalo → the code arrives as a Zalo message.
+
+How tokens work: the access token (~25 h) is cached in Redis (`zalo:oa:access-token`). On expiry the sender
+refreshes it; **Zalo returns a new refresh token each time and the old one stops working**, so the new one is saved in
+Redis (`zalo:oa:refresh-token`) and `ZALO_REFRESH_TOKEN` is only used while Redis has none. One instance refreshes at a
+time (Redis lock). If Redis is wiped, or the refresh token is unused for ~3 months, repeat step 4.
+
+Failures (Zalo error, timeout, token refresh refused) → `503 OTP_DELIVERY_FAILED`; the code is discarded and the user
+can ask again at once. The code and the tokens are never logged.
