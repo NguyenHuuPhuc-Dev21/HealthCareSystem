@@ -67,3 +67,20 @@ Use `loadSlaRules()` and the function of the row, then `insertOutcome` (repo) so
 3. **Notifications** — optional `notify` dependency, wired when `core/notifications` exposes a shared service.
 4. **`GET /refunds` scenarios** — besides the 9 rows it can return `INVALID_PRESCRIPTION` (prescription-rejection) and
    `OTHER` (late or extra payment refunds); patient-web to add them to `RefundScenario`.
+
+## Nurse side — rows 6–7 (`cancellation-policy.nurse*.ts`, migration 0033)
+
+`GET /bookings/:id/nurse-cancel-preview`, `POST /bookings/:id/nurse-cancel { reason }` — the assigned nurse of a
+CONFIRMED booking, before its start. One transaction under the booking lock:
+
+1. booking → `MATCHING`, `nurse_id = NULL`, `prescription_verified_by_nurse = FALSE`, `urgent_bonus_amount += fine`;
+2. `applyTrustScoreChange` (reviews-trustscore) −5 / −20, reason `CANCEL_OVER_12H` / `CANCEL_WITHIN_12H` — may suspend;
+3. row 7: `deposits.deductPenalty` (BE-3) `NURSE_LATE_CANCEL`, key `deposit-penalty:NLC:<booking>:<nurse>` (≤ 100 chars);
+4. `nurse_cancellations` row (append-only; one per booking **and** nurse — a booking can be given back by several nurses,
+   which `cancellation_outcomes`, one per booking, cannot hold).
+
+After COMMIT: `matching-radar.redispatch` (key `redispatch:<booking>:<nurse>`, released nurse excluded) and notices
+(customer `BOOKING_NURSE_CANCELLED`, nurse `DEPOSIT_PENALTY` / `BOOKING_CANCELLED`).
+
+**Open (BE-3):** paying `bookings.urgent_bonus_amount` to the replacement nurse at settlement (`TxType.URGENT_BONUS`) —
+settlements does not do it yet.
