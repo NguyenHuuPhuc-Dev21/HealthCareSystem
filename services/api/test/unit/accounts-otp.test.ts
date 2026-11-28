@@ -15,6 +15,8 @@ const CONFIG: Partial<Record<SystemConfigKey, number>> = {
   OTP_RESEND_COOLDOWN_SECONDS: 60,
   OTP_MAX_SENDS_PER_PHONE_PER_HOUR: 5,
   OTP_MAX_SENDS_PER_IP_PER_HOUR: 20,
+  OTP_MAX_FAILED_VERIFY_PER_PHONE_PER_HOUR: 10,
+  OTP_LOCKOUT_MINUTES: 60,
   ACCESS_TOKEN_TTL_MINUTES: 15,
   REFRESH_TOKEN_TTL_DAYS: 30,
   ADMIN_SESSION_IDLE_MINUTES: 30,
@@ -308,6 +310,78 @@ describe('verify-otp', () => {
   });
 });
 
+describe('brute-force lock across codes (Phase 8)', () => {
+  const wrongFor = (right: string) => (right === '000000' ? '111111' : '000000');
+
+  it('10 wrong codes within an hour, over several codes → 429 OTP_LOCKED; no new code until the lock ends', async () => {
+    const s = setup();
+    let wrongs = 0;
+    // Each code allows 4 wrong tries before the 5th destroys it; ask for a new code and keep guessing.
+    while (wrongs < 9) {
+      await s.svc.requestOtp(PHONE, ctx);
+      const wrong = wrongFor(s.sender.last());
+      for (let i = 0; i < 4 && wrongs < 9; i++) {
+        await expectAppError(s.svc.verifyOtp(PHONE, wrong, ctx), 400, 'OTP_INVALID_OR_EXPIRED');
+        wrongs += 1;
+      }
+      s.clock.advance(61); // past the resend cooldown
+    }
+    await s.svc.requestOtp(PHONE, ctx);
+    const right = s.sender.last();
+    let err: AppError | null = null;
+    try {
+      await s.svc.verifyOtp(PHONE, wrongFor(right), ctx); // 10th wrong code
+    } catch (e) {
+      err = e as AppError;
+    }
+    expect(err?.status).toBe(429);
+    expect(err?.code).toBe('OTP_LOCKED');
+    expect((err?.details as { retryAfterSeconds: number }).retryAfterSeconds).toBe(3600);
+
+    // Locked: even the right code fails, and no SMS is sent for a new request.
+    await expectAppError(s.svc.verifyOtp(PHONE, right, ctx), 429, 'OTP_LOCKED');
+    const sent = s.sender.sent.length;
+    s.clock.advance(61);
+    await expectAppError(s.svc.requestOtp(PHONE, ctx), 429, 'OTP_LOCKED');
+    expect(s.sender.sent.length).toBe(sent);
+
+    // After the lock: a fresh code works again.
+    s.clock.advance(3600);
+    await s.svc.requestOtp(PHONE, ctx);
+    await expect(s.svc.verifyOtp(PHONE, s.sender.last(), ctx)).resolves.toMatchObject({ status: 'REGISTRATION_REQUIRED' });
+  });
+
+  it('the lock is per phone: another number is not affected', async () => {
+    const s = setup();
+    await s.kv.set('otp:lock:' + PHONE, '1', 3600);
+    await expectAppError(s.svc.requestOtp(PHONE, ctx), 429, 'OTP_LOCKED');
+    await expect(s.svc.requestOtp('0901000002', ctx)).resolves.toMatchObject({ expiresInSeconds: 300 });
+  });
+
+  it('a successful sign-in clears the hourly count', async () => {
+    const s = setup();
+    for (let round = 0; round < 3; round++) {
+      await s.svc.requestOtp(PHONE, ctx);
+      const right = s.sender.last();
+      for (let i = 0; i < 4; i++) await expectAppError(s.svc.verifyOtp(PHONE, wrongFor(right), ctx), 400, 'OTP_INVALID_OR_EXPIRED');
+      await s.svc.verifyOtp(PHONE, right, ctx); // 12 wrong in total, but never 10 in a row without a success
+      s.clock.advance(61);
+    }
+    expect(await s.kv.get('otp:lock:' + PHONE)).toBeNull();
+  });
+
+  it('wrong codes slower than the window do not add up (counter lives one hour)', async () => {
+    const s = setup();
+    for (let round = 0; round < 3; round++) {
+      await s.svc.requestOtp(PHONE, ctx);
+      const wrong = wrongFor(s.sender.last());
+      for (let i = 0; i < 4; i++) await expectAppError(s.svc.verifyOtp(PHONE, wrong, ctx), 400, 'OTP_INVALID_OR_EXPIRED');
+      s.clock.advance(3601);
+    }
+    expect(await s.kv.get('otp:lock:' + PHONE)).toBeNull();
+  });
+});
+
 describe('sessions', () => {
   async function signedIn() {
     const s = setup();
@@ -464,6 +538,36 @@ describe('admin 2FA (TOTP)', () => {
     for (let i = 0; i < 4; i++) await expectAppError(s.svc.verifySecondFactor(ch.challengeToken, wrong, ctx), 400, 'TOTP_INVALID');
     await expectAppError(s.svc.verifySecondFactor(ch.challengeToken, wrong, ctx), 400, 'TOTP_ATTEMPTS_EXCEEDED');
     await expectAppError(s.svc.verifySecondFactor(ch.challengeToken, right, ctx), 400, 'CHALLENGE_INVALID');
+  });
+
+  it('10 wrong authenticator codes in an hour, over several sign-ins → 429 TOTP_LOCKED for that Admin', async () => {
+    const s = setup();
+    const ch0 = await adminChallenge(s);
+    const { secret } = await s.svc.setupSecondFactor(ch0.challengeToken);
+    await s.svc.verifySecondFactor(ch0.challengeToken, codeFor(secret, s.clock.now()), ctx); // enrolled
+    let wrongs = 0;
+    let lockedErr: AppError | null = null;
+    while (!lockedErr && wrongs < 20) {
+      s.clock.advance(61);
+      const ch = await adminChallenge(s);
+      const right = codeFor(secret, s.clock.now());
+      const wrong = right === '000000' ? '111111' : '000000';
+      for (let i = 0; i < 4 && !lockedErr; i++) {
+        try {
+          await s.svc.verifySecondFactor(ch.challengeToken, wrong, ctx);
+        } catch (e) {
+          if ((e as AppError).code === 'TOTP_LOCKED') lockedErr = e as AppError;
+        }
+        wrongs += 1;
+      }
+    }
+    expect(wrongs).toBe(10);
+    expect(lockedErr?.status).toBe(429);
+
+    // Still locked on a new sign-in, even with the right code.
+    s.clock.advance(61);
+    const ch = await adminChallenge(s);
+    await expectAppError(s.svc.verifySecondFactor(ch.challengeToken, codeFor(secret, s.clock.now()), ctx), 429, 'TOTP_LOCKED');
   });
 
   it('the challenge expires with the OTP TTL', async () => {

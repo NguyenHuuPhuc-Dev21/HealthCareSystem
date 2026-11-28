@@ -34,6 +34,7 @@ Send the access token as `Authorization: Bearer <accessToken>`.
 |---|---|
 | `429 OTP_RESEND_TOO_SOON` | asked again before `resendAfterSeconds`; `details.retryAfterSeconds` |
 | `429 OTP_RATE_LIMITED` | hourly cap per phone or per IP reached |
+| `429 OTP_LOCKED` | the phone is locked after too many wrong codes (see verify-otp); `details.retryAfterSeconds` |
 | `503 OTP_DELIVERY_FAILED` | SMS provider failed — the user may retry immediately |
 
 ### `POST /auth/verify-otp`
@@ -58,6 +59,7 @@ Send the access token as `Authorization: Bearer <accessToken>`.
 |---|---|
 | `400 OTP_INVALID_OR_EXPIRED` | wrong, expired or already used; `details.attemptsRemaining` on a wrong code |
 | `400 OTP_ATTEMPTS_EXCEEDED` | too many wrong tries — request a new code |
+| `429 OTP_LOCKED` | `OTP_MAX_FAILED_VERIFY_PER_PHONE_PER_HOUR` (10) wrong codes for this phone within an hour, across all codes → no verify and no new code for `OTP_LOCKOUT_MINUTES` (60); `details.retryAfterSeconds` |
 | `403 ACCOUNT_BANNED` | account permanently locked |
 
 ### `POST /auth/complete-registration` (first sign-in of a new number)
@@ -101,6 +103,7 @@ Nothing is saved until the first valid code is sent to `verify-2fa`.
 |---|---|
 | `400 TOTP_INVALID` | wrong or already-used code; `details.attemptsRemaining` |
 | `400 TOTP_ATTEMPTS_EXCEEDED` | too many wrong codes — restart from `request-otp` |
+| `429 TOTP_LOCKED` | 10 wrong authenticator codes for this Admin within an hour, across sign-ins → locked for `OTP_LOCKOUT_MINUTES`; `details.retryAfterSeconds` |
 | `400 TOTP_NOT_ENROLLED` | call `2fa/setup` first |
 | `400 CHALLENGE_INVALID` | challenge expired/used |
 
