@@ -35,6 +35,10 @@ import { getCancellationPolicyService } from './modules/cancellation-policy/canc
 import { getShiftExtendService } from './modules/shift-extend/shift-extend.service';
 import { createReviewsRouter } from './modules/reviews-trustscore/reviews-trustscore.routes';
 import { getReviewsService } from './modules/reviews-trustscore/reviews-trustscore.service';
+import { createAdminCatalogRouter } from './modules/admin-catalog/admin-catalog.routes';
+import { getAdminCatalogService } from './modules/admin-catalog/admin-catalog.service';
+import { createAdminConfigsRouter } from './modules/admin-configs/admin-configs.routes';
+import { getAdminConfigsService } from './modules/admin-configs/admin-configs.service';
 import { getPrescriptionRejectionService } from './modules/prescription-rejection/prescription-rejection.service';
 import { getPrescriptionGateService } from './modules/prescription-gate/prescription-gate.service';
 import { createPrivacyConsentRouter } from './modules/privacy-consent/privacy-consent.routes';
@@ -72,6 +76,8 @@ function buildApiRouter(): Router {
   api.use(createShiftExtendRouter(getShiftExtendService())); // BE-1 · Phase 4 · shift-extend
   api.use(createCancellationPolicyRouter(getCancellationPolicyService())); // BE-1 · Phase 5 · cancellation-policy
   api.use(createReviewsRouter(getReviewsService())); // BE-1 · Phase 6 · reviews-trustscore
+  api.use(createAdminCatalogRouter(getAdminCatalogService())); // BE-1 · Phase 7 · admin-catalog
+  api.use(createAdminConfigsRouter(getAdminConfigsService())); // BE-1 · Phase 7 · admin-configs
 
   return api;
 }
