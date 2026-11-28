@@ -55,6 +55,10 @@ import { createOpsMonitoringRouter } from './modules/ops-monitoring/ops-monitori
 import { getOpsMonitoringService } from './modules/ops-monitoring/ops-monitoring.service';
 import { createSosRouter } from './modules/sos/sos.routes';
 import { getSosService } from './modules/sos/sos.service';
+import { createAdminCatalogRouter } from './modules/admin-catalog/admin-catalog.routes';
+import { getAdminCatalogService } from './modules/admin-catalog/admin-catalog.service';
+import { createAdminConfigsRouter } from './modules/admin-configs/admin-configs.routes';
+import { getAdminConfigsService } from './modules/admin-configs/admin-configs.service';
 import { getPrescriptionRejectionService } from './modules/prescription-rejection/prescription-rejection.service';
 import { getPrescriptionGateService } from './modules/prescription-gate/prescription-gate.service';
 import { createPrivacyConsentRouter } from './modules/privacy-consent/privacy-consent.routes';
@@ -117,6 +121,8 @@ function buildApiRouter(): Router {
   api.use(createAdminFinanceRouter(getAdminFinanceService())); // BE-3 · Phase 7 · admin-finance (CT-15 reconciliation, ledger export, finance queues)
   api.use(createOpsMonitoringRouter(getOpsMonitoringService())); // BE-3 · Phase 8 · ops-monitoring (health checks + alerts)
   api.use(createSosRouter(getSosService())); // BE-3 · Phase 4 · sos (FR-SHIFT-05 emergency alerts, incident report)
+  api.use(createAdminCatalogRouter(getAdminCatalogService())); // BE-1 · Phase 7 · admin-catalog
+  api.use(createAdminConfigsRouter(getAdminConfigsService())); // BE-1 · Phase 7 · admin-configs
 
   return api;
 }

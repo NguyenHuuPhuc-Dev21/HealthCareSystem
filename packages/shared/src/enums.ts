@@ -305,6 +305,7 @@ export enum AuditAction {
   RESOLVE_FINANCE_HOLD = 'RESOLVE_FINANCE_HOLD',     // migration 0029 · BE-3 admin-finance (reconciliation mismatch / settlement hold)
   EXPORT_FINANCE_REPORT = 'EXPORT_FINANCE_REPORT',   // migration 0029 · BE-3 admin-finance (ledger audit trail export)
   CLOSE_SOS_INCIDENT = 'CLOSE_SOS_INCIDENT',         // migration 0030 · BE-3 sos (Admin closes an emergency with its outcome, FR-SHIFT-05)
+  UPDATE_SERVICE_CATALOG = 'UPDATE_SERVICE_CATALOG', // migration 0031 · BE-1 admin-catalog (Admin actor)
 }
 
 // ============================================================================
