@@ -1,9 +1,11 @@
 import { z } from 'zod';
 
-/** PATCH /admin/configs/:key — the shape admin-web already sends. */
+/** PATCH /admin/configs/:key — the body admin-web sends (features/configs/configs.api.ts). */
 export const updateConfigSchema = z
   .object({
-    config_value: z.union([z.string().max(500), z.number(), z.boolean(), z.record(z.unknown()), z.array(z.unknown())]),
+    value: z.string().max(500),
+    /** Why it changed (e.g. "PO decision 26/11") — stored in the audit record only. */
+    note: z.string().trim().max(200).optional(),
   })
   .strict();
 

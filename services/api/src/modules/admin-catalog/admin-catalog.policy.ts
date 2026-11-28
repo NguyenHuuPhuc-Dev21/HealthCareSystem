@@ -2,11 +2,11 @@
 import { NurseTier } from '@healthcare-system/shared';
 import type { EditableFields } from './admin-catalog.types';
 
-export type CatalogProblem = 'INVASIVE_REQUIRES_TIER_2';
+export type CatalogProblem = 'INVALID_TIER_FOR_INVASIVE';
 
 /** Checked on the row as it would be after the change. Invasive procedures are Tier 2 only (hard tier gate). */
 export function catalogProblem(s: Pick<EditableFields, 'is_invasive' | 'required_tier'>): CatalogProblem | null {
-  if (s.is_invasive && s.required_tier !== NurseTier.TIER_2_SPECIALIST) return 'INVASIVE_REQUIRES_TIER_2';
+  if (s.is_invasive && s.required_tier !== NurseTier.TIER_2_SPECIALIST) return 'INVALID_TIER_FOR_INVASIVE';
   return null;
 }
 

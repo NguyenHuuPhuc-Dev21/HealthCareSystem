@@ -1,6 +1,6 @@
 /**
  * Routes for admin-configs (mounted at /api/v1). Contract: docs/api/admin-configs.api.md
- * Paths and body follow what admin-web already calls (features/configs/configs.api.ts).
+ * Paths, bodies and replies follow admin-web (features/configs/configs.api.ts).
  */
 import { Router } from 'express';
 import { UserRole } from '@healthcare-system/shared';
@@ -29,7 +29,7 @@ export function createAdminConfigsRouter(service: AdminConfigsService): Router {
       const key = configKeyParamSchema.safeParse(req.params.key);
       if (!key.success) throw notFound('CONFIG_NOT_FOUND', 'No such configuration key');
       const body = req.body as UpdateConfigBody;
-      res.json({ success: true, data: await service.update(req.user!.id, key.data, body.config_value, req.ip ?? null) });
+      res.json({ success: true, data: await service.update(req.user!.id, key.data, body.value, body.note, req.ip ?? null) });
     }),
   );
 

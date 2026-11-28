@@ -1,6 +1,6 @@
 /**
  * Routes for admin-catalog (mounted at /api/v1). Contract: docs/api/admin-catalog.api.md
- * Paths follow what admin-web already calls (features/catalog/catalog.api.ts); POST added for "create".
+ * Paths, bodies and replies follow admin-web (features/catalog/catalog.api.ts, camelCase).
  */
 import { Router } from 'express';
 import { UserRole } from '@healthcare-system/shared';

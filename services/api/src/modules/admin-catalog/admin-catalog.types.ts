@@ -1,6 +1,6 @@
 import type { NurseTier, ServiceType, ServiceUnit } from '@healthcare-system/shared';
 
-/** A service_categories row, as stored and as returned (snake_case, like the table and admin-web). */
+/** A service_categories row as stored (snake_case columns). */
 export type ServiceCategoryRow = {
   id: string;
   code: string;
@@ -16,8 +16,24 @@ export type ServiceCategoryRow = {
   updated_at: Date;
 };
 
-/** Fields an Admin may set. `code` only at creation. */
+/** Columns an Admin may set. `code` only at creation. */
 export type EditableFields = Pick<
   ServiceCategoryRow,
   'name' | 'service_type' | 'is_invasive' | 'is_prohibited' | 'required_tier' | 'base_price' | 'unit' | 'is_active'
 >;
+
+/** Same shape as admin-web features/catalog/catalog.types.ts ServiceCategory (camelCase). */
+export interface ServiceCategoryDto {
+  id: string;
+  code: string;
+  name: string;
+  serviceType: ServiceType;
+  isInvasive: boolean;
+  isProhibited: boolean;
+  requiredTier: NurseTier;
+  basePrice: number;
+  unit: ServiceUnit;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

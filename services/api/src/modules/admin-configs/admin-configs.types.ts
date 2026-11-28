@@ -6,21 +6,18 @@ export type ConfigRow = {
   data_type: ConfigDataType;
   description: string | null;
   updated_by: string | null;
+  updated_by_name: string | null;
   updated_at: Date;
 };
 
+/** Same shape as admin-web features/configs/configs.types.ts ConfigItem. */
 export interface ConfigItemDto {
-  value: unknown;
+  key: string;
+  /** As stored (VARCHAR 500), e.g. "0.15", "true", "19:00". */
+  value: string;
   dataType: ConfigDataType;
   description: string | null;
+  /** null = value seeded by a migration (no Admin changed it yet). */
+  updatedBy: { id: string; name: string } | null;
   updatedAt: string;
-  /** Admin who last changed it; null = seeded by a migration. */
-  updatedBy: string | null;
-}
-
-export interface UpdateConfigResult {
-  /** false when the new value equals the stored one (nothing written, no audit). */
-  updated: boolean;
-  key: string;
-  value: unknown;
 }

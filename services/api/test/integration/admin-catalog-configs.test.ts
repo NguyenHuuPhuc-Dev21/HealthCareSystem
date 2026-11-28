@@ -53,42 +53,42 @@ describe('admin-configs + admin-catalog (integration)', () => {
   });
 
   // ------------------------------------------------------------------ configs
-  it('lists every key with its typed value', async () => {
-    const all = await configs().list();
-    expect(all.PLATFORM_COMMISSION_RATE).toMatchObject({ value: expect.any(Number), dataType: 'NUMBER' });
-    expect(Object.keys(all).length).toBeGreaterThan(40);
+  const item = async (key: string) => (await configs().list()).items.find((c) => c.key === key)!;
+
+  it('lists every key as admin-web expects ({ items })', async () => {
+    const { items } = await configs().list();
+    expect(items.length).toBeGreaterThan(40);
+    expect(items.find((c) => c.key === 'PLATFORM_COMMISSION_RATE')).toMatchObject({ value: expect.any(String), dataType: 'NUMBER' });
   });
 
-  it('updates a value: stored with updated_by, audited UPDATE_CONFIG, cache dropped', async () => {
-    const before = (await configs().list()).NO_SHOW_PENALTY!.value;
-    const out = await configs().update(adminId, 'NO_SHOW_PENALTY', 60000, '10.0.0.1');
-    expect(out).toEqual({ updated: true, key: 'NO_SHOW_PENALTY', value: 60000 });
+  it('updates a value: stored with updated_by, audited UPDATE_CONFIG with the note, cache dropped', async () => {
+    const before = Number((await item('NO_SHOW_PENALTY')).value);
+    const out = await configs().update(adminId, 'NO_SHOW_PENALTY', '60000', 'Theo quyết định PO', '10.0.0.1');
+    expect(out).toMatchObject({ key: 'NO_SHOW_PENALTY', value: '60000', dataType: 'NUMBER', updatedBy: { id: adminId, name: expect.any(String) } });
 
-    const row = (await db.query("SELECT config_value, updated_by FROM system_configs WHERE config_key = 'NO_SHOW_PENALTY'")).rows[0];
-    expect(row).toEqual({ config_value: '60000', updated_by: adminId });
     const [audit] = await audits('UPDATE_CONFIG');
     expect(audit).toMatchObject({
       target_table: 'system_configs',
       target_id: null,
       old_value: { key: 'NO_SHOW_PENALTY', value: before },
-      new_value: { key: 'NO_SHOW_PENALTY', value: 60000 },
+      new_value: { key: 'NO_SHOW_PENALTY', value: 60000, note: 'Theo quyết định PO' },
       ip_address: '10.0.0.1',
     });
     expect(invalidations).toBe(1);
   });
 
-  it('same value → updated:false, no audit, cache kept', async () => {
-    const current = (await configs().list()).PLATFORM_COMMISSION_RATE!.value;
-    await expect(configs().update(adminId, 'PLATFORM_COMMISSION_RATE', String(current), null)).resolves.toMatchObject({ updated: false });
+  it('same value → nothing written, no audit, cache kept; the item is returned unchanged', async () => {
+    const current = await item('PLATFORM_COMMISSION_RATE');
+    await expect(configs().update(adminId, 'PLATFORM_COMMISSION_RATE', current.value, undefined, null)).resolves.toEqual(current);
     expect(await audits('UPDATE_CONFIG')).toHaveLength(0);
     expect(invalidations).toBe(0);
   });
 
-  it('refuses: unknown key (404), bad value (422), broken pair (422) — nothing written', async () => {
-    expect(await codeOf(configs().update(adminId, 'NOT_A_KEY', 1, null))).toBe('CONFIG_NOT_FOUND');
-    expect(await codeOf(configs().update(adminId, 'PLATFORM_COMMISSION_RATE', 15, null))).toBe('INVALID_CONFIG_VALUE');
-    expect(await codeOf(configs().update(adminId, 'PLATFORM_COMMISSION_RATE', true, null))).toBe('INVALID_CONFIG_VALUE');
-    expect(await codeOf(configs().update(adminId, 'CUSTOMER_CANCEL_NEAR_NURSE_RATE', 0.9, null))).toBe('INVALID_CONFIG_VALUE');
+  it('refuses: unknown key (404), bad value (400), broken pair (400) — nothing written', async () => {
+    expect(await codeOf(configs().update(adminId, 'NOT_A_KEY', '1', undefined, null))).toBe('CONFIG_NOT_FOUND');
+    expect(await codeOf(configs().update(adminId, 'PLATFORM_COMMISSION_RATE', '15', undefined, null))).toBe('INVALID_CONFIG_VALUE');
+    expect(await codeOf(configs().update(adminId, 'PLATFORM_COMMISSION_RATE', 'abc', undefined, null))).toBe('INVALID_CONFIG_VALUE');
+    expect(await codeOf(configs().update(adminId, 'CUSTOMER_CANCEL_NEAR_NURSE_RATE', '0.9', undefined, null))).toBe('INVALID_CONFIG_VALUE');
     expect(await audits('UPDATE_CONFIG')).toHaveLength(0);
   });
 
@@ -96,31 +96,31 @@ describe('admin-configs + admin-catalog (integration)', () => {
   const newService = (over: Record<string, unknown> = {}) => ({
     code: `SRV_IT_${Math.floor(Math.random() * 1e9)}`,
     name: 'Dịch vụ test',
-    service_type: 'TASK_BASED' as const,
-    is_invasive: false,
-    is_prohibited: false,
-    required_tier: 'TIER_1_BASIC' as const,
-    base_price: 150_000,
-    unit: 'PER_TIME' as const,
-    is_active: true,
+    serviceType: 'TASK_BASED',
+    isInvasive: false,
+    isProhibited: false,
+    requiredTier: 'TIER_1_BASIC',
+    basePrice: 150_000,
+    unit: 'PER_TIME',
+    isActive: true,
     ...over,
-  });
+  }) as never;
 
-  it('creates a service and audits it; a duplicate code → 409', async () => {
-    const body = newService();
+  it('creates a service (camelCase) and audits it; a duplicate code → 409 CODE_EXISTS', async () => {
+    const body = newService() as { code: string };
     const s = await catalog().create(adminId, body as never, null);
-    expect(s).toMatchObject({ code: body.code, base_price: 150_000, is_active: true });
+    expect(s).toMatchObject({ code: body.code, basePrice: 150_000, isActive: true, requiredTier: 'TIER_1_BASIC' });
     const [audit] = await audits('UPDATE_SERVICE_CATALOG');
     expect(audit).toMatchObject({ target_table: 'service_categories', target_id: s.id, old_value: null });
     expect(audit.new_value).toMatchObject({ code: body.code, base_price: 150_000 });
 
-    expect(await codeOf(catalog().create(adminId, body as never, null))).toBe('SERVICE_CODE_TAKEN');
+    expect(await codeOf(catalog().create(adminId, body as never, null))).toBe('CODE_EXISTS');
   });
 
   it('patches only what changed and audits old → new; no change → no audit', async () => {
-    const s = await catalog().create(adminId, newService() as never, null);
-    const updated = await catalog().update(adminId, s.id, { base_price: 180_000, name: 'Dịch vụ test' }, null);
-    expect(updated.base_price).toBe(180_000);
+    const s = await catalog().create(adminId, newService(), null);
+    const updated = await catalog().update(adminId, s.id, { basePrice: 180_000, name: 'Dịch vụ test' }, null);
+    expect(updated.basePrice).toBe(180_000);
 
     const rows = await audits('UPDATE_SERVICE_CATALOG');
     expect(rows).toHaveLength(2);
@@ -129,22 +129,22 @@ describe('admin-configs + admin-catalog (integration)', () => {
     expect(change).toMatchObject({ old_value: { code: s.code, base_price: 150_000 }, new_value: { code: s.code, base_price: 180_000 } });
     expect(change.new_value).not.toHaveProperty('name');
 
-    await catalog().update(adminId, s.id, { base_price: 180_000 }, null);
+    await catalog().update(adminId, s.id, { basePrice: 180_000 }, null);
     expect(await audits('UPDATE_SERVICE_CATALOG')).toHaveLength(2);
   });
 
-  it('retire with is_active=false (still listed); invasive needs Tier 2; unknown id → 404', async () => {
-    const s = await catalog().create(adminId, newService() as never, null);
-    await catalog().update(adminId, s.id, { is_active: false }, null);
-    expect((await catalog().list()).find((x) => x.id === s.id)?.is_active).toBe(false);
+  it('hide with isActive=false (still listed); invasive needs Tier 2 (400); unknown id → 404', async () => {
+    const s = await catalog().create(adminId, newService(), null);
+    await catalog().update(adminId, s.id, { isActive: false }, null);
+    expect((await catalog().list()).items.find((x) => x.id === s.id)?.isActive).toBe(false);
 
-    expect(await codeOf(catalog().update(adminId, s.id, { is_invasive: true }, null))).toBe('INVASIVE_REQUIRES_TIER_2');
+    expect(await codeOf(catalog().update(adminId, s.id, { isInvasive: true }, null))).toBe('INVALID_TIER_FOR_INVASIVE');
     await expect(
-      catalog().update(adminId, s.id, { is_invasive: true, required_tier: 'TIER_2_SPECIALIST' as never }, null),
-    ).resolves.toMatchObject({ is_invasive: true, required_tier: 'TIER_2_SPECIALIST' });
+      catalog().update(adminId, s.id, { isInvasive: true, requiredTier: 'TIER_2_SPECIALIST' as never }, null),
+    ).resolves.toMatchObject({ isInvasive: true, requiredTier: 'TIER_2_SPECIALIST' });
     // Once invasive, dropping back to Tier 1 alone is refused too.
-    expect(await codeOf(catalog().update(adminId, s.id, { required_tier: 'TIER_1_BASIC' as never }, null))).toBe('INVASIVE_REQUIRES_TIER_2');
+    expect(await codeOf(catalog().update(adminId, s.id, { requiredTier: 'TIER_1_BASIC' as never }, null))).toBe('INVALID_TIER_FOR_INVASIVE');
 
-    expect(await codeOf(catalog().update(adminId, '00000000-0000-4000-8000-000000000000', { is_active: false }, null))).toBe('SERVICE_NOT_FOUND');
+    expect(await codeOf(catalog().update(adminId, '00000000-0000-4000-8000-000000000000', { isActive: false }, null))).toBe('SERVICE_NOT_FOUND');
   });
 });

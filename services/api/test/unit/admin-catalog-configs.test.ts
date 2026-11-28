@@ -3,7 +3,7 @@ import { NurseTier, ServiceType, ServiceUnit } from '@healthcare-system/shared';
 import { checkConfigValue, checkOrderedPairs, toStoredString } from '../../src/modules/admin-configs/admin-configs.policy';
 import { updateConfigSchema } from '../../src/modules/admin-configs/admin-configs.schema';
 import { catalogProblem, changedFields } from '../../src/modules/admin-catalog/admin-catalog.policy';
-import { createServiceSchema, updateServiceSchema } from '../../src/modules/admin-catalog/admin-catalog.schema';
+import { createServiceSchema, toColumns, updateServiceSchema } from '../../src/modules/admin-catalog/admin-catalog.schema';
 
 /** admin-configs + admin-catalog policies (Phase 7) — pure rules. */
 describe('admin-configs — policy (unit)', () => {
@@ -57,10 +57,18 @@ describe('admin-configs — policy (unit)', () => {
     expect(checkOrderedPairs(m)?.message).toMatch(/must not be greater/);
   });
 
-  it('body: only config_value', () => {
-    expect(updateConfigSchema.safeParse({ config_value: 0.2 }).success).toBe(true);
-    expect(updateConfigSchema.safeParse({ config_value: '0.2' }).success).toBe(true);
-    expect(updateConfigSchema.safeParse({ config_value: 1, data_type: 'STRING' }).success).toBe(false);
+  it('embargo times must be HH:mm', () => {
+    expect(checkConfigValue('MAINTENANCE_EMBARGO_START', '19:00', 'STRING')).toEqual({ value: '19:00' });
+    expect(checkConfigValue('MAINTENANCE_EMBARGO_END', '25:00', 'STRING')).toMatchObject({ code: 'INVALID_CONFIG_VALUE' });
+    expect(checkConfigValue('MAINTENANCE_EMBARGO_END', '9:00', 'STRING')).toMatchObject({ code: 'INVALID_CONFIG_VALUE' });
+  });
+
+  it('body: { value, note? } as admin-web sends it', () => {
+    expect(updateConfigSchema.safeParse({ value: '0.2' }).success).toBe(true);
+    expect(updateConfigSchema.safeParse({ value: '0.2', note: 'Theo quyết định PO' }).success).toBe(true);
+    expect(updateConfigSchema.safeParse({ value: 0.2 }).success).toBe(false);
+    expect(updateConfigSchema.safeParse({ value: '1', note: 'x'.repeat(201) }).success).toBe(false);
+    expect(updateConfigSchema.safeParse({ value: '1', dataType: 'STRING' }).success).toBe(false);
     expect(updateConfigSchema.safeParse({}).success).toBe(false);
   });
 });
@@ -79,7 +87,7 @@ describe('admin-catalog — policy (unit)', () => {
 
   it('invasive needs Tier 2', () => {
     expect(catalogProblem(base)).toBeNull();
-    expect(catalogProblem({ ...base, is_invasive: true })).toBe('INVASIVE_REQUIRES_TIER_2');
+    expect(catalogProblem({ ...base, is_invasive: true })).toBe('INVALID_TIER_FOR_INVASIVE');
     expect(catalogProblem({ ...base, is_invasive: true, required_tier: NurseTier.TIER_2_SPECIALIST })).toBeNull();
   });
 
@@ -88,17 +96,27 @@ describe('admin-catalog — policy (unit)', () => {
     expect(changedFields(base, { base_price: 250_000, is_active: true })).toEqual({ base_price: 250_000 });
   });
 
-  it('create: code format, defaults, integer VND', () => {
-    const body = { code: 'SRV_TEST_1', name: 'X', service_type: 'TASK_BASED', base_price: 100_000, unit: 'PER_TIME' };
+  it('create (camelCase, as admin-web sends it): code format, defaults, integer VND', () => {
+    const body = { code: 'SRV_TEST_1', name: 'X', serviceType: 'TASK_BASED', basePrice: 100_000, unit: 'PER_TIME' };
     const parsed = createServiceSchema.parse(body);
-    expect(parsed).toMatchObject({ is_invasive: false, is_prohibited: false, required_tier: 'TIER_1_BASIC', is_active: true });
+    expect(parsed).toMatchObject({ isInvasive: false, isProhibited: false, requiredTier: 'TIER_1_BASIC', isActive: true });
     expect(createServiceSchema.safeParse({ ...body, code: 'srv test' }).success).toBe(false);
-    expect(createServiceSchema.safeParse({ ...body, base_price: 100.5 }).success).toBe(false);
-    expect(createServiceSchema.safeParse({ ...body, base_price: -1 }).success).toBe(false);
+    expect(createServiceSchema.safeParse({ ...body, code: '1SRV' }).success).toBe(false);
+    expect(createServiceSchema.safeParse({ ...body, basePrice: 100.5 }).success).toBe(false);
+    expect(createServiceSchema.safeParse({ ...body, basePrice: -1 }).success).toBe(false);
+    expect(createServiceSchema.safeParse({ ...body, base_price: 1 }).success).toBe(false);
+  });
+
+  it('camelCase body → table columns', () => {
+    expect(toColumns({ basePrice: 5, isActive: false, requiredTier: NurseTier.TIER_2_SPECIALIST })).toEqual({
+      base_price: 5,
+      is_active: false,
+      required_tier: 'TIER_2_SPECIALIST',
+    });
   });
 
   it('update: partial, never code, never empty', () => {
-    expect(updateServiceSchema.safeParse({ base_price: 1 }).success).toBe(true);
+    expect(updateServiceSchema.safeParse({ basePrice: 1 }).success).toBe(true);
     expect(updateServiceSchema.safeParse({ code: 'NEW' }).success).toBe(false);
     expect(updateServiceSchema.safeParse({}).success).toBe(false);
   });

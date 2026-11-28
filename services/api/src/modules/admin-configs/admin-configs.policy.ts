@@ -8,6 +8,7 @@
  *   - `TRUST_*`: 0..100 (TrustScore scale); `TRUST_RECOVERY_MIN_STARS`: 1..5;
  *   - durations, counts and VND amounts: whole numbers;
  *   - TTLs, lengths, radii, windows, timeouts, maxima: at least 1 (0 would switch the feature off by accident);
+ *   - STRING `*_EMBARGO_START|END`: time of day HH:mm;
  * and a few pairs that other modules assume (e.g. the nurse's share of a cancel fee ≤ the fee).
  */
 import { ConfigError, parseConfigValue } from '../../core/config';
@@ -57,6 +58,9 @@ export function checkConfigValue(key: string, stored: string, dataType: ConfigDa
   } catch (e) {
     if (e instanceof ConfigError) return bad(`Expected a ${dataType} value`);
     throw e;
+  }
+  if (dataType === 'STRING' && /_EMBARGO_(START|END)$/.test(key) && !/^([01]\d|2[0-3]):[0-5]\d$/.test(stored)) {
+    return bad('Time of day as HH:mm (e.g. 19:00)');
   }
   if (dataType !== 'NUMBER') return { value };
 
